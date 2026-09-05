@@ -1,0 +1,7 @@
+{
+  "name": "آرشیو ۰۱ — نقشه تعاملی گالری ۰۰",
+  "description": "نقشه تعاملی و راهنمای آثار موزه و بخش‌های گالری همراه با آزمون و پرسش‌های گالری ۰۱ و ۰۳",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

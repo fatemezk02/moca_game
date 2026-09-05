@@ -1,0 +1,175 @@
+/**
+ * Strongly typed definitions for the game's external content layer.
+ * These interfaces represent the unified internal model for:
+ * 1. Questions
+ * 2. Stars (Star Points & Discovery)
+ * 3. Artworks
+ */
+
+export type ContentSourceType = 'network' | 'cache' | 'seed-fallback';
+
+/**
+ * Strongly typed representation of a Question item
+ */
+export interface QuestionContent {
+  id: string;
+  galleryId: string;
+  puzzlePointId?: string;
+  questionOrder?: number;
+  title: string;
+  question: string;
+  questionFa?: string;
+  questionEn?: string;
+  options: string[];
+  optionsFa?: string[];
+  optionsEn?: string[];
+  correctOption?: string;
+  correctAnswer: string;
+  correctIndex: number;
+  explanation?: string;
+  category?: 'gallery' | 'puzzle' | 'star' | 'general';
+  reward?: number;
+  active: boolean;
+  puzzlePieceId?: string;
+  /** Preserves any unexpected raw columns from the sheet */
+  rawFields?: Record<string, string>;
+}
+
+/**
+ * Strongly typed representation of a Star Point entity
+ */
+export interface StarContent {
+  id: string;
+  starId?: string;
+  questionId?: string;
+  galleryId: string;
+  labelTextFa: string;
+  titleFa: string;
+  introFa: string;
+  discoveryCost: number;
+  informationCost: number;
+  questionText: string;
+  questionOptions: string[];
+  correctAnswer: string;
+  correctIndex: number;
+  reward: number;
+  wrongReward: number;
+  explanation?: string;
+  artworkImageUrl: string;
+  artworkTextFa: string;
+  artworkTextEn: string;
+  active?: boolean;
+  rawFields?: Record<string, string>;
+}
+
+/**
+ * Strongly typed representation of an Artwork entity
+ */
+export interface ArtworkContent {
+  id: string;
+  galleryId: string;
+  title: string;
+  roomSection?: string;
+  x?: number;
+  y?: number;
+  period?: string;
+  artistOrCulture?: string;
+  medium?: string;
+  year?: string;
+  dimensions?: string;
+  description?: string;
+  imageUrl?: string;
+  rawFields?: Record<string, string>;
+}
+
+/**
+ * Strongly typed representation of a Gallery entity
+ * Based on Google Sheets 'Galleries' tab:
+ * gallery_id, gallery_number, name_fa, name_en, description_fa, description_en, active
+ */
+export interface GalleryContent {
+  id: string;
+  galleryId: string;
+  galleryNumber: string;
+  nameFa: string;
+  nameEn: string;
+  descriptionFa: string;
+  descriptionEn: string;
+  active: boolean;
+  rawFields?: Record<string, string>;
+}
+
+/**
+ * Full bundled content payload stored in cache and memory
+ */
+export interface GameContentData {
+  questions: QuestionContent[];
+  stars: StarContent[];
+  artworks: ArtworkContent[];
+  galleries: GalleryContent[];
+  metadata: {
+    loadedAt: number;
+    source: ContentSourceType;
+    version: string;
+    error?: string;
+  };
+}
+
+/**
+ * Real-time status of the ContentService
+ */
+export interface ContentServiceStatus {
+  isLoading: boolean;
+  isLoaded: boolean;
+  source: 'idle' | ContentSourceType;
+  lastLoadedAt?: number;
+  error?: string | null;
+  counts: {
+    questions: number;
+    stars: number;
+    artworks: number;
+    galleries: number;
+  };
+}
+
+/**
+ * Summary object for verification and debugging as specified in requirements
+ */
+export interface GameContentSummary {
+  isLoaded: boolean;
+  source: 'network' | 'cache' | 'seed' | 'none';
+  lastLoadedDate: string | null;
+  counts: {
+    questions: number;
+    stars: number;
+    artworks: number;
+    galleries: number;
+  };
+  hasLocalCache: boolean;
+}
+
+/**
+ * Public debug interface exposed on window.__GAME_CONTENT_DEBUG__
+ */
+export interface GameContentDebug {
+  getSummary: () => GameContentSummary;
+  getQuestions: () => QuestionContent[];
+  getStars: () => StarContent[];
+  getArtworks: () => ArtworkContent[];
+  getGalleries: () => GalleryContent[];
+  getGalleryById: (id: string) => GalleryContent | null;
+  refresh: () => Promise<GameContentData>;
+  clearCache: () => void;
+}
+
+/**
+ * Backward compatibility alias for debug summary
+ */
+export type ContentDebugSummary = GameContentSummary;
+
+declare global {
+  interface Window {
+    __GAME_CONTENT_DEBUG__: GameContentDebug;
+    getGameContentStats: () => GameContentSummary;
+  }
+}
