@@ -67,6 +67,20 @@ export const PuzzlePointModal: React.FC<PuzzlePointModalProps> = ({
     puzzlePoint.id
   );
 
+  // Resolve artwork image for the question: Questions.artwork_id -> Artworks.artwork_id -> Artworks.image_url
+  const questionArtwork = questionData?.artworkId
+    ? contentService.getArtworkById(questionData.artworkId)
+    : null;
+  const questionArtworkUrl = questionArtwork?.imageUrl?.trim() || '';
+
+  const [questionImgLoaded, setQuestionImgLoaded] = useState(false);
+  const [questionImgError, setQuestionImgError] = useState(false);
+
+  useEffect(() => {
+    setQuestionImgLoaded(false);
+    setQuestionImgError(false);
+  }, [questionData?.id, questionData?.artworkId]);
+
   // Resolve gallery record from Galleries dataset by gallery_id
   const galleryRecord = contentService.getGalleryById(galleryId);
 
@@ -318,6 +332,25 @@ export const PuzzlePointModal: React.FC<PuzzlePointModalProps> = ({
                           {blueInformationalText}
                         </div>
                       </div>
+
+                      {/* Question Artwork Image from Artworks dataset (Questions.artwork_id -> Artworks.artwork_id -> Artworks.image_url) */}
+                      {questionArtworkUrl && !questionImgError && (
+                        <div className="w-full flex items-center justify-center py-1">
+                          <ArtworkFrame>
+                            <img
+                              src={questionArtworkUrl}
+                              alt={questionData.title || questionData.questionFa || 'تصویر پرسش پازل'}
+                              className="max-h-[20vh] sm:max-h-[24vh] max-w-full w-auto h-auto object-contain block rounded-xs select-none"
+                              referrerPolicy="no-referrer"
+                              onLoad={() => setQuestionImgLoaded(true)}
+                              onError={() => {
+                                console.warn(`[PuzzlePointModal] Failed to load question artwork: ${questionArtworkUrl}`);
+                                setQuestionImgError(true);
+                              }}
+                            />
+                          </ArtworkFrame>
+                        </div>
+                      )}
 
                       {/* Question Text */}
                       <div className="space-y-1 text-right">

@@ -59,7 +59,8 @@ export function isPuzzlePointCompleted(
   const progress = getPuzzleProgress();
   if (galleryId) {
     const canonId = toCanonicalGalleryId(galleryId);
-    const galleryProgress = progress[canonId] || progress[galleryId];
+    const legacyId = canonId.replace('_', '-');
+    const galleryProgress = progress[canonId] || progress[legacyId] || progress[galleryId];
     if (galleryProgress) {
       if (
         pointId &&
@@ -164,15 +165,19 @@ export function markPuzzlePointCompleted(
 }
 
 /**
- * Normalizes gallery ID to standard canonical format (e.g., 'gallery-01', 'gallery-03')
+ * Normalizes gallery ID to standard canonical format (e.g., 'gallery_01', 'gallery_03')
  */
 export function toCanonicalGalleryId(galleryId: string): string {
+  if (!galleryId) return 'gallery_01';
   const clean = galleryId.toLowerCase().replace(/[^a-z0-9]/g, '');
   if (clean.startsWith('gallery')) {
     const num = clean.replace('gallery', '');
-    return `gallery-${num.padStart(2, '0')}`;
+    return `gallery_${num.padStart(2, '0')}`;
   }
-  return galleryId.toLowerCase();
+  if (/^\d+$/.test(clean)) {
+    return `gallery_${clean.padStart(2, '0')}`;
+  }
+  return galleryId.toLowerCase().replace(/-/g, '_');
 }
 
 /**
@@ -249,7 +254,8 @@ export function isPuzzleQuestionCompleted(galleryId: string, questionId: string)
 export function getCollectedPiecesForGallery(galleryId: string): string[] {
   const progress = getPuzzleProgress();
   const canonId = toCanonicalGalleryId(galleryId);
-  const galleryProgress = progress[canonId] || progress[galleryId];
+  const legacyId = canonId.replace('_', '-');
+  const galleryProgress = progress[canonId] || progress[legacyId] || progress[galleryId];
   return galleryProgress?.collectedPieces || [];
 }
 
@@ -261,21 +267,22 @@ export function getCollectedPiecesForGallery(galleryId: string): string[] {
  */
 export function isGalleryPuzzleCompleted(galleryId: string): boolean {
   const canonId = toCanonicalGalleryId(galleryId);
+  const legacyId = canonId.replace('_', '-');
   const progress = getPuzzleProgress();
-  const galleryProgress = progress[canonId] || progress[galleryId];
+  const galleryProgress = progress[canonId] || progress[legacyId] || progress[galleryId];
 
   if (galleryProgress?.isCompleted) {
     return true;
   }
 
   const completedList = getCompletedGalleryPuzzles();
-  if (completedList.includes(canonId) || completedList.includes(galleryId)) {
+  if (completedList.includes(canonId) || completedList.includes(legacyId) || completedList.includes(galleryId)) {
     return true;
   }
 
   // Check if all 3 pieces are collected
   const collected = galleryProgress?.collectedPieces || [];
-  const cleanId = canonId.replace('-', '');
+  const cleanId = canonId.replace(/[-_]/g, '');
   const requiredPieces = [
     `${cleanId}-piece-01`,
     `${cleanId}-piece-02`,
@@ -364,7 +371,7 @@ export function collectPuzzlePiece(
   }
 
   const collectedList = Array.from(collectedPiecesSet);
-  const cleanId = canonId.replace('-', '');
+  const cleanId = canonId.replace(/[-_]/g, '');
   const requiredPieces = [
     `${cleanId}-piece-01`,
     `${cleanId}-piece-02`,

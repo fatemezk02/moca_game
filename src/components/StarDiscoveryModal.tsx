@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -67,6 +67,11 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
   const [phase, setPhase] = useState<ModalPhase>('initial_choice');
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [artworkImageError, setArtworkImageError] = useState(false);
+
+  useEffect(() => {
+    setArtworkImageError(false);
+  }, [starPointId, discoveryData?.information?.image]);
 
   // Dynamic calculation of information unlock progress
   const [progressCount, setProgressCount] = useState<{ unlocked: number; total: number }>(() => {
@@ -100,15 +105,59 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
   const rawGalleryNum = starGallery?.galleryNumber || discoveryData?.galleryNumber || (targetGalleryId.includes('3') ? '03' : '01');
   const formattedGalleryNum = formatTwoDigitPersian(rawGalleryNum);
 
-  // Resolve star question ID dynamically from Star record
-  const starQuestionId =
-    discoveryData?.questionId ||
-    (starPointId.toLowerCase().startsWith('star-q-')
-      ? starPointId
-      : `star-q-${starPointId.replace(/^(star|col|artwork)[-_]?/i, '').padStart(2, '0')}`);
+  // Resolve star number deterministically from Star record identity
+  const deriveStarNumber = (): string => {
+    if (discoveryData?.starNumber) {
+      return discoveryData.starNumber;
+    }
+    const starIdStr = discoveryData?.starId || discoveryData?.id || starPointId;
+    const numMatch = starIdStr.match(/\d+/)?.[0];
+    if (numMatch) {
+      return parseInt(numMatch, 10).toString();
+    }
+    const activeStars = contentService
+      .getStars()
+      .filter((s) => s.active !== false && s.galleryId === targetGalleryId);
+    const starIdx = activeStars.findIndex(
+      (s) => (s.starId || s.id) === (discoveryData?.starId || discoveryData?.id)
+    );
+    return (starIdx >= 0 ? starIdx + 1 : 1).toString();
+  };
 
-  // Dynamic top title pattern: کشف [star question id] _ گالری [gallery number]
-  const modalHeaderTitle = `کشف ${starQuestionId} _ گالری ${formattedGalleryNum}`;
+  const formattedStarNum = toPersianDigits(deriveStarNumber());
+
+  // Dynamic top title pattern: کشف [Star Number] ـ گالری [Gallery Number]
+  const modalHeaderTitle = `کشف ${formattedStarNum} ـ گالری ${formattedGalleryNum}`;
+
+  // Net reward calculation: correct reward - information cost
+  const correctRewardCoins = discoveryData?.question?.correctReward ?? 50;
+  const infoUnlockCost = discoveryData?.informationCost ?? 30;
+  const netReward = Math.max(0, correctRewardCoins - infoUnlockCost);
+
+  // Auto-transition timer for correct answer sequence (~2 seconds)
+  const autoTransitionTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (phase === 'correct_answer') {
+      autoTransitionTimerRef.current = setTimeout(() => {
+        setPhase('artwork_info');
+      }, 2000);
+    }
+
+    return () => {
+      if (autoTransitionTimerRef.current) {
+        clearTimeout(autoTransitionTimerRef.current);
+        autoTransitionTimerRef.current = null;
+      }
+    };
+  }, [phase]);
+
+  useEffect(() => {
+    if (!isOpen && autoTransitionTimerRef.current) {
+      clearTimeout(autoTransitionTimerRef.current);
+      autoTransitionTimerRef.current = null;
+    }
+  }, [isOpen]);
 
   // Initialize or reset modal phase whenever opened or when starPointId changes
   useEffect(() => {
@@ -132,7 +181,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
     setPhase('question');
   };
 
-  // Handle choice 2: [ اطلاعات بیشتر ] (Payment confirmation - 30 Coins)
+  // Handle choice 2: [ ۳۰ سکه ] (Payment confirmation - Dynamic cost)
   const handleSelectMoreInfoChoice = () => {
     setErrorMessage(null);
     setPhase('payment_confirm');
@@ -144,9 +193,9 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
     const correctIdx = discoveryData.question.correctIndex;
 
     if (idx === correctIdx) {
-      // Correct answer: reward coins awarded, unlocked permanently
-      const rewardCoins = discoveryData.question.correctReward ?? 50;
-      unlockStarPointViaQuestion(starPointId, rewardCoins);
+      // Award NET reward coins (correct_reward_coins - informationCost)
+      // and unlock information permanently
+      unlockStarPointViaQuestion(starPointId, netReward);
       setPhase('correct_answer');
     } else {
       // Incorrect answer: 0 coins, remains locked
@@ -154,13 +203,13 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
     }
   };
 
-  // Handle paying 30 coins to unlock information
+  // Handle paying coins to unlock information directly
   const handleConfirm30Payment = () => {
     setErrorMessage(null);
     const cost = discoveryData.informationCost || 30;
 
     if (playerStats.coins < cost) {
-      setErrorMessage(`موجودی سکه شما کافی نیست (حداقل ${cost} سکه نیاز است).`);
+      setErrorMessage(`موجودی سکه شما کافی نیست (حداقل ${toPersianDigits(cost)} سکه نیاز است).`);
       return;
     }
 
@@ -259,9 +308,10 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
               <div
                 id="modal-star-progress-badge"
                 title={`پیشرفت بازگشایی اطلاعات ستاره‌ها: ${toPersianDigits(progressCount.unlocked)} از ${toPersianDigits(progressCount.total)}`}
-                className="bg-[#ffffff] text-[#1e1b18] border-[1.5px] border-[#1e1b18] rounded-full px-2.5 py-0.5 shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center font-mono-custom text-[11px] sm:text-[12px] font-black tracking-wider select-none shrink-0"
+                className="bg-[#ffffff] text-[#1e1b18] border-[1.5px] border-[#1e1b18] rounded-full px-2.5 py-0.5 shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-1.5 font-mono-custom text-[11px] sm:text-[12px] font-black tracking-wider select-none shrink-0"
                 dir="ltr"
               >
+                <Star className="w-3 h-3 text-[#d97706] fill-[#fbbf24] shrink-0" />
                 <span>{toPersianDigits(progressCount.unlocked)} / {toPersianDigits(progressCount.total)}</span>
               </div>
 
@@ -278,10 +328,30 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
             </div>
           </div>
 
+          {/* Star Artwork Image - Visible immediately upon modal opening and in all phases */}
+          {discoveryData.information.image && !artworkImageError && (
+            <div className="w-full flex items-center justify-center overflow-hidden pt-3 px-4 sm:px-5 shrink-0">
+              <ArtworkFrame>
+                <img
+                  src={discoveryData.information.image}
+                  alt={discoveryData.titleFa || 'تصویر ستاره اثر'}
+                  className="max-h-[22vh] sm:max-h-[25vh] max-w-full w-auto h-auto object-contain block rounded-xs select-none"
+                  referrerPolicy="no-referrer"
+                  onError={() => {
+                    console.warn(
+                      `[StarDiscoveryModal] Failed to load artwork image: ${discoveryData.information.image}`
+                    );
+                    setArtworkImageError(true);
+                  }}
+                />
+              </ArtworkFrame>
+            </div>
+          )}
+
           {/* Modal Body Container */}
           <div className="p-4 sm:p-5 overflow-y-auto flex-1 flex flex-col justify-center">
             {/* ==========================================================
-                STAGE 1: TWO INITIAL CHOICES ([سؤال] | [اطلاعات بیشتر])
+                STAGE 1: TWO INITIAL CHOICES ([سؤال] | [۳۰ سکه])
                 ========================================================== */}
             {phase === 'initial_choice' && (
               <motion.div
@@ -292,15 +362,14 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 className="space-y-4 my-auto"
               >
                 <div className="text-center space-y-1.5">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#fef3c7] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] mb-1">
-                    <Sparkles className="w-6 h-6 text-[#d97706] fill-[#fbbf24]" />
-                  </div>
-                  <h3 className="font-sans-custom text-[17px] font-black text-[#1e1b18]">
+                  <h3 className="font-sans-custom text-[16px] sm:text-[17px] font-black text-[#1e1b18]">
                     {discoveryData.titleFa}
                   </h3>
-                  <p className="text-[13px] font-medium text-[#475569] leading-relaxed px-2">
-                    {discoveryData.introFa}
-                  </p>
+                  {discoveryData.introFa && (
+                    <p className="text-[12px] sm:text-[13px] font-medium text-[#475569] leading-relaxed px-2">
+                      {discoveryData.introFa}
+                    </p>
+                  )}
                 </div>
 
                 {/* Side-by-side horizontal action buttons */}
@@ -320,7 +389,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                     </span>
                   </button>
 
-                  {/* Choice 2: [ اطلاعات بیشتر · ۳۰ سکه ] (Cost resolved dynamically) */}
+                  {/* Choice 2: [ ۳۰ سکه ] (Cost resolved dynamically, no "اطلاعات بیشتر" label) */}
                   <button
                     id="star-choice-more-info-btn"
                     type="button"
@@ -328,10 +397,10 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                     className="w-full py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#fefce8] border-2 border-[#1e1b18] rounded-xl shadow-[2.5px_2.5px_0px_#1e1b18] text-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-2 group select-none min-h-[48px]"
                   >
                     <div className="w-7 h-7 rounded-lg bg-[#fef3c7] border border-[#1e1b18] flex items-center justify-center text-[#d97706] shrink-0 group-hover:bg-[#fbbf24] transition-colors">
-                      <BookOpen className="w-4 h-4 text-[#1e1b18]" />
+                      <Coins className="w-4 h-4 text-[#1e1b18]" />
                     </div>
-                    <span className="font-sans-custom text-[11.5px] sm:text-[13px] font-black text-[#1e1b18] whitespace-nowrap">
-                      اطلاعات بیشتر · {toPersianDigits(discoveryData.informationCost || 30)} سکه
+                    <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
+                      {toPersianDigits(discoveryData.informationCost || 30)} سکه
                     </span>
                   </button>
                 </div>
@@ -350,7 +419,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 className="space-y-4 my-auto text-center"
               >
                 <div className="w-14 h-14 mx-auto rounded-2xl bg-[#fef3c7] border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center">
-                  <BookOpen className="w-7 h-7 text-[#d97706]" />
+                  <Coins className="w-7 h-7 text-[#d97706]" />
                 </div>
 
                 <div>
@@ -477,7 +546,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
             )}
 
             {/* ==========================================================
-                STAGE 4: QUESTION CORRECT (+50 COINS AWARDED, UNLOCKED)
+                STAGE 4: QUESTION CORRECT (+NET REWARD COINS, AUTO-TRANSITION)
                 ========================================================== */}
             {phase === 'correct_answer' && (
               <motion.div
@@ -485,7 +554,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
-                className="space-y-4 my-auto text-center"
+                className="space-y-4 my-auto text-center relative py-2"
               >
                 <div className="w-14 h-14 mx-auto rounded-2xl bg-[#dcfce7] border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8 text-[#15803d]" />
@@ -495,39 +564,71 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                   <h3 className="font-sans-custom text-[17px] font-black text-[#15803d]">
                     پاسخ شما درست است! 🎉
                   </h3>
-                  <p className="text-[12px] font-medium text-[#475569] mt-1 leading-relaxed">
-                    {discoveryData.question.correctReward ?? 50} سکه به موجودی شما افزوده شد و اطلاعات اثر بازگشایی گردید.
-                  </p>
                 </div>
 
-                {/* Reward Highlight Badge */}
-                <div className="bg-[#f0fdf4] border-2 border-[#1e1b18] rounded-xl px-5 py-3 shadow-[2px_2px_0px_#1e1b18] inline-flex items-center gap-3">
-                  <div className="flex items-center gap-1 font-mono-custom text-[18px] font-black text-[#15803d]">
-                    <span>+{discoveryData.question.correctReward ?? 50}</span>
-                    <span>🪙</span>
-                  </div>
-                  <div className="text-[12px] font-bold text-[#15803d]">
-                    پاداش پاسخ صحیح دریافت شد
-                  </div>
+                {/* Net Reward Coin Display & Floating Reward Animation */}
+                <div className="relative flex flex-col items-center justify-center py-2">
+                  {/* Floating upward fading reward badge */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 12, scale: 0.8 }}
+                    animate={{
+                      opacity: [0, 1, 1, 0],
+                      y: [12, -4, -18, -32],
+                      scale: [0.8, 1.15, 1.05, 0.95],
+                    }}
+                    transition={{
+                      duration: 1.8,
+                      times: [0, 0.2, 0.7, 1],
+                      ease: 'easeOut',
+                    }}
+                    className="absolute z-20 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#fef3c7] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] text-[#d97706] select-none pointer-events-none"
+                  >
+                    <span className="text-[14px]">🪙</span>
+                    <span className="font-mono-custom text-[17px] font-black text-[#15803d]">
+                      +{toPersianDigits(netReward)}
+                    </span>
+                    <span className="font-sans-custom text-[12px] font-black text-[#1e1b18]">
+                      سکه
+                    </span>
+                  </motion.div>
+
+                  {/* Main Static Net Reward Badge */}
+                  <motion.div
+                    initial={{ scale: 0.92, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1, duration: 0.25 }}
+                    className="bg-[#f0fdf4] border-2 border-[#1e1b18] rounded-2xl px-6 py-3.5 shadow-[3px_3px_0px_#1e1b18] inline-flex items-center gap-2.5"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#fbbf24] border border-[#1e1b18] flex items-center justify-center text-[15px] shadow-[1px_1px_0px_#1e1b18] shrink-0">
+                      🪙
+                    </div>
+                    <div
+                      className="flex items-baseline gap-1 font-mono-custom font-black text-[22px] text-[#15803d]"
+                      dir="ltr"
+                    >
+                      <span>+{toPersianDigits(netReward)}</span>
+                      <span className="font-sans-custom text-[14px] text-[#1e1b18] font-black mr-1">
+                        سکه
+                      </span>
+                    </div>
+                  </motion.div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="space-y-2 pt-2">
+                {/* Quick manual transition link */}
+                <div className="pt-2">
                   <button
                     type="button"
-                    onClick={() => setPhase('artwork_info')}
-                    className="w-full py-3 px-4 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e1b18] font-black text-[14px] border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    onClick={() => {
+                      if (autoTransitionTimerRef.current) {
+                        clearTimeout(autoTransitionTimerRef.current);
+                        autoTransitionTimerRef.current = null;
+                      }
+                      setPhase('artwork_info');
+                    }}
+                    className="text-[12px] font-bold text-[#64748b] hover:text-[#1e1b18] cursor-pointer inline-flex items-center gap-1 transition-colors"
                   >
-                    <BookOpen className="w-4 h-4" />
                     <span>مشاهده اطلاعات اثر</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="w-full py-2.5 text-[12px] font-bold text-[#64748b] hover:text-[#1e1b18] cursor-pointer"
-                  >
-                    پایان و بازگشت به نقشه
+                    <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
                   </button>
                 </div>
               </motion.div>
@@ -612,29 +713,17 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                   </div>
                 </div>
 
-                {/* Artwork Image Container */}
-                <div className="w-full flex items-center justify-center overflow-hidden py-1">
-                  <ArtworkFrame>
-                    <img
-                      src={discoveryData.information.image}
-                      alt="Star Discovery Artwork"
-                      className="max-h-[30vh] sm:max-h-[34vh] max-w-full w-auto h-auto object-contain block rounded-xs select-none"
-                      referrerPolicy="no-referrer"
-                    />
-                  </ArtworkFrame>
-                </div>
-
-                {/* Artwork Information Text */}
-                <div className="bg-[#f8fafc] border-2 border-[#1e1b18] rounded-xl p-3.5 shadow-[2px_2px_0px_#1e1b18] space-y-1.5 max-h-[28vh] overflow-y-auto">
+                {/* Unlocked Artwork Information Text */}
+                <div className="bg-[#f8fafc] border-2 border-[#1e1b18] rounded-xl p-3.5 shadow-[2px_2px_0px_#1e1b18] space-y-2 max-h-[36vh] overflow-y-auto">
                   <div className="flex items-center gap-1.5 text-[12px] font-black text-[#1e1b18]">
                     <Info className="w-3.5 h-3.5 text-[#d97706]" />
                     <span>{discoveryData.titleFa}</span>
                   </div>
-                  <p className="text-[12px] leading-relaxed text-[#334155] font-medium text-justify">
+                  <p className="text-[12px] sm:text-[13px] leading-relaxed text-[#334155] font-medium text-justify">
                     {discoveryData.information.textFa}
                   </p>
                   {discoveryData.information.textEn && (
-                    <p className="text-[11px] leading-relaxed text-[#64748b] font-mono-custom dir-ltr text-left pt-1 border-t border-[#e2e8f0]">
+                    <p className="text-[11px] sm:text-[12px] leading-relaxed text-[#64748b] font-mono-custom dir-ltr text-left pt-2 border-t border-[#e2e8f0]">
                       {discoveryData.information.textEn}
                     </p>
                   )}

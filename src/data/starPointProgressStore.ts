@@ -89,7 +89,23 @@ export function getStarPointProgress(starPointId: string): StarPointProgressItem
  */
 export function isStarPointUnlocked(starPointId: string): boolean {
   const progress = getStarPointProgress(starPointId);
-  return Boolean(progress.discoveryUnlocked || progress.informationUnlocked);
+  if (Boolean(progress.discoveryUnlocked || progress.informationUnlocked)) {
+    return true;
+  }
+  const db = getStarPointProgressDb();
+  const extractNum = (s: string) => {
+    const m = s.match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
+  };
+  const targetNum = extractNum(starPointId);
+  if (targetNum !== null) {
+    return Object.entries(db).some(([key, item]) => {
+      if (!item.discoveryUnlocked && !item.informationUnlocked) return false;
+      const keyNum = extractNum(key);
+      return keyNum !== null && keyNum === targetNum;
+    });
+  }
+  return false;
 }
 
 /**
@@ -97,7 +113,23 @@ export function isStarPointUnlocked(starPointId: string): boolean {
  */
 export function isStarPointInformationUnlocked(starPointId: string): boolean {
   const progress = getStarPointProgress(starPointId);
-  return Boolean(progress.informationUnlocked);
+  if (Boolean(progress.informationUnlocked)) {
+    return true;
+  }
+  const db = getStarPointProgressDb();
+  const extractNum = (s: string) => {
+    const m = s.match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
+  };
+  const targetNum = extractNum(starPointId);
+  if (targetNum !== null) {
+    return Object.entries(db).some(([key, item]) => {
+      if (!item.informationUnlocked) return false;
+      const keyNum = extractNum(key);
+      return keyNum !== null && keyNum === targetNum;
+    });
+  }
+  return false;
 }
 
 /**
@@ -203,7 +235,7 @@ export function unlockStarPointViaQuestion(starPointId: string, rewardCoins: num
 
     // Award reward coins if not previously claimed
     const alreadyClaimed = Boolean(existing.rewardClaimed);
-    if (!alreadyClaimed) {
+    if (!alreadyClaimed && rewardCoins > 0) {
       awardCoins(rewardCoins);
     }
 

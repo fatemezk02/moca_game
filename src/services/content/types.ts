@@ -31,6 +31,7 @@ export interface QuestionContent {
   reward?: number;
   active: boolean;
   puzzlePieceId?: string;
+  artworkId?: string;
   /** Preserves any unexpected raw columns from the sheet */
   rawFields?: Record<string, string>;
 }
@@ -41,8 +42,10 @@ export interface QuestionContent {
 export interface StarContent {
   id: string;
   starId?: string;
+  starNumber?: string;
   questionId?: string;
   galleryId: string;
+  artworkId?: string;
   labelTextFa: string;
   titleFa: string;
   introFa: string;
@@ -67,6 +70,7 @@ export interface StarContent {
  */
 export interface ArtworkContent {
   id: string;
+  artworkId?: string;
   galleryId: string;
   title: string;
   roomSection?: string;
@@ -85,7 +89,7 @@ export interface ArtworkContent {
 /**
  * Strongly typed representation of a Gallery entity
  * Based on Google Sheets 'Galleries' tab:
- * gallery_id, gallery_number, name_fa, name_en, description_fa, description_en, active
+ * gallery_id, gallery_number, name_fa, name_en, description_fa, description_en, active, artwork_id
  */
 export interface GalleryContent {
   id: string;
@@ -95,6 +99,9 @@ export interface GalleryContent {
   nameEn: string;
   descriptionFa: string;
   descriptionEn: string;
+  curator?: string;
+  curatorUrl?: string;
+  puzzleArtworkId?: string;
   active: boolean;
   rawFields?: Record<string, string>;
 }
@@ -158,6 +165,8 @@ export interface GameContentDebug {
   getArtworks: () => ArtworkContent[];
   getGalleries: () => GalleryContent[];
   getGalleryById: (id: string) => GalleryContent | null;
+  getArtworkById: (id: string) => ArtworkContent | null;
+  getGalleryPuzzleArtwork: (galleryId: string) => ArtworkContent | null;
   refresh: () => Promise<GameContentData>;
   clearCache: () => void;
 }

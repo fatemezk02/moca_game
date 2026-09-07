@@ -281,5 +281,5 @@ export function getGalleryPuzzleConfig(galleryId: string): GalleryPuzzleConfig {
  */
 export function getGalleryPuzzleArtworkSrc(galleryId: string): string {
   const config = getGalleryQuestionsArtwork(galleryId);
-  return config?.image || GALLERY_01_ARTWORK_SRC;
+  return config?.image?.trim() || '';
 }

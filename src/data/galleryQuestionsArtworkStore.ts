@@ -2,11 +2,12 @@
  * Gallery Questions Artwork Store
  * Manages persistence for final artwork image configurations across galleries
  */
+import { contentService } from '../services/content/contentService';
 import { GALLERY_01_ARTWORK_SRC } from './gallery01Artwork';
 
 export interface GalleryQuestionsArtworkConfig {
   galleryId: string;
-  image: string; // base64 data URL or asset URL
+  image: string; // URL or base64
   scale: number; // percentage, e.g. 100 for 100%, range 20 - 250
   x: number;     // offset percentage (-50 to +50 from center, or relative %)
   y: number;     // offset percentage (-50 to +50 from center, or relative %)
@@ -16,39 +17,34 @@ export interface GalleryQuestionsArtworkConfig {
 
 const STORAGE_KEY_PREFIX = 'museum_gallery_questions_artwork_';
 
-export const DEFAULT_GALLERY_ARTWORKS: Record<string, GalleryQuestionsArtworkConfig> = {
-  'gallery-01': {
-    galleryId: 'gallery-01',
-    image: GALLERY_01_ARTWORK_SRC,
-    scale: 100,
-    x: 0,
-    y: 0,
-    imageName: 'اچ سالیوان.jpg (Default)',
-    updatedAt: Date.now(),
-  },
-  'gallery-03': {
-    galleryId: 'gallery-03',
-    image: GALLERY_01_ARTWORK_SRC,
-    scale: 100,
-    x: 0,
-    y: 0,
-    imageName: 'Gallery 03 Artwork (Placeholder)',
-    updatedAt: Date.now(),
-  },
-};
-
 /**
- * Retrieve the configured artwork for a gallery
+ * Retrieve the configured artwork for a gallery dynamically from ContentService.
+ * Respects user adjustments (scale, x, y) in localStorage while ensuring the source
+ * image resolves to the gallery's configured puzzle artwork in Google Sheets.
  */
 export function getGalleryQuestionsArtwork(galleryId: string): GalleryQuestionsArtworkConfig {
+  const dynamicSrc = contentService.getGalleryPuzzleArtworkSrc(galleryId);
+
   try {
     const raw = localStorage.getItem(`${STORAGE_KEY_PREFIX}${galleryId}`);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed.scale === 'number') {
+        // If parsed.image was an old hardcoded asset or placeholder, prefer dynamic URL from Google Sheets
+        const isLegacyDefault =
+          !parsed.image ||
+          parsed.image === GALLERY_01_ARTWORK_SRC ||
+          parsed.image.includes('gallery01Artwork') ||
+          parsed.imageName?.includes('Default') ||
+          parsed.imageName?.includes('Placeholder');
+
+        const imageToUse = isLegacyDefault
+          ? (dynamicSrc || parsed.image || '')
+          : (parsed.image || dynamicSrc || '');
+
         return {
           galleryId,
-          image: parsed.image || DEFAULT_GALLERY_ARTWORKS[galleryId]?.image || GALLERY_01_ARTWORK_SRC,
+          image: imageToUse,
           scale: parsed.scale ?? 100,
           x: parsed.x ?? 0,
           y: parsed.y ?? 0,
@@ -61,13 +57,13 @@ export function getGalleryQuestionsArtwork(galleryId: string): GalleryQuestionsA
     console.warn('Failed to load gallery questions artwork from localStorage', err);
   }
 
-  return DEFAULT_GALLERY_ARTWORKS[galleryId] || {
+  return {
     galleryId,
-    image: GALLERY_01_ARTWORK_SRC,
+    image: dynamicSrc || '',
     scale: 100,
     x: 0,
     y: 0,
-    imageName: 'پیش‌فرض',
+    imageName: `اثر پازل ${galleryId}`,
     updatedAt: Date.now(),
   };
 }
@@ -102,13 +98,23 @@ export function resetGalleryQuestionsArtwork(galleryId: string): GalleryQuestion
   } catch (err) {
     console.warn('Failed to remove gallery questions artwork from localStorage', err);
   }
-  return DEFAULT_GALLERY_ARTWORKS[galleryId] || {
+
+  const dynamicSrc = contentService.getGalleryPuzzleArtworkSrc(galleryId);
+  const defConfig: GalleryQuestionsArtworkConfig = {
     galleryId,
-    image: GALLERY_01_ARTWORK_SRC,
+    image: dynamicSrc || '',
     scale: 100,
     x: 0,
     y: 0,
-    imageName: 'پیش‌فرض',
+    imageName: `اثر پازل ${galleryId}`,
     updatedAt: Date.now(),
   };
+
+  window.dispatchEvent(
+    new CustomEvent('gallery_questions_artwork_updated', {
+      detail: { galleryId, config: defConfig },
+    })
+  );
+
+  return defConfig;
 }

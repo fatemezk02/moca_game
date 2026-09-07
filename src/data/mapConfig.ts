@@ -669,7 +669,15 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
  */
 export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
   const all = getAllGalleryMapConfigs();
-  const rawConfig = all[galleryId] || DEFAULT_MAP_DATABASE[galleryId];
+  const canonId = galleryId.replace('_', '-');
+  const underscoreId = galleryId.replace('-', '_');
+  const rawConfig =
+    all[galleryId] ||
+    all[canonId] ||
+    all[underscoreId] ||
+    DEFAULT_MAP_DATABASE[galleryId] ||
+    DEFAULT_MAP_DATABASE[canonId] ||
+    DEFAULT_MAP_DATABASE[underscoreId];
   if (rawConfig) {
     return {
       ...rawConfig,

@@ -25,6 +25,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     nameEn: 'Alchemy of Light',
     descriptionFa: 'پیدایش و سیر تحول عکاسی در ایران و جهان',
     descriptionEn: 'Origins and Evolution of Photography in Iran and the World',
+    curator: 'آنا بهرامی',
+    curatorUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop',
+    puzzleArtworkId: '26',
     active: true,
   },
   {
@@ -35,6 +38,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     nameEn: 'Diplomatic Albums',
     descriptionFa: 'آلبوم‌های تاریخی و عکس‌های تشریفاتی دوره قاجار',
     descriptionEn: 'Historical Albums and Ceremonial Photographs of the Qajar Era',
+    curator: 'سهراب کاشانی',
+    curatorUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop',
+    puzzleArtworkId: '27',
     active: true,
   },
   {
@@ -45,6 +51,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     nameEn: 'Recording Our Endurance',
     descriptionFa: 'روایت تصویری از هویت، زیست و حافظه جمعی',
     descriptionEn: 'Visual Narrative of Identity, Life, and Collective Memory',
+    curator: 'نیلوفر معتمد',
+    curatorUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400&auto=format&fit=crop',
+    puzzleArtworkId: '28',
     active: true,
   },
   {
@@ -55,6 +64,7 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     nameEn: 'City Rhythm',
     descriptionFa: 'عکاسی خیابانی و نبض دگرگونی‌های شهری',
     descriptionEn: 'Street Photography and the Pulse of Urban Transformations',
+    puzzleArtworkId: '29',
     active: true,
   },
   {
@@ -65,6 +75,7 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     nameEn: 'Between Gaze and Mastery',
     descriptionFa: 'رویکردهای انتقادی به تصویر و قدرت دیدن',
     descriptionEn: 'Critical Approaches to the Image and the Power of Seeing',
+    puzzleArtworkId: '30',
     active: true,
   },
   {
@@ -75,6 +86,7 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     nameEn: 'Passing from Outside to Inside',
     descriptionFa: 'روایت‌های شخصی، پرتره‌نگاری و نگاه درون‌نگر',
     descriptionEn: 'Personal Narratives, Portraiture, and Introspective Vision',
+    puzzleArtworkId: '31',
     active: true,
   },
   {
@@ -85,6 +97,7 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     nameEn: 'Pendulum of Time',
     descriptionFa: 'گذر زمان در قالب فرم و متریال عکاسانه',
     descriptionEn: 'The Passage of Time in Photographic Form and Material',
+    puzzleArtworkId: '32',
     active: true,
   },
   {
@@ -95,6 +108,7 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     nameEn: 'Intersection of Media',
     descriptionFa: 'پیوند عکاسی با رسانه‌ها و هنرهای نوظهور',
     descriptionEn: 'The Union of Photography with Emerging Arts and Media',
+    puzzleArtworkId: '33',
     active: true,
   },
 ];
@@ -189,7 +203,9 @@ export function buildDefaultSeedContent(): GameContentData {
   // 2. Stars Seed
   const stars: StarContent[] = Object.values(DEFAULT_STAR_DISCOVERIES).map((star) => ({
     id: star.id,
+    starId: star.id,
     galleryId: star.galleryId,
+    artworkId: (star as any).artworkId,
     labelTextFa: star.labelTextFa,
     titleFa: star.titleFa,
     introFa: star.introFa,
@@ -208,7 +224,22 @@ export function buildDefaultSeedContent(): GameContentData {
   }));
 
   // 3. Artworks Seed
-  const artworks: ArtworkContent[] = [];
+  const artworks: ArtworkContent[] = [
+    { id: '1', artworkId: '1', galleryId: 'gallery-01', title: 'شاخه سرخس', imageUrl: 'https://www.olo.pics/images/2026/09/05/fbf69bdd63db1cdf72428b93ad065dbf.webp' },
+    { id: '2', artworkId: '2', galleryId: 'gallery-01', title: 'پرتره درباری', imageUrl: 'https://www.olo.pics/images/2026/09/05/1934-012.webp' },
+    { id: '3', artworkId: '3', galleryId: 'gallery-01', title: 'پلکان کاخ گلستان', imageUrl: 'https://www.olo.pics/images/2026/09/05/1934-011.webp' },
+    { id: '4', artworkId: '4', galleryId: 'gallery-01', title: 'میدان مشق تهران', imageUrl: 'https://www.olo.pics/images/2026/09/05/1934-010.webp' },
+    { id: '5', artworkId: '5', galleryId: 'gallery-01', title: 'عکاسخانه ناصری', imageUrl: 'https://www.olo.pics/images/2026/09/05/1932-012.webp' },
+    { id: '6', artworkId: '6', galleryId: 'gallery-01', title: 'شمس العماره', imageUrl: 'https://www.olo.pics/images/2026/09/05/970329_15.webp' },
+    { id: '26', artworkId: '26', galleryId: 'gallery-01', title: 'پازل گالری ۰۱', imageUrl: 'https://www.olo.pics/images/2026/09/05/45fa62f550893fd78aad04a202819595.webp' },
+    { id: '27', artworkId: '27', galleryId: 'gallery-03', title: 'پازل گالری ۰۳', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-004.webp' },
+    { id: '28', artworkId: '28', galleryId: 'gallery-04', title: 'پازل گالری ۰۴', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-006.webp' },
+    { id: '29', artworkId: '29', galleryId: 'gallery-05', title: 'پازل گالری ۰۵', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-008.webp' },
+    { id: '30', artworkId: '30', galleryId: 'gallery-06', title: 'پازل گالری ۰۶', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-010.webp' },
+    { id: '31', artworkId: '31', galleryId: 'gallery-07', title: 'پازل گالری ۰۷', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-012.webp' },
+    { id: '32', artworkId: '32', galleryId: 'gallery-08', title: 'پازل گالری ۰۸', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-014.webp' },
+    { id: '33', artworkId: '33', galleryId: 'gallery-09', title: 'پازل گالری ۰۹', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-016.webp' },
+  ];
 
   // Gallery 01 Artworks
   GALLERY_01_ARTWORKS.forEach((art) => {

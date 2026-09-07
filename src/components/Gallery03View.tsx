@@ -28,6 +28,7 @@ import {
 import { setCurrentGalleryId } from '../data/playerLocationStore';
 import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian } from '../services/content/mappers';
+import { GalleryInfoModal } from './GalleryInfoModal';
 
 interface Gallery03ViewProps {
   onNavigateBack: () => void;
@@ -57,6 +58,7 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
   const [selectedStarPointId, setSelectedStarPointId] = useState<string | null>(null);
   const [activeStarDiscoveryId, setActiveStarDiscoveryId] = useState<string | null>(null);
   const [activePuzzlePoint, setActivePuzzlePoint] = useState<AdminPuzzlePoint | null>(null);
+  const [activeGalleryInfoId, setActiveGalleryInfoId] = useState<string | null>(null);
   const [puzzleUpdateTrigger, setPuzzleUpdateTrigger] = useState<number>(0);
 
   // Sync with Admin point changes dynamically
@@ -153,28 +155,31 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
 
   const handleIconPointClick = (iconPoint: AdminIconPoint, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (iconPoint.destination === 'gallery-03-questions') {
-      onNavigateToQuestions?.();
-    } else if (iconPoint.destination === 'gallery-01-questions') {
-      onNavigateToGallery?.('gallery-01-questions');
-    } else if (iconPoint.destination === 'gallery-01') {
+    if (iconPoint.destination === 'gallery-00') {
+      onNavigateBack();
+      return;
+    }
+    if (iconPoint.destination === 'gallery-01') {
       setCurrentGalleryId('gallery-01');
       onNavigateToGallery?.('gallery-01');
-    } else if (iconPoint.destination === 'gallery-03') {
-      // Stay on Gallery 03
       return;
-    } else if (iconPoint.destination === 'gallery-04') {
+    }
+    if (iconPoint.destination === 'gallery-04') {
       setCurrentGalleryId('gallery-04');
       onNavigateToGallery?.('gallery-04');
-    } else if (iconPoint.destination === 'gallery-00') {
-      onNavigateBack();
-    } else if (
+      return;
+    }
+    if (
       iconPoint.destination === 'collection' ||
       iconPoint.destination === 'tasks' ||
       iconPoint.destination === 'curator'
     ) {
       onSelectTab?.(iconPoint.destination);
+      return;
     }
+    // Requirement 1 & 11: Central icon on gallery map opens Gallery Information Modal
+    const targetGalleryId = iconPoint.galleryId || 'gallery-03';
+    setActiveGalleryInfoId(targetGalleryId);
   };
 
   const handlePuzzlePointClick = (puzzlePoint: AdminPuzzlePoint, e: React.MouseEvent) => {
@@ -475,6 +480,13 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
           onClose={() => setActivePuzzlePoint(null)}
         />
       )}
+
+      {/* Shared Gallery Information Modal for Gallery Center Icon */}
+      <GalleryInfoModal
+        galleryId={activeGalleryInfoId}
+        isOpen={Boolean(activeGalleryInfoId)}
+        onClose={() => setActiveGalleryInfoId(null)}
+      />
     </div>
   );
 };

@@ -36,6 +36,7 @@ import {
 import { setCurrentGalleryId } from '../data/playerLocationStore';
 import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian } from '../services/content/mappers';
+import { GalleryInfoModal } from './GalleryInfoModal';
 
 interface Gallery01ViewProps {
   onNavigateBack: () => void;
@@ -63,6 +64,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   const [selectedStarPointId, setSelectedStarPointId] = useState<string | null>(null);
   const [activeStarDiscoveryId, setActiveStarDiscoveryId] = useState<string | null>(null);
   const [activePuzzlePoint, setActivePuzzlePoint] = useState<AdminPuzzlePoint | null>(null);
+  const [activeGalleryInfoId, setActiveGalleryInfoId] = useState<string | null>(null);
   const [puzzleUpdateTrigger, setPuzzleUpdateTrigger] = useState<number>(0);
 
   // Sync with Admin point changes dynamically
@@ -150,17 +152,14 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
 
   const handleIconPointClick = (iconPoint: AdminIconPoint, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (iconPoint.destination === 'gallery-01-questions') {
-      onNavigateToQuestions?.();
-    } else if (iconPoint.destination === 'gallery-03-questions') {
-      onNavigateToGallery?.('gallery-03-questions');
-    } else if (iconPoint.destination === 'gallery-03') {
-      setCurrentGalleryId('gallery-03');
-      onNavigateToGallery?.('gallery-03');
-    } else if (iconPoint.destination === 'gallery-00') {
+    if (iconPoint.destination === 'gallery-00') {
       onNavigateBack();
     } else if (iconPoint.destination === 'collection' || iconPoint.destination === 'tasks' || iconPoint.destination === 'curator') {
       onSelectTab?.(iconPoint.destination);
+    } else {
+      // Requirement 1 & 11: Central icon on gallery map opens Gallery Information Modal
+      const targetGalleryId = iconPoint.galleryId || 'gallery-01';
+      setActiveGalleryInfoId(targetGalleryId);
     }
   };
 
@@ -458,6 +457,13 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
           onClose={() => setActivePuzzlePoint(null)}
         />
       )}
+
+      {/* Shared Gallery Information Modal for Gallery Center Icon */}
+      <GalleryInfoModal
+        galleryId={activeGalleryInfoId}
+        isOpen={Boolean(activeGalleryInfoId)}
+        onClose={() => setActiveGalleryInfoId(null)}
+      />
     </div>
   );
 };

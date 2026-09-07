@@ -38,8 +38,10 @@ export interface StarPointInformation {
 export interface StarDiscoveryItem {
   id: string; // Star Point ID (e.g. 'artwork-01', 'star-01', etc.)
   starId?: string;
+  starNumber?: string;
   questionId?: string;
   galleryId: string;
+  artworkId?: string;
   galleryNumber?: string;
   galleryNameFa?: string;
   galleryNameEn?: string;
@@ -82,17 +84,43 @@ export function mapStarContentToDiscoveryItem(
     explanation: star.explanation || '',
   };
 
+  // Resolve artwork image strictly via:
+  // Star -> artwork_id -> Artworks.artwork_id -> Artworks.image_url
+  let resolvedImageUrl = '';
+  if (star.artworkId) {
+    const artwork = contentService.getArtworkById(star.artworkId);
+    if (artwork) {
+      if (artwork.imageUrl && artwork.imageUrl.trim()) {
+        resolvedImageUrl = artwork.imageUrl.trim();
+      } else {
+        console.warn(
+          `[StarDiscovery] Artwork "${star.artworkId}" for star "${star.id}" was found but its image_url is empty.`
+        );
+      }
+    } else {
+      console.warn(
+        `[StarDiscovery] Star "${star.id}" references artwork_id "${star.artworkId}" which does not exist in Artworks.`
+      );
+    }
+  }
+
   const information: StarPointInformation = {
-    image: star.artworkImageUrl || GALLERY_01_ARTWORK_SRC,
+    image: resolvedImageUrl,
     textFa: star.artworkTextFa || '',
     textEn: star.artworkTextEn || '',
   };
 
+  const rawStarNum =
+    star.starNumber ||
+    (star.id.match(/\d+/)?.[0] ? parseInt(star.id.match(/\d+/)?.[0]!, 10).toString() : undefined);
+
   return {
     id: starPointId,
     starId: star.starId || star.id,
+    starNumber: rawStarNum,
     questionId: rawQid,
     galleryId: star.galleryId,
+    artworkId: star.artworkId,
     galleryNumber: gallery?.galleryNumber,
     galleryNameFa: gallery?.nameFa,
     galleryNameEn: gallery?.nameEn,
@@ -117,6 +145,7 @@ export const DEFAULT_STAR_DISCOVERIES: Record<string, StarDiscoveryItem> = {
   'star-01': {
     id: 'star-01',
     starId: 'star-01',
+    starNumber: '1',
     questionId: 'star-q-01',
     galleryId: 'gallery-01',
     galleryNumber: '01',
@@ -169,6 +198,7 @@ export const DEFAULT_STAR_DISCOVERIES: Record<string, StarDiscoveryItem> = {
   'star-02': {
     id: 'star-02',
     starId: 'star-02',
+    starNumber: '2',
     questionId: 'star-q-02',
     galleryId: 'gallery-01',
     galleryNumber: '01',
@@ -221,6 +251,7 @@ export const DEFAULT_STAR_DISCOVERIES: Record<string, StarDiscoveryItem> = {
   'star-03': {
     id: 'star-03',
     starId: 'star-03',
+    starNumber: '3',
     questionId: 'star-q-03',
     galleryId: 'gallery-03',
     galleryNumber: '03',

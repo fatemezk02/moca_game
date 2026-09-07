@@ -2,7 +2,7 @@ import { IContentProvider } from './IContentProvider';
 import { contentCache } from './contentCache';
 import { buildDefaultSeedContent } from './defaultSeedContent';
 import { GoogleSheetsContentProvider } from './googleSheetsProvider';
-import { normalizeGalleryId } from './mappers';
+import { normalizeGalleryId, normalizeKey } from './mappers';
 import {
   ArtworkContent,
   ContentDebugSummary,
@@ -253,43 +253,71 @@ class ContentService {
       return hasText && hasOptions;
     });
 
+    // Extract target index within the gallery (1, 2, or 3)
+    let targetIndex: number | null = null;
+    const targetMatch = puzzlePointId.match(/(?:point|piece)[-_]?0*(\d+)/i);
+    if (targetMatch) {
+      targetIndex = parseInt(targetMatch[1], 10);
+    } else if (/^\d+$/.test(puzzlePointId.trim())) {
+      targetIndex = parseInt(puzzlePointId.trim(), 10);
+    }
+
     // Match question by puzzle_point_id
     const isMatchingPoint = (q: QuestionContent): boolean => {
-      if (!q.puzzlePointId) return false;
-      const qPoint = q.puzzlePointId.trim();
+      const qPoint = (q.puzzlePointId || '').trim();
       const targetPoint = puzzlePointId.trim();
 
       // 1. Direct match (e.g. "puzzle-point-01" === "puzzle-point-01")
-      if (qPoint.toLowerCase() === targetPoint.toLowerCase()) return true;
+      if (qPoint && qPoint.toLowerCase() === targetPoint.toLowerCase()) return true;
 
       // 2. Normalized alphanumeric match (e.g. "puzzlepoint01" === "puzzlepoint01")
       const qClean = qPoint.toLowerCase().replace(/[^a-z0-9]/g, '');
       const tClean = targetPoint.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (qClean === tClean) return true;
+      if (qClean && qClean === tClean) return true;
 
-      // 3. Match numeric identifiers for Gallery 01:
-      // puzzle-point-01 -> "1", "01", "puzzle-point-1"
-      // puzzle-point-02 -> "2", "02", "puzzle-point-2"
-      // puzzle-point-03 -> "3", "03", "puzzle-point-3"
-      if (targetPoint === 'puzzle-point-01' && (qPoint === '1' || qPoint === '01' || qPoint === 'puzzle-point-1')) return true;
-      if (targetPoint === 'puzzle-point-02' && (qPoint === '2' || qPoint === '02' || qPoint === 'puzzle-point-2')) return true;
-      if (targetPoint === 'puzzle-point-03' && (qPoint === '3' || qPoint === '03' || qPoint === 'puzzle-point-3')) return true;
+      // 3. Fallback: match if q.puzzlePieceId matches piece ID or point ID
+      if (q.puzzlePieceId && (q.puzzlePieceId.toLowerCase() === targetPoint.toLowerCase() || q.puzzlePieceId.replace(/[^a-z0-9]/g, '') === tClean)) {
+        return true;
+      }
 
-      // 4. Match numeric identifiers for Gallery 03:
-      // puzzle-g03-point-01 -> "puzzle-g03-point-01", "7", "1", "01" (order 1 in G03, point 7 globally)
-      // puzzle-g03-point-02 -> "puzzle-g03-point-02", "8", "2", "02"
-      // puzzle-g03-point-03 -> "puzzle-g03-point-03", "9", "3", "03"
-      if (targetPoint === 'puzzle-g03-point-01' && (qPoint === '7' || qPoint === '1' || qPoint === '01' || qClean === 'puzzleg03point01' || qClean === 'puzzleg03point1')) return true;
-      if (targetPoint === 'puzzle-g03-point-02' && (qPoint === '8' || qPoint === '2' || qPoint === '02' || qClean === 'puzzleg03point02' || qClean === 'puzzleg03point2')) return true;
-      if (targetPoint === 'puzzle-g03-point-03' && (qPoint === '9' || qPoint === '3' || qPoint === '03' || qClean === 'puzzleg03point03' || qClean === 'puzzleg03point3')) return true;
+      // 4. Match numeric identifiers and order for Gallery 01 (point 1, 2, 3)
+      if (canonGalleryId === 'gallery_01' || canonGalleryId === 'gallery-01') {
+        if (targetIndex === 1 && (qPoint === '1' || qPoint === '01' || qPoint === 'puzzle-point-1' || qPoint === 'puzzle-point-01' || qClean === 'puzzlepoint01' || q.questionOrder === 1)) return true;
+        if (targetIndex === 2 && (qPoint === '2' || qPoint === '02' || qPoint === 'puzzle-point-2' || qPoint === 'puzzle-point-02' || qClean === 'puzzlepoint02' || q.questionOrder === 2)) return true;
+        if (targetIndex === 3 && (qPoint === '3' || qPoint === '03' || qPoint === 'puzzle-point-3' || qPoint === 'puzzle-point-03' || qClean === 'puzzlepoint03' || q.questionOrder === 3)) return true;
+      }
 
-      // 5. Fallback: match if q.puzzlePieceId matches piece ID or point ID
-      if (q.puzzlePieceId && q.puzzlePieceId === targetPoint) return true;
+      // 5. Match numeric identifiers and order for Gallery 03 (point 1, 2, 3 / points 4, 5, 6 / order 1, 2, 3)
+      if (canonGalleryId === 'gallery_03' || canonGalleryId === 'gallery-03') {
+        if (targetIndex === 1 && (qPoint === '4' || qPoint === '04' || qPoint === '1' || qPoint === '01' || qPoint === '7' || qPoint === '07' || qClean === 'puzzleg03point01' || qClean === 'puzzleg03point1' || q.questionOrder === 1)) return true;
+        if (targetIndex === 2 && (qPoint === '5' || qPoint === '05' || qPoint === '2' || qPoint === '02' || qPoint === '8' || qPoint === '08' || qClean === 'puzzleg03point02' || qClean === 'puzzleg03point2' || q.questionOrder === 2)) return true;
+        if (targetIndex === 3 && (qPoint === '6' || qPoint === '06' || qPoint === '3' || qPoint === '03' || qPoint === '9' || qPoint === '09' || qClean === 'puzzleg03point03' || qClean === 'puzzleg03point3' || q.questionOrder === 3)) return true;
+      }
+
+      // 6. Match numeric identifiers for Gallery 04 (point 1, 2, 3 / points 7, 8, 9 / order 1, 2, 3)
+      if (canonGalleryId === 'gallery_04' || canonGalleryId === 'gallery-04') {
+        if (targetIndex === 1 && (qPoint === '7' || qPoint === '07' || qPoint === '1' || qPoint === '01' || qPoint === '10' || qClean === 'puzzleg04point01' || q.questionOrder === 1)) return true;
+        if (targetIndex === 2 && (qPoint === '8' || qPoint === '08' || qPoint === '2' || qPoint === '02' || qPoint === '11' || qClean === 'puzzleg04point02' || q.questionOrder === 2)) return true;
+        if (targetIndex === 3 && (qPoint === '9' || qPoint === '09' || qPoint === '3' || qPoint === '03' || qPoint === '12' || qClean === 'puzzleg04point03' || q.questionOrder === 3)) return true;
+      }
+
+      // 7. General match by questionOrder if targetIndex is known
+      if (targetIndex !== null && q.questionOrder === targetIndex) {
+        return true;
+      }
 
       return false;
     };
 
-    const matchingQuestions = galleryQuestions.filter(isMatchingPoint);
+    let matchingQuestions = galleryQuestions.filter(isMatchingPoint);
+
+    // If no direct point matched, fallback to matching by questionOrder within gallery questions
+    if (matchingQuestions.length === 0 && targetIndex !== null && galleryQuestions.length > 0) {
+      const byOrder = galleryQuestions.filter((q) => q.questionOrder === targetIndex);
+      if (byOrder.length > 0) {
+        matchingQuestions = byOrder;
+      }
+    }
 
     // Requirement 14: If multiple active questions exist for the same puzzle_point_id:
     // - use question_order to determine the first applicable question
@@ -362,9 +390,11 @@ class ContentService {
         const starGallery = normalizeGalleryId(star.galleryId);
         // Gallery 01 Architectural Hall in game maps to gallery_id 2 or 1 in Google Sheets
         const isG01Compatible =
-          canonGalleryId === 'gallery-01' && (starGallery === 'gallery-01' || starGallery === 'gallery-02');
+          (canonGalleryId === 'gallery_01' || canonGalleryId === 'gallery-01') &&
+          (starGallery === 'gallery_01' || starGallery === 'gallery-01' || starGallery === 'gallery_02' || starGallery === 'gallery-02');
         const isG02Compatible =
-          canonGalleryId === 'gallery-02' && starGallery === 'gallery-02';
+          (canonGalleryId === 'gallery_02' || canonGalleryId === 'gallery-02') &&
+          (starGallery === 'gallery_02' || starGallery === 'gallery-02');
         const isExactMatch = starGallery === canonGalleryId;
 
         if (!isG01Compatible && !isG02Compatible && !isExactMatch) {
@@ -436,6 +466,139 @@ class ContentService {
    */
   getArtworks(): ArtworkContent[] {
     return this.currentData?.artworks || [];
+  }
+
+  /**
+   * Resolves an Artwork entity by its artwork_id or id from the Artworks sheet.
+   *
+   * Error Handling (Requirement 9):
+   * - If no matching artwork exists: do not crash, log a clear development warning,
+   *   do not display another artwork, do not use the first artwork as fallback.
+   * - If image_url is missing: log a clear development warning, keep the UI stable.
+   */
+  getArtworkById(artworkId: string): ArtworkContent | null {
+    if (!artworkId || typeof artworkId !== 'string' || !artworkId.trim()) {
+      return null;
+    }
+    const cleanId = artworkId.trim();
+    const artworks = this.getArtworks();
+
+    if (!artworks || artworks.length === 0) {
+      console.warn(
+        `[ContentService] No artworks loaded in cache when resolving artwork_id "${artworkId}".`
+      );
+      return null;
+    }
+
+    // 1. Direct match on id or artworkId
+    let match = artworks.find(
+      (a) => a.id === cleanId || a.artworkId === cleanId
+    );
+
+    // 2. Numeric / integer match (e.g. '1' matches 'artwork-01' or '1' or 'artwork-1')
+    if (!match) {
+      const targetDigits = cleanId.replace(/[^0-9]/g, '');
+      if (targetDigits) {
+        const targetNum = parseInt(targetDigits, 10);
+        match = artworks.find((a) => {
+          const idDigits = (a.artworkId || a.id || '').replace(/[^0-9]/g, '');
+          return idDigits !== '' && parseInt(idDigits, 10) === targetNum;
+        });
+      }
+    }
+
+    // 3. Normalized string match
+    if (!match) {
+      const normTarget = normalizeKey(cleanId);
+      match = artworks.find(
+        (a) =>
+          normalizeKey(a.id) === normTarget ||
+          (a.artworkId && normalizeKey(a.artworkId) === normTarget)
+      );
+    }
+
+    if (!match) {
+      console.warn(`[ContentService] No matching Artwork found for artwork_id: "${artworkId}".`);
+      return null;
+    }
+
+    if (!match.imageUrl || !match.imageUrl.trim()) {
+      console.warn(`[ContentService] Artwork "${artworkId}" was found but its image_url is empty.`);
+    }
+
+    return match;
+  }
+
+  /**
+   * Resolves the configured puzzle artwork for a given gallery.
+   * Conceptually: Galleries.gallery_id -> puzzle_artwork_id -> Artworks.artwork_id -> Artworks.image_url
+   *
+   * Error Handling (Requirement 9):
+   * - If a Gallery references a puzzle_artwork_id that does not exist:
+   *   do not crash, log a clear development warning, do not use another gallery's artwork,
+   *   keep the rest of the game functional.
+   */
+  getGalleryPuzzleArtwork(galleryId: string): ArtworkContent | null {
+    if (!galleryId) return null;
+    const gallery = this.getGalleryById(galleryId);
+
+    // 1. Check gallery.puzzleArtworkId from Galleries sheet
+    let puzzleArtId = gallery?.puzzleArtworkId?.trim();
+
+    // 2. If not explicitly in sheet row, check standard configured mapping:
+    // Gallery 01 -> '26', Gallery 03 -> '27', Gallery 04 -> '28', etc.
+    if (!puzzleArtId) {
+      const canonId = normalizeGalleryId(galleryId);
+      const defaultMappings: Record<string, string> = {
+        'gallery_01': '26',
+        'gallery_03': '27',
+        'gallery_04': '28',
+        'gallery_05': '29',
+        'gallery_06': '30',
+        'gallery_07': '31',
+        'gallery_08': '32',
+        'gallery_09': '33',
+        'gallery-01': '26',
+        'gallery-03': '27',
+        'gallery-04': '28',
+        'gallery-05': '29',
+        'gallery-06': '30',
+        'gallery-07': '31',
+        'gallery-08': '32',
+        'gallery-09': '33',
+      };
+      if (defaultMappings[canonId]) {
+        puzzleArtId = defaultMappings[canonId];
+      }
+    }
+
+    if (puzzleArtId) {
+      const art = this.getArtworkById(puzzleArtId);
+      if (art) return art;
+      console.warn(
+        `[ContentService] Gallery "${galleryId}" references puzzle_artwork_id "${puzzleArtId}" which does not exist in Artworks.`
+      );
+      return null;
+    }
+
+    // 3. Fallback: Search Artworks sheet for artwork with matching gallery_id and non-empty image_url
+    const matchingArtwork = this.getArtworks().find(
+      (a) => normalizeGalleryId(a.galleryId) === normalizeGalleryId(galleryId) && a.imageUrl && a.imageUrl.trim()
+    );
+    if (matchingArtwork) {
+      return matchingArtwork;
+    }
+
+    console.warn(`[ContentService] No configured puzzle artwork found for gallery "${galleryId}".`);
+    return null;
+  }
+
+  /**
+   * Resolves the final puzzle artwork image URL for a given gallery.
+   */
+  getGalleryPuzzleArtworkSrc(galleryId: string): string {
+    const artwork = this.getGalleryPuzzleArtwork(galleryId);
+    return artwork?.imageUrl ? artwork.imageUrl.trim() : '';
   }
 
   /**
@@ -572,6 +735,8 @@ export function registerContentDebugAPI(service: ContentService = contentService
     getArtworks: () => service.getArtworks(),
     getGalleries: () => service.getGalleries(),
     getGalleryById: (id: string) => service.getGalleryById(id),
+    getArtworkById: (id: string) => service.getArtworkById(id),
+    getGalleryPuzzleArtwork: (galleryId: string) => service.getGalleryPuzzleArtwork(galleryId),
     refresh: () => service.initializeContent(true),
     clearCache: () => {
       contentCache.clear();

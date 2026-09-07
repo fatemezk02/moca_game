@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BottomNavBar } from './BottomNavBar';
 import { ArtworkFrame } from './ArtworkFrame';
 import { GALLERY_01_QUESTIONS } from '../data/gallery01Questions';
-import { GALLERY_01_ARTWORK_SRC } from '../data/gallery01Artwork';
 import {
   getGalleryQuestionsArtwork,
   GalleryQuestionsArtworkConfig,
@@ -261,7 +260,7 @@ export const Gallery01QuestionsView: React.FC<Gallery01QuestionsViewProps> = ({
               >
                 {/* Reference ghost image for intrinsic layout geometry and sizing */}
                 <img
-                  src={artworkConfig.image || GALLERY_01_ARTWORK_SRC}
+                  src={artworkConfig.image || ''}
                   alt=""
                   aria-hidden="true"
                   className="max-h-full max-w-full w-auto h-auto object-contain select-none pointer-events-none invisible"
@@ -272,7 +271,7 @@ export const Gallery01QuestionsView: React.FC<Gallery01QuestionsViewProps> = ({
 
                 {/* Layer 1: Bottom 1/3 (Blinks on Q1 completion; remains static with no animation on Q2 completion) */}
                 <motion.img
-                  src={artworkConfig.image || GALLERY_01_ARTWORK_SRC}
+                  src={artworkConfig.image || ''}
                   alt="Gallery 01 Artwork - Bottom Third"
                   initial={progressStep === 1 ? { opacity: 0 } : { opacity: 1 }}
                   animate={
@@ -296,7 +295,7 @@ export const Gallery01QuestionsView: React.FC<Gallery01QuestionsViewProps> = ({
                 {/* Layer 2: Middle 1/3 (Newly revealed on Q2 completion; blinks 2-3 times then stays visible) */}
                 {progressStep === 2 && (
                   <motion.img
-                    src={artworkConfig.image || GALLERY_01_ARTWORK_SRC}
+                    src={artworkConfig.image || ''}
                     alt="Gallery 01 Artwork - Middle Third"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: [0, 1, 0, 1, 0, 1] }}
@@ -325,7 +324,7 @@ export const Gallery01QuestionsView: React.FC<Gallery01QuestionsViewProps> = ({
               <div className="flex-1 min-h-0 w-full flex items-center justify-center mb-4 overflow-hidden relative">
                 <ArtworkFrame>
                   <img
-                    src={artworkConfig.image || GALLERY_01_ARTWORK_SRC}
+                    src={artworkConfig.image || ''}
                     alt="Gallery 01 Artwork"
                     className="max-h-[42vh] sm:max-h-[46vh] max-w-[76vw] sm:max-w-xs w-auto h-auto object-contain select-none pointer-events-auto transition-transform block"
                     style={{

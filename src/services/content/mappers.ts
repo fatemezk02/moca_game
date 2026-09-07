@@ -107,29 +107,51 @@ function extractOptions(
 }
 
 /**
- * Normalizes gallery identifier strings into canonical form (e.g. '1' -> 'gallery-01')
+ * Normalizes gallery identifier strings into canonical form (e.g. '1', 'gallery-01', 'gallery01' -> 'gallery_01')
  */
 export function normalizeGalleryId(raw: string): string {
-  if (!raw) return 'gallery-01';
+  if (!raw) return 'gallery_01';
   const clean = raw.toLowerCase().trim().replace(/[\s_\-–—:\/\\()\[\]]/g, '');
   if (clean === '1' || clean === '01' || clean === 'g1' || clean === 'g01' || clean === 'gallery1' || clean === 'gallery01') {
-    return 'gallery-01';
+    return 'gallery_01';
   }
   if (clean === '2' || clean === '02' || clean === 'g2' || clean === 'g02' || clean === 'gallery2' || clean === 'gallery02') {
-    return 'gallery-02';
+    return 'gallery_02';
   }
   if (clean === '3' || clean === '03' || clean === 'g3' || clean === 'g03' || clean === 'gallery3' || clean === 'gallery03') {
-    return 'gallery-03';
+    return 'gallery_03';
+  }
+  if (clean === '4' || clean === '04' || clean === 'g4' || clean === 'g04' || clean === 'gallery4' || clean === 'gallery04') {
+    return 'gallery_04';
+  }
+  if (clean === '5' || clean === '05' || clean === 'g5' || clean === 'g05' || clean === 'gallery5' || clean === 'gallery05') {
+    return 'gallery_05';
+  }
+  if (clean === '6' || clean === '06' || clean === 'g6' || clean === 'g06' || clean === 'gallery6' || clean === 'gallery06') {
+    return 'gallery_06';
+  }
+  if (clean === '7' || clean === '07' || clean === 'g7' || clean === 'g07' || clean === 'gallery7' || clean === 'gallery07') {
+    return 'gallery_07';
+  }
+  if (clean === '8' || clean === '08' || clean === 'g8' || clean === 'g08' || clean === 'gallery8' || clean === 'gallery08') {
+    return 'gallery_08';
+  }
+  if (clean === '9' || clean === '09' || clean === 'g9' || clean === 'g09' || clean === 'gallery9' || clean === 'gallery09') {
+    return 'gallery_09';
   }
   if (clean === '0' || clean === '00' || clean === 'g0' || clean === 'g00' || clean === 'gallery0' || clean === 'gallery00') {
-    return 'gallery-00';
+    return 'gallery_00';
   }
   if (clean.startsWith('gallery')) {
     const num = clean.replace('gallery', '');
-    if (num.length === 1) return `gallery-0${num}`;
-    return `gallery-${num}`;
+    if (num.length === 1) return `gallery_0${num}`;
+    return `gallery_${num}`;
   }
-  return raw;
+  if (/^\d+$/.test(clean)) {
+    const n = parseInt(clean, 10);
+    return n < 10 ? `gallery_0${n}` : `gallery_${n}`;
+  }
+  return raw.replace(/-/g, '_');
 }
 
 /**
@@ -304,6 +326,22 @@ export function mapRowToQuestion(row: Record<string, string>, index: number): Qu
 
   const puzzlePieceId = getValueByAliases(row, ['puzzlepieceid', 'قطعه پازل', 'شناسه پازل', 'pieceid']);
 
+  const rawArtworkId = getValueByAliases(row, [
+    'artwork_id',
+    'artworkid',
+    'artwork',
+    'art_id',
+    'artid',
+    'شناسه اثر',
+    'شناسه_اثر',
+    'کد اثر',
+    'کد_اثر',
+    'تصویر اثر',
+    'عکس اثر',
+    'آرت ورک',
+  ]);
+  const artworkId = rawArtworkId ? rawArtworkId.trim() : undefined;
+
   return {
     id,
     galleryId,
@@ -324,6 +362,7 @@ export function mapRowToQuestion(row: Record<string, string>, index: number): Qu
     reward,
     active,
     puzzlePieceId: puzzlePieceId || undefined,
+    artworkId,
     rawFields: row,
   };
 }
@@ -367,6 +406,26 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
 
   const id = rawId.trim();
   const starId = id;
+
+  const rawStarNumber = getValueByAliases(row, [
+    'star_number',
+    'starnumber',
+    'star_no',
+    'starno',
+    'star_num',
+    'starnum',
+    'شماره ستاره',
+    'شماره_ستاره',
+    'شماره',
+    'عدد ستاره',
+    'ردیف',
+  ]);
+  const numInIdMatch = id.match(/\d+/)?.[0];
+  const starNumber = rawStarNumber
+    ? rawStarNumber.trim()
+    : numInIdMatch
+    ? parseInt(numInIdMatch, 10).toString()
+    : `${index + 1}`;
 
   const rawQuestionId = getValueByAliases(row, [
     'question_id',
@@ -586,11 +645,26 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
   const rawActive = getValueByAliases(row, ['is_active', 'isactive', 'active', 'فعال']).toLowerCase().trim();
   const active = rawActive === 'false' || rawActive === '0' || rawActive === 'no' || rawActive === 'غیرفعال' ? false : true;
 
+  const artworkId = getValueByAliases(row, [
+    'artwork_id',
+    'artworkid',
+    'artwork',
+    'art_id',
+    'artid',
+    'شناسه اثر',
+    'شناسه_اثر',
+    'کد اثر',
+    'کد_اثر',
+    'اثر',
+  ]);
+
   return {
     id,
     starId,
+    starNumber,
     questionId,
     galleryId,
+    artworkId: artworkId ? artworkId.trim() : undefined,
     labelTextFa,
     titleFa,
     introFa,
@@ -616,7 +690,7 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
  * 3. MAPPER: Spreadsheet Row -> ArtworkContent
  * ============================================================================
  * Expected / Supported Column Names in 'Artworks' Sheet:
- * - ID / id / شناسه (e.g. artwork-01, art-101)
+ * - artwork_id / ID / id / شناسه (e.g. 1, 2, 26, 27, artwork-01, art-101)
  * - galleryId / gallery / گالری (e.g. gallery-01, gallery-00)
  * - title / عنوان / نام اثر
  * - roomSection / section / بخش / تالار
@@ -628,15 +702,27 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
  * - year / سال ساخت
  * - dimensions / ابعاد
  * - description / توضیحات / شرح
- * - imageUrl / image / عکس / تصویر
+ * - imageUrl / image_url / image / عکس / تصویر
  */
 export function mapRowToArtwork(row: Record<string, string>, index: number): ArtworkContent {
-  const id =
-    getValueByAliases(row, ['id', 'ID', 'شناسه', 'کد اثر']) ||
-    `artwork-${index + 1}`;
+  const rawId =
+    getValueByAliases(row, [
+      'artwork_id',
+      'artworkid',
+      'id',
+      'ID',
+      'شناسه اثر',
+      'شناسه_اثر',
+      'شناسه',
+      'کد اثر',
+      'کد_اثر',
+      'کد',
+    ]) || `artwork-${index + 1}`;
+  const id = rawId.trim();
+  const artworkId = id;
 
   const galleryId =
-    getValueByAliases(row, ['galleryid', 'gallery', 'گالری']) ||
+    getValueByAliases(row, ['galleryid', 'gallery', 'گالری', 'شناسه گالری']) ||
     'gallery-01';
 
   const title =
@@ -657,10 +743,21 @@ export function mapRowToArtwork(row: Record<string, string>, index: number): Art
   const year = getValueByAliases(row, ['year', 'سال', 'قدمت']);
   const dimensions = getValueByAliases(row, ['dimensions', 'ابعاد', 'اندازه']);
   const description = getValueByAliases(row, ['description', 'توضیحات', 'شرح', 'متن']);
-  const imageUrl = getValueByAliases(row, ['imageurl', 'image', 'عکس', 'تصویر', 'لینک عکس']);
+  const imageUrl = getValueByAliases(row, [
+    'image_url',
+    'imageurl',
+    'artwork_image_url',
+    'artworkimageurl',
+    'image',
+    'عکس',
+    'تصویر',
+    'لینک عکس',
+    'لینک تصویر',
+  ]);
 
   return {
     id,
+    artworkId,
     galleryId,
     title,
     roomSection: roomSection || undefined,
@@ -689,11 +786,13 @@ export function mapRowToArtwork(row: Record<string, string>, index: number): Art
  * - description_fa (e.g. توضیحات گالری ۱)
  * - description_en (e.g. Gallery 01 Description)
  * - active (e.g. true / TRUE)
+ * - puzzle_artwork_id / artwork_id (e.g. 26, 27, art-01)
  */
 export function mapRowToGallery(row: Record<string, string>, index: number): GalleryContent {
-  const galleryId =
+  const rawGalleryId =
     getValueByAliases(row, ['gallery_id', 'galleryid', 'id', 'شناسه گالری', 'گالری']) ||
-    `gallery-${String(index).padStart(2, '0')}`;
+    `gallery_${String(index).padStart(2, '0')}`;
+  const galleryId = normalizeGalleryId(rawGalleryId);
 
   const galleryNumber =
     getValueByAliases(row, [
@@ -745,6 +844,58 @@ export function mapRowToGallery(row: Record<string, string>, index: number): Gal
       'توضیحات انگلیسی',
     ]) || '';
 
+  const curator = getValueByAliases(row, [
+    'curator',
+    'curator_name',
+    'curatorname',
+    'guide',
+    'guide_name',
+    'guidename',
+    'کیوریتور',
+    'نام کیوریتور',
+    'راهنما',
+    'نام راهنما',
+    'کیوریتور / راهنما',
+    'راهنمای گالری',
+    'کیوریتور گالری',
+  ]);
+
+  const curatorUrl = getValueByAliases(row, [
+    'curator_url',
+    'curatorurl',
+    'curator_image',
+    'curatorimage',
+    'curator_img',
+    'curatorimg',
+    'guide_url',
+    'guideurl',
+    'guide_image',
+    'guideimage',
+    'تصویر کیوریتور',
+    'عکس کیوریتور',
+    'تصویر راهنما',
+    'عکس راهنما',
+    'لینک تصویر کیوریتور',
+  ]);
+
+  const puzzleArtworkId = getValueByAliases(row, [
+    'puzzle_artwork_id',
+    'puzzleartworkid',
+    'puzzle_artwork',
+    'puzzleartwork',
+    'artwork_id',
+    'artworkid',
+    'artwork',
+    'art_id',
+    'artid',
+    'شناسه اثر پازل',
+    'کد اثر پازل',
+    'اثر پازل',
+    'شناسه اثر',
+    'کد اثر',
+    'اثر',
+  ]);
+
   const activeRaw = getValueByAliases(row, ['active', 'فعال', 'is_active', 'status']);
   const active =
     activeRaw === ''
@@ -762,6 +913,9 @@ export function mapRowToGallery(row: Record<string, string>, index: number): Gal
     nameEn,
     descriptionFa,
     descriptionEn,
+    curator: curator ? curator.trim() : undefined,
+    curatorUrl: curatorUrl ? curatorUrl.trim() : undefined,
+    puzzleArtworkId: puzzleArtworkId ? puzzleArtworkId.trim() : undefined,
     active,
     rawFields: row,
   };
