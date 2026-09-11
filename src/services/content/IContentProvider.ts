@@ -1,4 +1,10 @@
-import { ArtworkContent, GalleryContent, QuestionContent, StarContent } from './types';
+import {
+  ArtworkContent,
+  GalleryContent,
+  QuestionContent,
+  StarContent,
+  ExperienceContent,
+} from './types';
 
 /**
  * Interface representing any content provider backend (Google Sheets, REST API, MySQL microservice, etc.)
@@ -22,11 +28,15 @@ export interface IContentProvider {
   /** Fetch Galleries dataset */
   fetchGalleries(): Promise<GalleryContent[]>;
 
+  /** Fetch Experiences dataset */
+  fetchExperiences(): Promise<ExperienceContent[]>;
+
   /** Fetch all datasets in parallel */
   fetchAll(): Promise<{
     questions: QuestionContent[];
     stars: StarContent[];
     artworks: ArtworkContent[];
     galleries: GalleryContent[];
+    experiences: ExperienceContent[];
   }>;
 }

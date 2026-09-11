@@ -167,8 +167,8 @@ export function markPuzzlePointCompleted(
 /**
  * Normalizes gallery ID to standard canonical format (e.g., 'gallery_01', 'gallery_03')
  */
-export function toCanonicalGalleryId(galleryId: string): string {
-  if (!galleryId) return 'gallery_01';
+export function toCanonicalGalleryId(galleryId?: string): string {
+  if (!galleryId || typeof galleryId !== 'string') return 'gallery_01';
   const clean = galleryId.toLowerCase().replace(/[^a-z0-9]/g, '');
   if (clean.startsWith('gallery')) {
     const num = clean.replace('gallery', '');
@@ -265,7 +265,8 @@ export function getCollectedPiecesForGallery(galleryId: string): string[] {
  * 2. Or completed gallery puzzles list in localStorage
  * 3. Or all 3 puzzle pieces (piece-01, piece-02, piece-03) have been collected
  */
-export function isGalleryPuzzleCompleted(galleryId: string): boolean {
+export function isGalleryPuzzleCompleted(galleryId?: string): boolean {
+  if (!galleryId) return false;
   const canonId = toCanonicalGalleryId(galleryId);
   const legacyId = canonId.replace('_', '-');
   const progress = getPuzzleProgress();

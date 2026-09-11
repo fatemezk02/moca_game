@@ -1,0 +1,195 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ExperiencePointMarker } from './ExperiencePointMarker';
+import { ExperienceContent, ExperienceIconType } from '../services/content/types';
+import { contentService } from '../services/content/contentService';
+import { DEFAULT_EXPERIENCES } from '../services/content/defaultSeedContent';
+
+export interface ExperiencePointProps {
+  id: string;
+  experienceId: string;
+  galleryId: string;
+  x: number;
+  y: number;
+  iconId?: ExperienceIconType | string;
+  label?: string;
+  title?: string;
+  mapWidth?: number;
+  mapHeight?: number;
+  isSelected?: boolean;
+  onSelect?: () => void;
+  onOpenModal: (experience: ExperienceContent) => void;
+}
+
+export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
+  id,
+  experienceId,
+  galleryId,
+  x,
+  y,
+  iconId: propIconId,
+  label: propLabel,
+  title: propTitle,
+  mapWidth = 848,
+  mapHeight = 1264,
+  isSelected = false,
+  onSelect,
+  onOpenModal,
+}) => {
+  const [isLabelOpen, setIsLabelOpen] = useState<boolean>(false);
+  const [, setContentVersion] = useState<number>(0);
+
+  // Subscribe to ContentService updates (e.g. when Google Sheets load finishes)
+  useEffect(() => {
+    return contentService.subscribe(() => {
+      setContentVersion((v) => v + 1);
+    });
+  }, []);
+
+  // Sync external selection state
+  useEffect(() => {
+    if (!isSelected) {
+      setIsLabelOpen(false);
+    }
+  }, [isSelected]);
+
+  // Resolve the specific experience data for this point.
+  // CRITICAL: Never fall back to the first experience of another entity.
+  const resolvedExperience = React.useMemo<ExperienceContent>(() => {
+    const fromService =
+      contentService.getExperienceById(experienceId) ||
+      contentService.getExperiencesForGallery(galleryId).find(
+        (e) =>
+          e.experienceId.toLowerCase() === experienceId.toLowerCase() ||
+          e.id.toLowerCase() === experienceId.toLowerCase()
+      );
+
+    if (fromService) {
+      return fromService;
+    }
+
+    // Seed fallback for this specific experienceId ONLY
+    const fromSeed = DEFAULT_EXPERIENCES.find(
+      (e) =>
+        e.experienceId.toLowerCase() === experienceId.toLowerCase() ||
+        e.id.toLowerCase() === experienceId.toLowerCase()
+    );
+
+    if (fromSeed) {
+      return fromSeed;
+    }
+
+    // Fallback constructed ONLY for this experience entity
+    return {
+      id: experienceId,
+      experienceId,
+      galleryId,
+      labelFa: propLabel || propTitle || experienceId,
+      title: propTitle || propLabel || experienceId,
+      descriptionFa: '',
+      iconId: (propIconId as ExperienceIconType) || 'frame',
+      active: true,
+    };
+  }, [experienceId, galleryId, propIconId, propLabel, propTitle]);
+
+  const displayLabel = resolvedExperience.labelFa || resolvedExperience.title || experienceId;
+  const effectiveIcon = resolvedExperience.iconId || propIconId || 'frame';
+
+  // Responsive map percentage coordinates
+  const leftPercent = (x / mapWidth) * 100;
+  const topPercent = (y / mapHeight) * 100;
+  const isRightSide = x > mapWidth / 2;
+
+  const handleMarkerClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isLabelOpen) {
+      // Second click: Open modal
+      setIsLabelOpen(false);
+      onOpenModal(resolvedExperience);
+    } else {
+      // First click: Reveal label
+      setIsLabelOpen(true);
+      onSelect?.();
+    }
+  };
+
+  const handleLabelClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsLabelOpen(false);
+    onOpenModal(resolvedExperience);
+  };
+
+  return (
+    <div
+      id={`experience-point-${id}`}
+      style={{
+        left: `${leftPercent}%`,
+        top: `${topPercent}%`,
+      }}
+      className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30"
+    >
+      {/* Clickable Experience Marker */}
+      <button
+        type="button"
+        onClick={handleMarkerClick}
+        aria-label={`تجربه: ${displayLabel}`}
+        title={displayLabel}
+        className="relative group flex items-center justify-center p-0 bg-transparent border-0 cursor-pointer focus:outline-none"
+      >
+        <ExperiencePointMarker
+          iconId={effectiveIcon}
+          isSelected={isSelected || isLabelOpen}
+          title={displayLabel}
+        />
+      </button>
+
+      {/* First Click Contextual Label */}
+      <AnimatePresence>
+        {isLabelOpen && !!displayLabel && (
+          <motion.div
+            id={`experience-label-${id}`}
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            exit={{ opacity: 0, scaleX: 0 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              transformOrigin: isRightSide ? 'right center' : 'left center',
+            }}
+            onClick={handleLabelClick}
+            className={`absolute top-1/2 -translate-y-1/2 z-40 pointer-events-auto cursor-pointer ${
+              isRightSide ? 'right-[90%]' : 'left-[90%]'
+            }`}
+          >
+            {isRightSide ? (
+              /* Label projecting to the LEFT */
+              <div className="flex flex-col items-end pr-1 select-none group">
+                {/* Horizontal line in line with the marker */}
+                <div className="h-[2px] bg-[#1e1b18] w-8 sm:w-12 -mr-1" />
+
+                {/* Badge container */}
+                <div className="mt-1 bg-[#ffffff] group-hover:bg-[#fffbeb] text-[#1e1b18] border-[1.8px] border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] rounded-md px-2.5 py-1 font-sans-custom text-[11px] sm:text-[12px] font-black tracking-tight whitespace-nowrap transition-colors flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#f59e0b] border border-[#1e1b18]" />
+                  <span>{displayLabel}</span>
+                </div>
+              </div>
+            ) : (
+              /* Label projecting to the RIGHT */
+              <div className="flex flex-col items-start pl-1 select-none group">
+                {/* Horizontal line in line with the marker */}
+                <div className="h-[2px] bg-[#1e1b18] w-8 sm:w-12 -ml-1" />
+
+                {/* Badge container */}
+                <div className="mt-1 bg-[#ffffff] group-hover:bg-[#fffbeb] text-[#1e1b18] border-[1.8px] border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] rounded-md px-2.5 py-1 font-sans-custom text-[11px] sm:text-[12px] font-black tracking-tight whitespace-nowrap transition-colors flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#f59e0b] border border-[#1e1b18]" />
+                  <span>{displayLabel}</span>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default ExperiencePoint;

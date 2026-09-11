@@ -22,6 +22,12 @@ import {
 import { NavigationArrowRender } from './NavigationArrowRender';
 import { Gallery00MapSvg } from './Gallery00MapSvg';
 import { Gallery03MapSvg } from './Gallery03MapSvg';
+import { Gallery04MapSvg } from './Gallery04MapSvg';
+import { Gallery05MapSvg } from './Gallery05MapSvg';
+import { Gallery06MapSvg } from './Gallery06MapSvg';
+import { Gallery07MapSvg } from './Gallery07MapSvg';
+import { Gallery08MapSvg } from './Gallery08MapSvg';
+import { Gallery09MapSvg } from './Gallery09MapSvg';
 import {
   Navigation,
   Plus,
@@ -508,7 +514,7 @@ export const AdminArrowEditor: React.FC<AdminArrowEditorProps> = ({
             <div
               style={{
                 aspectRatio: `${vbWidth} / ${vbHeight}`,
-                width: currentGallery.id === 'gallery-01' || currentGallery.id === 'gallery-03' ? '460px' : '560px',
+                width: currentGallery.id === 'gallery-00' ? '560px' : '460px',
                 maxWidth: '100%',
               }}
               className="relative bg-[#fbf9f9] border border-[#0e0f0f] shadow-xl p-4"
@@ -549,6 +555,36 @@ export const AdminArrowEditor: React.FC<AdminArrowEditorProps> = ({
                 </svg>
               ) : currentGallery.id === 'gallery-03' ? (
                 <Gallery03MapSvg
+                  ref={svgRef}
+                  className="w-full h-full object-contain pointer-events-auto"
+                />
+              ) : currentGallery.id === 'gallery-04' ? (
+                <Gallery04MapSvg
+                  ref={svgRef}
+                  className="w-full h-full object-contain pointer-events-auto"
+                />
+              ) : currentGallery.id === 'gallery-05' ? (
+                <Gallery05MapSvg
+                  ref={svgRef}
+                  className="w-full h-full object-contain pointer-events-auto"
+                />
+              ) : currentGallery.id === 'gallery-06' ? (
+                <Gallery06MapSvg
+                  ref={svgRef}
+                  className="w-full h-full object-contain pointer-events-auto"
+                />
+              ) : currentGallery.id === 'gallery-07' ? (
+                <Gallery07MapSvg
+                  ref={svgRef}
+                  className="w-full h-full object-contain pointer-events-auto"
+                />
+              ) : currentGallery.id === 'gallery-08' ? (
+                <Gallery08MapSvg
+                  ref={svgRef}
+                  className="w-full h-full object-contain pointer-events-auto"
+                />
+              ) : currentGallery.id === 'gallery-09' ? (
+                <Gallery09MapSvg
                   ref={svgRef}
                   className="w-full h-full object-contain pointer-events-auto"
                 />
@@ -649,6 +685,12 @@ export const AdminArrowEditor: React.FC<AdminArrowEditorProps> = ({
                   <option value="gallery-01-questions">پرسش‌های گالری ۰۱ (Gallery 01 Questions)</option>
                   <option value="gallery-03">گالری ۰۳ (Gallery 03)</option>
                   <option value="gallery-03-questions">پرسش‌های گالری ۰۳ (Gallery 03 Questions)</option>
+                  <option value="gallery-04">گالری ۰۴ (Gallery 04)</option>
+                  <option value="gallery-05">گالری ۰۵ (Gallery 05)</option>
+                  <option value="gallery-06">گالری ۰۶ (Gallery 06)</option>
+                  <option value="gallery-07">گالری ۰۷ (Gallery 07)</option>
+                  <option value="gallery-08">گالری ۰۸ (Gallery 08)</option>
+                  <option value="gallery-09">گالری ۰۹ (Gallery 09)</option>
                   <option value="collection">صفحه کلکسیون (Collection)</option>
                   <option value="tasks">وظایف و آزمون (Tasks)</option>
                   <option value="curator">یادداشت کیوریتور (Curator)</option>

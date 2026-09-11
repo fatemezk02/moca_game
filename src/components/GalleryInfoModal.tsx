@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Sparkles, RotateCw, BookOpen } from 'lucide-react';
-import { contentService } from '../services/content';
+import { contentService, formatTwoDigitPersian } from '../services/content';
 
 export interface GalleryInfoModalProps {
   galleryId: string | null;
@@ -105,10 +105,14 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
   // Requirement 3: Positioning rule based on gallery number/data
   // For Gallery 5 and Gallery 9: imageSide = 'right', nameSide = 'left'
   // For all other galleries: imageSide = 'left', nameSide = 'right'
-  const galleryNum = parseInt(gallery.galleryNumber, 10);
-  const idNumMatch = gallery.galleryId.match(/\d+/);
+  const galleryNum = parseInt(gallery.galleryNumber || '', 10);
+  const idNumMatch = (gallery.galleryId || '').match(/\d+/);
   const idNum = idNumMatch ? parseInt(idNumMatch[0], 10) : NaN;
   const isGallery5or9 = galleryNum === 5 || galleryNum === 9 || idNum === 5 || idNum === 9;
+
+  const rawGalleryNum = gallery.galleryNumber || (gallery.galleryId ? gallery.galleryId.replace(/[^0-9]/g, '') : '') || '01';
+  const formattedGalleryNum = formatTwoDigitPersian(rawGalleryNum);
+  const galleryDisplayTitle = `گالری ${formattedGalleryNum}`;
 
   const imageSide: 'left' | 'right' = isGallery5or9 ? 'right' : 'left';
   const nameSide: 'left' | 'right' = isGallery5or9 ? 'left' : 'right';
@@ -170,14 +174,14 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
                   <X className="w-4 h-4 stroke-[2.5]" />
                 </button>
 
-                {/* Centered Gallery Title */}
+                {/* Centered Gallery Number Title */}
                 <div className="flex items-center justify-center gap-1.5 text-center">
                   <Sparkles className="w-4 h-4 text-[#ea580c] shrink-0" />
                   <h2
                     id="gallery-info-modal-title"
                     className="font-sans-custom text-[18px] sm:text-[21px] font-black text-[#1e1b18] text-center"
                   >
-                    {gallery.nameFa}
+                    {galleryDisplayTitle}
                   </h2>
                 </div>
 
@@ -193,19 +197,28 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
                 </button>
               </div>
 
-              {/* CENTER / HIGHER UP: Gallery Description */}
-              {/* Positioned higher up, significantly closer to the title */}
+              {/* CENTER / HIGHER UP: Gallery Name as Title & Gallery Description */}
+              {/* Positioned higher up, significantly closer to the header */}
               <div
                 id="gallery-info-modal-body"
-                className="relative flex flex-col items-center pt-3 sm:pt-4 px-2 sm:px-4"
+                className="relative flex flex-col items-center pt-2.5 sm:pt-3.5 px-2 sm:px-4"
               >
                 <div
                   id="gallery-info-description-container"
                   className="w-full max-w-[260px] sm:max-w-[320px] text-center mx-auto z-10 select-text"
                 >
+                  {/* Gallery Name as heading above description */}
+                  {gallery.nameFa && (
+                    <h3
+                      id="gallery-info-name-heading"
+                      className="font-sans-custom text-[16px] sm:text-[18px] font-black text-[#1e1b18] mb-1.5 sm:mb-2 text-center"
+                    >
+                      {gallery.nameFa}
+                    </h3>
+                  )}
                   <p
                     id="gallery-info-description-text"
-                    className="font-sans-custom text-[14.5px] sm:text-[16.5px] text-[#292524] leading-[1.85] sm:leading-[2.05] font-medium text-center"
+                    className="font-sans-custom text-[14px] sm:text-[15.5px] text-[#292524] leading-[1.8] sm:leading-[1.95] font-medium text-center"
                   >
                     {gallery.descriptionFa}
                   </p>
@@ -213,21 +226,32 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
               </div>
 
               {/* BOTTOM CORNERS: Independently Anchored Curator Elements */}
-              {/* 1. Large Curator Image (Direct on modal bg, ~30-35% visual area, no card/border) */}
+              {/* 1. Prominent Curator Image (~40% modal width, ~45% modal max-height, object-fit contain, direct on modal bg) */}
               {hasCuratorImage && (
                 <div
                   id="gallery-info-curator-image-anchor"
-                  className={`absolute z-20 pointer-events-none select-none bg-transparent flex items-end w-[32%] sm:w-[35%] max-w-[145px] sm:max-w-[185px] max-h-[155px] sm:max-h-[195px] ${
+                  style={{
+                    width: '40%',
+                    maxWidth: '40%',
+                    height: '45%',
+                    maxHeight: '45%',
+                  }}
+                  className={`absolute z-20 pointer-events-none select-none bg-transparent flex items-end ${
                     imageSide === 'right'
-                      ? 'bottom-3.5 right-4 sm:bottom-4 sm:right-6 justify-end'
-                      : 'bottom-3.5 left-4 sm:bottom-4 sm:left-6 justify-start'
+                      ? 'bottom-2.5 right-3.5 sm:bottom-3.5 sm:right-5 justify-end'
+                      : 'bottom-2.5 left-3.5 sm:bottom-3.5 sm:left-5 justify-start'
                   }`}
                 >
                   <img
                     id="gallery-info-curator-image"
                     src={gallery.curatorUrl}
                     alt={gallery.curator ? `نام راهنما: ${gallery.curator}` : 'تصویر راهنما'}
-                    className={`w-full h-auto max-h-[150px] sm:max-h-[190px] object-contain bg-transparent block ${
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                    }}
+                    className={`bg-transparent block select-none ${
                       imageSide === 'right' ? 'object-bottom-right' : 'object-bottom-left'
                     }`}
                     referrerPolicy="no-referrer"

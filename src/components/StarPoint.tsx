@@ -6,6 +6,7 @@ import {
   markStarPointFirstViewed,
 } from '../data/starPointProgressStore';
 import { getStarDiscovery } from '../data/starDiscoveryData';
+import { contentService } from '../services/content/contentService';
 
 export interface StarPointProps {
   id: string;
@@ -54,8 +55,16 @@ export const StarPoint: React.FC<StarPointProps> = ({
   const [unlocked, setUnlocked] = useState<boolean>(() => isStarPointUnlocked(effectiveStarId));
   const [isLabelOpen, setIsLabelOpen] = useState<boolean>(false);
 
-  const discoveryData = getStarDiscovery(effectiveStarId, galleryId);
-  const labelText = discoveryData?.labelTextFa || title || 'ردپای اثر را دنبال کن';
+  // Subscribe to ContentService to re-render when Google Sheets data finishes loading
+  const [, setContentVersion] = useState(0);
+  useEffect(() => {
+    return contentService.subscribe(() => {
+      setContentVersion((v) => v + 1);
+    });
+  }, []);
+
+  const discoveryData = getStarDiscovery(effectiveStarId, galleryId, starId);
+  const labelText = discoveryData?.labelTextFa || '';
 
   // Responsive map percentage coordinates
   const leftPercent = (x / mapWidth) * 100;
@@ -143,7 +152,7 @@ export const StarPoint: React.FC<StarPointProps> = ({
             ردپای عکاسی را در گذر زمان دنبال کن
           ==================================================================== */}
       <AnimatePresence>
-        {isLabelOpen && !unlocked && (
+        {isLabelOpen && !unlocked && !!labelText && (
           <motion.div
             id={`star-label-${id}`}
             initial={{ opacity: 0, scaleX: 0 }}

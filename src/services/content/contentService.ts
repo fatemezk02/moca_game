@@ -3,10 +3,12 @@ import { contentCache } from './contentCache';
 import { buildDefaultSeedContent } from './defaultSeedContent';
 import { GoogleSheetsContentProvider } from './googleSheetsProvider';
 import { normalizeGalleryId, normalizeKey } from './mappers';
+import { getGalleryMapConfig } from '../../data/mapConfig';
 import {
   ArtworkContent,
   ContentDebugSummary,
   ContentServiceStatus,
+  ExperienceContent,
   GalleryContent,
   GameContentData,
   GameContentDebug,
@@ -109,6 +111,7 @@ class ContentService {
             stars: data.stars.length,
             artworks: data.artworks.length,
             galleries: (data.galleries || []).length,
+            experiences: (data.experiences || []).length,
           },
         };
         registerContentDebugAPI(this);
@@ -136,6 +139,7 @@ class ContentService {
             stars: fallback.stars.length,
             artworks: fallback.artworks.length,
             galleries: (fallback.galleries || []).length,
+            experiences: (fallback.experiences || []).length,
           },
         };
         registerContentDebugAPI(this);
@@ -160,13 +164,14 @@ class ContentService {
     if (isOnline && isConfigured) {
       try {
         console.info(`[ContentService] Fetching latest content via ${this.provider.name}...`);
-        const { questions, stars, artworks, galleries } = await this.provider.fetchAll();
+        const { questions, stars, artworks, galleries, experiences } = await this.provider.fetchAll();
 
         const networkData: GameContentData = {
           questions,
           stars,
           artworks,
           galleries,
+          experiences: experiences || [],
           metadata: {
             loadedAt: Date.now(),
             source: 'network',
@@ -223,14 +228,22 @@ class ContentService {
     console.log('Stars count:', data.stars.length);
     console.log('Artworks count:', data.artworks.length);
     console.log('Galleries count:', (data.galleries || []).length);
+    console.log('Experiences count:', (data.experiences || []).length);
     console.groupEnd();
+  }
+
+  private ensureDataLoaded(): GameContentData {
+    if (!this.currentData) {
+      this.currentData = contentCache.get() || buildDefaultSeedContent();
+    }
+    return this.currentData;
   }
 
   /**
    * Get all loaded questions
    */
   getQuestions(): QuestionContent[] {
-    return this.currentData?.questions || [];
+    return this.ensureDataLoaded().questions || [];
   }
 
   /**
@@ -238,114 +251,163 @@ class ContentService {
    * Matches via Google Sheets 'puzzle_point_id' column, respecting gallery_id,
    * active flag, and question_order.
    */
+  /**
+   * Resolves a Question for a given Puzzle Point in a gallery.
+   *
+   * Rules:
+   * 1. Gallery IDs:
+   *    gallery_01 = Master Gallery (no puzzle points)
+   *    gallery_02 = the exhibition gallery that was previously Gallery 01
+   *    gallery_03 ... gallery_09
+   * 2. Puzzle Questions Order:
+   *    Each gallery has 3 Puzzle Points and 3 Questions.
+   *    Puzzle Point #1 -> Question order 1
+   *    Puzzle Point #2 -> Question order 2
+   *    Puzzle Point #3 -> Question order 3
+   * 3. Data Resolution:
+   *    - Filter by Questions.gallery_id == current gallery_id
+   *    - Filter active questions only (active !== false, non-empty text and options)
+   *    - If Questions.puzzle_point_id is explicitly mapped, preserve it ONLY when it matches
+   *      the correct gallery and question.
+   *    - Otherwise sort the gallery's questions by question_order ASC:
+   *      question 1 -> Puzzle 01
+   *      question 2 -> Puzzle 02
+   *      question 3 -> Puzzle 03
+   *    - Do NOT use random selection
+   *    - Do NOT use array index across all questions
+   *    - Use gallery-local question_order
+   * 4. Missing Content:
+   *    If a gallery does not have exactly 3 active questions:
+   *    - Do not borrow questions from another gallery
+   *    - Do not fall back to the first question
+   *    - Do not show an unrelated question
+   *    - Log a clear development warning containing:
+   *      gallery_id, expected question_order, available question IDs
+   */
   getQuestionForPuzzlePoint(galleryId: string, puzzlePointId: string): QuestionContent | null {
     const questions = this.getQuestions();
-    const canonGalleryId = normalizeGalleryId(galleryId);
+    let canonGalleryId = normalizeGalleryId(galleryId);
+    // Canonical gallery IDs: gallery_01 is Master Gallery with no puzzles;
+    // previous Gallery 01 is now canonical gallery_02.
+    if (canonGalleryId === 'gallery_01') {
+      canonGalleryId = 'gallery_02';
+    }
 
-    // Filter questions belonging to this gallery and marked active with non-empty content
-    const galleryQuestions = questions.filter((q) => {
+    // Determine expected question_order (1, 2, or 3) for this puzzle point:
+    // Existing Puzzle Point #1 must ALWAYS open Question order 1
+    // Existing Puzzle Point #2 must ALWAYS open Question order 2
+    // Existing Puzzle Point #3 must ALWAYS open Question order 3
+    let expectedOrder: number | null = null;
+    const orderMatch = (puzzlePointId || '').match(/(?:point|piece)?[-_]?0*([1-3])$/i);
+    if (orderMatch) {
+      expectedOrder = parseInt(orderMatch[1], 10);
+    } else if (puzzlePointId && /^[1-3]$/.test(puzzlePointId.trim())) {
+      expectedOrder = parseInt(puzzlePointId.trim(), 10);
+    } else {
+      const anyDigitMatch = (puzzlePointId || '').match(/0*(\d+)/);
+      if (anyDigitMatch) {
+        const d = parseInt(anyDigitMatch[1], 10);
+        if (d >= 1 && d <= 3) {
+          expectedOrder = d;
+        }
+      }
+    }
+
+    // 1. Filter questions belonging to this gallery and marked active with playable content
+    let galleryActiveQuestions = questions.filter((q) => {
       const qGallery = normalizeGalleryId(q.galleryId);
+      // Strictly enforce matching current gallery; never borrow from another gallery
       if (qGallery !== canonGalleryId) return false;
       if (q.active === false) return false;
-      // Must have question text and at least one option to be playable
       const hasText = Boolean(q.question && q.question.trim().length > 0);
       const hasOptions = Boolean(q.options && q.options.length > 0);
       return hasText && hasOptions;
     });
 
-    // Extract target index within the gallery (1, 2, or 3)
-    let targetIndex: number | null = null;
-    const targetMatch = puzzlePointId.match(/(?:point|piece)[-_]?0*(\d+)/i);
-    if (targetMatch) {
-      targetIndex = parseInt(targetMatch[1], 10);
-    } else if (/^\d+$/.test(puzzlePointId.trim())) {
-      targetIndex = parseInt(puzzlePointId.trim(), 10);
+    // Prioritize specific puzzle questions (category === 'puzzle' or has puzzlePieceId / puzzlePointId)
+    const specificPuzzleQuestions = galleryActiveQuestions.filter(
+      (q) => q.category === 'puzzle' || Boolean(q.puzzlePieceId) || Boolean(q.puzzlePointId)
+    );
+    if (specificPuzzleQuestions.length > 0) {
+      galleryActiveQuestions = specificPuzzleQuestions;
     }
 
-    // Match question by puzzle_point_id
-    const isMatchingPoint = (q: QuestionContent): boolean => {
-      const qPoint = (q.puzzlePointId || '').trim();
-      const targetPoint = puzzlePointId.trim();
+    const availableQuestionIds = galleryActiveQuestions.map((q) => q.id);
 
-      // 1. Direct match (e.g. "puzzle-point-01" === "puzzle-point-01")
-      if (qPoint && qPoint.toLowerCase() === targetPoint.toLowerCase()) return true;
-
-      // 2. Normalized alphanumeric match (e.g. "puzzlepoint01" === "puzzlepoint01")
-      const qClean = qPoint.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const tClean = targetPoint.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (qClean && qClean === tClean) return true;
-
-      // 3. Fallback: match if q.puzzlePieceId matches piece ID or point ID
-      if (q.puzzlePieceId && (q.puzzlePieceId.toLowerCase() === targetPoint.toLowerCase() || q.puzzlePieceId.replace(/[^a-z0-9]/g, '') === tClean)) {
-        return true;
-      }
-
-      // 4. Match numeric identifiers and order for Gallery 01 (point 1, 2, 3)
-      if (canonGalleryId === 'gallery_01' || canonGalleryId === 'gallery-01') {
-        if (targetIndex === 1 && (qPoint === '1' || qPoint === '01' || qPoint === 'puzzle-point-1' || qPoint === 'puzzle-point-01' || qClean === 'puzzlepoint01' || q.questionOrder === 1)) return true;
-        if (targetIndex === 2 && (qPoint === '2' || qPoint === '02' || qPoint === 'puzzle-point-2' || qPoint === 'puzzle-point-02' || qClean === 'puzzlepoint02' || q.questionOrder === 2)) return true;
-        if (targetIndex === 3 && (qPoint === '3' || qPoint === '03' || qPoint === 'puzzle-point-3' || qPoint === 'puzzle-point-03' || qClean === 'puzzlepoint03' || q.questionOrder === 3)) return true;
-      }
-
-      // 5. Match numeric identifiers and order for Gallery 03 (point 1, 2, 3 / points 4, 5, 6 / order 1, 2, 3)
-      if (canonGalleryId === 'gallery_03' || canonGalleryId === 'gallery-03') {
-        if (targetIndex === 1 && (qPoint === '4' || qPoint === '04' || qPoint === '1' || qPoint === '01' || qPoint === '7' || qPoint === '07' || qClean === 'puzzleg03point01' || qClean === 'puzzleg03point1' || q.questionOrder === 1)) return true;
-        if (targetIndex === 2 && (qPoint === '5' || qPoint === '05' || qPoint === '2' || qPoint === '02' || qPoint === '8' || qPoint === '08' || qClean === 'puzzleg03point02' || qClean === 'puzzleg03point2' || q.questionOrder === 2)) return true;
-        if (targetIndex === 3 && (qPoint === '6' || qPoint === '06' || qPoint === '3' || qPoint === '03' || qPoint === '9' || qPoint === '09' || qClean === 'puzzleg03point03' || qClean === 'puzzleg03point3' || q.questionOrder === 3)) return true;
-      }
-
-      // 6. Match numeric identifiers for Gallery 04 (point 1, 2, 3 / points 7, 8, 9 / order 1, 2, 3)
-      if (canonGalleryId === 'gallery_04' || canonGalleryId === 'gallery-04') {
-        if (targetIndex === 1 && (qPoint === '7' || qPoint === '07' || qPoint === '1' || qPoint === '01' || qPoint === '10' || qClean === 'puzzleg04point01' || q.questionOrder === 1)) return true;
-        if (targetIndex === 2 && (qPoint === '8' || qPoint === '08' || qPoint === '2' || qPoint === '02' || qPoint === '11' || qClean === 'puzzleg04point02' || q.questionOrder === 2)) return true;
-        if (targetIndex === 3 && (qPoint === '9' || qPoint === '09' || qPoint === '3' || qPoint === '03' || qPoint === '12' || qClean === 'puzzleg04point03' || q.questionOrder === 3)) return true;
-      }
-
-      // 7. General match by questionOrder if targetIndex is known
-      if (targetIndex !== null && q.questionOrder === targetIndex) {
-        return true;
-      }
-
-      return false;
-    };
-
-    let matchingQuestions = galleryQuestions.filter(isMatchingPoint);
-
-    // If no direct point matched, fallback to matching by questionOrder within gallery questions
-    if (matchingQuestions.length === 0 && targetIndex !== null && galleryQuestions.length > 0) {
-      const byOrder = galleryQuestions.filter((q) => q.questionOrder === targetIndex);
-      if (byOrder.length > 0) {
-        matchingQuestions = byOrder;
-      }
-    }
-
-    // Requirement 14: If multiple active questions exist for the same puzzle_point_id:
-    // - use question_order to determine the first applicable question
-    // - log a development warning indicating duplicate questions exist for that Puzzle Point
-    if (matchingQuestions.length > 1) {
-      matchingQuestions.sort((a, b) => {
-        const orderA = a.questionOrder ?? 9999;
-        const orderB = b.questionOrder ?? 9999;
-        if (orderA !== orderB) return orderA - orderB;
-        return a.id.localeCompare(b.id);
-      });
+    // Warning if gallery does not have exactly 3 active questions
+    if (galleryActiveQuestions.length !== 3) {
       console.warn(
-        `[ContentService] Duplicate active questions found for puzzle point "${puzzlePointId}" in gallery "${galleryId}". Found ${matchingQuestions.length} active questions. Selecting question with question_order ${matchingQuestions[0].questionOrder ?? 1} (question_id: "${matchingQuestions[0].id}").`
+        `[ContentService] Gallery "${canonGalleryId}" has ${galleryActiveQuestions.length} active questions (expected 3). Available question IDs: [${availableQuestionIds.join(', ')}].`
       );
-      return matchingQuestions[0];
     }
 
-    if (matchingQuestions.length === 1) {
-      return matchingQuestions[0];
+    if (expectedOrder === null || expectedOrder < 1 || expectedOrder > 3) {
+      console.warn(
+        `[ContentService] Missing content or invalid puzzle point "${puzzlePointId}" in gallery "${canonGalleryId}". Expected question_order 1, 2, or 3. Available question IDs: [${availableQuestionIds.join(', ')}].`
+      );
+      return null;
     }
 
-    // Requirement 13: If a Puzzle Point has no matching question in Google Sheets:
-    // - do not crash
-    // - keep the application stable
-    // - show a clear development warning in the console
-    // - the Puzzle Point should not incorrectly award a puzzle piece
+    // 2. If Questions.puzzle_point_id is explicitly mapped, preserve it ONLY when it matches the correct gallery and question
+    const explicitMatch = galleryActiveQuestions.find((q) => {
+      if (!q.puzzlePointId) return false;
+      const qPointClean = q.puzzlePointId.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const targetClean = puzzlePointId.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (qPointClean === targetClean) {
+        if (q.questionOrder != null && q.questionOrder !== expectedOrder) {
+          return false;
+        }
+        return true;
+      }
+      return false;
+    });
+
+    if (explicitMatch) {
+      console.log(
+        `[ContentService] Puzzle Point Lookup -> Puzzle Point ID: ${puzzlePointId} | Current Gallery ID: ${canonGalleryId} | Question ID: ${explicitMatch.id} | Question gallery_id: ${explicitMatch.galleryId} | Question order: ${explicitMatch.questionOrder}`
+      );
+      return explicitMatch;
+    }
+
+    // 3. Otherwise match question with question_order === expectedOrder
+    const matchedByOrder = galleryActiveQuestions.find(
+      (q) => q.questionOrder === expectedOrder
+    );
+
+    if (matchedByOrder) {
+      console.log(
+        `[ContentService] Puzzle Point Lookup -> Puzzle Point ID: ${puzzlePointId} | Current Gallery ID: ${canonGalleryId} | Question ID: ${matchedByOrder.id} | Question gallery_id: ${matchedByOrder.galleryId} | Question order: ${matchedByOrder.questionOrder}`
+      );
+      return matchedByOrder;
+    }
+
+    // 4. Fallback: Sort the gallery's questions by question_order ASC (or id)
+    // question 1 -> Puzzle 01
+    // question 2 -> Puzzle 02
+    // question 3 -> Puzzle 03
+    const sortedQuestions = [...galleryActiveQuestions].sort((a, b) => {
+      const orderA = a.questionOrder ?? 999;
+      const orderB = b.questionOrder ?? 999;
+      if (orderA !== orderB) return orderA - orderB;
+      return a.id.localeCompare(b.id);
+    });
+
+    const candidate = sortedQuestions[expectedOrder - 1];
+    if (candidate) {
+      console.log(
+        `[ContentService] Puzzle Point Lookup -> Puzzle Point ID: ${puzzlePointId} | Current Gallery ID: ${canonGalleryId} | Question ID: ${candidate.id} | Question gallery_id: ${candidate.galleryId} | Question order: ${candidate.questionOrder}`
+      );
+      return candidate;
+    }
+
+    // 5. Missing content:
+    // - do not borrow questions from another gallery
+    // - do not fall back to the first question
+    // - do not show an unrelated question
+    // - log a clear development warning containing:
+    //   gallery_id, expected question_order, available question IDs
     console.warn(
-      `[ContentService] No active matching question found in Google Sheets for puzzle point "${puzzlePointId}" in gallery "${galleryId}".`
+      `[ContentService] Missing question for puzzle point "${puzzlePointId}" in gallery "${canonGalleryId}". Expected question_order: ${expectedOrder}. Available question IDs: [${availableQuestionIds.join(', ')}].`
     );
     return null;
   }
@@ -354,7 +416,7 @@ class ContentService {
    * Get all loaded stars
    */
   getStars(): StarContent[] {
-    return this.currentData?.stars || [];
+    return this.ensureDataLoaded().stars || [];
   }
 
   /**
@@ -366,13 +428,20 @@ class ContentService {
    *   Does NOT crash and does NOT fall back to stars[0] or another Star's content.
    * - If duplicate star_id records exist: logs a development warning and returns a deterministic record.
    */
-  getStarForStarPoint(starPointId: string, galleryId?: string): StarContent | null {
-    if (!starPointId) return null;
+  getStarForStarPoint(
+    starPointId?: string,
+    galleryId?: string,
+    explicitStarId?: string
+  ): StarContent | null {
+    if (!starPointId && !explicitStarId) return null;
     const stars = this.getStars();
+
+    const lookupPointId = (starPointId || '').trim();
+    const lookupStarId = (explicitStarId || '').trim();
 
     if (!stars || stars.length === 0) {
       console.warn(
-        `[ContentService] No stars data loaded in cache when resolving Star Point "${starPointId}".`
+        `[ContentService] No stars data loaded in cache when resolving Star Point ID: "${lookupPointId}", star_id: "${lookupStarId || lookupPointId}".`
       );
       return null;
     }
@@ -380,15 +449,32 @@ class ContentService {
     const activeStars = stars.filter((s) => s.active !== false);
     const canonGalleryId = galleryId ? normalizeGalleryId(galleryId) : null;
 
-    const isMatchingStar = (star: StarContent): boolean => {
-      const starId = (star.starId || star.id || '').trim();
-      const target = starPointId.trim();
+    // Helper: Extract integer numeric value from ID or starNumber
+    const extractNumeric = (s?: string): number | null => {
+      if (!s) return null;
+      if (/^\d+$/.test(s.trim())) return parseInt(s.trim(), 10);
+      const m = s.match(/(?:star|artwork|col|point)?[-_]?(\d+)/i);
+      if (m && m[1]) return parseInt(m[1], 10);
+      return null;
+    };
 
-      // Gallery verification:
-      // "The Star's gallery_id must also be respected. A Star Point must not display content belonging to another gallery."
-      if (canonGalleryId && star.galleryId) {
+    // Helper: Check if two strings match normalized
+    const isCleanMatch = (a?: string, b?: string): boolean => {
+      if (!a || !b) return false;
+      const cleanA = a.toLowerCase().trim();
+      const cleanB = b.toLowerCase().trim();
+      if (cleanA === cleanB) return true;
+      const alphaA = cleanA.replace(/[^a-z0-9]/g, '');
+      const alphaB = cleanB.replace(/[^a-z0-9]/g, '');
+      return alphaA.length > 0 && alphaA === alphaB;
+    };
+
+    // If galleryId is specified, perform gallery-scoped matching
+    if (canonGalleryId) {
+      // 1. Filter active stars belonging strictly to this gallery (with Gallery 01 / Gallery 02 backward compatibility)
+      const galleryStars = activeStars.filter((star) => {
+        if (!star.galleryId) return false;
         const starGallery = normalizeGalleryId(star.galleryId);
-        // Gallery 01 Architectural Hall in game maps to gallery_id 2 or 1 in Google Sheets
         const isG01Compatible =
           (canonGalleryId === 'gallery_01' || canonGalleryId === 'gallery-01') &&
           (starGallery === 'gallery_01' || starGallery === 'gallery-01' || starGallery === 'gallery_02' || starGallery === 'gallery-02');
@@ -396,67 +482,147 @@ class ContentService {
           (canonGalleryId === 'gallery_02' || canonGalleryId === 'gallery-02') &&
           (starGallery === 'gallery_02' || starGallery === 'gallery-02');
         const isExactMatch = starGallery === canonGalleryId;
+        return isG01Compatible || isG02Compatible || isExactMatch;
+      });
 
-        if (!isG01Compatible && !isG02Compatible && !isExactMatch) {
-          return false;
+      // Sort gallery stars deterministically by starNumber/ID
+      galleryStars.sort((a, b) => {
+        const numA = extractNumeric(a.starNumber) ?? extractNumeric(a.starId) ?? extractNumeric(a.id) ?? 9999;
+        const numB = extractNumeric(b.starNumber) ?? extractNumeric(b.starId) ?? extractNumeric(b.id) ?? 9999;
+        if (numA !== numB) return numA - numB;
+        return (a.id || '').localeCompare(b.id || '');
+      });
+
+      // Retrieve all collection/star points configured for this gallery
+      const mapConfig = getGalleryMapConfig(canonGalleryId);
+      const existingStarPoints = (mapConfig?.collectionPoints || []).filter(
+        (cp) => cp.pointType === 'star'
+      );
+
+      // Ensure the queried lookupPoint is represented in the list of points to match if missing
+      const allPointsToMatch = [...existingStarPoints];
+      if (
+        lookupPointId &&
+        !allPointsToMatch.some((p) => p.id === lookupPointId)
+      ) {
+        allPointsToMatch.push({
+          id: lookupPointId,
+          starId: lookupStarId || undefined,
+          pointType: 'star',
+          type: 'collection',
+          galleryId: canonGalleryId,
+          x: 0,
+          y: 0,
+          title: '',
+          frames: [],
+        });
+      }
+
+      // DETERMINISTIC MATCHING:
+      // Point ID -> StarContent
+      const pointToStarMap = new Map<string, StarContent>();
+      const usedStarIds = new Set<string>();
+
+      // PHASE 1: Preserve existing correct mappings first
+      for (const point of allPointsToMatch) {
+        const pId = point.id;
+        const pStarId = point.starId;
+        const pNum = extractNumeric(pStarId) ?? extractNumeric(pId);
+
+        // Try direct starId match
+        let matchedStar = galleryStars.find((s) => {
+          if (usedStarIds.has(s.id)) return false;
+          const sId = s.starId || s.id;
+          return (pStarId && isCleanMatch(pStarId, sId)) || isCleanMatch(pId, sId);
+        });
+
+        // Try numeric match within this gallery
+        if (!matchedStar && pNum !== null) {
+          matchedStar = galleryStars.find((s) => {
+            if (usedStarIds.has(s.id)) return false;
+            const sNum = extractNumeric(s.starId || s.id) ?? extractNumeric(s.starNumber);
+            return sNum !== null && sNum === pNum;
+          });
+        }
+
+        // Try explicit alias match (e.g. artwork-01 -> 1, artwork-g03-star -> 3)
+        if (!matchedStar) {
+          if (pId.toLowerCase() === 'artwork-01' || pId.toLowerCase() === 'col-01') {
+            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 1);
+          } else if (pId.toLowerCase() === 'artwork-g03-star') {
+            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 3);
+          }
+        }
+
+        if (matchedStar) {
+          pointToStarMap.set(pId, matchedStar);
+          usedStarIds.add(matchedStar.id);
         }
       }
 
-      // 1. Direct match (e.g. item.starId === starPoint.id)
-      if (starId.toLowerCase() === target.toLowerCase()) return true;
-
-      // 2. Normalized alphanumeric match (e.g. "star01" === "star01")
-      const starClean = starId.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const targetClean = target.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (starClean === targetClean && starClean.length > 0) return true;
-
-      // 3. Numeric extraction match (e.g. target "star-01" -> 1 matches star "1", "01", "star-1")
-      const extractNumeric = (s: string): number | null => {
-        if (/^\d+$/.test(s)) return parseInt(s, 10);
-        const m = s.match(/(?:star|artwork|col)?[-_]?(\d+)/i);
-        if (m && m[1]) return parseInt(m[1], 10);
-        return null;
-      };
-
-      const targetNum = extractNumeric(target);
-      const starNum = extractNumeric(starId);
-
-      if (targetNum !== null && starNum !== null && targetNum === starNum) {
-        return true;
+      // PHASE 2: Assign remaining unused gallery records to unmatched existing Star Points in gallery-local order
+      for (const point of allPointsToMatch) {
+        if (!pointToStarMap.has(point.id)) {
+          const unusedStar = galleryStars.find((s) => !usedStarIds.has(s.id));
+          if (unusedStar) {
+            pointToStarMap.set(point.id, unusedStar);
+            usedStarIds.add(unusedStar.id);
+          }
+        }
       }
 
-      // 4. Map configuration alias matching for existing points
-      if (target.toLowerCase() === 'artwork-01' && starNum === 1) return true;
-      if (target.toLowerCase() === 'artwork-g03-star' && starNum === 3) return true;
-      if (target.toLowerCase() === 'col-01' && starNum === 1) return true;
+      // RESOLUTION FOR THE CURRENT QUERY:
+      // 1. By Point ID
+      if (lookupPointId && pointToStarMap.has(lookupPointId)) {
+        return pointToStarMap.get(lookupPointId)!;
+      }
 
-      return false;
-    };
+      // 2. By Star ID (find point having that starId or matching star directly)
+      if (lookupStarId) {
+        // Check if any point was mapped to a star matching lookupStarId
+        for (const star of pointToStarMap.values()) {
+          if (isCleanMatch(star.starId || star.id, lookupStarId)) {
+            return star;
+          }
+        }
+        // Check unused or direct star in galleryStars
+        const directStar = galleryStars.find((s) => isCleanMatch(s.starId || s.id, lookupStarId));
+        if (directStar) {
+          return directStar;
+        }
+      }
 
-    const matchingStars = activeStars.filter(isMatchingStar);
+      // 3. If single lookupPointId matches any star in galleryStars directly
+      if (lookupPointId) {
+        const directStar = galleryStars.find((s) => isCleanMatch(s.starId || s.id, lookupPointId));
+        if (directStar) {
+          return directStar;
+        }
+      }
 
-    // Duplicate star_id handling:
-    // - log a development warning
-    // - use a deterministic record
-    // - do not silently merge unrelated Star records
-    if (matchingStars.length > 1) {
+      // If no match in this gallery: Log clear console warning and return null (never cross-gallery or stars[0])
+      const missingStarId = lookupStarId || lookupPointId;
       console.warn(
-        `[ContentService] Duplicate star_id records exist for Star Point "${starPointId}" in gallery "${galleryId || 'all'}" (found ${matchingStars.length} records). Using deterministic record with id "${matchingStars[0].id}".`
+        `[ContentService] No matching Star record found for Star Point ID "${lookupPointId}", missing star_id: "${missingStarId}" in gallery "${galleryId}".`
       );
-      return matchingStars[0];
+      return null;
     }
 
-    if (matchingStars.length === 1) {
-      return matchingStars[0];
+    // Fallback: Global lookup when no galleryId is provided (strictly match by ID, never use stars[0])
+    const singleMatch = activeStars.find((s) => {
+      const sId = s.starId || s.id;
+      if (lookupStarId && isCleanMatch(sId, lookupStarId)) return true;
+      if (lookupPointId && isCleanMatch(sId, lookupPointId)) return true;
+      return false;
+    });
+
+    if (singleMatch) {
+      return singleMatch;
     }
 
-    // No matching record found:
-    // - do not crash
-    // - log a clear console warning containing the Star Point ID
-    // - do not silently fall back to the first Star record
-    // - do not display another Star's content
+    const missingStarId = lookupStarId || lookupPointId;
     console.warn(
-      `[ContentService] No matching Star record found for Star Point id "${starPointId}" in gallery "${galleryId || 'all'}".`
+      `[ContentService] No matching Star record found for Star Point ID "${lookupPointId}", missing star_id: "${missingStarId}".`
     );
     return null;
   }
@@ -465,7 +631,7 @@ class ContentService {
    * Get all loaded artworks
    */
   getArtworks(): ArtworkContent[] {
-    return this.currentData?.artworks || [];
+    return this.ensureDataLoaded().artworks || [];
   }
 
   /**
@@ -496,8 +662,8 @@ class ContentService {
     );
 
     // 2. Numeric / integer match (e.g. '1' matches 'artwork-01' or '1' or 'artwork-1')
-    if (!match) {
-      const targetDigits = cleanId.replace(/[^0-9]/g, '');
+    if (!match && cleanId) {
+      const targetDigits = (cleanId || '').replace(/[^0-9]/g, '');
       if (targetDigits) {
         const targetNum = parseInt(targetDigits, 10);
         match = artworks.find((a) => {
@@ -605,7 +771,7 @@ class ContentService {
    * Get all loaded galleries from the Google Sheets 'Galleries' tab
    */
   getGalleries(): GalleryContent[] {
-    return this.currentData?.galleries || [];
+    return this.ensureDataLoaded().galleries || [];
   }
 
   /**
@@ -629,8 +795,8 @@ class ContentService {
     }
 
     // 3. Match numeric or gallery_number if passed e.g. "1" or "01"
-    if (!matched) {
-      const targetNum = galleryId.replace(/[^0-9]/g, '');
+    if (!matched && galleryId) {
+      const targetNum = (galleryId || '').replace(/[^0-9]/g, '');
       if (targetNum) {
         const intTarget = parseInt(targetNum, 10);
         matched = galleries.find((g) => {
@@ -672,6 +838,7 @@ class ContentService {
     const stars = current?.stars || [];
     const artworks = current?.artworks || [];
     const galleries = current?.galleries || [];
+    const experiences = current?.experiences || [];
 
     let source: 'network' | 'cache' | 'seed' | 'none' = 'none';
     if (!isLoaded || this.status.source === 'idle') {
@@ -698,9 +865,47 @@ class ContentService {
         stars: stars.length,
         artworks: artworks.length,
         galleries: galleries.length,
+        experiences: experiences.length,
       },
       hasLocalCache: contentCache.has(),
     };
+  }
+
+  /**
+   * Get all loaded experiences
+   */
+  getExperiences(): ExperienceContent[] {
+    return this.ensureDataLoaded().experiences || [];
+  }
+
+  /**
+   * Get active experiences for a specific gallery
+   */
+  getExperiencesForGallery(galleryId: string): ExperienceContent[] {
+    if (!galleryId) return [];
+    const canonId = normalizeGalleryId(galleryId);
+    return this.getExperiences().filter(
+      (exp) =>
+        exp.active !== false &&
+        (normalizeGalleryId(exp.galleryId) === canonId ||
+          exp.galleryId === galleryId ||
+          exp.galleryId === canonId)
+    );
+  }
+
+  /**
+   * Get an experience by its experienceId or id
+   */
+  getExperienceById(experienceId: string): ExperienceContent | null {
+    if (!experienceId) return null;
+    const cleanId = experienceId.trim().toLowerCase();
+    return (
+      this.getExperiences().find(
+        (exp) =>
+          exp.experienceId.toLowerCase() === cleanId ||
+          exp.id.toLowerCase() === cleanId
+      ) || null
+    );
   }
 
   /**
@@ -734,6 +939,9 @@ export function registerContentDebugAPI(service: ContentService = contentService
     getStars: () => service.getStars(),
     getArtworks: () => service.getArtworks(),
     getGalleries: () => service.getGalleries(),
+    getExperiences: () => service.getExperiences(),
+    getExperiencesForGallery: (galleryId: string) => service.getExperiencesForGallery(galleryId),
+    getExperienceById: (id: string) => service.getExperienceById(id),
     getGalleryById: (id: string) => service.getGalleryById(id),
     getArtworkById: (id: string) => service.getArtworkById(id),
     getGalleryPuzzleArtwork: (galleryId: string) => service.getGalleryPuzzleArtwork(galleryId),

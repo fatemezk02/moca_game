@@ -4,23 +4,31 @@ import { DEFAULT_PUZZLE_QUESTIONS } from '../../data/puzzleQuestionsData';
 import { DEFAULT_STAR_DISCOVERIES } from '../../data/starDiscoveryData';
 import { GALLERY_01_ARTWORKS } from '../../data/gallery01Artworks';
 import { MUSEUM_COLLECTIONS } from '../../data/museumCollections';
-import { ArtworkContent, GalleryContent, GameContentData, QuestionContent, StarContent } from './types';
+import { normalizeGalleryId } from './mappers';
+import {
+  ArtworkContent,
+  ExperienceContent,
+  GalleryContent,
+  GameContentData,
+  QuestionContent,
+  StarContent,
+} from './types';
 
 export const DEFAULT_GALLERIES: GalleryContent[] = [
   {
-    id: 'gallery-00',
-    galleryId: 'gallery-00',
-    galleryNumber: '0',
+    id: 'gallery_01',
+    galleryId: 'gallery_01',
+    galleryNumber: '01',
     nameFa: 'نقشه اصلی',
-    nameEn: 'Main Map',
-    descriptionFa: 'نقشه کلی موزه و مسیر دسترسی به تالارها',
+    nameEn: 'Master Gallery',
+    descriptionFa: 'نقشه اصلی موزه و مسیر دسترسی به تالارها',
     descriptionEn: 'Main Museum Floor Plan and Gallery Navigation',
     active: true,
   },
   {
-    id: 'gallery-01',
-    galleryId: 'gallery-01',
-    galleryNumber: '1',
+    id: 'gallery_02',
+    galleryId: 'gallery_02',
+    galleryNumber: '02',
     nameFa: 'کیمیای نور',
     nameEn: 'Alchemy of Light',
     descriptionFa: 'پیدایش و سیر تحول عکاسی در ایران و جهان',
@@ -31,9 +39,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery-03',
-    galleryId: 'gallery-03',
-    galleryNumber: '3',
+    id: 'gallery_03',
+    galleryId: 'gallery_03',
+    galleryNumber: '03',
     nameFa: 'آلبوم‌های دیپلماتیک',
     nameEn: 'Diplomatic Albums',
     descriptionFa: 'آلبوم‌های تاریخی و عکس‌های تشریفاتی دوره قاجار',
@@ -44,9 +52,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery-04',
-    galleryId: 'gallery-04',
-    galleryNumber: '4',
+    id: 'gallery_04',
+    galleryId: 'gallery_04',
+    galleryNumber: '04',
     nameFa: 'ثبت دوام ما',
     nameEn: 'Recording Our Endurance',
     descriptionFa: 'روایت تصویری از هویت، زیست و حافظه جمعی',
@@ -57,10 +65,10 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery-05',
-    galleryId: 'gallery-05',
-    galleryNumber: '5',
-    nameFa: 'ضرب اهنگ شهر',
+    id: 'gallery_05',
+    galleryId: 'gallery_05',
+    galleryNumber: '05',
+    nameFa: 'ضرب آهنگ شهر',
     nameEn: 'City Rhythm',
     descriptionFa: 'عکاسی خیابانی و نبض دگرگونی‌های شهری',
     descriptionEn: 'Street Photography and the Pulse of Urban Transformations',
@@ -68,9 +76,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery-06',
-    galleryId: 'gallery-06',
-    galleryNumber: '6',
+    id: 'gallery_06',
+    galleryId: 'gallery_06',
+    galleryNumber: '06',
     nameFa: 'در کشاکش تماشا و استیلا',
     nameEn: 'Between Gaze and Mastery',
     descriptionFa: 'رویکردهای انتقادی به تصویر و قدرت دیدن',
@@ -79,9 +87,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery-07',
-    galleryId: 'gallery-07',
-    galleryNumber: '7',
+    id: 'gallery_07',
+    galleryId: 'gallery_07',
+    galleryNumber: '07',
     nameFa: 'گذر از برون به درون',
     nameEn: 'Passing from Outside to Inside',
     descriptionFa: 'روایت‌های شخصی، پرتره‌نگاری و نگاه درون‌نگر',
@@ -90,9 +98,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery-08',
-    galleryId: 'gallery-08',
-    galleryNumber: '8',
+    id: 'gallery_08',
+    galleryId: 'gallery_08',
+    galleryNumber: '08',
     nameFa: 'آونگ زمان',
     nameEn: 'Pendulum of Time',
     descriptionFa: 'گذر زمان در قالب فرم و متریال عکاسانه',
@@ -101,14 +109,77 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery-09',
-    galleryId: 'gallery-09',
-    galleryNumber: '9',
+    id: 'gallery_09',
+    galleryId: 'gallery_09',
+    galleryNumber: '09',
     nameFa: 'تلاقی رسانه‌ها',
     nameEn: 'Intersection of Media',
     descriptionFa: 'پیوند عکاسی با رسانه‌ها و هنرهای نوظهور',
     descriptionEn: 'The Union of Photography with Emerging Arts and Media',
     puzzleArtworkId: '33',
+    active: true,
+  },
+];
+
+export const DEFAULT_EXPERIENCES: ExperienceContent[] = [
+  {
+    id: 'experience_1',
+    experienceId: 'experience_1',
+    galleryId: 'gallery_03',
+    labelFa: 'قاب پرتره',
+    title: 'قاب پرتره',
+    descriptionFa: 'تجربه عکاسی پرتره با قاب مخصوص و نورپردازی کلاسیک.',
+    iconId: 'frame',
+    active: true,
+  },
+  {
+    id: 'experience_2',
+    experienceId: 'experience_2',
+    galleryId: 'gallery_03',
+    labelFa: 'سایه و ضد‌نور',
+    title: 'سایه و ضد‌نور',
+    descriptionFa: 'تجربه خلق فرم با سایه‌نما و پرده نورانی متضاد.',
+    iconId: 'shadow-silhouette',
+    active: true,
+  },
+  {
+    id: 'experience_3',
+    experienceId: 'experience_3',
+    galleryId: 'gallery_04',
+    labelFa: 'انعکاس در آینه',
+    title: 'انعکاس در آینه',
+    descriptionFa: 'تجربه بازتاب و ترکیب پرسپکتیو از دریچه آینه‌های موازی.',
+    iconId: 'mirror',
+    active: true,
+  },
+  {
+    id: 'experience_4',
+    experienceId: 'experience_4',
+    galleryId: 'gallery_05',
+    labelFa: 'دوربین قطع بزرگ',
+    title: 'دوربین قطع بزرگ',
+    descriptionFa: 'تجربه لمس و کار با سازوکار دوربین‌های جعبه‌ای و دمنده‌ای قدیمی.',
+    iconId: 'vintage-camera',
+    active: true,
+  },
+  {
+    id: 'experience_5',
+    experienceId: 'experience_5',
+    galleryId: 'gallery_05',
+    labelFa: 'سلفی در آینه',
+    title: 'سلفی در آینه',
+    descriptionFa: 'تجربه ثبت خودنگاره در چیدمان آینه‌ای نوین.',
+    iconId: 'mirror-selfie',
+    active: true,
+  },
+  {
+    id: 'experience_6',
+    experienceId: 'experience_6',
+    galleryId: 'gallery_08',
+    labelFa: 'اتاق تاریک',
+    title: 'اتاق تاریک',
+    descriptionFa: 'تجربه حضور در فرآیند شیمیایی ظهور و ثبوت عکس روی کاغذ حساس به نور زیر نور قرمز.',
+    iconId: 'darkroom',
     active: true,
   },
 ];
@@ -125,9 +196,9 @@ export function buildDefaultSeedContent(): GameContentData {
   GALLERY_01_QUESTIONS.forEach((q, idx) => {
     questions.push({
       id: `g01-q${q.id}`,
-      galleryId: 'gallery-01',
+      galleryId: 'gallery_02',
       questionOrder: idx + 1,
-      title: `تالار ۰۱ — سوال ${q.id}`,
+      title: `تالار ۰۲ — سوال ${q.id}`,
       question: q.question,
       questionFa: q.question,
       options: [...q.options],
@@ -144,7 +215,7 @@ export function buildDefaultSeedContent(): GameContentData {
   GALLERY_03_QUESTIONS.forEach((q, idx) => {
     questions.push({
       id: `g03-q${q.id}`,
-      galleryId: 'gallery-03',
+      galleryId: 'gallery_03',
       questionOrder: idx + 1,
       title: `تالار ۰۳ — سوال ${q.id}`,
       question: q.question,
@@ -160,29 +231,22 @@ export function buildDefaultSeedContent(): GameContentData {
   });
 
   // Puzzle Questions
-  Object.values(DEFAULT_PUZZLE_QUESTIONS).forEach((pq, idx) => {
-    let puzzlePointId: string | undefined;
-    if (pq.galleryId === 'gallery-01') {
-      puzzlePointId =
-        pq.id.includes('q01') || pq.puzzlePieceId.includes('01')
-          ? 'puzzle-point-01'
-          : pq.id.includes('q02') || pq.puzzlePieceId.includes('02')
-          ? 'puzzle-point-02'
-          : 'puzzle-point-03';
-    } else if (pq.galleryId === 'gallery-03') {
-      puzzlePointId =
-        pq.id.includes('q01') || pq.puzzlePieceId.includes('01')
-          ? 'puzzle-g03-point-01'
-          : pq.id.includes('q02') || pq.puzzlePieceId.includes('02')
-          ? 'puzzle-g03-point-02'
-          : 'puzzle-g03-point-03';
-    }
+  Object.values(DEFAULT_PUZZLE_QUESTIONS).forEach((pq) => {
+    const canonGId = normalizeGalleryId(pq.galleryId);
+    let puzzlePointId = '';
+    const orderMatch = pq.id.match(/q0*([1-3])$/i) || pq.id.match(/0*([1-3])$/i);
+    const orderNum = orderMatch ? parseInt(orderMatch[1], 10) : 1;
 
-    const orderNum = pq.id.includes('01') ? 1 : pq.id.includes('02') ? 2 : 3;
+    if (canonGId === 'gallery_02') {
+      puzzlePointId = orderNum === 1 ? 'puzzle-point-01' : orderNum === 2 ? 'puzzle-point-02' : 'puzzle-point-03';
+    } else {
+      const gNum = canonGId.replace(/[^0-9]/g, '');
+      puzzlePointId = `puzzle-g${gNum}-point-${String(orderNum).padStart(2, '0')}`;
+    }
 
     questions.push({
       id: pq.id,
-      galleryId: pq.galleryId,
+      galleryId: canonGId,
       puzzlePointId,
       questionOrder: orderNum,
       title: pq.title,
@@ -195,6 +259,7 @@ export function buildDefaultSeedContent(): GameContentData {
       explanation: pq.explanation,
       category: 'puzzle',
       puzzlePieceId: pq.puzzlePieceId,
+      artworkId: pq.artworkId,
       reward: 50,
       active: true,
     });
@@ -231,14 +296,17 @@ export function buildDefaultSeedContent(): GameContentData {
     { id: '4', artworkId: '4', galleryId: 'gallery-01', title: 'میدان مشق تهران', imageUrl: 'https://www.olo.pics/images/2026/09/05/1934-010.webp' },
     { id: '5', artworkId: '5', galleryId: 'gallery-01', title: 'عکاسخانه ناصری', imageUrl: 'https://www.olo.pics/images/2026/09/05/1932-012.webp' },
     { id: '6', artworkId: '6', galleryId: 'gallery-01', title: 'شمس العماره', imageUrl: 'https://www.olo.pics/images/2026/09/05/970329_15.webp' },
-    { id: '26', artworkId: '26', galleryId: 'gallery-01', title: 'پازل گالری ۰۱', imageUrl: 'https://www.olo.pics/images/2026/09/05/45fa62f550893fd78aad04a202819595.webp' },
-    { id: '27', artworkId: '27', galleryId: 'gallery-03', title: 'پازل گالری ۰۳', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-004.webp' },
-    { id: '28', artworkId: '28', galleryId: 'gallery-04', title: 'پازل گالری ۰۴', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-006.webp' },
-    { id: '29', artworkId: '29', galleryId: 'gallery-05', title: 'پازل گالری ۰۵', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-008.webp' },
-    { id: '30', artworkId: '30', galleryId: 'gallery-06', title: 'پازل گالری ۰۶', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-010.webp' },
-    { id: '31', artworkId: '31', galleryId: 'gallery-07', title: 'پازل گالری ۰۷', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-012.webp' },
-    { id: '32', artworkId: '32', galleryId: 'gallery-08', title: 'پازل گالری ۰۸', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-014.webp' },
-    { id: '33', artworkId: '33', galleryId: 'gallery-09', title: 'پازل گالری ۰۹', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-016.webp' },
+    { id: '26', artworkId: '26', galleryId: 'gallery_02', title: 'پازل گالری ۰۲', imageUrl: 'https://www.olo.pics/images/2026/09/05/45fa62f550893fd78aad04a202819595.webp' },
+    { id: '27', artworkId: '27', galleryId: 'gallery_03', title: 'پازل گالری ۰۳', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-004.webp' },
+    { id: '28', artworkId: '28', galleryId: 'gallery_04', title: 'پازل گالری ۰۴', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-006.webp' },
+    { id: '29', artworkId: '29', galleryId: 'gallery_05', title: 'پازل گالری ۰۵', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-008.webp' },
+    { id: '30', artworkId: '30', galleryId: 'gallery_06', title: 'پازل گالری ۰۶', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-010.webp' },
+    { id: '31', artworkId: '31', galleryId: 'gallery_07', title: 'پازل گالری ۰۷', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-012.webp' },
+    { id: '32', artworkId: '32', galleryId: 'gallery_08', title: 'پازل گالری ۰۸', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-014.webp' },
+    { id: '33', artworkId: '33', galleryId: 'gallery_09', title: 'پازل گالری ۰۹', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-016.webp' },
+    { id: '37', artworkId: '37', galleryId: 'gallery-04', title: 'پرتره ادوارد استایکن', imageUrl: 'https://www.olo.pics/images/2026/09/05/--d9a6a2eaf8714280.webp' },
+    { id: '41', artworkId: '41', galleryId: 'gallery_05', title: 'کارگر صنعتی — لوییس هاین', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-008.webp' },
+    { id: '42', artworkId: '42', galleryId: 'gallery_05', title: 'زلزله سان‌فرانسیسکو — آرنولد گنته', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-008.webp' },
   ];
 
   // Gallery 01 Artworks
@@ -273,6 +341,7 @@ export function buildDefaultSeedContent(): GameContentData {
     stars,
     artworks,
     galleries: DEFAULT_GALLERIES,
+    experiences: DEFAULT_EXPERIENCES,
     metadata: {
       loadedAt: Date.now(),
       source: 'seed-fallback',

@@ -48,6 +48,28 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
       'gallery03-piece-03',
     ],
   },
+  'gallery-04': {
+    galleryId: 'gallery-04',
+    targetGalleryId: 'gallery-05',
+    arrowId: 'arrow-g04-to-g05',
+    requiredPuzzlePiecesCount: 3,
+    requiredPuzzlePieceIds: [
+      'gallery04-piece-01',
+      'gallery04-piece-02',
+      'gallery04-piece-03',
+    ],
+  },
+  'gallery-05': {
+    galleryId: 'gallery-05',
+    targetGalleryId: 'gallery-06',
+    arrowId: 'arrow-g05-to-g06',
+    requiredPuzzlePiecesCount: 3,
+    requiredPuzzlePieceIds: [
+      'gallery05-piece-01',
+      'gallery05-piece-02',
+      'gallery05-piece-03',
+    ],
+  },
 };
 
 /**

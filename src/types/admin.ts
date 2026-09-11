@@ -48,7 +48,23 @@ export interface AdminIconPoint {
   iconData?: string; // SVG raw string or base64 data URL
   width: number;
   height: number;
-  destination: 'gallery-00' | 'gallery-01' | 'gallery-01-questions' | 'gallery-02' | 'gallery-03' | 'gallery-03-questions' | 'gallery-04' | 'collection' | 'tasks' | 'curator';
+  destination:
+    | 'gallery-00'
+    | 'gallery-01'
+    | 'gallery-01-questions'
+    | 'gallery-02'
+    | 'gallery-03'
+    | 'gallery-03-questions'
+    | 'gallery-04'
+    | 'gallery-05'
+    | 'gallery-06'
+    | 'gallery-07'
+    | 'gallery-08'
+    | 'gallery-09'
+    | 'collection'
+    | 'tasks'
+    | 'curator'
+    | (string & {});
   destinationParams?: string;
   hiddenInAdminPreview?: boolean;
 }
@@ -93,6 +109,7 @@ export type ArrowDestination =
   | 'gallery-03'
   | 'gallery-03-questions'
   | 'gallery-04'
+  | 'gallery-05'
   | 'collection'
   | 'tasks'
   | 'curator'

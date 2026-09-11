@@ -1,19 +1,19 @@
 import React from 'react';
-import { PuzzlePointModal } from './PuzzlePointModal';
-import { AdminPuzzlePoint } from '../types/admin';
+import {
+  PuzzleQuestionModal,
+  PuzzleQuestionModalProps,
+} from './PuzzleQuestionModal';
 
-export interface PuzzleQuestionPopupProps {
-  galleryId: string;
-  puzzlePoint: AdminPuzzlePoint | null;
-  onClose: () => void;
-}
+export type PuzzleQuestionPopupProps = PuzzleQuestionModalProps;
 
 /**
- * Shared reusable PuzzleQuestionPopup component.
- * Provides visually and behaviorally identical puzzle question popup across all galleries.
+ * Standard shared Puzzle Question Modal wrapper.
+ * Directly renders the unified PuzzleQuestionModal for all galleries.
  */
-export const PuzzleQuestionPopup: React.FC<PuzzleQuestionPopupProps> = (props) => {
-  return <PuzzlePointModal {...props} />;
+export const PuzzleQuestionPopup: React.FC<PuzzleQuestionPopupProps> = (
+  props
+) => {
+  return <PuzzleQuestionModal {...props} />;
 };
 
 export default PuzzleQuestionPopup;

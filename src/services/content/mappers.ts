@@ -4,13 +4,21 @@
  * to strongly typed internal game data models.
  */
 
-import { ArtworkContent, GalleryContent, QuestionContent, StarContent } from './types';
+import {
+  ArtworkContent,
+  GalleryContent,
+  QuestionContent,
+  StarContent,
+  ExperienceContent,
+  ExperienceIconType,
+} from './types';
 
 /**
  * Normalizes a column header string for forgiving comparisons
  * e.g. "Gallery ID" -> "galleryid", "متن_سوال" -> "متنسوال", "Option 1" -> "option1"
  */
-export function normalizeKey(key: string): string {
+export function normalizeKey(key?: string): string {
+  if (!key || typeof key !== 'string') return '';
   return key
     .toLowerCase()
     .replace(/[\s_\-–—:\/\\()\[\]]/g, '')
@@ -110,8 +118,9 @@ function extractOptions(
  * Normalizes gallery identifier strings into canonical form (e.g. '1', 'gallery-01', 'gallery01' -> 'gallery_01')
  */
 export function normalizeGalleryId(raw: string): string {
-  if (!raw) return 'gallery_01';
+  if (!raw) return '';
   const clean = raw.toLowerCase().trim().replace(/[\s_\-–—:\/\\()\[\]]/g, '');
+  if (!clean) return '';
   if (clean === '1' || clean === '01' || clean === 'g1' || clean === 'g01' || clean === 'gallery1' || clean === 'gallery01') {
     return 'gallery_01';
   }
@@ -151,7 +160,7 @@ export function normalizeGalleryId(raw: string): string {
     const n = parseInt(clean, 10);
     return n < 10 ? `gallery_0${n}` : `gallery_${n}`;
   }
-  return raw.replace(/-/g, '_');
+  return (raw || '').replace(/-/g, '_');
 }
 
 /**
@@ -270,7 +279,10 @@ export function mapRowToQuestion(row: Record<string, string>, index: number): Qu
       correctIndex = 0;
     } else if (options.length > 0) {
       const foundIdx = options.findIndex(
-        (opt) => opt.trim().toLowerCase() === norm || opt.toLowerCase().includes(norm)
+        (opt) =>
+          opt &&
+          (opt.trim().toLowerCase() === norm ||
+            (typeof opt === 'string' && opt.toLowerCase().includes(norm)))
       );
       if (foundIdx !== -1) {
         correctIndex = foundIdx;
@@ -288,7 +300,10 @@ export function mapRowToQuestion(row: Record<string, string>, index: number): Qu
   // If still not determined, detect historical answer if known, otherwise default to 0
   if (correctIndex === -1 && options.length > 0) {
     const caloIdx = options.findIndex(
-      (o) => o.includes('کالوتایپ') || o.toLowerCase().includes('calotype')
+      (o) =>
+        o &&
+        typeof o === 'string' &&
+        (o.includes('کالوتایپ') || o.toLowerCase().includes('calotype'))
     );
     correctIndex = caloIdx >= 0 ? caloIdx : 0;
   } else if (correctIndex === -1) {
@@ -301,7 +316,7 @@ export function mapRowToQuestion(row: Record<string, string>, index: number): Qu
   const rawReward = getValueByAliases(row, ['reward_coins', 'rewardcoins', 'reward', 'پاداش', 'سکه', 'امتیاز']);
   const reward = rawReward ? parseInt(rawReward, 10) || 50 : 50;
 
-  const rawActive = getValueByAliases(row, ['active', 'is_active', 'isactive', 'فعال']).toLowerCase().trim();
+  const rawActive = (getValueByAliases(row, ['active', 'is_active', 'isactive', 'فعال']) || '').toLowerCase().trim();
   let active = true;
   if (rawActive === 'false' || rawActive === '0' || rawActive === 'no' || rawActive === 'غیرفعال') {
     active = false;
@@ -316,7 +331,7 @@ export function mapRowToQuestion(row: Record<string, string>, index: number): Qu
   const title = rawTitle || (puzzlePointId ? `نقطه پازل ${puzzlePointId}` : `پرسش ${index + 1}`);
 
   const explanation = getValueByAliases(row, ['explanation', 'توضیح', 'شرح', 'راهنما']);
-  const categoryRaw = getValueByAliases(row, ['category', 'نوع', 'دسته بندی', 'نوع سوال']).toLowerCase();
+  const categoryRaw = (getValueByAliases(row, ['category', 'نوع', 'دسته بندی', 'نوع سوال']) || '').toLowerCase();
   const category: QuestionContent['category'] =
     categoryRaw.includes('puzzle') || categoryRaw.includes('پازل') || Boolean(puzzlePointId)
       ? 'puzzle'
@@ -420,7 +435,7 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
     'عدد ستاره',
     'ردیف',
   ]);
-  const numInIdMatch = id.match(/\d+/)?.[0];
+  const numInIdMatch = id ? id.match(/\d+/)?.[0] : null;
   const starNumber = rawStarNumber
     ? rawStarNumber.trim()
     : numInIdMatch
@@ -449,7 +464,7 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
     if (trimmedQ.toLowerCase().startsWith('star-q-')) {
       questionId = trimmedQ;
     } else {
-      const numMatch = trimmedQ.match(/\d+/)?.[0];
+      const numMatch = trimmedQ ? trimmedQ.match(/\d+/)?.[0] : null;
       if (numMatch) {
         questionId = `star-q-${numMatch.padStart(2, '0')}`;
       } else {
@@ -457,7 +472,7 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
       }
     }
   } else {
-    const numMatch = id.match(/\d+/)?.[0];
+    const numMatch = id ? id.match(/\d+/)?.[0] : null;
     questionId = numMatch ? `star-q-${numMatch.padStart(2, '0')}` : `star-q-01`;
   }
 
@@ -642,7 +657,7 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
       'توضیحات انگلیسی',
     ]) || '';
 
-  const rawActive = getValueByAliases(row, ['is_active', 'isactive', 'active', 'فعال']).toLowerCase().trim();
+  const rawActive = (getValueByAliases(row, ['is_active', 'isactive', 'active', 'فعال']) || '').toLowerCase().trim();
   const active = rawActive === 'false' || rawActive === '0' || rawActive === 'no' || rawActive === 'غیرفعال' ? false : true;
 
   const artworkId = getValueByAliases(row, [
@@ -900,8 +915,8 @@ export function mapRowToGallery(row: Record<string, string>, index: number): Gal
   const active =
     activeRaw === ''
       ? true
-      : activeRaw.toLowerCase() === 'true' ||
-        activeRaw.toLowerCase() === '1' ||
+      : (activeRaw || '').toLowerCase() === 'true' ||
+        (activeRaw || '').toLowerCase() === '1' ||
         activeRaw === 'بله' ||
         activeRaw === 'فعال';
 
@@ -916,6 +931,184 @@ export function mapRowToGallery(row: Record<string, string>, index: number): Gal
     curator: curator ? curator.trim() : undefined,
     curatorUrl: curatorUrl ? curatorUrl.trim() : undefined,
     puzzleArtworkId: puzzleArtworkId ? puzzleArtworkId.trim() : undefined,
+    active,
+    rawFields: row,
+  };
+}
+
+/**
+ * Maps a spreadsheet row to a strongly typed ExperienceContent object.
+ *
+ * Supported column header aliases:
+ * - experience_id / experienceid / id / شناسه تجربه / کد تجربه
+ * - gallery_id / galleryid / gallery / گالری / تالار
+ * - label_fa / lable_fa / label / lable / برچسب / عنوان کوتاه
+ * - description_fa / description / desc / توضیحات / متن تجربه
+ * - image_url / img_url / image / تصویر / عکس
+ * - title / title_fa / عنوان / نام تجربه
+ * - icon_id / icon / آیکون
+ * - active / is_active / فعال
+ */
+export function mapRowToExperience(row: Record<string, string>, index: number): ExperienceContent {
+  const rawId = getValueByAliases(row, [
+    'experience_id',
+    'experienceid',
+    'experience',
+    'id',
+    'شناسه تجربه',
+    'کد تجربه',
+    'شناسه',
+  ]);
+  const experienceId = rawId ? rawId.trim() : `experience_${index + 1}`;
+
+  const rawGalleryId = getValueByAliases(row, [
+    'gallery_id',
+    'galleryid',
+    'gallery',
+    'گالری',
+    'تالار',
+    'شناسه گالری',
+  ]);
+  const galleryId = normalizeGalleryId(rawGalleryId) || 'gallery_03';
+
+  const labelFa = getValueByAliases(row, [
+    'label_fa',
+    'lable_fa',
+    'label',
+    'lable',
+    'برچسب',
+    'عنوان کوتاه',
+  ]);
+
+  const title = getValueByAliases(row, [
+    'title',
+    'title_fa',
+    'عنوان',
+    'نام',
+    'نام تجربه',
+  ]);
+
+  const descriptionFa = getValueByAliases(row, [
+    'description_fa',
+    'description',
+    'desc',
+    'توضیحات',
+    'متن',
+    'متن تجربه',
+  ]);
+
+  const imageUrl = getValueByAliases(row, [
+    'image_url',
+    'img_url',
+    'imageurl',
+    'image',
+    'photo',
+    'تصویر',
+    'عکس',
+  ]);
+
+  const rawIconId = getValueByAliases(row, [
+    'icon_id',
+    'iconid',
+    'icon',
+    'آیکون',
+    'طرح آیکون',
+  ])
+    .toLowerCase()
+    .replace(/_/g, '-');
+
+  // Determine iconId
+  let iconId: ExperienceIconType = 'frame';
+  if (rawIconId) {
+    if (rawIconId.includes('frame') || rawIconId.includes('قاب')) {
+      iconId = 'frame';
+    } else if (
+      rawIconId.includes('shadow') ||
+      rawIconId.includes('silhouette') ||
+      rawIconId.includes('سایه')
+    ) {
+      iconId = 'shadow-silhouette';
+    } else if (
+      rawIconId.includes('mirror-selfie') ||
+      rawIconId.includes('selfie') ||
+      rawIconId.includes('سلفی')
+    ) {
+      iconId = 'mirror-selfie';
+    } else if (
+      rawIconId.includes('mirror') ||
+      rawIconId.includes('آینه') ||
+      rawIconId.includes('اینه')
+    ) {
+      iconId = 'mirror';
+    } else if (
+      rawIconId.includes('camera') ||
+      rawIconId.includes('vintage') ||
+      rawIconId.includes('دوربین')
+    ) {
+      iconId = 'vintage-camera';
+    } else if (
+      rawIconId.includes('darkroom') ||
+      rawIconId.includes('تاریک') ||
+      rawIconId.includes('ظهور')
+    ) {
+      iconId = 'darkroom';
+    } else {
+      iconId = rawIconId as ExperienceIconType;
+    }
+  } else {
+    // Default fallback based on experienceId or galleryId / index
+    const cleanExpId = experienceId.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (cleanExpId.includes('1') || cleanExpId.includes('frame')) {
+      iconId = 'frame';
+    } else if (
+      cleanExpId.includes('2') ||
+      cleanExpId.includes('shadow') ||
+      cleanExpId.includes('silhouette')
+    ) {
+      iconId = 'shadow-silhouette';
+    } else if (
+      cleanExpId.includes('3') ||
+      (galleryId === 'gallery_04' && !cleanExpId.includes('selfie'))
+    ) {
+      iconId = 'mirror';
+    } else if (
+      cleanExpId.includes('4') ||
+      (galleryId === 'gallery_05' && (cleanExpId.includes('camera') || index === 3))
+    ) {
+      iconId = 'vintage-camera';
+    } else if (
+      cleanExpId.includes('5') ||
+      cleanExpId.includes('selfie') ||
+      (galleryId === 'gallery_05' && index === 4)
+    ) {
+      iconId = 'mirror-selfie';
+    } else if (
+      cleanExpId.includes('6') ||
+      cleanExpId.includes('darkroom') ||
+      galleryId === 'gallery_08'
+    ) {
+      iconId = 'darkroom';
+    }
+  }
+
+  const activeRaw = getValueByAliases(row, ['active', 'فعال', 'is_active', 'status']);
+  const active =
+    activeRaw === ''
+      ? true
+      : (activeRaw || '').toLowerCase() === 'true' ||
+        (activeRaw || '').toLowerCase() === '1' ||
+        activeRaw === 'بله' ||
+        activeRaw === 'فعال';
+
+  return {
+    id: experienceId,
+    experienceId,
+    galleryId,
+    labelFa: labelFa || title || experienceId,
+    title: title || labelFa,
+    descriptionFa,
+    imageUrl: imageUrl || undefined,
+    iconId,
     active,
     rawFields: row,
   };

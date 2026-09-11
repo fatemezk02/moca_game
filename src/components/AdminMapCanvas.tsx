@@ -12,6 +12,12 @@ import { PuzzlePointMarker } from './PuzzlePointMarker';
 import { Gallery00MapSvg } from './Gallery00MapSvg';
 import { Gallery01MapSvg } from './Gallery01MapSvg';
 import { Gallery03MapSvg } from './Gallery03MapSvg';
+import { Gallery04MapSvg } from './Gallery04MapSvg';
+import { Gallery05MapSvg } from './Gallery05MapSvg';
+import { Gallery06MapSvg } from './Gallery06MapSvg';
+import { Gallery07MapSvg } from './Gallery07MapSvg';
+import { Gallery08MapSvg } from './Gallery08MapSvg';
+import { Gallery09MapSvg } from './Gallery09MapSvg';
 import { ZoomIn, ZoomOut, RotateCcw, Move, Crosshair } from 'lucide-react';
 
 interface AdminMapCanvasProps {
@@ -179,7 +185,7 @@ export const AdminMapCanvas: React.FC<AdminMapCanvasProps> = ({
         <div
           style={{
             aspectRatio: `${vbWidth} / ${vbHeight}`,
-            width: gallery.id === 'gallery-01' || gallery.id === 'gallery-03' ? '460px' : '560px',
+            width: gallery.id === 'gallery-00' ? '560px' : '460px',
             maxWidth: '100%',
           }}
           className="relative bg-[#fbf9f9] border border-[#0e0f0f] shadow-xl p-4"
@@ -193,6 +199,42 @@ export const AdminMapCanvas: React.FC<AdminMapCanvasProps> = ({
           ) : gallery.id === 'gallery-03' ? (
             /* Gallery 03 Architectural SVG Plan */
             <Gallery03MapSvg
+              ref={svgRef}
+              className="w-full h-full object-contain pointer-events-auto"
+            />
+          ) : gallery.id === 'gallery-04' ? (
+            /* Gallery 04 Architectural SVG Plan */
+            <Gallery04MapSvg
+              ref={svgRef}
+              className="w-full h-full object-contain pointer-events-auto"
+            />
+          ) : gallery.id === 'gallery-05' ? (
+            /* Gallery 05 Architectural SVG Plan */
+            <Gallery05MapSvg
+              ref={svgRef}
+              className="w-full h-full object-contain pointer-events-auto"
+            />
+          ) : gallery.id === 'gallery-06' ? (
+            /* Gallery 06 Architectural SVG Plan */
+            <Gallery06MapSvg
+              ref={svgRef}
+              className="w-full h-full object-contain pointer-events-auto"
+            />
+          ) : gallery.id === 'gallery-07' ? (
+            /* Gallery 07 Architectural SVG Plan */
+            <Gallery07MapSvg
+              ref={svgRef}
+              className="w-full h-full object-contain pointer-events-auto"
+            />
+          ) : gallery.id === 'gallery-08' ? (
+            /* Gallery 08 Architectural SVG Plan */
+            <Gallery08MapSvg
+              ref={svgRef}
+              className="w-full h-full object-contain pointer-events-auto"
+            />
+          ) : gallery.id === 'gallery-09' ? (
+            /* Gallery 09 Architectural SVG Plan */
+            <Gallery09MapSvg
               ref={svgRef}
               className="w-full h-full object-contain pointer-events-auto"
             />

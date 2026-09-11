@@ -16,7 +16,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
 }) => {
   const isMainMap = currentView === 'gallery-00';
   const targetLabel = isMainMap
-    ? (associatedGallery === 'gallery-03' ? 'گالری ۰۳' : 'گالری ۰۱')
+    ? (associatedGallery === 'gallery-06' ? 'گالری ۰۶' : associatedGallery === 'gallery-05' ? 'گالری ۰۵' : associatedGallery === 'gallery-04' ? 'گالری ۰۴' : associatedGallery === 'gallery-03' ? 'گالری ۰۳' : 'گالری ۰۱')
     : 'گالری ۰۰';
 
   return (

@@ -19,8 +19,13 @@ import { Gallery01View } from './components/Gallery01View';
 import { Gallery01QuestionsView } from './components/Gallery01QuestionsView';
 import { Gallery03View } from './components/Gallery03View';
 import { Gallery03QuestionsView } from './components/Gallery03QuestionsView';
+import { Gallery04View } from './components/Gallery04View';
+import { Gallery05View } from './components/Gallery05View';
+import { Gallery06View } from './components/Gallery06View';
+import { Gallery07View } from './components/Gallery07View';
+import { Gallery08View } from './components/Gallery08View';
+import { Gallery09View } from './components/Gallery09View';
 import { Gallery04PlaceholderView } from './components/Gallery04PlaceholderView';
-import { PuzzleQuestionView } from './components/PuzzleQuestionView';
 import { AdminManagementView } from './components/AdminManagementView';
 import { PlayerStatusBar } from './components/PlayerStatusBar';
 import { usePlayerStats } from './hooks/usePlayerStats';
@@ -40,16 +45,26 @@ export default function App() {
 
   // Gallery Route state
   const [currentGallery, setCurrentGallery] = useState<
-    'gallery-00' | 'gallery-01' | 'gallery-01-questions' | 'gallery-03' | 'gallery-03-questions' | 'gallery-04'
+    'gallery-00' | 'gallery-01' | 'gallery-01-questions' | 'gallery-03' | 'gallery-03-questions' | 'gallery-04' | 'gallery-05' | 'gallery-06' | 'gallery-07' | 'gallery-08' | 'gallery-09'
   >(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const g = urlParams.get('gallery');
+      if (g === '09' || g === 'gallery-09') return 'gallery-09';
+      if (g === '08' || g === 'gallery-08') return 'gallery-08';
+      if (g === '07' || g === 'gallery-07') return 'gallery-07';
+      if (g === '06' || g === 'gallery-06') return 'gallery-06';
+      if (g === '05' || g === 'gallery-05') return 'gallery-05';
       if (g === '04' || g === 'gallery-04') return 'gallery-04';
       if (g === '03' || g === 'gallery-03') return 'gallery-03';
       if (g === '03-questions' || g === 'gallery-03-questions') return 'gallery-03-questions';
       if (g === '01' || g === 'gallery-01') return 'gallery-01';
       if (g === '01-questions' || g === 'gallery-01-questions') return 'gallery-01-questions';
+      if (window.location.hash === '#gallery-09') return 'gallery-09';
+      if (window.location.hash === '#gallery-08') return 'gallery-08';
+      if (window.location.hash === '#gallery-07') return 'gallery-07';
+      if (window.location.hash === '#gallery-06') return 'gallery-06';
+      if (window.location.hash === '#gallery-05') return 'gallery-05';
       if (window.location.hash === '#gallery-04') return 'gallery-04';
       if (window.location.hash === '#gallery-03') return 'gallery-03';
       if (window.location.hash === '#gallery-03-questions') return 'gallery-03-questions';
@@ -69,12 +84,24 @@ export default function App() {
   });
 
   // Associated Gallery for the circular toggle button (dynamic context tracking)
-  const [associatedGallery, setAssociatedGallery] = useState<'gallery-01' | 'gallery-03'>(() => {
+  const [associatedGallery, setAssociatedGallery] = useState<'gallery-01' | 'gallery-03' | 'gallery-04' | 'gallery-05' | 'gallery-06' | 'gallery-07' | 'gallery-08' | 'gallery-09'>(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const g = urlParams.get('gallery');
+      if (g === '09' || g === 'gallery-09') return 'gallery-09';
+      if (g === '08' || g === 'gallery-08') return 'gallery-08';
+      if (g === '07' || g === 'gallery-07') return 'gallery-07';
+      if (g === '06' || g === 'gallery-06') return 'gallery-06';
+      if (g === '05' || g === 'gallery-05') return 'gallery-05';
+      if (g === '04' || g === 'gallery-04') return 'gallery-04';
       if (g === '03' || g === 'gallery-03' || g === '03-questions' || g === 'gallery-03-questions') return 'gallery-03';
       const saved = localStorage.getItem('museum_active_gallery');
+      if (saved === 'gallery-09') return 'gallery-09';
+      if (saved === 'gallery-08') return 'gallery-08';
+      if (saved === 'gallery-07') return 'gallery-07';
+      if (saved === 'gallery-06') return 'gallery-06';
+      if (saved === 'gallery-05') return 'gallery-05';
+      if (saved === 'gallery-04') return 'gallery-04';
       if (saved === 'gallery-03') return 'gallery-03';
     } catch {
       // Fallback
@@ -83,22 +110,60 @@ export default function App() {
   });
 
   const navigateToGalleryWithTrack = (galleryId: string) => {
-    if (galleryId === 'gallery-03' || galleryId === 'gallery-03-questions') {
+    if (!galleryId || typeof galleryId !== 'string') return;
+    const norm = galleryId.replace('_', '-');
+    if (norm === 'gallery-09') {
+      setAssociatedGallery('gallery-09');
+      try {
+        localStorage.setItem('museum_active_gallery', 'gallery-09');
+      } catch {}
+      setCurrentGallery('gallery-09');
+    } else if (norm === 'gallery-08') {
+      setAssociatedGallery('gallery-08');
+      try {
+        localStorage.setItem('museum_active_gallery', 'gallery-08');
+      } catch {}
+      setCurrentGallery('gallery-08');
+    } else if (norm === 'gallery-07') {
+      setAssociatedGallery('gallery-07');
+      try {
+        localStorage.setItem('museum_active_gallery', 'gallery-07');
+      } catch {}
+      setCurrentGallery('gallery-07');
+    } else if (norm === 'gallery-06') {
+      setAssociatedGallery('gallery-06');
+      try {
+        localStorage.setItem('museum_active_gallery', 'gallery-06');
+      } catch {}
+      setCurrentGallery('gallery-06');
+    } else if (norm === 'gallery-05') {
+      setAssociatedGallery('gallery-05');
+      try {
+        localStorage.setItem('museum_active_gallery', 'gallery-05');
+      } catch {}
+      setCurrentGallery('gallery-05');
+    } else if (norm === 'gallery-04') {
+      setAssociatedGallery('gallery-04');
+      try {
+        localStorage.setItem('museum_active_gallery', 'gallery-04');
+      } catch {}
+      setCurrentGallery('gallery-04');
+    } else if (norm === 'gallery-03' || norm === 'gallery-03-questions') {
       setAssociatedGallery('gallery-03');
       try {
         localStorage.setItem('museum_active_gallery', 'gallery-03');
       } catch {}
-    } else if (galleryId === 'gallery-01' || galleryId === 'gallery-01-questions') {
+      setCurrentGallery(norm as any);
+    } else if (norm === 'gallery-01' || norm === 'gallery-01-questions') {
       setAssociatedGallery('gallery-01');
       try {
         localStorage.setItem('museum_active_gallery', 'gallery-01');
       } catch {}
+      setCurrentGallery(norm as any);
+    } else {
+      setCurrentGallery(norm as any);
     }
-    setCurrentGallery(galleryId as any);
   };
-
-  // Puzzle Point active state
-  const [activePuzzlePoint, setActivePuzzlePoint] = useState<AdminPuzzlePoint | null>(null);
 
   // Navigation & View state
   const [activeTab, setActiveTab] = useState<'map' | 'collection' | 'tasks' | 'curator'>('map');
@@ -215,7 +280,7 @@ export default function App() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Toggle Admin with Alt+A or Ctrl+Alt+A
-      if ((e.altKey && e.key.toLowerCase() === 'a') || (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'a')) {
+      if ((e.altKey && e.key?.toLowerCase() === 'a') || (e.ctrlKey && e.altKey && e.key?.toLowerCase() === 'a')) {
         e.preventDefault();
         setIsAdminOpen((prev) => !prev);
         return;
@@ -243,7 +308,6 @@ export default function App() {
       setCurrentGallery('gallery-00');
       setSelectedCollection(null);
       setActiveStarDiscoveryId(null);
-      setActivePuzzlePoint(null);
       setDetailModalCollection(null);
       try {
         if (window.location.hash) {
@@ -303,26 +367,6 @@ export default function App() {
     );
   }
 
-  // If user navigated into a Puzzle Point Question view
-  if (activePuzzlePoint) {
-    return (
-      <PuzzleQuestionView
-        galleryId={activePuzzlePoint.galleryId}
-        puzzlePoint={activePuzzlePoint}
-        onNavigateBack={() => {
-          const backGallery = activePuzzlePoint.galleryId;
-          setActivePuzzlePoint(null);
-          navigateToGalleryWithTrack(backGallery);
-        }}
-        onSelectTab={(tab) => {
-          setActivePuzzlePoint(null);
-          setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
-        }}
-      />
-    );
-  }
-
   // If user navigated into Gallery 03 Questions view
   if (currentGallery === 'gallery-03-questions') {
     return (
@@ -336,11 +380,94 @@ export default function App() {
     );
   }
 
+  // If user navigated into Gallery 09, render the dedicated Gallery 09 view
+  if (currentGallery === 'gallery-09') {
+    return (
+      <Gallery09View
+        onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
+        onNavigateToGallery={(galleryId) => {
+          navigateToGalleryWithTrack(galleryId);
+        }}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          navigateToGalleryWithTrack('gallery-00');
+        }}
+      />
+    );
+  }
+
+  // If user navigated into Gallery 08, render the dedicated Gallery 08 view
+  if (currentGallery === 'gallery-08') {
+    return (
+      <Gallery08View
+        onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
+        onNavigateToGallery={(galleryId) => {
+          navigateToGalleryWithTrack(galleryId);
+        }}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          navigateToGalleryWithTrack('gallery-00');
+        }}
+      />
+    );
+  }
+
+  // If user navigated into Gallery 07, render the dedicated Gallery 07 view
+  if (currentGallery === 'gallery-07') {
+    return (
+      <Gallery07View
+        onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
+        onNavigateToGallery={(galleryId) => {
+          navigateToGalleryWithTrack(galleryId);
+        }}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          navigateToGalleryWithTrack('gallery-00');
+        }}
+      />
+    );
+  }
+
+  // If user navigated into Gallery 06, render the dedicated Gallery 06 view
+  if (currentGallery === 'gallery-06') {
+    return (
+      <Gallery06View
+        onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
+        onNavigateToGallery={(galleryId) => {
+          navigateToGalleryWithTrack(galleryId);
+        }}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          navigateToGalleryWithTrack('gallery-00');
+        }}
+      />
+    );
+  }
+
+  // If user navigated into Gallery 05, render the dedicated Gallery 05 view
+  if (currentGallery === 'gallery-05') {
+    return (
+      <Gallery05View
+        onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
+        onNavigateToGallery={(galleryId) => {
+          navigateToGalleryWithTrack(galleryId);
+        }}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          navigateToGalleryWithTrack('gallery-00');
+        }}
+      />
+    );
+  }
+
   // If user navigated into Gallery 04, render the dedicated Gallery 04 view
   if (currentGallery === 'gallery-04') {
     return (
-      <Gallery04PlaceholderView
+      <Gallery04View
         onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
+        onNavigateToGallery={(galleryId) => {
+          navigateToGalleryWithTrack(galleryId);
+        }}
         onSelectTab={(tab) => {
           setActiveTab(tab);
           navigateToGalleryWithTrack('gallery-00');
@@ -355,9 +482,6 @@ export default function App() {
       <Gallery03View
         onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
         onNavigateToQuestions={() => navigateToGalleryWithTrack('gallery-03-questions')}
-        onNavigateToPuzzleQuestion={(puzzlePoint) => {
-          setActivePuzzlePoint(puzzlePoint);
-        }}
         onNavigateToGallery={(galleryId) => navigateToGalleryWithTrack(galleryId)}
         onSelectTab={(tab) => {
           setActiveTab(tab);
@@ -386,9 +510,6 @@ export default function App() {
       <Gallery01View
         onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
         onNavigateToQuestions={() => navigateToGalleryWithTrack('gallery-01-questions')}
-        onNavigateToPuzzleQuestion={(puzzlePoint) => {
-          setActivePuzzlePoint(puzzlePoint);
-        }}
         onNavigateToGallery={(galleryId) => navigateToGalleryWithTrack(galleryId)}
         onSelectTab={(tab) => {
           setActiveTab(tab);

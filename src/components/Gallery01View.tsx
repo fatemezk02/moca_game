@@ -17,12 +17,12 @@ import { PuzzlePointMarker } from './PuzzlePointMarker';
 import { NavigationArrowRender } from './NavigationArrowRender';
 import { PlayerStatusBar } from './PlayerStatusBar';
 import { usePlayerStats } from '../hooks/usePlayerStats';
+import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
 import { Gallery01MapSvg } from './Gallery01MapSvg';
 import { isPuzzlePieceCollected } from '../data/puzzleProgressStore';
 import { StarDiscoveryModal } from './StarDiscoveryModal';
-import { PuzzlePointModal } from './PuzzlePointModal';
+import { PuzzleQuestionModal } from './PuzzleQuestionModal';
 import { PuzzlePoint } from './PuzzlePoint';
-import { PuzzleQuestionPopup } from './PuzzleQuestionPopup';
 import { StarQuestionPopup } from './StarQuestionPopup';
 import { StarPoint } from './StarPoint';
 import {
@@ -54,9 +54,15 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   onSelectTab,
 }) => {
   const playerStats = usePlayerStats();
-  const galleryRecord = contentService.getGalleryById('gallery-01');
-  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '01');
-  const galleryNameFa = galleryRecord?.nameFa?.trim() || 'کیمیای نور';
+  const { containerRef, dimensions } = useFitMapDimensions(848, 1264, 1.4);
+  const galleryRecord = contentService.getGalleryById('gallery_02');
+  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '02');
+  const galleryNameFa = galleryRecord?.nameFa?.trim() || '';
+
+  // Current Gallery ID for this page is gallery_02
+  useEffect(() => {
+    setCurrentGalleryId('gallery_02');
+  }, []);
 
   const [points, setPoints] = useState<AdminMapPoint[]>(() => getGalleryPoints('gallery-01'));
   const [arrows, setArrows] = useState<AdminArrowPoint[]>(() => getGalleryArrows('gallery-01'));
@@ -158,7 +164,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
       onSelectTab?.(iconPoint.destination);
     } else {
       // Requirement 1 & 11: Central icon on gallery map opens Gallery Information Modal
-      const targetGalleryId = iconPoint.galleryId || 'gallery-01';
+      const targetGalleryId = iconPoint.galleryId || 'gallery_02';
       setActiveGalleryInfoId(targetGalleryId);
     }
   };
@@ -234,17 +240,21 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
 
       {/* Main Floor Plan Canvas - Available Viewport between Header and Bottom Nav */}
       <main
+        ref={containerRef}
         id="gallery-01-canvas-area"
-        className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-3 sm:p-5 mb-16"
+        className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-3 sm:p-5 mb-16 sm:mb-[68px]"
       >
         <div
           style={{
+            ...(dimensions
+              ? { width: `${dimensions.width}px`, height: `${dimensions.height}px` }
+              : { width: '100%', height: '100%' }),
             aspectRatio: '848 / 1264',
           }}
-          className="relative mx-auto flex items-center justify-center h-full max-h-full max-w-full"
+          className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
         >
           {/* Base SVG Architectural Plan */}
-          <Gallery01MapSvg className="w-full h-full max-h-full max-w-full object-contain filter drop-shadow-sm pointer-events-auto" />
+          <Gallery01MapSvg className="w-full h-full object-contain filter drop-shadow-sm pointer-events-auto" />
 
           {/* Map Overlay for Interactive Points (Coordinates relative to 848 x 1264 SVG map) */}
           <div className="absolute inset-0 pointer-events-none">
@@ -303,7 +313,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
               <PuzzlePoint
                 key={puzzlePoint.id}
                 puzzlePoint={puzzlePoint}
-                galleryId="gallery-01"
+                galleryId="gallery_02"
                 onClick={handlePuzzlePointClick}
                 isSelected={activePuzzlePoint?.id === puzzlePoint.id}
               />
@@ -449,10 +459,10 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
         />
       )}
 
-      {/* Dedicated Puzzle Point Modal */}
+      {/* Shared Puzzle Question Modal */}
       {activePuzzlePoint && (
-        <PuzzleQuestionPopup
-          galleryId="gallery-01"
+        <PuzzleQuestionModal
+          galleryId="gallery_02"
           puzzlePoint={activePuzzlePoint}
           onClose={() => setActivePuzzlePoint(null)}
         />

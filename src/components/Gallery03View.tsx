@@ -12,11 +12,16 @@ import { NavigationArrowRender } from './NavigationArrowRender';
 import { Gallery03MapSvg } from './Gallery03MapSvg';
 import { PlayerStatusBar } from './PlayerStatusBar';
 import { usePlayerStats } from '../hooks/usePlayerStats';
+import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
 import { StarDiscoveryModal } from './StarDiscoveryModal';
 import { PuzzlePoint } from './PuzzlePoint';
-import { PuzzleQuestionPopup } from './PuzzleQuestionPopup';
+import { PuzzleQuestionModal } from './PuzzleQuestionModal';
 import { StarQuestionPopup } from './StarQuestionPopup';
 import { StarPoint } from './StarPoint';
+import { ExperiencePoint } from './ExperiencePoint';
+import { ExperienceModal } from './ExperienceModal';
+import { getExperiencePointsForGallery } from '../data/experiencePointsConfig';
+import { ExperienceContent } from '../services/content/types';
 import {
   hasStarPointBeenViewed,
   markStarPointFirstViewed,
@@ -48,6 +53,7 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
   onSelectTab,
 }) => {
   const playerStats = usePlayerStats();
+  const { containerRef, dimensions } = useFitMapDimensions(848, 1264, 1.4);
   const galleryRecord = contentService.getGalleryById('gallery-03');
   const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '03');
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'آلبوم‌های دیپلماتیک';
@@ -59,6 +65,8 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
   const [activeStarDiscoveryId, setActiveStarDiscoveryId] = useState<string | null>(null);
   const [activePuzzlePoint, setActivePuzzlePoint] = useState<AdminPuzzlePoint | null>(null);
   const [activeGalleryInfoId, setActiveGalleryInfoId] = useState<string | null>(null);
+  const [selectedExperiencePointId, setSelectedExperiencePointId] = useState<string | null>(null);
+  const [activeExperience, setActiveExperience] = useState<ExperienceContent | null>(null);
   const [puzzleUpdateTrigger, setPuzzleUpdateTrigger] = useState<number>(0);
 
   // Sync with Admin point changes dynamically
@@ -118,6 +126,7 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
   const handleClosePopup = () => {
     setSelectedArtwork(null);
     setSelectedStarPointId(null);
+    setSelectedExperiencePointId(null);
   };
 
   const handleArrowClick = (arrow: AdminArrowPoint, e: React.MouseEvent | React.TouchEvent) => {
@@ -192,6 +201,7 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
   const collectionPoints = points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
   const iconPoints = points.filter((p) => p.type === 'icon') as AdminIconPoint[];
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
+  const experiencePoints = React.useMemo(() => getExperiencePointsForGallery('gallery-03'), [puzzleUpdateTrigger]);
 
   // Ensure central question entry point is always present at ~center (x: 424, y: 632)
   const effectiveIconPoints = iconPoints.some(
@@ -256,17 +266,24 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
 
       {/* Main Floor Plan Canvas - Available Viewport between Header and Bottom Nav */}
       <main
+        ref={containerRef}
         id="gallery-03-canvas-area"
-        className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-3 sm:p-5 mb-16"
+        className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-3 sm:p-5 mb-16 sm:mb-[68px]"
       >
         <div
           style={{
+            ...(dimensions
+              ? { width: `${dimensions.width}px`, height: `${dimensions.height}px` }
+              : { width: '100%', height: '100%' }),
             aspectRatio: '848 / 1264',
           }}
-          className="relative mx-auto flex items-center justify-center h-full max-h-full max-w-full"
+          className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
         >
           {/* Authoritative Gallery 03 SVG Map */}
-          <Gallery03MapSvg className="w-full h-full max-h-full max-w-full object-contain filter drop-shadow-sm pointer-events-auto" />
+          <Gallery03MapSvg
+            style={{ transform: 'translateY(-1%) scale(0.96)', transformOrigin: 'center' }}
+            className="w-full h-full object-contain filter drop-shadow-sm pointer-events-auto"
+          />
 
           {/* Map Overlay for Interactive Points (Coordinates relative to 848 x 1264 SVG map) */}
           <div className="absolute inset-0 pointer-events-none">
@@ -332,6 +349,35 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
               />
             ))}
 
+            {/* Interactive Experience Points (Gallery 03: frame, shadow-silhouette) */}
+            {experiencePoints.map((exp) => (
+              <ExperiencePoint
+                key={exp.id}
+                id={exp.id}
+                experienceId={exp.experienceId}
+                galleryId="gallery_03"
+                x={exp.x}
+                y={exp.y}
+                iconId={exp.iconId}
+                label={exp.labelFa}
+                title={exp.title}
+                mapWidth={848}
+                mapHeight={1264}
+                isSelected={selectedExperiencePointId === exp.id}
+                onSelect={() => {
+                  setSelectedArtwork(null);
+                  setSelectedStarPointId(null);
+                  setSelectedExperiencePointId(exp.id);
+                }}
+                onOpenModal={(experience) => {
+                  setSelectedArtwork(null);
+                  setSelectedStarPointId(null);
+                  setSelectedExperiencePointId(null);
+                  setActiveExperience(experience);
+                }}
+              />
+            ))}
+
             {/* Interactive Collection Points and Standardized Star Points */}
             {collectionPoints.map((artwork) => {
               if (artwork.pointType === 'star') {
@@ -343,7 +389,7 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
                     x={artwork.x}
                     y={artwork.y}
                     title={artwork.title}
-                    galleryId="gallery-03"
+                    galleryId="gallery_03"
                     mapWidth={848}
                     mapHeight={1264}
                     isSelected={selectedStarPointId === artwork.id}
@@ -466,16 +512,17 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
       {activeStarDiscoveryId && (
         <StarQuestionPopup
           starPointId={activeStarDiscoveryId}
-          galleryId="gallery-03"
+          starId={collectionPoints.find((cp) => cp.id === activeStarDiscoveryId)?.starId || activeStarDiscoveryId}
+          galleryId="gallery_03"
           isOpen={!!activeStarDiscoveryId}
           onClose={() => setActiveStarDiscoveryId(null)}
         />
       )}
 
-      {/* Dedicated Puzzle Point Modal */}
+      {/* Shared Puzzle Question Modal */}
       {activePuzzlePoint && (
-        <PuzzleQuestionPopup
-          galleryId="gallery-03"
+        <PuzzleQuestionModal
+          galleryId="gallery_03"
           puzzlePoint={activePuzzlePoint}
           onClose={() => setActivePuzzlePoint(null)}
         />
@@ -487,6 +534,15 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
         isOpen={Boolean(activeGalleryInfoId)}
         onClose={() => setActiveGalleryInfoId(null)}
       />
+
+      {/* Interactive Experience Modal */}
+      {activeExperience && (
+        <ExperienceModal
+          isOpen={Boolean(activeExperience)}
+          onClose={() => setActiveExperience(null)}
+          experience={activeExperience}
+        />
+      )}
     </div>
   );
 };

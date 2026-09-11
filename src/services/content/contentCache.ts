@@ -25,6 +25,7 @@ export const contentCache = {
         return {
           ...parsed,
           galleries: Array.isArray(parsed.galleries) ? parsed.galleries : [],
+          experiences: Array.isArray(parsed.experiences) ? parsed.experiences : [],
           metadata: {
             ...parsed.metadata,
             source: 'cache',

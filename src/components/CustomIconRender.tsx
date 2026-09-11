@@ -4,21 +4,33 @@ import { HelpCircle, LogIn, Star, Info } from 'lucide-react';
 import { LocationPointMarker } from './LocationPointMarker';
 
 interface CustomIconRenderProps {
-  point: AdminIconPoint;
+  point?: AdminIconPoint;
+  iconPoint?: AdminIconPoint;
   className?: string;
   isSelected?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
-export const CustomIconRender: React.FC<CustomIconRenderProps> = ({ point, className = '', isSelected = false }) => {
+export const CustomIconRender: React.FC<CustomIconRenderProps> = ({
+  point: pointProp,
+  iconPoint,
+  className = '',
+  isSelected = false,
+  onClick,
+}) => {
+  const point = pointProp || iconPoint;
+  if (!point) return null;
+
   // If custom uploaded SVG or image data URI is present
   if (point.iconData) {
     if (point.iconData.startsWith('data:image') || point.iconData.startsWith('http') || point.iconData.startsWith('/')) {
       return (
         <img
           src={point.iconData}
-          alt={point.title}
-          style={{ width: point.width, height: point.height }}
+          alt={point.title || 'Icon'}
+          style={{ width: point.width || 32, height: point.height || 32 }}
           className={`object-contain select-none pointer-events-none ${className}`}
+          onClick={onClick}
         />
       );
     }
@@ -26,9 +38,10 @@ export const CustomIconRender: React.FC<CustomIconRenderProps> = ({ point, class
     if (point.iconData.includes('<svg')) {
       return (
         <div
-          style={{ width: point.width, height: point.height }}
+          style={{ width: point.width || 32, height: point.height || 32 }}
           className={`flex items-center justify-center ${className}`}
           dangerouslySetInnerHTML={{ __html: point.iconData }}
+          onClick={onClick}
         />
       );
     }

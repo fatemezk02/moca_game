@@ -1,7 +1,9 @@
 import React, { forwardRef } from 'react';
+import type { MapDisplayMode } from '../types';
 
 interface Gallery01MapSvgProps extends React.SVGProps<SVGSVGElement> {
   className?: string;
+  mapMode?: MapDisplayMode;
   children?: React.ReactNode;
 }
 
@@ -13,68 +15,49 @@ interface Gallery01MapSvgProps extends React.SVGProps<SVGSVGElement> {
  * - Floor base: #f8efe8
  */
 export const Gallery01MapSvg = forwardRef<SVGSVGElement, Gallery01MapSvgProps>(
-  ({ className = '', children, ...props }, ref) => {
+  ({ className = '', children, mapMode, ...props }, ref) => {
     return (
       <svg
         ref={ref}
         id="Layer_1"
         data-name="Layer 1"
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 848 1264"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 1024 1024"
         className={className}
         {...props}
       >
         <defs>
           <style>
-            {`
-              .g01-wall {
-                fill: #2a2623;
-                stroke: #1e1b18;
-                stroke-linecap: round;
-                stroke-linejoin: round;
-                stroke-width: 2.5px;
-              }
-              .g01-accent {
-                fill: #da985f;
-                stroke: #2a2623;
-                stroke-width: 1.5px;
-              }
-              .g01-floor {
-                fill: #f8efe8;
-              }
-              .g01-detail {
-                fill: #45240c;
-              }
-            `}
+            {`.cls-1{fill:url(#linear-gradient);}.cls-2{fill:#f8efe8;}.cls-3{fill:url(#linear-gradient-2);}.cls-4{fill:#2a2623;}`}
           </style>
+          <linearGradient id="linear-gradient" x1="665.82" y1="285.18" x2="879.84" y2="285.18" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#f8efe8" />
+            <stop offset="0.09" stopColor="#f8efe9" stopOpacity="0.97" />
+            <stop offset="0.22" stopColor="#f9f1ea" stopOpacity="0.9" />
+            <stop offset="0.37" stopColor="#faf2ed" stopOpacity="0.78" />
+            <stop offset="0.53" stopColor="#fbf5f1" stopOpacity="0.62" />
+            <stop offset="0.71" stopColor="#fcf8f6" stopOpacity="0.41" />
+            <stop offset="0.9" stopColor="#fefcfb" stopOpacity="0.16" />
+            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="linear-gradient-2" x1="478.28" y1="1003" x2="477.02" y2="948.73" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#fff" stopOpacity="0" />
+            <stop offset="0.68" stopColor="#faf4ef" stopOpacity="0.69" />
+            <stop offset="1" stopColor="#f8efe8" />
+          </linearGradient>
         </defs>
-
-        {/* Ambient Hall Floor (#f8efe8) */}
-        <path
-          className="g01-floor"
-          d="M125,115 L733,115 L733,1079 L547,1079 L547,1181 L125,1181 Z"
-        />
-
-        {/* North Peristyle & Main Hall Boundaries */}
-        <path
-          className="g01-wall"
-          d="M733.69,250v11h-225.69v-11h199V115h-194.3c-1.51,0-2.76-1.18-2.83-2.69-.05-1.12-.13-2.22-.3-3.32-1.58-10-4.77-19.16-9.44-27.65-3.06-5.57-6.77-10.85-11.07-15.89-21.57-25.23-61.92-37.38-95.59-22.51-31.15,13.77-49.53,36.33-52.94,69.49-.15,1.47-1.41,2.57-2.88,2.57h-194.65v135h119.02v109h-119.02v709.49s160.43.01,160.43.01v112.76h-11v-101.77h-159.45l-.06-731.2h118.1v-87.29h-118.1l-.42-151.5c-.13-5.35.03-5.5,5.5-5.5l188.5-.02c1.89,0,3.96.73,4.57-2.47,2.58-13.44,8.15-25.57,16.41-36.52,13.49-17.9,30.81-30.06,52.5-36.05,2.75-.76,5.51-1.32,8.29-1.77,11.03-1.75,22.29-1.84,33.31-.02,5.9.97,11.72,2.46,17.46,4.75,31.24,12.46,50.81,35.16,59.75,67.16,1.15,4.09,2.44,5,6.21,5,62.17-.08,124.33-.02,186.5-.11,6.9-.01,6.01,1.16,6.01,6.05v140h16.18Z"
-        />
-
-        {/* East Portals and Masonry Columns (#da985f & #45240c) */}
-        <rect className="g01-accent" x="745.74" y="250" width="16.18" height="11" rx="2" />
-        <rect className="g01-detail" x="773.97" y="250" width="27.57" height="11" rx="2" />
-        <rect className="g01-accent" x="813.37" y="250" width="17.87" height="11" rx="2" />
-        <rect className="g01-detail" x="773.97" y="347.99" width="27.57" height="11" rx="2" />
-        <rect className="g01-accent" x="813.37" y="347.99" width="17.87" height="11" rx="2" />
-
-        {/* South & West Hall Corridors */}
-        <polygon
-          className="g01-wall"
-          points="733.69 347.99 733.69 358.99 717.51 358.99 717.49 1079.62 558.15 1079.62 558.15 1181.26 547.15 1181.26 547.15 1068.62 707 1068.62 707 359 508 359 508 348.29 577.88 348.19 717.51 347.99 733.69 347.99"
-        />
-        <rect className="g01-accent" x="745.74" y="347.99" width="16.18" height="11" rx="2" />
-
+        <polyline className="cls-1" points="665.82 347.7 879.84 347.7 879.84 222.66 665.82 222.66" />
+        <path className="cls-2" d="M665.82,94.06V944.92a5.88,5.88,0,0,1-3,.78H300.69a6.05,6.05,0,0,1-6.05-6.05V347.71H263.18a72.47,72.47,0,0,1,7.41-125h24.05V99.33a6.05,6.05,0,0,1,6.05-6H403.91a6,6,0,0,0,5.91-4.76,90.63,90.63,0,0,1,8.39-23.09,69.22,69.22,0,0,1,20.37-23.71H527a65.88,65.88,0,0,1,19.69,23.94,87.52,87.52,0,0,1,7.45,22.7,6,6,0,0,0,5.94,4.92H662.87A5.88,5.88,0,0,1,665.82,94.06Z" />
+        <path className="cls-3" d="M587.4,945.7c-3,0-5.51,2.95-5.51,6.59v52.31H372V952.29c0-3.64-2.47-6.59-5.51-6.59Z" />
+        <path className="cls-4" d="M709.38,217.18H675a6,6,0,0,1-6.05-6V99.32a6,6,0,0,0-6-6H560.09a6,6,0,0,1-5.93-4.92,87.7,87.7,0,0,0-7.45-22.71A66,66,0,0,0,527,41.72c-10.29-7.63-24.49-13.1-44-13.1s-33.89,5.47-44.44,13.1a69.28,69.28,0,0,0-20.37,23.7,90.44,90.44,0,0,0-8.39,23.1,6.05,6.05,0,0,1-5.91,4.76H300.69a6,6,0,0,0-6.05,6V210.18a6,6,0,0,1-4.86,5.93,72.55,72.55,0,0,0,0,142.5,6,6,0,0,1,4.86,5.91V939.65a6,6,0,0,0,6.05,6h59.78a6,6,0,0,1,6,6v48a4.84,4.84,0,0,0,4.84,4.83h7.25a4.83,4.83,0,0,0,4.84-4.83v-48a6,6,0,0,1,6-6h10.89a4.83,4.83,0,0,0,4.83-4.83V933.6a4.83,4.83,0,0,0-4.83-4.83H317.58a6,6,0,0,1-6-6V368.4a6,6,0,0,1,6-6h81.55a6,6,0,0,0,6-6.05v-4.83a6,6,0,0,0-6-6.05h-52.4a72.48,72.48,0,0,0,0-116.16h52.4a6,6,0,0,0,6-6v-4.84a6,6,0,0,0-6-6H317.61a6,6,0,0,1-6-6V116.25a6,6,0,0,1,6-6H418.74a6,6,0,0,0,6-5.78l.1-2.32C425,99.78,428,45.55,483,45.55c54.72,0,55.65,53.92,55.66,56.19v2.42a6,6,0,0,0,6.05,6H645.94a6.05,6.05,0,0,1,6,6v94.89a6,6,0,0,1-6,6H550.83A4.84,4.84,0,0,0,546,222v7.25a4.83,4.83,0,0,0,4.83,4.84H709.38a4.83,4.83,0,0,0,4.83-4.84V222A4.84,4.84,0,0,0,709.38,217.18ZM358.73,282.29a55.68,55.68,0,0,1-60.46,60.46q-1.83-.17-3.63-.45a55.62,55.62,0,0,1,0-109.87,56.34,56.34,0,0,1,13.78-.46A55.74,55.74,0,0,1,358.73,282.29Z" />
+        <path className="cls-4" d="M714.21,344.08v7.25a4.84,4.84,0,0,1-4.83,4.84H675a6,6,0,0,0-6.05,6V939.65a6,6,0,0,1-6,6H603.08a6,6,0,0,0-6,6v48a4.84,4.84,0,0,1-4.84,4.83H585a4.84,4.84,0,0,1-4.84-4.83v-48a6,6,0,0,0-6-6H563.19a4.84,4.84,0,0,1-4.84-4.83V933.6a4.84,4.84,0,0,1,4.84-4.83h82.75a6.05,6.05,0,0,0,6-6V362.21a6,6,0,0,0-6-6H550.83a4.84,4.84,0,0,1-4.83-4.84v-7.25a4.84,4.84,0,0,1,4.83-4.84H709.38A4.84,4.84,0,0,1,714.21,344.08Z" />
+        <rect className="cls-4" x="729.93" y="339.24" width="32.67" height="16.93" rx="3.02" />
+        <rect className="cls-4" x="729.93" y="217.18" width="32.67" height="16.93" rx="3.02" />
+        <rect className="cls-4" x="775.59" y="339.24" width="58.88" height="16.93" rx="3.02" />
+        <rect className="cls-4" x="775.59" y="217.18" width="58.88" height="16.93" rx="3.02" />
+        <rect className="cls-4" x="847.17" y="339.24" width="32.67" height="16.93" rx="3.02" />
+        <rect className="cls-4" x="847.17" y="217.18" width="32.67" height="16.93" rx="3.02" />
         {children}
       </svg>
     );

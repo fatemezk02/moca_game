@@ -1,0 +1,149 @@
+import React, { forwardRef } from 'react';
+import type { MapDisplayMode } from '../types';
+
+interface Gallery06MapSvgProps extends React.SVGProps<SVGSVGElement> {
+  className?: string;
+  mapMode?: MapDisplayMode;
+  children?: React.ReactNode;
+}
+
+/**
+ * Architectural SVG Map for Gallery 06.
+ * Exact SVG specification as provided.
+ * viewBox="0 0 762.8 1147.2"
+ */
+export const Gallery06MapSvg = forwardRef<SVGSVGElement, Gallery06MapSvgProps>(
+  ({ className = '', children, mapMode, ...props }, ref) => {
+    return (
+      <svg
+        ref={ref}
+        version="1.1"
+        id="Layer_1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        x="0px"
+        y="0px"
+        viewBox="0 0 762.8 1147.2"
+        style={{ enableBackground: 'new 0 0 762.8 1147.2' }}
+        xmlSpace="preserve"
+        className={className}
+        {...props}
+      >
+        <defs>
+          <style type="text/css">
+            {`
+              .st0{fill:#F8EFE8;}
+              .st1{fill:#2A2623;}
+              .st2{fill:url(#SVGID_1_);}
+              .st3{fill:url(#SVGID_00000103261439022213087240000003715280637570521742_);}
+              .st4{fill:url(#SVGID_00000116939880848055511840000016877438177667268022_);}
+              .st5{fill:#C9AC59;stroke:#2D2824;stroke-miterlimit:10;}
+              .st6{fill:url(#SVGID_00000116916719396459478960000000964061167028000443_);}
+              .st7{fill:url(#SVGID_00000118384909591231273450000006245307666827263649_);}
+              .st8{fill:#998F56;stroke:#353329;stroke-miterlimit:10;}
+              .st9{fill:url(#SVGID_00000166634382188469433810000011628225461233089978_);}
+              .st10{fill:url(#SVGID_00000132809949301078843840000013626999411165112461_);}
+              .st11{fill:none;stroke:#2A2623;stroke-width:11;stroke-miterlimit:10;}
+              .st12{fill:url(#SVGID_00000147930470763270972450000016452997873199027854_);}
+              .st13{fill:url(#SVGID_00000086666536899982443800000011653059951935708311_);}
+              .st14{fill:url(#SVGID_00000081635898667751527860000007989991893677335968_);}
+              .st15{opacity:0.2;}
+              .st16{opacity:0.63;}
+              .st17{fill:url(#SVGID_00000159456996950096349180000006874109162857981838_);}
+            `}
+          </style>
+        </defs>
+        <path
+          className="st0"
+          d="M608.4,393.1h-84.2V274.7H407.4v1.5l-215,0c0,0-60,4.5-60,58.5c0,53.9,60,58.5,60,58.5v4.5h107.5v511.7
+          c0,0,51.9,0,81.5,0h20.1c0,0-1.3,60,52.7,60s52.7-60,52.7-60h101.6V393.1z"
+        />
+        <linearGradient
+          id="SVGID_1_"
+          gradientUnits="userSpaceOnUse"
+          x1="246.3582"
+          y1="803.5001"
+          x2="246.3582"
+          y2="708.4457"
+          gradientTransform="matrix(1 0 0 -1 0 1200.8561)"
+        >
+          <stop offset="0" style={{ stopColor: '#F8EFE8' }} />
+          <stop offset="0.9085" style={{ stopColor: '#FEFDFD', stopOpacity: 0.09146148 }} />
+          <stop offset="1" style={{ stopColor: '#FFFFFF', stopOpacity: 0 }} />
+        </linearGradient>
+        <rect x="198.3" y="397.4" className="st2" width="96.2" height="95.1" />
+        <g>
+          <path
+            className="st11"
+            d="M523.8,274.7v114.5h84.6v4v516.2h-65.8h-35.8c0,0.1,1.3,60-52.7,60s-52.7-60-52.7-60h-20.1
+            c-29.6,0-81.5,0-81.5,0V393.1H369v28.8"
+          />
+          <path
+            className="st11"
+            d="M192.5,415.5v-22.3c0,0-60-4.5-60-58.5c0-54,60-58.5,60-58.5l215,0v-1.5v-28.5"
+          />
+        </g>
+        <g>
+          <path
+            className="st1"
+            d="M529.4,249v9.6c0,1.7-1.3,3-3,3h-5c-1.7,0-3-1.3-3-3V249c0-1.7,1.3-3,3-3h5C528,246,529.4,247.4,529.4,249z"
+          />
+          <path
+            className="st8"
+            d="M529.4,212.5V231c0,1.7-1.3,3-3,3h-5c-1.7,0-3-1.3-3-3v-18.5c0-1.7,1.3-3,3-3h5
+            C528,209.5,529.4,210.9,529.4,212.5z"
+          />
+          <path
+            className="st1"
+            d="M529.4,184.9v9.6c0,1.7-1.3,3-3,3h-5c-1.7,0-3-1.3-3-3v-9.6c0-1.7,1.3-3,3-3h5
+            C528,181.9,529.4,183.2,529.4,184.9z"
+          />
+        </g>
+        <g>
+          <path
+            className="st1"
+            d="M198.3,467.6v9.6c0,1.7-1.3,3-3,3h-5c-1.7,0-3-1.3-3-3v-9.6c0-1.7,1.3-3,3-3h5
+            C196.9,464.6,198.3,466,198.3,467.6z"
+          />
+          <path
+            className="st8"
+            d="M198.3,431.1v18.5c0,1.7-1.3,3-3,3h-5c-1.7,0-3-1.3-3-3v-18.5c0-1.7,1.3-3,3-3h5
+            C196.9,428.1,198.3,429.4,198.3,431.1z"
+          />
+        </g>
+        <path
+          className="st8"
+          d="M412.9,212.5V231c0,1.7-1.3,3-3,3h-5c-1.7,0-3-1.3-3-3v-18.5c0-1.7,1.3-3,3-3h5
+          C411.6,209.5,412.9,210.9,412.9,212.5z"
+        />
+        <path
+          className="st1"
+          d="M409.9,197.5h-5c-1.7,0-3-1.3-3-3v-9.6c0-1.7,1.3-3,3-3h5c1.7,0,3,1.3,3,3v9.6
+          C412.9,196.1,411.6,197.5,409.9,197.5z"
+        />
+        <linearGradient
+          id="SVGID_00000083069914305596653400000009444342805119236522_"
+          gradientUnits="userSpaceOnUse"
+          x1="465.6454"
+          y1="276.9065"
+          x2="465.6454"
+          y2="181.8521"
+        >
+          <stop offset="0" style={{ stopColor: '#F8EFE8' }} />
+          <stop offset="0.9085" style={{ stopColor: '#FEFDFD', stopOpacity: 0.09146148 }} />
+          <stop offset="1" style={{ stopColor: '#FFFFFF', stopOpacity: 0 }} />
+        </linearGradient>
+        <rect
+          x="412.9"
+          y="181.9"
+          style={{ fill: 'url(#SVGID_00000083069914305596653400000009444342805119236522_)' }}
+          width="105.4"
+          height="95.1"
+        />
+        {children}
+      </svg>
+    );
+  }
+);
+
+Gallery06MapSvg.displayName = 'Gallery06MapSvg';

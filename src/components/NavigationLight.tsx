@@ -28,12 +28,15 @@ export function formatGalleryLabelFa(id?: string, customLabel?: string): string 
     'gallery-01': 'گالری ۰۱',
     'gallery-02': 'گالری ۰۲',
     'gallery-03': 'گالری ۰۳',
+    'gallery-04': 'گالری ۰۴',
+    'gallery-05': 'گالری ۰۵',
+    'gallery-06': 'گالری ۰۶',
   };
   if (mapping[id]) {
     return mapping[id];
   }
 
-  const match = id.match(/\d+/);
+  const match = typeof id === 'string' ? id.match(/\d+/) : null;
   if (match) {
     const persianDigits: Record<string, string> = {
       '0': '۰', '1': '۱', '2': '۲', '3': '۳', '4': '۴',
@@ -85,7 +88,7 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
       >
         {/* Outer Gentle Pulsing Glow Halo (Layer 1 - Soft diffuse aura) */}
         <div
-          className="absolute w-14 h-14 rounded-full pointer-events-none transition-transform duration-700 animate-pulse"
+          className="absolute w-[51px] h-[51px] rounded-full pointer-events-none transition-transform duration-700 animate-pulse"
           style={{
             background:
               'radial-gradient(circle, rgba(245, 197, 66, 0.45) 0%, rgba(245, 175, 40, 0.22) 45%, rgba(245, 158, 11, 0.08) 70%, transparent 90%)',
@@ -96,19 +99,19 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
 
         {/* Mid Pulsing Halo Ring (Layer 2 - Subtle breathing glow) */}
         <div
-          className="absolute w-10 h-10 rounded-full pointer-events-none transition-all duration-500"
+          className="absolute w-[36.5px] h-[36.5px] rounded-full pointer-events-none transition-all duration-500"
           style={{
             background:
               'radial-gradient(circle, rgba(255, 236, 179, 0.9) 0%, rgba(245, 197, 66, 0.6) 45%, rgba(217, 119, 6, 0.2) 80%, transparent 100%)',
-            boxShadow: '0 0 16px 5px rgba(245, 197, 66, 0.55)',
+            boxShadow: '0 0 14px 4px rgba(245, 197, 66, 0.55)',
             animation: 'lampGlowPulse 2.8s ease-in-out infinite',
           }}
         />
 
         {/* Inner Glowing Lamp / Beacon Fixture */}
         <div className="relative z-10 flex flex-col items-center justify-center">
-          {/* Custom Stylized Museum Lightbulb - Sized slightly bigger (34px) with refined thin stroke */}
-          <div className="relative w-[34px] h-[34px] flex items-center justify-center filter drop-shadow-md group-hover:scale-105 group-active:scale-95 transition-transform duration-200">
+          {/* Custom Stylized Museum Lightbulb - Scaled 4% smaller (31px) */}
+          <div className="relative w-[31px] h-[31px] flex items-center justify-center filter drop-shadow-md group-hover:scale-105 group-active:scale-95 transition-transform duration-200">
             <svg
               viewBox="0 0 24 24"
               className="w-full h-full overflow-visible"

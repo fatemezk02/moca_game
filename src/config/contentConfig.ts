@@ -37,6 +37,8 @@ export interface GoogleSheetsSourceConfig {
     artworks: string;
     /** Published CSV link for the 'Galleries' tab */
     galleries: string;
+    /** Published CSV link for the 'Experiences' tab */
+    experiences: string;
   };
 
   /**
@@ -47,13 +49,14 @@ export interface GoogleSheetsSourceConfig {
   spreadsheetId?: string;
 
   /**
-   * Tab names in your Google Spreadsheet (default: Questions, Stars, Artworks, Galleries)
+   * Tab names in your Google Spreadsheet (default: Questions, Stars, Artworks, Galleries, Experiences)
    */
   tabNames?: {
     questions: string;
     stars: string;
     artworks: string;
     galleries: string;
+    experiences: string;
   };
 
   /**
@@ -71,6 +74,7 @@ export const CONTENT_SOURCE_CONFIG: GoogleSheetsSourceConfig = {
     stars: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=1089507013&single=true&output=csv',     // e.g. "https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=123...&single=true&output=csv"
     artworks: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=1588976816&single=true&output=csv',  // e.g. "https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=456...&single=true&output=csv"
     galleries: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=1983886582&single=true&output=csv', // Published CSV link for the 'Galleries' tab
+    experiences: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=145470513&single=true&output=csv', // Published CSV link for the 'Experiences' tab
   },
 
   // Optional: If you want to use the Spreadsheet ID directly, paste it here:
@@ -81,6 +85,7 @@ export const CONTENT_SOURCE_CONFIG: GoogleSheetsSourceConfig = {
     stars: 'Stars',
     artworks: 'Artworks',
     galleries: 'Galleries',
+    experiences: 'Experiences',
   },
 
   fetchTimeoutMs: 10000,

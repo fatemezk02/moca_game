@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MuseumCollection, MapDisplayMode } from '../types';
 import { NavigationLight } from './NavigationLight';
 import { getGalleryPoints, getGalleryArrows } from '../data/mapConfig';
@@ -11,6 +11,7 @@ import { StarPoint } from './StarPoint';
 import { isArrowVisibleToPlayer, markArrowUsed } from '../data/arrowConditionsStore';
 import { getCurrentGalleryId, setCurrentGalleryId } from '../data/playerLocationStore';
 import { getLampPositionForGallery } from '../data/galleryAreasStore';
+import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
 
 interface MuseumFloorPlanProps {
   collections: MuseumCollection[];
@@ -43,7 +44,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   mapMode = 'normal',
   onOpenStarDiscovery,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { containerRef, dimensions } = useFitMapDimensions(604.8, 844.86);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -297,13 +298,20 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoomScale})`,
           transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0, 0, 1)',
           transformOrigin: 'center center',
-          width: 'min(72vw, 66vh, 456px)',
+          ...(dimensions
+            ? { width: `${dimensions.width}px`, height: `${dimensions.height}px` }
+            : { width: '100%', height: '100%' }),
           aspectRatio: '604.8 / 844.86',
+          maxWidth: '100%',
+          maxHeight: '100%',
         }}
-        className="relative mx-auto flex items-center justify-center select-none"
+        className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
       >
         {/* Precise Architectural Floor Plan SVG */}
-        <Gallery00MapSvg mapMode={mapMode}>
+        <Gallery00MapSvg
+          style={{ transform: 'scale(1.22)', transformOrigin: 'center' }}
+          mapMode={mapMode}
+        >
           {/* Active Laser Guideline connecting active marker to interior */}
           {selectedCollection && (
             <g>

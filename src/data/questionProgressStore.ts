@@ -64,7 +64,8 @@ export function getBonusCoins(): number {
 /**
  * Normalizes gallery ID to standard canonical format (e.g., 'gallery-01', 'gallery-03')
  */
-function toCanonicalGalleryId(galleryId: string): string {
+function toCanonicalGalleryId(galleryId?: string): string {
+  if (!galleryId || typeof galleryId !== 'string') return 'gallery-01';
   const clean = galleryId.toLowerCase().replace(/[^a-z0-9]/g, '');
   if (clean.startsWith('gallery')) {
     const num = clean.replace('gallery', '');
@@ -197,10 +198,11 @@ export function awardCoins(amount: number): void {
 /**
  * Checks whether the questions for a specific gallery have been completed
  */
-export function isGalleryQuestionsCompleted(galleryId: string): boolean {
+export function isGalleryQuestionsCompleted(galleryId?: string): boolean {
+  if (!galleryId) return false;
   const progress = getQuestionProgress();
   const canonId = toCanonicalGalleryId(galleryId);
-  const rawId = galleryId.toLowerCase();
+  const rawId = typeof galleryId === 'string' ? galleryId.toLowerCase() : '';
   const normalizedKey = rawId.replace(/[^a-z0-9]/g, '');
 
   if (progress[canonId]?.completed) return true;
@@ -214,10 +216,11 @@ export function isGalleryQuestionsCompleted(galleryId: string): boolean {
  * Records individual answered question count for a gallery (1, 2, or 3)
  */
 export function setGalleryAnsweredCount(galleryId: string, count: number): void {
+  if (!galleryId) return;
   try {
     const progress = getQuestionProgress();
     const canonId = toCanonicalGalleryId(galleryId);
-    const rawId = galleryId.toLowerCase();
+    const rawId = typeof galleryId === 'string' ? galleryId.toLowerCase() : '';
     const normalizedKey = rawId.replace(/[^a-z0-9]/g, '');
 
     const existing = progress[canonId] || progress[rawId] || progress[normalizedKey] || { completed: false };
@@ -253,10 +256,11 @@ export function setGalleryAnsweredCount(galleryId: string, count: number): void 
  * Sets the question completion status for a specific gallery and saves to localStorage
  */
 export function setGalleryQuestionsCompleted(galleryId: string, completed = true): void {
+  if (!galleryId) return;
   try {
     const progress = getQuestionProgress();
     const canonId = toCanonicalGalleryId(galleryId);
-    const rawId = galleryId.toLowerCase();
+    const rawId = typeof galleryId === 'string' ? galleryId.toLowerCase() : '';
     const normalizedKey = rawId.replace(/[^a-z0-9]/g, '');
     const entry: GalleryQuestionProgress = {
       completed,
@@ -290,10 +294,11 @@ export function setGalleryQuestionsCompleted(galleryId: string, completed = true
  * Resets question completion for a specific gallery
  */
 export function resetGalleryQuestionsProgress(galleryId: string): void {
+  if (!galleryId) return;
   try {
     const progress = getQuestionProgress();
     const canonId = toCanonicalGalleryId(galleryId);
-    const rawId = galleryId.toLowerCase();
+    const rawId = typeof galleryId === 'string' ? galleryId.toLowerCase() : '';
     const normalizedKey = rawId.replace(/[^a-z0-9]/g, '');
     delete progress[canonId];
     delete progress[rawId];

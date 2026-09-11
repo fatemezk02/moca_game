@@ -6,6 +6,9 @@ import {
   resetGalleryPoints,
   createNewPuzzlePoint,
 } from '../data/mapConfig';
+import { contentService } from '../services/content/contentService';
+import { DEFAULT_STAR_DISCOVERIES } from '../data/starDiscoveryData';
+import { normalizeGalleryId } from '../services/content/mappers';
 import {
   AdminMapPoint,
   AdminCollectionPoint,
@@ -61,17 +64,173 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
   const [points, setPoints] = useState<AdminMapPoint[]>([]);
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState<'all' | 'collection' | 'icon' | 'puzzle'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'collection' | 'star' | 'icon' | 'puzzle'>('all');
 
   const currentGallery: GalleryConfig =
     GALLERIES.find((g) => g.id === selectedGalleryId) || GALLERIES[0];
 
-  // Load points for the selected gallery
+  // Canonical definition of all existing Star Points in the live game for each gallery
+  const GALLERY_CANONICAL_STARS: Record<
+    string,
+    { id: string; starId: string; title: string; defaultX: number; defaultY: number }[]
+  > = {
+    'gallery-01': [
+      { id: 'artwork-01', starId: 'star-01', title: 'کالوتایپ — فاکس تالبوت', defaultX: 230, defaultY: 190 },
+      { id: 'star-02', starId: 'star-02', title: 'مجله‌های Camera Work', defaultX: 670, defaultY: 190 },
+    ],
+    'gallery-03': [
+      { id: 'artwork-g03-star', starId: 'star-03', title: 'در جست‌وجوی فن و فضیلت', defaultX: 230, defaultY: 200 },
+      { id: 'star-04', starId: 'star-04', title: 'چهره‌های مشهور، در یک قاب', defaultX: 620, defaultY: 200 },
+      { id: 'star-05', starId: 'star-05', title: 'ژاپن در یک قاب', defaultX: 230, defaultY: 800 },
+      { id: 'star-06', starId: 'star-06', title: 'خودنگارهٔ چرخان نادار', defaultX: 620, defaultY: 800 },
+    ],
+    'gallery-04': [
+      { id: 'star-07', starId: 'star-07', title: 'وقتی عکاسی می‌خواست شبیه نقاشی شود', defaultX: 330, defaultY: 260 },
+    ],
+    'gallery-05': [
+      { id: 'star-08', starId: 'star-08', title: 'وقتی شهر از زاویه‌ای تازه دیده می‌شود', defaultX: 240, defaultY: 280 },
+      { id: 'star-09', starId: 'star-09', title: 'پاریسِ اوژن آتژه', defaultX: 530, defaultY: 340 },
+      { id: 'star-10', starId: 'star-10', title: 'انسان‌ها و شهر', defaultX: 230, defaultY: 720 },
+      { id: 'star-11', starId: 'star-11', title: 'تقاطع مخروطها', defaultX: 540, defaultY: 810 },
+    ],
+    'gallery-06': [
+      { id: 'star-12', starId: 'star-12', title: 'سیاستِ نگاه', defaultX: 240, defaultY: 280 },
+      { id: 'star-13', starId: 'star-13', title: 'بستر معنا و تصویر', defaultX: 530, defaultY: 340 },
+      { id: 'star-14', starId: 'star-14', title: 'تصویر و حافظه', defaultX: 230, defaultY: 720 },
+      { id: 'star-15', starId: 'star-15', title: 'افق‌های نوین نقد', defaultX: 540, defaultY: 810 },
+      { id: 'star-16', starId: 'star-16', title: 'اصفهان، نیویورک', defaultX: 380, defaultY: 240 },
+      { id: 'star-17', starId: 'star-17', title: 'پیشنهاد برای تغییر زمین', defaultX: 380, defaultY: 500 },
+      { id: 'star-18', starId: 'star-18', title: 'بازخوانی دههٔ ۱۹۶۰', defaultX: 380, defaultY: 760 },
+    ],
+    'gallery-07': [
+      { id: 'star-16', starId: 'star-16', title: 'ستاره کشف ۱۶', defaultX: 230, defaultY: 310 },
+      { id: 'star-17', starId: 'star-17', title: 'ستاره کشف ۱۷', defaultX: 540, defaultY: 320 },
+      { id: 'star-18', starId: 'star-18', title: 'ستاره کشف ۱۸', defaultX: 230, defaultY: 720 },
+      { id: 'star-19', starId: 'star-19', title: 'ستاره کشف ۱۹', defaultX: 540, defaultY: 780 },
+    ],
+    'gallery-08': [
+      { id: 'star-20', starId: 'star-20', title: 'ستاره کشف ۲۰', defaultX: 230, defaultY: 410 },
+      { id: 'star-21', starId: 'star-21', title: 'ستاره کشف ۲۱', defaultX: 470, defaultY: 410 },
+      { id: 'star-22', starId: 'star-22', title: 'ستاره کشف ۲۲', defaultX: 250, defaultY: 720 },
+      { id: 'star-23', starId: 'star-23', title: 'ستاره کشف ۲۳', defaultX: 470, defaultY: 640 },
+    ],
+    'gallery-09': [
+      { id: 'star-24', starId: 'star-24', title: 'ستاره کشف ۲۴', defaultX: 300, defaultY: 360 },
+      { id: 'star-25', starId: 'star-25', title: 'ستاره کشف ۲۵', defaultX: 480, defaultY: 360 },
+      { id: 'star-26', starId: 'star-26', title: 'ستاره کشف ۲۶', defaultX: 290, defaultY: 650 },
+      { id: 'star-27', starId: 'star-27', title: 'ستاره کشف ۲۷', defaultX: 480, defaultY: 650 },
+    ],
+  };
+
+  // Helper function to load points for a gallery with guaranteed inclusion of ALL Star Points
+  const loadEnrichedPointsForGallery = (galleryId: string): AdminMapPoint[] => {
+    const loaded = getGalleryPoints(galleryId);
+    const result: AdminMapPoint[] = [...loaded];
+
+    const canonKey = normalizeGalleryId(galleryId).replace('_', '-');
+    const canonicalStars =
+      GALLERY_CANONICAL_STARS[canonKey] || GALLERY_CANONICAL_STARS[galleryId] || [];
+
+    canonicalStars.forEach((starDef) => {
+      const existingIndex = result.findIndex((p) => {
+        if (p.id === starDef.id) return true;
+        if (p.id === starDef.starId) return true;
+        if (
+          p.type === 'collection' &&
+          (p as AdminCollectionPoint).starId === starDef.starId
+        )
+          return true;
+        return false;
+      });
+
+      // Attempt to retrieve title from ContentService or DEFAULT_STAR_DISCOVERIES
+      const contentStar =
+        contentService.getStars().find((s) => s.id === starDef.starId || s.starId === starDef.starId) ||
+        contentService.getStarForStarPoint(starDef.id, galleryId, starDef.starId) ||
+        (DEFAULT_STAR_DISCOVERIES as any)[starDef.starId];
+      const resolvedTitle =
+        contentStar?.titleFa || contentStar?.labelTextFa || starDef.title;
+
+      if (existingIndex !== -1) {
+        const existing = result[existingIndex];
+        if (existing.type === 'collection') {
+          const colPt = existing as AdminCollectionPoint;
+          colPt.pointType = 'star';
+          if (!colPt.starId) {
+            colPt.starId = starDef.starId;
+          }
+          if (!colPt.title || colPt.title === colPt.id) {
+            colPt.title = resolvedTitle;
+          }
+        }
+      } else {
+        result.push({
+          id: starDef.id,
+          starId: starDef.starId,
+          type: 'collection',
+          pointType: 'star',
+          galleryId: galleryId,
+          title: resolvedTitle,
+          x: starDef.defaultX,
+          y: starDef.defaultY,
+          frames: [],
+        });
+      }
+    });
+
+    // Also include any stars from ContentService or DEFAULT_STAR_DISCOVERIES for this gallery
+    const serviceStars = contentService.getStars();
+    const allDiscoveries = [
+      ...Object.values(DEFAULT_STAR_DISCOVERIES),
+      ...serviceStars,
+    ];
+    const canonSelected = normalizeGalleryId(galleryId);
+
+    allDiscoveries.forEach((disc) => {
+      const dGallery = normalizeGalleryId(disc.galleryId || '');
+      const isMatch =
+        dGallery === canonSelected ||
+        disc.galleryId === galleryId ||
+        ((canonSelected === 'gallery_01' || galleryId === 'gallery-01') &&
+          (dGallery === 'gallery_01' ||
+            dGallery === 'gallery_02' ||
+            disc.galleryId === 'gallery-02'));
+
+      if (isMatch) {
+        const starId = disc.starId || disc.id;
+        const alreadyExists = result.some(
+          (p) =>
+            p.id === starId ||
+            (p.type === 'collection' &&
+              ((p as AdminCollectionPoint).starId === starId ||
+                ((p as AdminCollectionPoint).pointType === 'star' && p.id === starId)))
+        );
+
+        if (!alreadyExists) {
+          result.push({
+            id: starId,
+            starId: starId,
+            type: 'collection',
+            pointType: 'star',
+            galleryId: galleryId,
+            title: disc.titleFa || disc.labelTextFa || `ستاره کشف ${starId}`,
+            x: 300,
+            y: 300,
+            frames: [],
+          });
+        }
+      }
+    });
+
+    return result;
+  };
+
+  // Load points for the selected gallery, ensuring all configured points and all gallery Star Points are present
   useEffect(() => {
-    const loaded = getGalleryPoints(selectedGalleryId);
-    setPoints(loaded);
-    if (loaded.length > 0) {
-      setSelectedPointId(loaded[0].id);
+    const result = loadEnrichedPointsForGallery(selectedGalleryId);
+    setPoints(result);
+    if (result.length > 0) {
+      setSelectedPointId(result[0].id);
     } else {
       setSelectedPointId(null);
     }
@@ -91,9 +250,10 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
         'آیا مطمئن هستید که می‌خواهید تمام نقاط این گالری را به حالت پیش‌فرض بازنشانی کنید؟'
       )
     ) {
-      const def = resetGalleryPoints(selectedGalleryId);
-      setPoints(def);
-      if (def.length > 0) setSelectedPointId(def[0].id);
+      resetGalleryPoints(selectedGalleryId);
+      const enriched = loadEnrichedPointsForGallery(selectedGalleryId);
+      setPoints(enriched);
+      if (enriched.length > 0) setSelectedPointId(enriched[0].id);
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 2500);
     }
@@ -259,7 +419,12 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
   const selectedPoint = points.find((p) => p.id === selectedPointId) || null;
 
   const filteredPoints = points.filter((p) => {
-    if (activeTab === 'collection') return p.type === 'collection';
+    if (activeTab === 'collection') {
+      return p.type === 'collection' && (p as AdminCollectionPoint).pointType !== 'star';
+    }
+    if (activeTab === 'star') {
+      return p.type === 'collection' && (p as AdminCollectionPoint).pointType === 'star';
+    }
     if (activeTab === 'icon') return p.type === 'icon';
     if (activeTab === 'puzzle') return p.type === 'puzzle';
     return true;
@@ -490,6 +655,19 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
                 مجموعه
               </button>
               <button
+                onClick={() => setActiveTab('star')}
+                className={`flex-1 py-0.5 text-center font-bold transition-colors cursor-pointer flex items-center justify-center gap-1 ${
+                  activeTab === 'star'
+                    ? 'bg-[#fbbf24] text-[#1e1b18]'
+                    : 'hover:bg-[#eae7e7] text-[#0e0f0f]'
+                }`}
+              >
+                <Star className="w-2.5 h-2.5 fill-current" />
+                <span>
+                  ستاره ({points.filter((p) => p.type === 'collection' && (p as AdminCollectionPoint).pointType === 'star').length})
+                </span>
+              </button>
+              <button
                 onClick={() => setActiveTab('icon')}
                 className={`flex-1 py-0.5 text-center font-bold transition-colors cursor-pointer ${
                   activeTab === 'icon'
@@ -522,6 +700,7 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
               filteredPoints.map((pt) => {
                 const isSelected = selectedPointId === pt.id;
                 const isCollection = pt.type === 'collection';
+                const isStar = isCollection && (pt as AdminCollectionPoint).pointType === 'star';
                 const isPuzzle = pt.type === 'puzzle';
 
                 return (
@@ -535,7 +714,18 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      {isCollection ? (
+                      {isStar ? (
+                        <div
+                          className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 text-[10px] font-mono-custom font-bold ${
+                            isSelected
+                              ? 'border-[#fbbf24] bg-[#fbbf24] text-[#1e1b18]'
+                              : 'border-[#fbbf24] bg-[#fef3c7] text-[#92400e]'
+                          }`}
+                          title="نقطه ستاره‌دار"
+                        >
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                        </div>
+                      ) : isCollection ? (
                         <div
                           className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 text-[10px] font-mono-custom font-bold ${
                             isSelected
@@ -568,8 +758,9 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
                       )}
 
                       <div className="min-w-0 flex-1">
-                        <div className="text-xs font-bold truncate leading-tight">
-                          {pt.title || pt.id}
+                        <div className="text-xs font-bold truncate leading-tight flex items-center gap-1">
+                          {isStar && <span className="text-[#fbbf24] font-mono-custom text-[11px]">★</span>}
+                          <span className="truncate">{pt.title || pt.id}</span>
                         </div>
                         <div
                           className={`text-[10px] font-mono-custom flex items-center gap-2 mt-0.5 ${
@@ -849,6 +1040,27 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
                       </div>
                     </div>
 
+                    {/* Star ID display / editor if this is a Star Point */}
+                    {(selectedPoint as AdminCollectionPoint).pointType === 'star' && (
+                      <div>
+                        <label className="block text-[11px] font-bold font-mono-custom text-[#747878] uppercase mb-1">
+                          شناسه محتوای ستاره (Star ID)
+                        </label>
+                        <input
+                          type="text"
+                          value={(selectedPoint as AdminCollectionPoint).starId || ''}
+                          onChange={(e) =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
+                              starId: e.target.value,
+                            })
+                          }
+                          placeholder="مثال: star-01"
+                          className="w-full bg-[#fbf9f9] border border-[#0e0f0f] px-2 py-1 text-xs font-mono-custom"
+                        />
+                      </div>
+                    )}
+
                     {/* Artwork Frames Configuration Section */}
                     <div className="pt-2 border-t border-[#0e0f0f]/20 space-y-3">
                       <div className="flex items-center justify-between">
@@ -1084,6 +1296,13 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
                         <option value="gallery-00">گالری ۰۰ (Gallery 00 Museum Archive)</option>
                         <option value="gallery-01">گالری ۰۱ (Gallery 01 Architectural Hall)</option>
                         <option value="gallery-02">گالری ۰۲ (Gallery 02 Vault Pavilion)</option>
+                        <option value="gallery-03">گالری ۰۳ (Gallery 03 Modern Hall)</option>
+                        <option value="gallery-04">گالری ۰۴ (Gallery 04)</option>
+                        <option value="gallery-05">گالری ۰۵ (Gallery 05)</option>
+                        <option value="gallery-06">گالری ۰۶ (Gallery 06)</option>
+                        <option value="gallery-07">گالری ۰۷ (Gallery 07)</option>
+                        <option value="gallery-08">گالری ۰۸ (Gallery 08)</option>
+                        <option value="gallery-09">گالری ۰۹ (Gallery 09)</option>
                         <option value="collection">نمای فهرست مجموعه‌ها (Collection Index)</option>
                         <option value="curator">یادداشت‌های کیوریتور (Curator Logbook)</option>
                         <option value="tasks">وظایف و ماموریت‌ها (Tasks View)</option>

@@ -6,7 +6,17 @@ interface MuseumInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenAdmin?: () => void;
-  onNavigateToGallery?: (galleryId: 'gallery-00' | 'gallery-01' | 'gallery-03') => void;
+  onNavigateToGallery?: (
+    galleryId:
+      | 'gallery-00'
+      | 'gallery-01'
+      | 'gallery-02'
+      | 'gallery-03'
+      | 'gallery-04'
+      | 'gallery-05'
+      | 'gallery-06'
+      | string
+  ) => void;
 }
 
 export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
@@ -88,6 +98,66 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
                   >
                     <span className="block font-black text-[12px]">گالری ۰۳</span>
                     <span className="text-[10px] text-[#64748b]">هنر مدرن</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onNavigateToGallery('gallery-04');
+                      onClose();
+                    }}
+                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
+                  >
+                    <span className="block font-black text-[12px]">گالری ۰۴</span>
+                    <span className="text-[10px] text-[#64748b]">ثبت دوام ما</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onNavigateToGallery('gallery-05');
+                      onClose();
+                    }}
+                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
+                  >
+                    <span className="block font-black text-[12px]">گالری ۰۵</span>
+                    <span className="text-[10px] text-[#64748b]">ضرب آهنگ شهر</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onNavigateToGallery('gallery-06');
+                      onClose();
+                    }}
+                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
+                  >
+                    <span className="block font-black text-[12px]">گالری ۰۶</span>
+                    <span className="text-[10px] text-[#64748b]">در کشاکش تماشا</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onNavigateToGallery('gallery-07');
+                      onClose();
+                    }}
+                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
+                  >
+                    <span className="block font-black text-[12px]">گالری ۰۷</span>
+                    <span className="text-[10px] text-[#64748b]">گذر از برون به درون</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onNavigateToGallery('gallery-08');
+                      onClose();
+                    }}
+                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
+                  >
+                    <span className="block font-black text-[12px]">گالری ۰۸</span>
+                    <span className="text-[10px] text-[#64748b]">آونگ زمان</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onNavigateToGallery('gallery-09');
+                      onClose();
+                    }}
+                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
+                  >
+                    <span className="block font-black text-[12px]">گالری ۰۹</span>
+                    <span className="text-[10px] text-[#64748b]">تلاقی رسانه‌ها</span>
                   </button>
                 </div>
               </div>

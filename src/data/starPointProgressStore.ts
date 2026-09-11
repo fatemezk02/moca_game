@@ -93,7 +93,8 @@ export function isStarPointUnlocked(starPointId: string): boolean {
     return true;
   }
   const db = getStarPointProgressDb();
-  const extractNum = (s: string) => {
+  const extractNum = (s?: string) => {
+    if (!s) return null;
     const m = s.match(/\d+/);
     return m ? parseInt(m[0], 10) : null;
   };
@@ -117,7 +118,8 @@ export function isStarPointInformationUnlocked(starPointId: string): boolean {
     return true;
   }
   const db = getStarPointProgressDb();
-  const extractNum = (s: string) => {
+  const extractNum = (s?: string) => {
+    if (!s) return null;
     const m = s.match(/\d+/);
     return m ? parseInt(m[0], 10) : null;
   };
@@ -144,7 +146,8 @@ export function getUnlockedInformationStarsCount(allActiveStars?: Array<{ id: st
 
   if (allActiveStars && allActiveStars.length > 0) {
     let unlockedCount = 0;
-    const extractNum = (s: string) => {
+    const extractNum = (s?: string) => {
+      if (!s) return null;
       const m = s.match(/\d+/);
       return m ? parseInt(m[0], 10) : null;
     };

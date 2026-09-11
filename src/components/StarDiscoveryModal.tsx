@@ -27,7 +27,8 @@ import { usePlayerStats } from '../hooks/usePlayerStats';
 import { ArtworkFrame } from './ArtworkFrame';
 
 export interface StarDiscoveryModalProps {
-  starPointId: string;
+  starPointId?: string;
+  starId?: string;
   galleryId?: string;
   isOpen: boolean;
   onClose: () => void;
@@ -56,13 +57,25 @@ type ModalPhase =
  */
 export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
   starPointId,
+  starId,
   galleryId = 'gallery-01',
   isOpen,
   onClose,
   initialMode,
 }) => {
+  const effectiveStarPointId = starPointId || starId || '';
+  const effectiveStarId = starId || starPointId || '';
   const playerStats = usePlayerStats();
-  const discoveryData = getStarDiscovery(starPointId, galleryId);
+
+  // Content subscription to ensure live re-render when Google Sheets data finishes loading
+  const [, setContentVersion] = useState(0);
+  useEffect(() => {
+    return contentService.subscribe(() => {
+      setContentVersion((v) => v + 1);
+    });
+  }, []);
+
+  const discoveryData = getStarDiscovery(effectiveStarPointId, galleryId, effectiveStarId);
 
   const [phase, setPhase] = useState<ModalPhase>('initial_choice');
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -71,7 +84,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
 
   useEffect(() => {
     setArtworkImageError(false);
-  }, [starPointId, discoveryData?.information?.image]);
+  }, [effectiveStarPointId, discoveryData?.information?.image]);
 
   // Dynamic calculation of information unlock progress
   const [progressCount, setProgressCount] = useState<{ unlocked: number; total: number }>(() => {
@@ -110,8 +123,8 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
     if (discoveryData?.starNumber) {
       return discoveryData.starNumber;
     }
-    const starIdStr = discoveryData?.starId || discoveryData?.id || starPointId;
-    const numMatch = starIdStr.match(/\d+/)?.[0];
+    const starIdStr = discoveryData?.starId || discoveryData?.id || effectiveStarPointId || '';
+    const numMatch = starIdStr ? starIdStr.match(/\d+/)?.[0] : null;
     if (numMatch) {
       return parseInt(numMatch, 10).toString();
     }
@@ -225,7 +238,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
 
   if (!discoveryData) {
     console.warn(
-      `[StarDiscoveryModal] Star Point "${starPointId}" has no matching Star record in gallery "${galleryId}". Modal cannot display content.`
+      `[StarDiscoveryModal] Missing Star record for Star Point ID "${effectiveStarPointId}", missing star_id: "${effectiveStarId}" in gallery "${galleryId}". Modal cannot display content.`
     );
     return (
       <AnimatePresence>

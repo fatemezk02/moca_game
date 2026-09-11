@@ -8,6 +8,32 @@
 
 export type ContentSourceType = 'network' | 'cache' | 'seed-fallback';
 
+export type ExperienceIconType =
+  | 'frame'
+  | 'shadow-silhouette'
+  | 'mirror'
+  | 'vintage-camera'
+  | 'mirror-selfie'
+  | 'darkroom'
+  | (string & {});
+
+/**
+ * Strongly typed representation of an Experience Point entity
+ * Loaded from Google Sheets 'Experiences' tab
+ */
+export interface ExperienceContent {
+  id: string;
+  experienceId: string;
+  galleryId: string;
+  labelFa: string;
+  descriptionFa: string;
+  imageUrl?: string;
+  iconId: ExperienceIconType;
+  title?: string;
+  active?: boolean;
+  rawFields?: Record<string, string>;
+}
+
 /**
  * Strongly typed representation of a Question item
  */
@@ -114,6 +140,7 @@ export interface GameContentData {
   stars: StarContent[];
   artworks: ArtworkContent[];
   galleries: GalleryContent[];
+  experiences?: ExperienceContent[];
   metadata: {
     loadedAt: number;
     source: ContentSourceType;
@@ -136,6 +163,7 @@ export interface ContentServiceStatus {
     stars: number;
     artworks: number;
     galleries: number;
+    experiences?: number;
   };
 }
 
@@ -151,6 +179,7 @@ export interface GameContentSummary {
     stars: number;
     artworks: number;
     galleries: number;
+    experiences?: number;
   };
   hasLocalCache: boolean;
 }
@@ -164,6 +193,9 @@ export interface GameContentDebug {
   getStars: () => StarContent[];
   getArtworks: () => ArtworkContent[];
   getGalleries: () => GalleryContent[];
+  getExperiences: () => ExperienceContent[];
+  getExperiencesForGallery: (galleryId: string) => ExperienceContent[];
+  getExperienceById: (id: string) => ExperienceContent | null;
   getGalleryById: (id: string) => GalleryContent | null;
   getArtworkById: (id: string) => ArtworkContent | null;
   getGalleryPuzzleArtwork: (galleryId: string) => ArtworkContent | null;

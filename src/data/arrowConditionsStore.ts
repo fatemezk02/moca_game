@@ -3,6 +3,7 @@ import {
   isPuzzlePieceCollected,
   isPuzzleQuestionCompleted,
   isGalleryPuzzleCompleted,
+  getPuzzleProgress,
 } from './puzzleProgressStore';
 import { isGalleryQuestionsCompleted, getQuestionProgress } from './questionProgressStore';
 import { getProgressionRuleForArrow } from './galleryProgressionStore';
@@ -24,7 +25,8 @@ const STORAGE_ANSWERED_QUESTIONS_KEY = 'museum_answered_questions';
  * Normalizes question ID for robust matching across formats
  * e.g. 'gallery01-puzzle-q03', 'gallery01-q03', 'q03', 'q3', 'question-03'
  */
-function normalizeQuestionId(qId: string): string {
+function normalizeQuestionId(qId?: string): string {
+  if (!qId || typeof qId !== 'string') return '';
   return qId.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
 }
 
@@ -213,6 +215,12 @@ export function isQuestionAnswered(questionId: string): boolean {
   if (
     isPuzzleQuestionCompleted('gallery-01', questionId) ||
     isPuzzleQuestionCompleted('gallery-03', questionId) ||
+    isPuzzleQuestionCompleted('gallery-04', questionId) ||
+    isPuzzleQuestionCompleted('gallery-05', questionId) ||
+    isPuzzleQuestionCompleted('gallery-06', questionId) ||
+    isPuzzleQuestionCompleted('gallery-07', questionId) ||
+    isPuzzleQuestionCompleted('gallery-08', questionId) ||
+    isPuzzleQuestionCompleted('gallery-09', questionId) ||
     isPuzzleQuestionCompleted('gallery-00', questionId)
   ) {
     return true;
@@ -263,10 +271,21 @@ export function isQuestionAnswered(questionId: string): boolean {
  */
 export function isPieceCollected(puzzlePieceId: string): boolean {
   if (!puzzlePieceId) return false;
+  const progress = getPuzzleProgress();
+  for (const gId in progress) {
+    if (Array.isArray(progress[gId]?.collectedPieces) && progress[gId].collectedPieces.includes(puzzlePieceId)) {
+      return true;
+    }
+  }
   return (
     isPuzzlePieceCollected('gallery-01', puzzlePieceId) ||
     isPuzzlePieceCollected('gallery-03', puzzlePieceId) ||
     isPuzzlePieceCollected('gallery-04', puzzlePieceId) ||
+    isPuzzlePieceCollected('gallery-05', puzzlePieceId) ||
+    isPuzzlePieceCollected('gallery-06', puzzlePieceId) ||
+    isPuzzlePieceCollected('gallery-07', puzzlePieceId) ||
+    isPuzzlePieceCollected('gallery-08', puzzlePieceId) ||
+    isPuzzlePieceCollected('gallery-09', puzzlePieceId) ||
     isPuzzlePieceCollected('gallery-00', puzzlePieceId)
   );
 }
