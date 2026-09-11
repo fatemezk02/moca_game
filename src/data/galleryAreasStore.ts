@@ -1,6 +1,16 @@
 import { GalleryAreaConfig } from '../types/galleryArea';
+import { normalizeGalleryId } from '../services/content/mappers';
 
 const STORAGE_KEY = 'museum_gallery_areas_config';
+export const STORAGE_GALLERY_LAMPS_KEY = 'museum_gallery_lamps_config';
+
+export interface GalleryLampItem {
+  id: string;
+  galleryId: string;
+  title: string;
+  x: number;
+  y: number;
+}
 
 /**
  * Default location of the lamp when player is in Gallery 00 (Lobby/Master Archive entrance)
@@ -10,6 +20,21 @@ export const DEFAULT_GALLERY_00_LAMP_POSITION = {
   x: 302.4,
   y: 77.7,
 };
+
+/**
+ * Standard known museum gallery lamps on the Master Map SVG (0 0 604.8 844.86)
+ */
+export const DEFAULT_GALLERY_LAMPS: Array<{ galleryId: string; title: string; defaultX: number; defaultY: number }> = [
+  { galleryId: 'gallery_02', title: 'چراغ گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 302, defaultY: 85 },
+  { galleryId: 'gallery_03', title: 'چراغ گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 475, defaultY: 335 },
+  { galleryId: 'gallery_04', title: 'چراغ گالری ۰۴ (ثبت دوام ما)', defaultX: 135, defaultY: 335 },
+  { galleryId: 'gallery_05', title: 'چراغ گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 135, defaultY: 550 },
+  { galleryId: 'gallery_06', title: 'چراغ گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 475, defaultY: 550 },
+  { galleryId: 'gallery_07', title: 'چراغ گالری ۰۷ (گذر از برون به درون)', defaultX: 135, defaultY: 700 },
+  { galleryId: 'gallery_08', title: 'چراغ گالری ۰۸ (آونگ زمان)', defaultX: 475, defaultY: 700 },
+  { galleryId: 'gallery_09', title: 'چراغ گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 302, defaultY: 750 },
+  { galleryId: 'gallery_00', title: 'چراغ ورودی (نقشه اصلی)', defaultX: 302.4, defaultY: 77.7 },
+];
 
 /**
  * Default gallery areas configured for Gallery 01 and Gallery 03 on the master Gallery 00 SVG map.
@@ -108,36 +133,202 @@ export function getGalleryAreas(): GalleryAreaConfig[] {
 }
 
 /**
- * Find configured Gallery Area by target galleryId
+ * Get all saved gallery lamp positions overrides from localStorage
  */
-export function getGalleryAreaByGalleryId(galleryId: string): GalleryAreaConfig | undefined {
-  const areas = getGalleryAreas();
-  return areas.find((a) => a.galleryId === galleryId);
+export function getSavedGalleryLamps(): Record<string, { x: number; y: number }> {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(STORAGE_GALLERY_LAMPS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load saved gallery lamps:', err);
+  }
+  return {};
 }
 
 /**
- * Resolves the dynamic lamp position for the player's current gallery on Gallery 00.
- *
- * player.currentGalleryId
- *         ↓
- * galleryAreas[currentGalleryId]
- *         ↓
- * lampPosition
- *         ↓
- * Gallery 00 SVG
+ * Persists a gallery lamp position using exact SVG viewBox coordinates.
+ * Preserves the gallery association and updates both dedicated lamp storage and galleryAreaConfig.
+ */
+export function saveGalleryLampPosition(rawGalleryId: string, x: number, y: number): void {
+  const roundedX = Math.round(x * 10) / 10;
+  const roundedY = Math.round(y * 10) / 10;
+  const canonId = normalizeGalleryId(rawGalleryId) || rawGalleryId;
+
+  // 1. Update saved lamps dictionary
+  const current = getSavedGalleryLamps();
+  current[canonId] = { x: roundedX, y: roundedY };
+  current[rawGalleryId] = { x: roundedX, y: roundedY };
+
+  // Also cross-link legacy aliases (e.g. gallery_02 <-> gallery-01)
+  if (canonId === 'gallery_02') {
+    current['gallery-01'] = { x: roundedX, y: roundedY };
+  } else if (canonId === 'gallery_03') {
+    current['gallery-03'] = { x: roundedX, y: roundedY };
+  } else if (canonId === 'gallery_04') {
+    current['gallery-04'] = { x: roundedX, y: roundedY };
+  } else if (canonId === 'gallery_00') {
+    current['gallery-00'] = { x: roundedX, y: roundedY };
+    current['gallery_01'] = { x: roundedX, y: roundedY };
+  }
+
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(STORAGE_GALLERY_LAMPS_KEY, JSON.stringify(current));
+    }
+  } catch (err) {
+    console.error('Failed to persist gallery lamp position:', err);
+  }
+
+  // 2. Also update corresponding galleryArea if one exists
+  const areas = getGalleryAreas();
+  let updatedAnyArea = false;
+  const newAreas = areas.map((area) => {
+    const areaCanon = normalizeGalleryId(area.galleryId);
+    if (
+      area.galleryId === rawGalleryId ||
+      area.galleryId === canonId ||
+      areaCanon === canonId ||
+      (canonId === 'gallery_02' && area.galleryId === 'gallery-01')
+    ) {
+      updatedAnyArea = true;
+      return {
+        ...area,
+        lampPosition: { x: roundedX, y: roundedY },
+      };
+    }
+    return area;
+  });
+
+  if (updatedAnyArea) {
+    saveGalleryAreas(newAreas);
+  }
+
+  // 3. Dispatch update events
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('museum_lamp_position_updated', {
+        detail: { galleryId: canonId, rawGalleryId, x: roundedX, y: roundedY },
+      })
+    );
+    window.dispatchEvent(new CustomEvent('museum_gallery_areas_updated'));
+  }
+}
+
+/**
+ * Returns list of all existing gallery lamps for the Master Map.
+ * Ensures exactly one lamp per gallery and preserves gallery association.
+ */
+export function getAllGalleryLamps(): GalleryLampItem[] {
+  const lamps: GalleryLampItem[] = [];
+  const seenGalleries = new Set<string>();
+
+  // 1. Process known standard museum galleries
+  for (const def of DEFAULT_GALLERY_LAMPS) {
+    const canonId = normalizeGalleryId(def.galleryId);
+    if (seenGalleries.has(canonId)) continue;
+    seenGalleries.add(canonId);
+
+    const pos = getLampPositionForGallery(def.galleryId);
+    lamps.push({
+      id: `lamp-${canonId}`,
+      galleryId: canonId,
+      title: def.title,
+      x: pos.x,
+      y: pos.y,
+    });
+  }
+
+  // 2. Check if any other gallery area exists that was not in standard list
+  const areas = getGalleryAreas();
+  for (const area of areas) {
+    const canonId = normalizeGalleryId(area.galleryId);
+    if (!seenGalleries.has(canonId)) {
+      seenGalleries.add(canonId);
+      const pos = getLampPositionForGallery(area.galleryId);
+      lamps.push({
+        id: `lamp-${canonId}`,
+        galleryId: canonId,
+        title: `چراغ ${area.title || canonId}`,
+        x: pos.x,
+        y: pos.y,
+      });
+    }
+  }
+
+  return lamps;
+}
+
+/**
+ * Find configured Gallery Area by target galleryId (normalizing aliases)
+ */
+export function getGalleryAreaByGalleryId(galleryId: string): GalleryAreaConfig | undefined {
+  if (!galleryId) return undefined;
+  const canonTarget = normalizeGalleryId(galleryId);
+  const areas = getGalleryAreas();
+  return areas.find((a) => {
+    if (a.galleryId === galleryId) return true;
+    const aCanon = normalizeGalleryId(a.galleryId);
+    if (aCanon && aCanon === canonTarget) return true;
+    // Cross-link gallery-01 area with gallery_02
+    if (
+      (galleryId === 'gallery_02' && a.galleryId === 'gallery-01') ||
+      (galleryId === 'gallery-01' && a.galleryId === 'gallery_02')
+    ) {
+      return true;
+    }
+    return false;
+  });
+}
+
+/**
+ * Resolves the dynamic lamp position for a gallery on the Master Map SVG (604.8 × 844.86).
+ * Priority:
+ * 1. Dedicated saved lamp position (from Development Positioning Tool)
+ * 2. Configured Gallery Area lampPosition
+ * 3. Default known gallery lamp position
+ * 4. Fallback default entrance position
  */
 export function getLampPositionForGallery(galleryId: string): { x: number; y: number } {
-  // If player is in Gallery 00, return default Gallery 00 lamp position
-  if (!galleryId || galleryId === 'gallery-00') {
+  // If player is in Lobby/Master Archive entrance
+  if (!galleryId || galleryId === 'gallery-00' || galleryId === 'gallery_00') {
+    const saved = getSavedGalleryLamps();
+    if (saved['gallery-00']) return saved['gallery-00'];
+    if (saved['gallery_00']) return saved['gallery_00'];
     return DEFAULT_GALLERY_00_LAMP_POSITION;
   }
 
+  const canonId = normalizeGalleryId(galleryId);
+  const saved = getSavedGalleryLamps();
+
+  // 1. Saved lamp positions
+  if (saved[galleryId]) return saved[galleryId];
+  if (saved[canonId]) return saved[canonId];
+  if (canonId === 'gallery_02' && saved['gallery-01']) return saved['gallery-01'];
+  if (canonId === 'gallery_03' && saved['gallery-03']) return saved['gallery-03'];
+  if (canonId === 'gallery_04' && saved['gallery-04']) return saved['gallery-04'];
+
+  // 2. Configured gallery area
   const area = getGalleryAreaByGalleryId(galleryId);
   if (area && area.lampPosition) {
     return area.lampPosition;
   }
 
-  // Fallback to default location
+  // 3. Known default position
+  const foundDef = DEFAULT_GALLERY_LAMPS.find(
+    (d) => d.galleryId === galleryId || normalizeGalleryId(d.galleryId) === canonId
+  );
+  if (foundDef) {
+    return { x: foundDef.defaultX, y: foundDef.defaultY };
+  }
+
+  // 4. Fallback to default location
   return DEFAULT_GALLERY_00_LAMP_POSITION;
 }
 

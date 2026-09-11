@@ -375,11 +375,11 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 className="space-y-4 my-auto"
               >
                 <div className="text-center space-y-1.5">
-                  <h3 className="font-sans-custom text-[16px] sm:text-[17px] font-black text-[#1e1b18]">
+                  <h3 className="font-sans-custom text-[16px] sm:text-[17px] font-black text-[#1e1b18] break-words">
                     {discoveryData.titleFa}
                   </h3>
                   {discoveryData.introFa && (
-                    <p className="text-[12px] sm:text-[13px] font-medium text-[#475569] leading-relaxed px-2">
+                    <p className="text-[12px] sm:text-[13px] font-medium text-[#475569] leading-relaxed px-2 break-words">
                       {discoveryData.introFa}
                     </p>
                   )}

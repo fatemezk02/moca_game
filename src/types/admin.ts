@@ -44,7 +44,8 @@ export interface AdminIconPoint {
     | 'preset-door'
     | 'preset-star'
     | 'preset-info'
-    | 'preset-location-coffee';
+    | 'preset-location-coffee'
+    | 'preset-location-shop';
   iconData?: string; // SVG raw string or base64 data URL
   width: number;
   height: number;

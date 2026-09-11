@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type LocationMarkerIconType = 'coffee' | 'info' | 'star' | 'general';
+export type LocationMarkerIconType = 'coffee' | 'shop' | 'info' | 'star' | 'general';
 
 export interface LocationPointMarkerProps {
   iconType?: LocationMarkerIconType;
@@ -165,8 +165,35 @@ export const LocationPointMarker: React.FC<LocationPointMarkerProps> = ({
           </g>
         )}
 
+        {/* Inner Glyph: Square Minimalist Shopping Bag */}
+        {iconType === 'shop' && (
+          <g id="glyph-shopping-bag" className="pointer-events-none">
+            {/* Clean Curved Handle */}
+            <path
+              d="M 14.0 11.5 C 14.0 8.8, 18.0 8.8, 18.0 11.5"
+              stroke="#1e1b18"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              fill="none"
+            />
+
+            {/* Square Clean Bag Body */}
+            <rect
+              x="12.2"
+              y="11.5"
+              width="7.6"
+              height="6.2"
+              rx="0.6"
+              fill="#292524"
+              stroke="#1e1b18"
+              strokeWidth="1.2"
+              strokeLinejoin="round"
+            />
+          </g>
+        )}
+
         {/* Fallback general glyph */}
-        {iconType !== 'coffee' && (
+        {iconType !== 'coffee' && iconType !== 'shop' && (
           <circle
             cx="16"
             cy="13.5"

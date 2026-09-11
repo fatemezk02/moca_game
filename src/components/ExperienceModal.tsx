@@ -44,7 +44,8 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({
   const titleText = experience.title || experience.labelFa || 'تجربه تعاملی';
   const labelText = experience.labelFa || titleText;
   const descriptionText = experience.descriptionFa || '';
-  const hasImage = Boolean(experience.imageUrl && experience.imageUrl.trim().length > 0);
+  const rawImageUrl = typeof experience.imageUrl === 'string' ? experience.imageUrl.trim() : '';
+  const hasImage = Boolean(rawImageUrl && rawImageUrl !== 'null' && rawImageUrl !== 'undefined');
 
   return (
     <AnimatePresence>
@@ -101,39 +102,30 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({
 
           {/* Scrollable Modal Body */}
           <div className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
-            {/* Image Preview Container */}
+            {/* Complete Artwork Image Container (Responsive, Uncropped, Preserves Aspect Ratio) */}
             {hasImage && !imageError && (
-              <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-2xl overflow-hidden border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] bg-[#f5f2eb] flex items-center justify-center">
+              <div
+                id="experience-modal-image-wrapper"
+                className="relative w-full rounded-2xl overflow-hidden border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] bg-[#f5f2eb] flex items-center justify-center p-1 sm:p-1.5"
+              >
                 {!imageLoaded && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#f5f2eb] animate-pulse">
-                    <ImageIcon className="w-8 h-8 text-[#a8a29e]" />
+                  <div className="w-full py-8 flex flex-col items-center justify-center gap-2 bg-[#f5f2eb] animate-pulse">
+                    <ImageIcon className="w-6 h-6 text-[#a8a29e]" />
                     <span className="text-[11px] font-sans-custom text-[#78716c]">
                       در حال بارگذاری تصویر...
                     </span>
                   </div>
                 )}
                 <img
-                  src={experience.imageUrl}
+                  src={rawImageUrl}
                   alt={titleText}
                   referrerPolicy="no-referrer"
                   onLoad={() => setImageLoaded(true)}
                   onError={() => setImageError(true)}
-                  className={`w-full h-full object-cover transition-opacity duration-300 ${
-                    imageLoaded ? 'opacity-100' : 'opacity-0'
+                  className={`max-w-full max-h-[48vh] sm:max-h-[55vh] w-auto h-auto object-contain rounded-xl block mx-auto transition-opacity duration-300 ${
+                    imageLoaded ? 'opacity-100' : 'absolute inset-0 opacity-0 pointer-events-none'
                   }`}
                 />
-              </div>
-            )}
-
-            {/* If no image or image failed to load, show subtle themed banner */}
-            {(!hasImage || imageError) && (
-              <div className="w-full py-6 px-4 rounded-2xl border-2 border-[#1e1b18] border-dashed bg-[#fffdfa] flex flex-col items-center justify-center gap-2 text-center text-[#78716c]">
-                <div className="w-12 h-12 rounded-full bg-[#fef3c7] border border-[#1e1b18] flex items-center justify-center text-[#92400e]">
-                  <ExperienceIcon iconId={experience.iconId} className="w-6 h-6" />
-                </div>
-                <span className="text-[12px] font-sans-custom font-medium">
-                  {labelText}
-                </span>
               </div>
             )}
 

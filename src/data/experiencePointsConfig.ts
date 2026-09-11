@@ -7,6 +7,7 @@ export interface ExperienceMapPointDef {
   experienceId: string;
   galleryId: string;
   iconId: ExperienceIconType;
+  icon_id?: ExperienceIconType;
   x: number;
   y: number;
   labelFa?: string;
@@ -136,13 +137,55 @@ export function getExperiencePointsForGallery(galleryId: string): ExperienceMapP
     const x = saved ? saved.x : def.x;
     const y = saved ? saved.y : def.y;
 
+    const effectiveIcon = liveExp?.iconId || def.iconId;
+
     return {
       ...def,
       x,
       y,
-      iconId: liveExp?.iconId || def.iconId,
+      iconId: effectiveIcon,
+      icon_id: effectiveIcon,
       labelFa: liveExp?.labelFa || def.labelFa,
       title: liveExp?.title || def.title,
     };
   });
 }
+
+/**
+ * Saves or updates coordinates for an Experience Point in local persistence
+ * and dispatches update events so all gallery views re-render immediately.
+ */
+export function saveExperiencePointPosition(
+  id: string,
+  x: number,
+  y: number,
+  galleryId?: string
+): void {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return;
+  }
+  try {
+    const current = getSavedExperiencePoints();
+    current[id] = { x, y };
+    localStorage.setItem(STORAGE_EXP_POINTS_KEY, JSON.stringify(current));
+
+    window.dispatchEvent(
+      new CustomEvent('museum_experience_points_updated', {
+        detail: { id, x, y, galleryId },
+      })
+    );
+    window.dispatchEvent(
+      new CustomEvent('museum_points_updated', {
+        detail: { galleryId },
+      })
+    );
+    window.dispatchEvent(
+      new CustomEvent('museum_puzzle_progress_updated', {
+        detail: { galleryId },
+      })
+    );
+  } catch (err) {
+    console.error('Error saving experience point position:', err);
+  }
+}
+

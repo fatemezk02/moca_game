@@ -164,14 +164,21 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
   // Dynamic Stars resolution: load all active stars for gallery_09 from ContentService
   const effectiveCollectionPoints = useMemo(() => {
     const configuredCollectionPoints = points.filter(
-      (p): p is AdminCollectionPoint => p.type === 'collection'
+      (p): p is AdminCollectionPoint =>
+        p.type === 'collection' &&
+        !['star-26', 'star-27'].includes(p.id) &&
+        !['star-26', 'star-27'].includes(p.starId || '')
     );
 
     // Query active stars from ContentService
     const allStars = contentService.getStars().filter((s) => s.active !== false);
     const g09Stars = allStars.filter((s) => {
       const gId = normalizeGalleryId(s.galleryId);
-      return gId === 'gallery_09' || gId === 'gallery-09';
+      const starId = s.starId || s.id;
+      return (
+        (gId === 'gallery_09' || gId === 'gallery-09') &&
+        !['star-26', 'star-27'].includes(starId)
+      );
     });
 
     const result = [...configuredCollectionPoints];

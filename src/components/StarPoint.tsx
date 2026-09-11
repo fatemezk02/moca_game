@@ -171,22 +171,32 @@ export const StarPoint: React.FC<StarPointProps> = ({
               /* Label projecting to the LEFT */
               <div className="flex flex-col items-end pr-1 select-none group">
                 {/* Horizontal line in line with the star */}
-                <div className="h-[2px] bg-[#1e1b18] w-8 sm:w-12 -mr-1" />
+                <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -mr-1" />
 
-                {/* Section-style badge container */}
-                <div className="mt-1 bg-[#ffffff] group-hover:bg-[#fefce8] text-[#1e1b18] border-[1.5px] border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] rounded-md px-2.5 py-1 font-sans-custom text-[11px] sm:text-[12px] font-black tracking-tight whitespace-nowrap transition-colors flex items-center gap-1.5">
-                  <span>{labelText}</span>
+                {/* Collection/lamp-style badge container: content-based width with dynamic boundary limit */}
+                <div
+                  style={{
+                    maxWidth: `min(290px, calc(${Math.max(15, leftPercent - 2)}vw - 16px))`,
+                  }}
+                  className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
+                >
+                  <span className="break-words leading-snug">{labelText}</span>
                 </div>
               </div>
             ) : (
               /* Label projecting to the RIGHT */
               <div className="flex flex-col items-start pl-1 select-none group">
                 {/* Horizontal line in line with the star */}
-                <div className="h-[2px] bg-[#1e1b18] w-8 sm:w-12 -ml-1" />
+                <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -ml-1" />
 
-                {/* Section-style badge container */}
-                <div className="mt-1 bg-[#ffffff] group-hover:bg-[#fefce8] text-[#1e1b18] border-[1.5px] border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] rounded-md px-2.5 py-1 font-sans-custom text-[11px] sm:text-[12px] font-black tracking-tight whitespace-nowrap transition-colors flex items-center gap-1.5">
-                  <span>{labelText}</span>
+                {/* Collection/lamp-style badge container: content-based width with dynamic boundary limit */}
+                <div
+                  style={{
+                    maxWidth: `min(290px, calc(${Math.max(15, 100 - leftPercent - 2)}vw - 16px))`,
+                  }}
+                  className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
+                >
+                  <span className="break-words leading-snug">{labelText}</span>
                 </div>
               </div>
             )}

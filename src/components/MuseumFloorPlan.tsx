@@ -79,10 +79,12 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
 
     window.addEventListener('museum_player_location_updated', handleLocUpdate);
     window.addEventListener('museum_gallery_areas_updated', handleAreasUpdate);
+    window.addEventListener('museum_lamp_position_updated', handleAreasUpdate);
 
     return () => {
       window.removeEventListener('museum_player_location_updated', handleLocUpdate);
       window.removeEventListener('museum_gallery_areas_updated', handleAreasUpdate);
+      window.removeEventListener('museum_lamp_position_updated', handleAreasUpdate);
     };
   }, []);
 
@@ -406,7 +408,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           .map((iconPoint) => {
             const posX = (iconPoint.x / 604.8) * 100;
             const posY = (iconPoint.y / 844.86) * 100;
-            const isLocationPin = iconPoint.iconType === 'preset-location-coffee';
+            const isLocationPin = iconPoint.iconType?.startsWith('preset-location-');
 
             return (
               <div

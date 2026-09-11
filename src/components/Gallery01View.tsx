@@ -169,7 +169,9 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
     }
   };
 
-  const collectionPoints = points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
+  const collectionPoints = points.filter(
+    (p) => p.type === 'collection' && p.id !== 'artwork-02' && p.id !== 'artwork-03' && p.id !== 'artwork-04'
+  ) as AdminCollectionPoint[];
   const iconPoints = points.filter((p) => p.type === 'icon') as AdminIconPoint[];
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
 

@@ -60,6 +60,17 @@ export const CustomIconRender: React.FC<CustomIconRenderProps> = ({
         />
       );
 
+    case 'preset-location-shop':
+      return (
+        <LocationPointMarker
+          iconType="shop"
+          size={point.width || 32}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+
     case 'preset-question':
       return (
         <div

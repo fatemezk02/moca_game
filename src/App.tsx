@@ -39,6 +39,7 @@ import {
 import { resetEntireGame } from './data/gameReset';
 import { contentService, registerContentDebugAPI } from './services/content';
 import { Volume2, Pause, Play, X, Compass, Sparkles } from 'lucide-react';
+import { DevMapPositioningTool, IS_DEV_POSITIONING_ENABLED } from './components/DevMapPositioningTool';
 
 export default function App() {
   const playerStats = usePlayerStats();
@@ -351,8 +352,10 @@ export default function App() {
     registerContentDebugAPI(contentService);
   });
 
-  // If Admin Mode is active
-  if (isAdminOpen) {
+  // Render current view
+  const renderCurrentView = () => {
+    // If Admin Mode is active
+    if (isAdminOpen) {
     return (
       <AdminManagementView
         initialGalleryId={
@@ -688,5 +691,15 @@ export default function App() {
         />
       )}
     </div>
+    );
+  };
+
+  return (
+    <>
+      {renderCurrentView()}
+      {IS_DEV_POSITIONING_ENABLED && !isAdminOpen && !currentGallery.includes('questions') && (
+        <DevMapPositioningTool currentGalleryId={currentGallery} activeTab={activeTab} />
+      )}
+    </>
   );
 }

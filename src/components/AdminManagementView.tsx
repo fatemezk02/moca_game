@@ -103,22 +103,12 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
       { id: 'star-18', starId: 'star-18', title: 'بازخوانی دههٔ ۱۹۶۰', defaultX: 380, defaultY: 760 },
     ],
     'gallery-07': [
-      { id: 'star-16', starId: 'star-16', title: 'ستاره کشف ۱۶', defaultX: 230, defaultY: 310 },
-      { id: 'star-17', starId: 'star-17', title: 'ستاره کشف ۱۷', defaultX: 540, defaultY: 320 },
-      { id: 'star-18', starId: 'star-18', title: 'ستاره کشف ۱۸', defaultX: 230, defaultY: 720 },
       { id: 'star-19', starId: 'star-19', title: 'ستاره کشف ۱۹', defaultX: 540, defaultY: 780 },
     ],
-    'gallery-08': [
-      { id: 'star-20', starId: 'star-20', title: 'ستاره کشف ۲۰', defaultX: 230, defaultY: 410 },
-      { id: 'star-21', starId: 'star-21', title: 'ستاره کشف ۲۱', defaultX: 470, defaultY: 410 },
-      { id: 'star-22', starId: 'star-22', title: 'ستاره کشف ۲۲', defaultX: 250, defaultY: 720 },
-      { id: 'star-23', starId: 'star-23', title: 'ستاره کشف ۲۳', defaultX: 470, defaultY: 640 },
-    ],
+    'gallery-08': [],
     'gallery-09': [
       { id: 'star-24', starId: 'star-24', title: 'ستاره کشف ۲۴', defaultX: 300, defaultY: 360 },
       { id: 'star-25', starId: 'star-25', title: 'ستاره کشف ۲۵', defaultX: 480, defaultY: 360 },
-      { id: 'star-26', starId: 'star-26', title: 'ستاره کشف ۲۶', defaultX: 290, defaultY: 650 },
-      { id: 'star-27', starId: 'star-27', title: 'ستاره کشف ۲۷', defaultX: 480, defaultY: 650 },
     ],
   };
 

@@ -120,27 +120,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     height: 844.86,
     collectionPoints: [
       {
-        id: 'col-01',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-00',
-        title: 'Classical Antiquities & Archaic Reliefs',
-        roomCode: 'SEC 01',
-        roomSection: 'Northwest Diagonal Gallery',
-        x: 160, // 26.5%
-        y: 173, // 20.5%
-        direction: 'left',
-        frames: [
-          {
-            id: 'col-01-f1',
-            order: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-          },
-        ],
-      },
-      {
         id: 'col-02',
         type: 'collection',
         pointType: 'normal',
@@ -154,27 +133,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [
           {
             id: 'col-02-f1',
-            order: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-          },
-        ],
-      },
-      {
-        id: 'col-03',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-00',
-        title: 'Hellenistic Bronzes & Numismatics',
-        roomCode: 'SEC 03',
-        roomSection: 'West Central Transept',
-        x: 109, // 18.0%
-        y: 355, // 42.0%
-        direction: 'left',
-        frames: [
-          {
-            id: 'col-03-f1',
             order: 1,
             x: 0,
             y: 0,
@@ -225,27 +183,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         ],
       },
       {
-        id: 'col-06',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-00',
-        title: 'Etruscan Terracotta & Funerary Urns',
-        roomCode: 'SEC 06',
-        roomSection: 'Southwest Chamber',
-        x: 139, // 23.0%
-        y: 574, // 68.0%
-        direction: 'left',
-        frames: [
-          {
-            id: 'col-06-f1',
-            order: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-          },
-        ],
-      },
-      {
         id: 'col-07',
         type: 'collection',
         pointType: 'normal',
@@ -259,27 +196,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [
           {
             id: 'col-07-f1',
-            order: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-          },
-        ],
-      },
-      {
-        id: 'col-08',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-00',
-        title: 'Late Roman Sarcophagi & Vault Relics',
-        roomCode: 'SEC 08',
-        roomSection: 'South Crypt & Portico',
-        x: 302, // 50.0%
-        y: 693, // 82.0%
-        direction: 'bottom',
-        frames: [
-          {
-            id: 'col-08-f1',
             order: 1,
             x: 0,
             y: 0,
@@ -306,9 +222,21 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'icon',
         galleryId: 'gallery-00',
         title: 'کافه موزه (Museum Café)',
-        x: 302,
+        x: 235,
         y: 775,
         iconType: 'preset-location-coffee',
+        width: 32,
+        height: 32,
+        destination: 'gallery-00',
+      },
+      {
+        id: 'icon-g00-shop',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'فروشگاه موزه (Museum Shop)',
+        x: 370,
+        y: 775,
+        iconType: 'preset-location-shop',
         width: 32,
         height: 32,
         destination: 'gallery-00',
@@ -351,51 +279,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
           { id: 'artwork-01-f1', order: 1, x: 0, y: 0, scale: 1 },
           { id: 'artwork-01-f2', order: 2, x: 0, y: 0, scale: 1 },
           { id: 'artwork-01-f3', order: 3, x: 0, y: 0, scale: 1 },
-        ],
-      },
-      {
-        id: 'artwork-02',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-01',
-        title: 'West Gallery Vessel',
-        roomSection: 'WEST CORRIDOR',
-        x: 170,
-        y: 520,
-        frames: [
-          { id: 'artwork-02-f1', order: 1, x: 0, y: 0, scale: 1 },
-          { id: 'artwork-02-f2', order: 2, x: 0, y: 0, scale: 1 },
-          { id: 'artwork-02-f3', order: 3, x: 0, y: 0, scale: 1 },
-        ],
-      },
-      {
-        id: 'artwork-03',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-01',
-        title: 'East Corridor Relief',
-        roomSection: 'EAST WING',
-        x: 670,
-        y: 480,
-        frames: [
-          { id: 'artwork-03-f1', order: 1, x: 0, y: 0, scale: 1 },
-          { id: 'artwork-03-f2', order: 2, x: 0, y: 0, scale: 1 },
-          { id: 'artwork-03-f3', order: 3, x: 0, y: 0, scale: 1 },
-        ],
-      },
-      {
-        id: 'artwork-04',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-01',
-        title: 'South Forum Column',
-        roomSection: 'SOUTH ATRIUM',
-        x: 680,
-        y: 890,
-        frames: [
-          { id: 'artwork-04-f1', order: 1, x: 0, y: 0, scale: 1 },
-          { id: 'artwork-04-f2', order: 2, x: 0, y: 0, scale: 1 },
-          { id: 'artwork-04-f3', order: 3, x: 0, y: 0, scale: 1 },
         ],
       },
     ],
@@ -978,39 +861,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     height: 1147.2,
     collectionPoints: [
       {
-        id: 'star-16',
-        starId: 'star-16',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-07',
-        title: 'ستاره کشف ۱۶',
-        x: 230,
-        y: 310,
-        frames: [],
-      },
-      {
-        id: 'star-17',
-        starId: 'star-17',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-07',
-        title: 'ستاره کشف ۱۷',
-        x: 540,
-        y: 320,
-        frames: [],
-      },
-      {
-        id: 'star-18',
-        starId: 'star-18',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-07',
-        title: 'ستاره کشف ۱۸',
-        x: 230,
-        y: 720,
-        frames: [],
-      },
-      {
         id: 'star-19',
         starId: 'star-19',
         type: 'collection',
@@ -1110,52 +960,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     viewBox: '0 0 762.8 1147.2',
     width: 762.8,
     height: 1147.2,
-    collectionPoints: [
-      {
-        id: 'star-20',
-        starId: 'star-20',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-08',
-        title: 'ستاره کشف ۲۰',
-        x: 230,
-        y: 410,
-        frames: [],
-      },
-      {
-        id: 'star-21',
-        starId: 'star-21',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-08',
-        title: 'ستاره کشف ۲۱',
-        x: 470,
-        y: 410,
-        frames: [],
-      },
-      {
-        id: 'star-22',
-        starId: 'star-22',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-08',
-        title: 'ستاره کشف ۲۲',
-        x: 250,
-        y: 720,
-        frames: [],
-      },
-      {
-        id: 'star-23',
-        starId: 'star-23',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-08',
-        title: 'ستاره کشف ۲۳',
-        x: 470,
-        y: 640,
-        frames: [],
-      },
-    ],
+    collectionPoints: [],
     iconPoints: [
       {
         id: 'icon-g08-info',
@@ -1265,28 +1070,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'ستاره کشف ۲۵',
         x: 480,
         y: 360,
-        frames: [],
-      },
-      {
-        id: 'star-26',
-        starId: 'star-26',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-09',
-        title: 'ستاره کشف ۲۶',
-        x: 290,
-        y: 650,
-        frames: [],
-      },
-      {
-        id: 'star-27',
-        starId: 'star-27',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-09',
-        title: 'ستاره کشف ۲۷',
-        x: 480,
-        y: 650,
         frames: [],
       },
     ],
@@ -1416,7 +1199,13 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
               }
 
               const defaultCollections = DEFAULT_MAP_DATABASE[key]?.collectionPoints || [];
-              const savedCollections = parsed[key].collectionPoints || [];
+              const savedCollections = (parsed[key].collectionPoints || []).filter(
+                (c: any) =>
+                  !(key === 'gallery-01' && (c.id === 'artwork-02' || c.id === 'artwork-03' || c.id === 'artwork-04')) &&
+                  !((key === 'gallery-07' || key === 'gallery_07') && (c.id === 'star-16' || c.id === 'star-17' || c.id === 'star-18')) &&
+                  !((key === 'gallery-08' || key === 'gallery_08') && (c.id === 'star-20' || c.id === 'star-21' || c.id === 'star-22' || c.id === 'star-23')) &&
+                  !((key === 'gallery-09' || key === 'gallery_09') && (c.id === 'star-26' || c.id === 'star-27'))
+              );
               const combinedCollections = [...savedCollections];
               for (const defCol of defaultCollections) {
                 const existingIdx = combinedCollections.findIndex((c: any) => c.id === defCol.id);
@@ -1469,11 +1258,36 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
   if (rawConfig) {
     return {
       ...rawConfig,
-      collectionPoints: (rawConfig.collectionPoints || []).map((cp) => ({
-        ...cp,
-        pointType: cp.pointType || 'normal',
-      })),
-      iconPoints: rawConfig.iconPoints || [],
+      collectionPoints: (rawConfig.collectionPoints || [])
+        .filter(
+          (cp) =>
+            !((safeGalleryId === 'gallery-01' || canonId === 'gallery-01') && (cp.id === 'artwork-02' || cp.id === 'artwork-03' || cp.id === 'artwork-04')) &&
+            !((safeGalleryId === 'gallery-07' || canonId === 'gallery-07' || safeGalleryId === 'gallery_07' || canonId === 'gallery_07') && (cp.id === 'star-16' || cp.id === 'star-17' || cp.id === 'star-18')) &&
+            !((safeGalleryId === 'gallery-08' || canonId === 'gallery-08' || safeGalleryId === 'gallery_08' || canonId === 'gallery_08') && (cp.id === 'star-20' || cp.id === 'star-21' || cp.id === 'star-22' || cp.id === 'star-23')) &&
+            !((safeGalleryId === 'gallery-09' || canonId === 'gallery-09' || safeGalleryId === 'gallery_09' || canonId === 'gallery_09') && (cp.id === 'star-26' || cp.id === 'star-27'))
+        )
+        .map((cp) => ({
+          ...cp,
+          pointType: cp.pointType || 'normal',
+        })),
+      iconPoints: (safeGalleryId === 'gallery-00' || canonId === 'gallery-00')
+        ? (() => {
+            const rawList = rawConfig.iconPoints || [];
+            const cafePt = rawList.find((ip) => ip.id === 'icon-g00-cafe');
+            const targetWidth = cafePt?.width || 32;
+            const targetHeight = cafePt?.height || 32;
+            let list = [...rawList];
+            if (!list.some((ip) => ip.id === 'icon-g00-shop')) {
+              const defaultShop = DEFAULT_MAP_DATABASE['gallery-00']?.iconPoints?.find((ip) => ip.id === 'icon-g00-shop');
+              if (defaultShop) {
+                list.push({ ...defaultShop, width: targetWidth, height: targetHeight });
+              }
+            } else {
+              list = list.map((ip) => (ip.id === 'icon-g00-shop' ? { ...ip, width: targetWidth, height: targetHeight } : ip));
+            }
+            return list;
+          })()
+        : (rawConfig.iconPoints || []),
       puzzlePoints: rawConfig.puzzlePoints || (DEFAULT_MAP_DATABASE[safeGalleryId]?.puzzlePoints ? [...DEFAULT_MAP_DATABASE[safeGalleryId].puzzlePoints!] : []),
       arrows: rawConfig.arrows || [],
     };
