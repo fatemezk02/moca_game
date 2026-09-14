@@ -37,12 +37,19 @@ import {
   markStarPointFirstViewed,
 } from './data/starPointProgressStore';
 import { resetEntireGame } from './data/gameReset';
+import { markGalleryReached } from './data/reachedGalleriesStore';
+import { getCurrentGalleryId, setCurrentGalleryId } from './data/playerLocationStore';
 import { contentService, registerContentDebugAPI } from './services/content';
 import { Volume2, Pause, Play, X, Compass, Sparkles } from 'lucide-react';
 import { DevMapPositioningTool, IS_DEV_POSITIONING_ENABLED } from './components/DevMapPositioningTool';
+import { ProfileCreationPage } from './components/ProfileCreationPage';
+import { ProfileModal } from './components/ProfileModal';
+import { getUserProfile, UserProfile } from './data/userProfileStore';
 
 export default function App() {
   const playerStats = usePlayerStats();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(() => getUserProfile());
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Gallery Route state
   const [currentGallery, setCurrentGallery] = useState<
@@ -84,83 +91,52 @@ export default function App() {
     );
   });
 
-  // Associated Gallery for the circular toggle button (dynamic context tracking)
-  const [associatedGallery, setAssociatedGallery] = useState<'gallery-01' | 'gallery-03' | 'gallery-04' | 'gallery-05' | 'gallery-06' | 'gallery-07' | 'gallery-08' | 'gallery-09'>(() => {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const g = urlParams.get('gallery');
-      if (g === '09' || g === 'gallery-09') return 'gallery-09';
-      if (g === '08' || g === 'gallery-08') return 'gallery-08';
-      if (g === '07' || g === 'gallery-07') return 'gallery-07';
-      if (g === '06' || g === 'gallery-06') return 'gallery-06';
-      if (g === '05' || g === 'gallery-05') return 'gallery-05';
-      if (g === '04' || g === 'gallery-04') return 'gallery-04';
-      if (g === '03' || g === 'gallery-03' || g === '03-questions' || g === 'gallery-03-questions') return 'gallery-03';
-      const saved = localStorage.getItem('museum_active_gallery');
-      if (saved === 'gallery-09') return 'gallery-09';
-      if (saved === 'gallery-08') return 'gallery-08';
-      if (saved === 'gallery-07') return 'gallery-07';
-      if (saved === 'gallery-06') return 'gallery-06';
-      if (saved === 'gallery-05') return 'gallery-05';
-      if (saved === 'gallery-04') return 'gallery-04';
-      if (saved === 'gallery-03') return 'gallery-03';
-    } catch {
-      // Fallback
-    }
-    return 'gallery-01';
+  // Associated Gallery for the circular toggle button (syncs with current player progression gallery)
+  const [associatedGallery, setAssociatedGallery] = useState<string>(() => {
+    return getCurrentGalleryId();
   });
+
+  // Keep associatedGallery synced with player location progression events
+  useEffect(() => {
+    const handleLocationUpdate = (e: any) => {
+      const gid = e?.detail?.currentGalleryId || getCurrentGalleryId();
+      setAssociatedGallery(gid);
+    };
+    window.addEventListener('museum_player_location_updated', handleLocationUpdate);
+    window.addEventListener('museum_game_fully_reset', handleLocationUpdate);
+    return () => {
+      window.removeEventListener('museum_player_location_updated', handleLocationUpdate);
+      window.removeEventListener('museum_game_fully_reset', handleLocationUpdate);
+    };
+  }, []);
 
   const navigateToGalleryWithTrack = (galleryId: string) => {
     if (!galleryId || typeof galleryId !== 'string') return;
     const norm = galleryId.replace('_', '-');
+    markGalleryReached(norm);
+    setCurrentGalleryId(norm);
+    setAssociatedGallery(getCurrentGalleryId());
+
     if (norm === 'gallery-09') {
-      setAssociatedGallery('gallery-09');
-      try {
-        localStorage.setItem('museum_active_gallery', 'gallery-09');
-      } catch {}
       setCurrentGallery('gallery-09');
     } else if (norm === 'gallery-08') {
-      setAssociatedGallery('gallery-08');
-      try {
-        localStorage.setItem('museum_active_gallery', 'gallery-08');
-      } catch {}
       setCurrentGallery('gallery-08');
     } else if (norm === 'gallery-07') {
-      setAssociatedGallery('gallery-07');
-      try {
-        localStorage.setItem('museum_active_gallery', 'gallery-07');
-      } catch {}
       setCurrentGallery('gallery-07');
     } else if (norm === 'gallery-06') {
-      setAssociatedGallery('gallery-06');
-      try {
-        localStorage.setItem('museum_active_gallery', 'gallery-06');
-      } catch {}
       setCurrentGallery('gallery-06');
     } else if (norm === 'gallery-05') {
-      setAssociatedGallery('gallery-05');
-      try {
-        localStorage.setItem('museum_active_gallery', 'gallery-05');
-      } catch {}
       setCurrentGallery('gallery-05');
     } else if (norm === 'gallery-04') {
-      setAssociatedGallery('gallery-04');
-      try {
-        localStorage.setItem('museum_active_gallery', 'gallery-04');
-      } catch {}
       setCurrentGallery('gallery-04');
     } else if (norm === 'gallery-03' || norm === 'gallery-03-questions') {
-      setAssociatedGallery('gallery-03');
-      try {
-        localStorage.setItem('museum_active_gallery', 'gallery-03');
-      } catch {}
       setCurrentGallery(norm as any);
-    } else if (norm === 'gallery-01' || norm === 'gallery-01-questions') {
-      setAssociatedGallery('gallery-01');
-      try {
-        localStorage.setItem('museum_active_gallery', 'gallery-01');
-      } catch {}
-      setCurrentGallery(norm as any);
+    } else if (norm === 'gallery-01' || norm === 'gallery-01-questions' || norm === 'gallery-02') {
+      const target = norm === 'gallery-02' ? 'gallery-01' : norm;
+      setCurrentGallery(target as any);
+    } else if (norm === 'gallery-00' || norm === 'main-map') {
+      setActiveTab('map');
+      setCurrentGallery('gallery-00');
     } else {
       setCurrentGallery(norm as any);
     }
@@ -323,7 +299,7 @@ export default function App() {
 
   // One-time automatic reset triggered by user request
   useEffect(() => {
-    const RESET_VERSION = 'v1_reset_2026_09_03';
+    const RESET_VERSION = 'v1_reset_2026_09_13_g02_lamp';
     try {
       if (localStorage.getItem('museum_last_reset_version') !== RESET_VERSION) {
         resetEntireGame();
@@ -332,6 +308,14 @@ export default function App() {
       }
     } catch {}
   }, []);
+
+  // Track reached gallery whenever active gallery changes
+  useEffect(() => {
+    if (currentGallery && currentGallery !== 'gallery-00') {
+      markGalleryReached(currentGallery);
+    }
+  }, [currentGallery]);
+
 
   // Load external game content (Questions, Stars, Artworks) on application startup
   useEffect(() => {
@@ -507,8 +491,8 @@ export default function App() {
     );
   }
 
-  // If user navigated into Gallery 01, render the dedicated Gallery 01 view
-  if (currentGallery === 'gallery-01') {
+  // If user navigated into Gallery 01 or 02, render the dedicated Gallery view (Gallery 02 - کیمیای نور)
+  if (currentGallery === 'gallery-01' || (currentGallery as string) === 'gallery-02') {
     return (
       <Gallery01View
         onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
@@ -523,10 +507,11 @@ export default function App() {
   }
 
   return (
-    <div className="user-facing-app h-screen w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom">
+    <div className="user-facing-app h-screen h-[100dvh] max-h-[100dvh] w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom">
       {/* Top App Bar Header */}
       <TopAppBar
         onOpenInfo={() => setIsInfoModalOpen(true)}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
         activeFilter={activeFilter}
         onFilterChange={(f) => {
           setActiveFilter(f);
@@ -535,10 +520,10 @@ export default function App() {
       />
 
       {/* Compact Player Status Bar */}
-      <PlayerStatusBar stars={playerStats.stars} coins={playerStats.coins} />
+      <PlayerStatusBar puzzles={playerStats.completedPuzzles} stars={playerStats.stars} coins={playerStats.coins} />
 
       {/* Main Canvas Area */}
-      <main className="flex-1 relative overflow-hidden bg-[#fbf9f9] flex items-center justify-center">
+      <main className="flex-1 min-h-0 relative overflow-hidden bg-[#fbf9f9] flex items-center justify-center mb-[calc(64px+env(safe-area-inset-bottom,0px))] sm:mb-[calc(68px+env(safe-area-inset-bottom,0px))]">
         {activeTab === 'map' && (
           <>
             {/* The Interactive Architectural Map Canvas */}
@@ -582,7 +567,10 @@ export default function App() {
             <MapControls
               currentView="gallery-00"
               associatedGallery={associatedGallery}
-              onToggleGallery={() => navigateToGalleryWithTrack(associatedGallery)}
+              onToggleGallery={() => {
+                const target = getCurrentGalleryId();
+                navigateToGalleryWithTrack(target);
+              }}
               galleryName="GALLERY 00"
             />
           </>
@@ -605,6 +593,11 @@ export default function App() {
           <TasksCuratorView
             type={activeTab}
             onNavigateToMap={() => setActiveTab('map')}
+            onSelectGallery={(galleryId) => {
+              const norm = galleryId.toLowerCase().replace('_', '-');
+              setCurrentGallery(norm as any);
+              setActiveTab('map');
+            }}
           />
         )}
 
@@ -696,9 +689,21 @@ export default function App() {
 
   return (
     <>
-      {renderCurrentView()}
-      {IS_DEV_POSITIONING_ENABLED && !isAdminOpen && !currentGallery.includes('questions') && (
-        <DevMapPositioningTool currentGalleryId={currentGallery} activeTab={activeTab} />
+      {!userProfile ? (
+        <ProfileCreationPage
+          onProfileCreated={() => setUserProfile(getUserProfile())}
+        />
+      ) : (
+        <>
+          {renderCurrentView()}
+          {IS_DEV_POSITIONING_ENABLED && !isAdminOpen && !currentGallery.includes('questions') && (
+            <DevMapPositioningTool currentGalleryId={currentGallery} activeTab={activeTab} />
+          )}
+          <ProfileModal
+            isOpen={isProfileModalOpen}
+            onClose={() => setIsProfileModalOpen(false)}
+          />
+        </>
       )}
     </>
   );

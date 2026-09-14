@@ -12,7 +12,13 @@ import {
   ArrowRight,
   Info,
   Star,
+  Award,
 } from 'lucide-react';
+import { FinalCompletionCardBack } from './FinalCompletionCardBack';
+import {
+  evaluateAndTriggerFinalCompletion,
+  isFinalCompletionAwarded,
+} from '../data/finalCompletionStore';
 import { getStarDiscovery } from '../data/starDiscoveryData';
 import {
   isStarPointUnlocked,
@@ -81,6 +87,8 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [artworkImageError, setArtworkImageError] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isFinalCompletionFlow, setIsFinalCompletionFlow] = useState(false);
 
   useEffect(() => {
     setArtworkImageError(false);
@@ -152,8 +160,18 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
 
   useEffect(() => {
     if (phase === 'correct_answer') {
+      if (isFinalCompletionFlow) {
+        console.log('[FINAL CERTIFICATE] Starting 2 second delay');
+      }
+
       autoTransitionTimerRef.current = setTimeout(() => {
-        setPhase('artwork_info');
+        if (isFinalCompletionFlow) {
+          console.log('[FINAL CERTIFICATE] Opening certificate');
+          setIsFlipped(true);
+          setPhase('final_certificate');
+        } else {
+          setPhase('artwork_info');
+        }
       }, 2000);
     }
 
@@ -163,7 +181,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
         autoTransitionTimerRef.current = null;
       }
     };
-  }, [phase]);
+  }, [phase, isFinalCompletionFlow]);
 
   useEffect(() => {
     if (!isOpen && autoTransitionTimerRef.current) {
@@ -177,6 +195,8 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
     if (isOpen) {
       setErrorMessage(null);
       setSelectedOption(null);
+      setIsFlipped(false);
+      setIsFinalCompletionFlow(false);
 
       const isUnlocked = isStarPointUnlocked(starPointId);
       if (isUnlocked || initialMode === 'direct_info') {
@@ -209,6 +229,24 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
       // Award NET reward coins (correct_reward_coins - informationCost)
       // and unlock information permanently
       unlockStarPointViaQuestion(starPointId, netReward);
+
+      // Check if this triggers the final completion flow:
+      // (Trigger ONLY when: all 8 gallery puzzles are completed, player in Gallery 09,
+      // final star question answered correctly, causing 8th puzzle to become completed, awarded once)
+      const currentGallery = targetGalleryId || galleryId || '';
+      const norm = currentGallery.toLowerCase().replace('_', '-');
+      if (norm === 'gallery-09') {
+        console.log('[FINAL CERTIFICATE] Final Star answered', {
+          galleryId: currentGallery,
+          starPointId,
+        });
+      }
+
+      const isFinalTrigger = evaluateAndTriggerFinalCompletion(currentGallery);
+      if (isFinalTrigger) {
+        setIsFinalCompletionFlow(true);
+      }
+
       setPhase('correct_answer');
     } else {
       // Incorrect answer: 0 coins, remains locked
@@ -287,18 +325,45 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
     <AnimatePresence>
       <div
         id="star-discovery-modal-backdrop"
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0e0f0f]/60 backdrop-blur-xs select-none"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0e0f0f]/60 backdrop-blur-xs select-none [perspective:1200px]"
         onClick={onClose}
       >
         <motion.div
-          id="star-discovery-modal-card"
+          id="star-discovery-modal-flipper"
           initial={{ opacity: 0, scale: 0.95, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            rotateY: isFlipped ? 180 : 0,
+          }}
           exit={{ opacity: 0, scale: 0.95, y: 12 }}
-          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          transition={{
+            opacity: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+            scale: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+            y: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+            rotateY: { duration: 0.55, ease: [0.25, 1, 0.5, 1] },
+          }}
+          style={{
+            transformStyle: 'preserve-3d',
+            WebkitTransformStyle: 'preserve-3d',
+          }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] overflow-hidden flex flex-col max-h-[88vh]"
+          className="relative w-full max-w-md min-h-[480px] sm:min-h-[520px] max-h-[88vh]"
         >
+          {/* ================================================== */}
+          {/* 1. FRONT FACE: Star Discovery / Question / Info    */}
+          {/* ================================================== */}
+          <div
+            id="star-discovery-modal-card"
+            style={{
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+            }}
+            className={`w-full h-full min-h-[480px] sm:min-h-[520px] bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] overflow-hidden flex flex-col max-h-[88vh] ${
+              isFlipped ? 'pointer-events-none select-none' : 'pointer-events-auto'
+            }`}
+          >
           {/* Top Header Bar */}
           <div
             id="star-discovery-modal-header"
@@ -636,11 +701,15 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                         clearTimeout(autoTransitionTimerRef.current);
                         autoTransitionTimerRef.current = null;
                       }
-                      setPhase('artwork_info');
+                      if (isFinalCompletionFlow) {
+                        setIsFlipped(true);
+                      } else {
+                        setPhase('artwork_info');
+                      }
                     }}
                     className="text-[12px] font-bold text-[#64748b] hover:text-[#1e1b18] cursor-pointer inline-flex items-center gap-1 transition-colors"
                   >
-                    <span>مشاهده اطلاعات اثر</span>
+                    <span>{isFinalCompletionFlow ? 'مشاهده کارت کاشف موزه' : 'مشاهده اطلاعات اثر'}</span>
                     <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
                   </button>
                 </div>
@@ -742,6 +811,20 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                   )}
                 </div>
 
+                {/* Optional button to view Explorer Certificate if already awarded in Gallery 09 */}
+                {isFinalCompletionAwarded() &&
+                  (targetGalleryId.includes('09') || targetGalleryId.includes('9')) && (
+                    <button
+                      id="star-modal-view-certificate-btn"
+                      type="button"
+                      onClick={() => setIsFlipped(true)}
+                      className="w-full py-2.5 px-3 bg-[#fef3c7] hover:bg-[#fde68a] text-[#1e1b18] border-2 border-[#1e1b18] rounded-xl font-black text-[12px] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer active:translate-x-[1px] active:translate-y-[1px] transition-all"
+                    >
+                      <Award className="w-4 h-4 text-[#d97706]" />
+                      <span>مشاهده کارت پایان (کاشف موزه)</span>
+                    </button>
+                  )}
+
                 {/* Bottom Dismiss Button */}
                 <button
                   type="button"
@@ -753,9 +836,37 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
               </motion.div>
             )}
           </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+        </div>
+
+        {/* ================================================== */}
+        {/* 2. BACK FACE: Museum Explorer Certificate Card     */}
+        {/* ================================================== */}
+        <div
+          id="star-discovery-modal-card-back"
+          style={{
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            WebkitTransform: 'rotateY(180deg)',
+          }}
+          className={`absolute inset-0 w-full h-full ${
+            !isFlipped
+              ? 'pointer-events-none select-none opacity-0'
+              : 'pointer-events-auto opacity-100 z-30'
+          }`}
+        >
+          <FinalCompletionCardBack
+            onClose={onClose}
+            onFlipBack={() => {
+              setIsFlipped(false);
+              setPhase('artwork_info');
+            }}
+            isFlipped={isFlipped}
+          />
+        </div>
+      </motion.div>
+    </div>
+  </AnimatePresence>
   );
 };
 

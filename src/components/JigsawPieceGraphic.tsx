@@ -23,6 +23,7 @@ export const JigsawPieceGraphic: React.FC<JigsawPieceGraphicProps> = ({
 }) => {
   const uniqueClipId = useId().replace(/:/g, '_');
   const clipPathId = `jigsaw-clip-${piece.id}-${uniqueClipId}`;
+  const cleanArtworkSrc = artworkSrc?.trim() || null;
 
   if (mode === 'assembled') {
     // Renders in full 1000x1000 coordinate space to fit perfectly in multi-piece assembly
@@ -34,16 +35,27 @@ export const JigsawPieceGraphic: React.FC<JigsawPieceGraphicProps> = ({
           </clipPath>
         </defs>
 
-        {/* Clipped Artwork Image */}
-        <image
-          href={artworkSrc}
-          x="0"
-          y="0"
-          width="1000"
-          height="1000"
-          preserveAspectRatio="xMidYMid slice"
-          clipPath={`url(#${clipPathId})`}
-        />
+        {/* Clipped Artwork Image or Fallback */}
+        {cleanArtworkSrc ? (
+          <image
+            href={cleanArtworkSrc}
+            x="0"
+            y="0"
+            width="1000"
+            height="1000"
+            preserveAspectRatio="xMidYMid slice"
+            clipPath={`url(#${clipPathId})`}
+          />
+        ) : (
+          <rect
+            x="0"
+            y="0"
+            width="1000"
+            height="1000"
+            fill="#e2e8f0"
+            clipPath={`url(#${clipPathId})`}
+          />
+        )}
 
         {/* Jigsaw Vector Seam Outline */}
         <path
@@ -92,15 +104,26 @@ export const JigsawPieceGraphic: React.FC<JigsawPieceGraphicProps> = ({
         />
 
         {/* Clipped Artwork */}
-        <image
-          href={artworkSrc}
-          x="0"
-          y="0"
-          width="1000"
-          height="1000"
-          preserveAspectRatio="xMidYMid slice"
-          clipPath={`url(#${clipPathId})`}
-        />
+        {cleanArtworkSrc ? (
+          <image
+            href={cleanArtworkSrc}
+            x="0"
+            y="0"
+            width="1000"
+            height="1000"
+            preserveAspectRatio="xMidYMid slice"
+            clipPath={`url(#${clipPathId})`}
+          />
+        ) : (
+          <rect
+            x="0"
+            y="0"
+            width="1000"
+            height="1000"
+            fill="#e2e8f0"
+            clipPath={`url(#${clipPathId})`}
+          />
+        )}
 
         {/* Bevel highlight */}
         <path

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Lock, Unlock, Star, Sparkles, MapPin, CheckCircle2 } from 'lucide-react';
+import { Lock, Unlock, Star, Sparkles, CheckCircle2, ChevronLeft } from 'lucide-react';
 import { CuratorExhibitionWall } from './CuratorExhibitionWall';
 import { GALLERIES } from '../data/mapConfig';
 import { contentService } from '../services/content/contentService';
@@ -19,6 +19,7 @@ import { StarContent } from '../services/content/types';
 interface TasksCuratorViewProps {
   type: 'tasks' | 'curator';
   onNavigateToMap: () => void;
+  onSelectGallery?: (galleryId: string) => void;
 }
 
 /**
@@ -26,8 +27,7 @@ interface TasksCuratorViewProps {
  */
 function isGalleryUnlockedState(galleryId: string): boolean {
   const norm = galleryId.toLowerCase().replace('_', '-');
-  if (norm === 'gallery-00' || norm === 'gallery-01') return true;
-  if (norm === 'gallery-02') return false; // Pavilion (Coming Soon)
+  if (norm === 'gallery-00' || norm === 'gallery-01' || norm === 'gallery-02') return true;
 
   // If the player has already completed this gallery's puzzle or has pieces, it is unlocked
   if (isGalleryPuzzleCompleted(norm)) return true;
@@ -41,7 +41,12 @@ function isGalleryUnlockedState(galleryId: string): boolean {
 
   // Linear progression chain evaluation
   if (norm === 'gallery-03') {
-    return isProgressionConditionsSatisfied('gallery-01') || isGalleryPuzzleCompleted('gallery-01');
+    return (
+      isProgressionConditionsSatisfied('gallery-01') ||
+      isProgressionConditionsSatisfied('gallery-02') ||
+      isGalleryPuzzleCompleted('gallery-01') ||
+      isGalleryPuzzleCompleted('gallery-02')
+    );
   }
   if (norm === 'gallery-04') {
     return (
@@ -77,7 +82,39 @@ function isGalleryUnlockedState(galleryId: string): boolean {
   return false;
 }
 
-export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({ type, onNavigateToMap }) => {
+function parseGalleryTitleAndNumber(gallery: { id: string; nameFa?: string; name?: string; nameEn?: string }) {
+  const numMatch = gallery.id.match(/\d+/);
+  const galleryNumInt = numMatch ? parseInt(numMatch[0], 10) : 1;
+  const formattedNum = galleryNumInt < 10 ? `0${galleryNumInt}` : `${galleryNumInt}`;
+  const faNum = formatTwoDigitPersian(galleryNumInt);
+
+  const rawFa = gallery.nameFa || gallery.name || '';
+  let title = rawFa;
+  let subtitle = `گالری ${faNum}`;
+
+  if (rawFa.includes(' — ')) {
+    const parts = rawFa.split(' — ');
+    subtitle = parts[0].trim();
+    title = parts[1].trim();
+  } else if (rawFa.includes(' - ')) {
+    const parts = rawFa.split(' - ');
+    subtitle = parts[0].trim();
+    title = parts[1].trim();
+  }
+
+  return {
+    title,
+    subtitle: `${subtitle} • Gallery ${formattedNum}`,
+    rawSubtitle: subtitle,
+    formattedNum,
+  };
+}
+
+export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
+  type,
+  onNavigateToMap,
+  onSelectGallery,
+}) => {
   const [version, setVersion] = useState<number>(0);
 
   const refreshState = useCallback(() => {
@@ -105,8 +142,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({ type, onNavi
     return <CuratorExhibitionWall onNavigateToMap={onNavigateToMap} />;
   }
 
-  // Tasks Tab: Redesigned Gallery Progress Cards
-  // Filter standard exhibition galleries (excluding gallery-00 and gallery-01 as requested)
+  // Tasks Tab: Exhibition Galleries List (excluding gallery-00 and gallery-01)
   const targetGalleries = GALLERIES.filter(
     (g) => g.id !== 'gallery-00' && g.id !== 'gallery-01' && g.id.startsWith('gallery-')
   );
@@ -122,8 +158,15 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({ type, onNavi
 
     // ContentService gallery entity for title / metadata overrides
     const csGallery = contentService.getGalleryById(gallery.id);
-    const galleryName = csGallery?.nameFa || gallery.nameFa || gallery.name;
-    const galleryNameEn = csGallery?.nameEn || gallery.name;
+    const rawFa = csGallery?.nameFa || gallery.nameFa || gallery.name;
+    const rawEn = csGallery?.nameEn || gallery.name;
+
+    const { title, subtitle } = parseGalleryTitleAndNumber({
+      id: gallery.id,
+      nameFa: rawFa,
+      name: gallery.name,
+      nameEn: rawEn,
+    });
 
     const isUnlocked = isGalleryUnlockedState(gallery.id);
 
@@ -139,7 +182,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({ type, onNavi
       return false;
     });
 
-    // Fallback default star count if empty from sheets (e.g. Gallery 01 has 2, Gallery 03 has 4, etc.)
+    // Fallback default star count if empty from sheets
     const totalStars = galleryStars.length > 0 ? galleryStars.length : (gallery.id === 'gallery-03' ? 4 : gallery.id === 'gallery-01' ? 2 : 4);
 
     let collectedStars = 0;
@@ -153,19 +196,20 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({ type, onNavi
       }).length;
     }
 
-    const isComplete = isUnlocked && totalStars > 0 && collectedStars >= totalStars;
+    const isPuzzleCompleted = isGalleryPuzzleCompleted(gallery.id);
+    const isComplete = isUnlocked && (isPuzzleCompleted || (totalStars > 0 && collectedStars >= totalStars));
 
     return {
       id: gallery.id,
       number: formattedNum,
       numberPersian: formatTwoDigitPersian(galleryNumInt || 1),
-      name: galleryName,
-      nameEn: galleryNameEn,
+      title,
+      subtitle,
       isUnlocked,
       isComplete,
       collectedStars,
       totalStars,
-      progressPercent: totalStars > 0 ? Math.min(100, Math.round((collectedStars / totalStars) * 100)) : 0,
+      progressPercent: totalStars > 0 ? Math.min(100, Math.round((collectedStars / totalStars) * 100)) : (isPuzzleCompleted ? 100 : 0),
     };
   });
 
@@ -176,31 +220,31 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({ type, onNavi
   return (
     <div
       id="tasks-gallery-progress"
-      className="w-full h-full overflow-y-auto p-4 sm:p-6 space-y-6 pb-28 max-w-4xl mx-auto select-none"
+      className="w-full h-full overflow-y-auto p-3.5 sm:p-6 space-y-5 pb-28 max-w-2xl mx-auto select-none"
     >
       {/* Page Header */}
       <div className="border-b-2 border-[#1e1b18] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-[#f59e0b]" />
+            <Sparkles className="w-4 h-4 text-[#ea580c]" />
             <span className="font-sans-custom text-[11px] text-[#ea580c] font-black tracking-wider uppercase">
               پیشرفت مأموریت‌های موزه
             </span>
           </div>
-          <h1 className="font-sans-custom text-[20px] sm:text-[24px] font-black text-[#1e1b18] tracking-tight mt-0.5">
-            پیشرفت تالارها و کشف ستاره‌ها
+          <h1 className="font-sans-custom text-[20px] sm:text-[22px] font-black text-[#1e1b18] tracking-tight mt-0.5">
+            تالارها و مأموریت‌ها
           </h1>
         </div>
 
         {/* Global Stats Badges */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-[#1e1b18] bg-[#e0f2fe] shadow-[2px_2px_0px_#1e1b18] text-[#1e1b18] font-bold text-xs">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-[#1e1b18] bg-[#e0f2fe] shadow-[1.5px_1.5px_0px_#1e1b18] text-[#1e1b18] font-bold text-xs">
             <Unlock className="w-3.5 h-3.5 text-[#0284c7]" />
             <span className="font-sans-custom">
               {toPersianDigits(totalUnlockedCount)} از {toPersianDigits(galleryCards.length)} تالار
             </span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-[#1e1b18] bg-[#fef08a] shadow-[2px_2px_0px_#1e1b18] text-[#1e1b18] font-bold text-xs">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-[#1e1b18] bg-[#fef08a] shadow-[1.5px_1.5px_0px_#1e1b18] text-[#1e1b18] font-bold text-xs">
             <Star className="w-3.5 h-3.5 fill-[#f59e0b] text-[#1e1b18] stroke-[2]" />
             <span className="font-sans-custom">
               {toPersianDigits(totalStarsCollected)} از {toPersianDigits(totalStarsAvailable)} ستاره
@@ -209,107 +253,97 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({ type, onNavi
         </div>
       </div>
 
-      {/* Gallery Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+      {/* Main Board Container with Stacked Gallery Cards */}
+      <div
+        id="missions-board-container"
+        className="rounded-3xl border-2 border-[#1e1b18] bg-[#38bdf8]/15 p-3.5 sm:p-5 shadow-[4px_4px_0px_#1e1b18] space-y-3 sm:space-y-3.5"
+      >
         {galleryCards.map((card) => {
-          if (!card.isUnlocked) {
-            // 2. LOCKED GALLERIES
-            return (
-              <div
-                key={card.id}
-                id={`gallery-card-${card.id}`}
-                className="border-2 border-dashed border-[#94a3b8] rounded-2xl bg-[#ffffff]/60 p-4 sm:p-5 shadow-[2px_2px_0px_#cbd5e1] transition-all flex flex-col justify-between gap-3.5 relative overflow-hidden"
-              >
-                {/* Header: Gallery Number & Lock Status */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono-custom text-[11px] font-bold text-[#64748b] tracking-wider uppercase bg-[#e2e8f0] px-2.5 py-0.5 rounded-lg border border-[#cbd5e1]">
-                      Gallery {card.number}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 text-[#64748b] font-sans-custom text-[11px] font-bold bg-[#e2e8f0] px-2.5 py-0.5 rounded-full border border-[#cbd5e1]">
-                    <Lock className="w-3 h-3 text-[#64748b]" />
-                    <span>قفل</span>
-                  </div>
-                </div>
-
-                {/* Gallery Title */}
-                <div>
-                  <h3 className="font-sans-custom text-[16px] sm:text-[17px] font-bold text-[#64748b] leading-snug">
-                    {card.name}
-                  </h3>
-                </div>
-
-                {/* Locked Notice Message */}
-                <div className="mt-1 pt-3 border-t border-[#e2e8f0] flex items-center gap-2 text-[#64748b]">
-                  <div className="w-6 h-6 rounded-full bg-[#e2e8f0] border border-[#cbd5e1] flex items-center justify-center shrink-0">
-                    <Lock className="w-3.5 h-3.5 text-[#64748b]" />
-                  </div>
-                  <span className="font-sans-custom text-[11.5px] text-[#64748b] font-medium leading-relaxed">
-                    این تالار قفل است. با حل پازل تالار قبل بازگشایی می‌شود.
-                  </span>
-                </div>
-              </div>
-            );
-          }
-
-          // 3. UNLOCKED GALLERIES
           return (
             <div
               key={card.id}
-              id={`gallery-card-${card.id}`}
-              className="border-[2.5px] border-[#1e1b18] rounded-2xl bg-[#ffffff] p-4 sm:p-5 shadow-[4px_4px_0px_#1e1b18] hover:shadow-[5px_5px_0px_#1e1b18] transition-all flex flex-col justify-between gap-3.5 relative"
+              id={`mission-card-${card.id}`}
+              onClick={() => {
+                if (card.isUnlocked && onSelectGallery) {
+                  onSelectGallery(card.id);
+                }
+              }}
+              className={`w-full rounded-2xl border-2 transition-all duration-150 flex items-center justify-between px-3.5 sm:px-4 py-3 gap-3 ${
+                card.isUnlocked
+                  ? 'bg-[#ffffff] border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] hover:shadow-[4px_4px_0px_#1e1b18] hover:-translate-y-0.5 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] cursor-pointer'
+                  : 'bg-[#ffffff]/80 border-[#94a3b8]/70 shadow-[1.5px_1.5px_0px_#cbd5e1] cursor-not-allowed opacity-75'
+              }`}
             >
-              {/* Header: Gallery Number & Unlocked Status */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono-custom text-[11px] font-black text-[#1e1b18] tracking-wider uppercase bg-[#fef3c7] px-2.5 py-0.5 rounded-lg border-2 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]">
-                    Gallery {card.number}
+              {/* Right Side: Lock/Unlock Medallion + Vertical Divider + Title & Number */}
+              <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+                {/* Lock / Unlocked Status Icon */}
+                <div
+                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    card.isComplete
+                      ? 'bg-[#fef08a] border-[#1e1b18] text-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]'
+                      : card.isUnlocked
+                      ? 'bg-[#fed7aa] border-[#1e1b18] text-[#ea580c] shadow-[1.5px_1.5px_0px_#1e1b18]'
+                      : 'bg-[#e2e8f0] border-[#94a3b8] text-[#64748b]'
+                  }`}
+                >
+                  {card.isComplete ? (
+                    <CheckCircle2 className="w-5 h-5 text-[#b45309]" />
+                  ) : card.isUnlocked ? (
+                    <Unlock className="w-5 h-5 text-[#ea580c]" />
+                  ) : (
+                    <Lock className="w-5 h-5 text-[#64748b]" />
+                  )}
+                </div>
+
+                {/* Vertical Separator Line */}
+                <div
+                  className={`w-[1.5px] sm:w-[2px] h-8 sm:h-9 rounded-full shrink-0 ${
+                    card.isUnlocked ? 'bg-[#1e1b18]/20' : 'bg-[#cbd5e1]'
+                  }`}
+                />
+
+                {/* Left of Line: Gallery Name & Gallery Number */}
+                <div className="flex flex-col text-right justify-center min-w-0">
+                  <h3
+                    className={`font-sans-custom text-[14px] sm:text-[15.5px] font-black leading-snug truncate ${
+                      card.isUnlocked ? 'text-[#1e1b18]' : 'text-[#64748b]'
+                    }`}
+                  >
+                    {card.title}
+                  </h3>
+                  <span
+                    className={`font-mono-custom text-[11px] sm:text-[12px] mt-0.5 font-bold truncate ${
+                      card.isUnlocked ? 'text-[#64748b]' : 'text-[#94a3b8]'
+                    }`}
+                  >
+                    {card.subtitle}
                   </span>
                 </div>
-                {card.isComplete ? (
-                  <div className="flex items-center gap-1 text-[#1e1b18] font-sans-custom text-[11px] font-black bg-[#fef08a] px-2.5 py-0.5 rounded-full border-2 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#b45309]" />
-                    <span>کامل شد</span>
+              </div>
+
+              {/* Left End: Navigation Arrow / Status */}
+              <div className="flex items-center gap-1.5 shrink-0 pr-1">
+                {card.isUnlocked ? (
+                  <div className="flex items-center gap-1.5 text-[#1e1b18]">
+                    {card.isComplete ? (
+                      <span className="hidden sm:inline-block font-sans-custom text-[10.5px] font-black text-[#854d0e] bg-[#fef9c3] px-2 py-0.5 rounded-md border border-[#fde047]">
+                        تکمیل شد
+                      </span>
+                    ) : (
+                      <span className="hidden sm:inline-block font-sans-custom text-[10.5px] font-bold text-[#ea580c] bg-[#ffedd5] px-2 py-0.5 rounded-md border border-[#fed7aa]">
+                        ورود
+                      </span>
+                    )}
+                    <ChevronLeft className="w-5 h-5 text-[#1e1b18]" />
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1 text-[#15803d] font-sans-custom text-[11px] font-black bg-[#ecfdf5] px-2.5 py-0.5 rounded-full border-2 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]">
-                    <Unlock className="w-3.5 h-3.5 text-[#16a34a]" />
-                    <span>بازگشایی‌شده</span>
+                  <div className="flex items-center gap-1 text-[#94a3b8]">
+                    <span className="hidden sm:inline-block font-sans-custom text-[10.5px] font-medium text-[#94a3b8]">
+                      قفل
+                    </span>
+                    <ChevronLeft className="w-5 h-5 text-[#cbd5e1]" />
                   </div>
                 )}
-              </div>
-
-              {/* Gallery Title */}
-              <div>
-                <h3 className="font-sans-custom text-[16px] sm:text-[18px] font-black text-[#1e1b18] leading-snug">
-                  {card.name}
-                </h3>
-              </div>
-
-              {/* Star Progress Section */}
-              <div className="mt-1 pt-3 border-t-2 border-[#f1f5f9] space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded-full bg-[#fef08a] border-2 border-[#1e1b18] flex items-center justify-center shadow-[1px_1px_0px_#1e1b18]">
-                      <Star className="w-3.5 h-3.5 fill-[#f59e0b] text-[#1e1b18] stroke-[2]" />
-                    </div>
-                    <span className="font-mono-custom text-[14px] font-black text-[#1e1b18]">
-                      {card.collectedStars} / {card.totalStars}
-                    </span>
-                  </div>
-                  <span className="font-sans-custom text-[11.5px] text-[#64748b] font-bold">
-                    {toPersianDigits(card.collectedStars)} از {toPersianDigits(card.totalStars)} ستاره کشف‌شده
-                  </span>
-                </div>
-
-                {/* Progress Bar Indicator */}
-                <div className="w-full h-3 bg-[#e2e8f0] rounded-full border-2 border-[#1e1b18] p-[1.5px] overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#fde047] to-[#f59e0b] rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${card.progressPercent}%` }}
-                  />
-                </div>
               </div>
             </div>
           );
@@ -318,5 +352,6 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({ type, onNavi
     </div>
   );
 };
+
 
 

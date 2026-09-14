@@ -40,6 +40,9 @@ interface Gallery04ViewProps {
   onSelectTab?: (tab: 'map' | 'collection' | 'tasks' | 'curator') => void;
 }
 
+const GALLERY_04_MAP_WIDTH = 498.55;
+const GALLERY_04_MAP_HEIGHT = 851.79;
+
 export const Gallery04View: React.FC<Gallery04ViewProps> = ({
   onNavigateBack,
   onNavigateToQuestions,
@@ -137,8 +140,10 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
       return;
     }
 
-    // Mark arrow as used so it disappears from source map
-    markArrowUsed(arrow.id);
+    // Mark arrow as used so it disappears from source map (except return arrows)
+    if (!arrow.title?.includes('بازگشت') && !arrow.id.includes('-to-g03')) {
+      markArrowUsed(arrow.id);
+    }
 
     // If destination is gallery-00, return to master floor plan
     if (arrow.destination === 'gallery-00') {
@@ -189,7 +194,7 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
   const experiencePoints = React.useMemo(() => getExperiencePointsForGallery('gallery-04'), [puzzleUpdateTrigger]);
 
-  // Ensure central question/info entry point is present at ~center (x: 424, y: 632)
+  // Ensure central question/info entry point is present at ~center (x: 249, y: 426)
   const effectiveIconPoints = iconPoints.some(
     (p) => p.destination === 'gallery-04' || p.id === 'icon-g04-info'
   )
@@ -201,8 +206,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
           type: 'icon' as const,
           galleryId: 'gallery-04',
           title: 'اطلاعات گالری ۰۴',
-          x: 424,
-          y: 632,
+          x: 249,
+          y: 426,
           iconType: 'preset-question' as const,
           width: 48,
           height: 34,
@@ -257,11 +262,10 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
-      mapWidth={848}
-      mapHeight={1264}
+      mapWidth={GALLERY_04_MAP_WIDTH}
+      mapHeight={GALLERY_04_MAP_HEIGHT}
       mapSvg={
         <Gallery04MapSvg
-          style={{ transform: 'scale(0.97)', transformOrigin: 'center' }}
           className="w-full h-full object-contain filter drop-shadow-sm pointer-events-auto"
         />
       }
@@ -269,8 +273,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
     >
       {/* 1. Dynamic Navigation Arrows Layer */}
       {visibleArrows.map((arrow) => {
-        const leftPercent = (arrow.x / 848) * 100;
-        const topPercent = (arrow.y / 1264) * 100;
+        const leftPercent = (arrow.x / GALLERY_04_MAP_WIDTH) * 100;
+        const topPercent = (arrow.y / GALLERY_04_MAP_HEIGHT) * 100;
 
         return (
           <div
@@ -294,8 +298,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
 
       {/* 2. Custom Icon Points (Type B) — Central Info Icon */}
       {effectiveIconPoints.map((iconPoint) => {
-        const leftPercent = (iconPoint.x / 848) * 100;
-        const topPercent = (iconPoint.y / 1264) * 100;
+        const leftPercent = (iconPoint.x / GALLERY_04_MAP_WIDTH) * 100;
+        const topPercent = (iconPoint.y / GALLERY_04_MAP_HEIGHT) * 100;
 
         return (
           <div
@@ -324,8 +328,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
           key={puzzlePoint.id}
           puzzlePoint={puzzlePoint}
           galleryId="gallery-04"
-          mapWidth={848}
-          mapHeight={1264}
+          mapWidth={GALLERY_04_MAP_WIDTH}
+          mapHeight={GALLERY_04_MAP_HEIGHT}
           onClick={handlePuzzlePointClick}
           isSelected={activePuzzlePoint?.id === puzzlePoint.id}
         />
@@ -343,8 +347,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
           iconId={exp.iconId}
           label={exp.labelFa}
           title={exp.title}
-          mapWidth={848}
-          mapHeight={1264}
+          mapWidth={GALLERY_04_MAP_WIDTH}
+          mapHeight={GALLERY_04_MAP_HEIGHT}
           isSelected={selectedExperiencePointId === exp.id}
           onSelect={() => {
             setSelectedArtwork(null);
@@ -372,8 +376,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
               y={artwork.y}
               title={artwork.title}
               galleryId="gallery-04"
-              mapWidth={848}
-              mapHeight={1264}
+              mapWidth={GALLERY_04_MAP_WIDTH}
+              mapHeight={GALLERY_04_MAP_HEIGHT}
               isSelected={selectedStarPointId === artwork.id}
               onSelect={() => {
                 setSelectedArtwork(null);
@@ -388,10 +392,10 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
           );
         }
 
-        const leftPercent = (artwork.x / 848) * 100;
-        const topPercent = (artwork.y / 1264) * 100;
+        const leftPercent = (artwork.x / GALLERY_04_MAP_WIDTH) * 100;
+        const topPercent = (artwork.y / GALLERY_04_MAP_HEIGHT) * 100;
         const isSelected = selectedArtwork?.id === artwork.id;
-        const isRightSide = artwork.x > 424;
+        const isRightSide = artwork.x > GALLERY_04_MAP_WIDTH / 2;
 
         return (
           <div

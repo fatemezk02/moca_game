@@ -35,6 +35,8 @@ import {
 import {
   getAllGalleryLamps,
   saveGalleryLampPosition,
+  getAllGalleryLocks,
+  saveGalleryLockPosition,
 } from '../data/galleryAreasStore';
 import {
   getCuratorFrameConfig,
@@ -50,6 +52,7 @@ import {
   AdminCollectionPoint,
   AdminPuzzlePoint,
   AdminArrowPoint,
+  AdminIconPoint,
 } from '../types/admin';
 
 export interface PanelPositionResult {
@@ -188,7 +191,7 @@ export interface DevMapPositioningToolProps {
 
 interface EditableElement {
   id: string;
-  type: 'star' | 'puzzle' | 'arrow' | 'experience' | 'lamp' | 'curator-frame';
+  type: 'star' | 'puzzle' | 'arrow' | 'experience' | 'lamp' | 'lock' | 'icon' | 'curator-frame';
   title: string;
   originalX: number;
   originalY: number;
@@ -198,6 +201,8 @@ interface EditableElement {
   originalHeight?: number;
   currentWidth?: number;
   currentHeight?: number;
+  originalRotation?: number;
+  currentRotation?: number;
   aspectRatio?: number; // width / height
   subType?: string;
   extra?: any;
@@ -219,6 +224,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     y: number;
     width?: number;
     height?: number;
+    rotation?: number;
   } | null>(null);
 
   // Currently loaded elements for the active gallery / curator wall
@@ -294,6 +300,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     if (isCuratorMode) {
       return curatorVirtualDims.width || CURATOR_VIRTUAL_WIDTH;
     }
+    const meta = GALLERIES.find((g) => g.id === currentGalleryId);
+    if (meta?.width) {
+      return meta.width;
+    }
     if (mapContainerEl?.id === 'museum-map-transform-container' || currentGalleryId === 'gallery-00') {
       return 604.8;
     }
@@ -303,6 +313,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
   const mapHeight = useMemo(() => {
     if (isCuratorMode) {
       return curatorVirtualDims.height || CURATOR_VIRTUAL_HEIGHT;
+    }
+    const meta = GALLERIES.find((g) => g.id === currentGalleryId);
+    if (meta?.height) {
+      return meta.height;
     }
     if (mapContainerEl?.id === 'museum-map-transform-container' || currentGalleryId === 'gallery-00') {
       return 844.86;
@@ -327,19 +341,30 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         }
       }
 
-      // 2. Look for known map container IDs or styles
+      // 2. Look for gallery specific canvas container first if not Gallery 00
+      if (currentGalleryId && currentGalleryId !== 'gallery-00') {
+        const canvasArea = document.querySelector<HTMLElement>(
+          `#${currentGalleryId}-canvas-area > div, #${currentGalleryId}-canvas-area [style*="aspect-ratio"], #${currentGalleryId}-canvas-area [style*="aspectRatio"]`
+        );
+        if (canvasArea) {
+          setMapContainerEl(canvasArea);
+          return;
+        }
+      }
+
+      // 3. Look for Gallery 00 container
       const g00Container = document.querySelector<HTMLElement>('#museum-map-transform-container');
-      if (g00Container) {
+      if (g00Container && currentGalleryId === 'gallery-00') {
         setMapContainerEl(g00Container);
         return;
       }
 
-      // Check for canvas areas with aspect ratio
-      const canvasArea = document.querySelector<HTMLElement>(
+      // Check for generic canvas areas with aspect ratio
+      const generalCanvas = document.querySelector<HTMLElement>(
         `#${currentGalleryId}-canvas-area > div, main > div[style*="aspect-ratio"], main > div[style*="aspectRatio"]`
       );
-      if (canvasArea) {
-        setMapContainerEl(canvasArea);
+      if (generalCanvas) {
+        setMapContainerEl(generalCanvas);
         return;
       }
 
@@ -474,7 +499,19 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         originalY: arrow.y,
         currentX: arrow.x,
         currentY: arrow.y,
+        originalWidth: arrow.size || 48,
+        originalHeight: arrow.size || 48,
+        currentWidth: arrow.size || 48,
+        currentHeight: arrow.size || 48,
+        originalRotation: arrow.rotation ?? 0,
+        currentRotation: arrow.rotation ?? 0,
         subType: arrow.destination,
+        extra: {
+          rotation: arrow.rotation ?? 0,
+          size: arrow.size || 48,
+          destination: arrow.destination,
+          visibilityConditions: arrow.visibilityConditions,
+        },
       });
     }
 
@@ -504,13 +541,8 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       }
     }
 
-    // E. Gallery Location Lamps on Master Map
-    const isMasterMap =
-      currentGalleryId === 'gallery-00' ||
-      currentGalleryId === 'gallery-01' ||
-      currentGalleryId === 'gallery_01' ||
-      mapContainerEl?.id === 'museum-map-transform-container' ||
-      (typeof document !== 'undefined' && !!document.querySelector('#museum-map-transform-container'));
+    // E. Gallery Location Lamps & Locks on Master Map (strictly scoped to Master Map)
+    const isMasterMap = currentGalleryId === 'gallery-00' || currentGalleryId === 'main-map';
 
     if (isMasterMap) {
       const galleryLamps = getAllGalleryLamps();
@@ -527,9 +559,51 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
             subType: lamp.galleryId,
             extra: {
               galleryId: lamp.galleryId,
+              masterMapGalleryId: lamp.masterMapGalleryId || 'gallery-00',
             },
           });
         }
+      }
+
+      const galleryLocks = getAllGalleryLocks();
+      for (const lock of galleryLocks) {
+        if (!list.some((item) => item.id === lock.id)) {
+          list.push({
+            id: lock.id,
+            type: 'lock',
+            title: lock.title,
+            originalX: lock.x,
+            originalY: lock.y,
+            currentX: lock.x,
+            currentY: lock.y,
+            subType: lock.galleryId,
+            extra: {
+              galleryId: lock.galleryId,
+              masterMapGalleryId: lock.masterMapGalleryId || 'gallery-00',
+            },
+          });
+        }
+      }
+    }
+
+    // F. Location Pins & Custom Icons (from getGalleryPoints)
+    const iconPoints = allPoints.filter((p) => p.type === 'icon') as AdminIconPoint[];
+    for (const ip of iconPoints) {
+      if (!list.some((item) => item.id === ip.id)) {
+        list.push({
+          id: ip.id,
+          type: 'icon',
+          title: ip.title || `آیکون لوکیشن ${ip.id}`,
+          originalX: ip.x,
+          originalY: ip.y,
+          currentX: ip.x,
+          currentY: ip.y,
+          subType: ip.iconType,
+          originalWidth: ip.width || 32,
+          originalHeight: ip.height || 32,
+          currentWidth: ip.width || 32,
+          currentHeight: ip.height || 32,
+        });
       }
     }
 
@@ -552,6 +626,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     window.addEventListener('museum_puzzle_progress_updated', handleUpdate);
     window.addEventListener('museum_experience_points_updated', handleUpdate);
     window.addEventListener('museum_lamp_position_updated', handleUpdate);
+    window.addEventListener('museum_lock_position_updated', handleUpdate);
     window.addEventListener('museum_gallery_areas_updated', handleUpdate);
     window.addEventListener('curator_wall_config_updated', handleUpdate);
     window.addEventListener('dev_select_curator_frame', handleDevSelect);
@@ -562,6 +637,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       window.removeEventListener('museum_puzzle_progress_updated', handleUpdate);
       window.removeEventListener('museum_experience_points_updated', handleUpdate);
       window.removeEventListener('museum_lamp_position_updated', handleUpdate);
+      window.removeEventListener('museum_lock_position_updated', handleUpdate);
       window.removeEventListener('museum_gallery_areas_updated', handleUpdate);
       window.removeEventListener('curator_wall_config_updated', handleUpdate);
       window.removeEventListener('dev_select_curator_frame', handleDevSelect);
@@ -578,6 +654,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
           y: el.currentY,
           width: el.currentWidth ?? el.originalWidth,
           height: el.currentHeight ?? el.originalHeight,
+          rotation: el.currentRotation ?? el.originalRotation ?? 0,
         });
       }
     } else {
@@ -595,39 +672,9 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
   const convertScreenToSvg = (clientX: number, clientY: number): { x: number; y: number } => {
     if (!mapContainerEl) return { x: 0, y: 0 };
 
-    if (!isCuratorMode) {
-      // Try native SVG coordinate conversion if SVG element exists
-      const svg = mapContainerEl.querySelector<SVGSVGElement>('svg');
-      if (svg && svg.getScreenCTM) {
-        const ctm = svg.getScreenCTM();
-        if (ctm) {
-          const pt = svg.createSVGPoint();
-          pt.x = clientX;
-          pt.y = clientY;
-          const transformed = pt.matrixTransform(ctm.inverse());
-
-          const vb = svg.viewBox?.baseVal;
-          if (vb && vb.width > 0 && vb.height > 0) {
-            if (Math.abs(vb.width - mapWidth) < 5 && Math.abs(vb.height - mapHeight) < 5) {
-              return {
-                x: Math.round(Math.max(0, Math.min(mapWidth, transformed.x))),
-                y: Math.round(Math.max(0, Math.min(mapHeight, transformed.y))),
-              };
-            } else {
-              const scaleX = mapWidth / vb.width;
-              const scaleY = mapHeight / vb.height;
-              return {
-                x: Math.round(Math.max(0, Math.min(mapWidth, transformed.x * scaleX))),
-                y: Math.round(Math.max(0, Math.min(mapHeight, transformed.y * scaleY))),
-              };
-            }
-          }
-        }
-      }
-    }
-
-    // Direct container projection (Used for Curator wall 720x580 and fallback map)
     const rect = mapContainerEl.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return { x: 0, y: 0 };
+
     const clampedX = Math.max(0, Math.min(rect.width, clientX - rect.left));
     const clampedY = Math.max(0, Math.min(rect.height, clientY - rect.top));
 
@@ -646,6 +693,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     dragCoords?.height ?? selectedElement?.currentHeight ?? selectedElement?.originalHeight ?? 180;
   const activeAspectRatio =
     selectedElement?.aspectRatio || activeWidth / Math.max(1, activeHeight);
+  const activeRotation =
+    dragCoords?.rotation ?? selectedElement?.currentRotation ?? selectedElement?.originalRotation ?? 0;
+  const activeArrowSize =
+    dragCoords?.width ?? selectedElement?.currentWidth ?? selectedElement?.originalWidth ?? 48;
 
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelPos, setPanelPos] = useState<PanelPositionResult>({
@@ -787,33 +838,32 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
 
     const el = elements.find((item) => item.id === elementId);
 
-    if (el?.type === 'curator-frame' && mapContainerEl) {
+    if (mapContainerEl) {
       const rect = mapContainerEl.getBoundingClientRect();
-      const pointerCanvasX = ((e.clientX - rect.left) / rect.width) * mapWidth;
-      const pointerCanvasY = ((e.clientY - rect.top) / rect.height) * mapHeight;
+      const offsetX = isCuratorMode ? parseFloat(mapContainerEl.dataset.offsetX || '0') : 0;
+      const offsetY = isCuratorMode ? parseFloat(mapContainerEl.dataset.offsetY || '0') : 0;
+      const pointerCanvasX = offsetX + ((e.clientX - rect.left) / rect.width) * mapWidth;
+      const pointerCanvasY = offsetY + ((e.clientY - rect.top) / rect.height) * mapHeight;
 
-      const currentPosX = dragCoords?.x ?? el.currentX;
-      const currentPosY = dragCoords?.y ?? el.currentY;
+      const currentPosX = dragCoords?.x ?? el?.currentX ?? 0;
+      const currentPosY = dragCoords?.y ?? el?.currentY ?? 0;
 
       dragOffsetRef.current = {
         offsetX: pointerCanvasX - currentPosX,
         offsetY: pointerCanvasY - currentPosY,
       };
 
+      setDragCoords({
+        x: currentPosX,
+        y: currentPosY,
+        width: el?.currentWidth,
+        height: el?.currentHeight,
+        rotation: el?.currentRotation,
+      });
+
       updatePanelPlacement(e.clientX, e.clientY);
       return;
     }
-
-    const newCoords = convertScreenToSvg(e.clientX, e.clientY);
-    setDragCoords(newCoords);
-
-    setElements((prev) =>
-      prev.map((item) =>
-        item.id === elementId ? { ...item, currentX: newCoords.x, currentY: newCoords.y } : item
-      )
-    );
-
-    updatePanelPlacement(e.clientX, e.clientY);
   };
 
   // Corner resize handler for curator frames (preserves aspect ratio)
@@ -905,8 +955,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
 
       if (selectedElement.type === 'curator-frame') {
         const rect = mapContainerEl.getBoundingClientRect();
-        const pointerCanvasX = ((e.clientX - rect.left) / rect.width) * mapWidth;
-        const pointerCanvasY = ((e.clientY - rect.top) / rect.height) * mapHeight;
+        const offsetX = parseFloat(mapContainerEl.dataset.offsetX || '0');
+        const offsetY = parseFloat(mapContainerEl.dataset.offsetY || '0');
+        const pointerCanvasX = offsetX + ((e.clientX - rect.left) / rect.width) * mapWidth;
+        const pointerCanvasY = offsetY + ((e.clientY - rect.top) / rect.height) * mapHeight;
 
         const targetX = Math.round(pointerCanvasX - dragOffsetRef.current.offsetX);
         const targetY = Math.round(pointerCanvasY - dragOffsetRef.current.offsetY);
@@ -914,8 +966,8 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         const currentW = dragCoords?.width ?? selectedElement.currentWidth ?? 140;
         const currentH = dragCoords?.height ?? selectedElement.currentHeight ?? 180;
 
-        const clampedX = Math.max(0, Math.min(mapWidth - currentW, targetX));
-        const clampedY = Math.max(0, Math.min(mapHeight - currentH, targetY));
+        const clampedX = Math.max(0, targetX);
+        const clampedY = Math.max(0, targetY);
 
         setDragCoords((prev) => ({
           x: clampedX,
@@ -951,12 +1003,25 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       }
 
       // Map Point dragging
-      const newCoords = convertScreenToSvg(e.clientX, e.clientY);
-      setDragCoords(newCoords);
+      const rect = mapContainerEl.getBoundingClientRect();
+      const pointerCanvasX = ((e.clientX - rect.left) / rect.width) * mapWidth;
+      const pointerCanvasY = ((e.clientY - rect.top) / rect.height) * mapHeight;
+
+      const targetX = Math.round(pointerCanvasX - dragOffsetRef.current.offsetX);
+      const targetY = Math.round(pointerCanvasY - dragOffsetRef.current.offsetY);
+
+      const clampedX = Math.round(Math.max(0, Math.min(mapWidth, targetX)));
+      const clampedY = Math.round(Math.max(0, Math.min(mapHeight, targetY)));
+
+      setDragCoords((prev) => ({
+        ...prev,
+        x: clampedX,
+        y: clampedY,
+      }));
 
       setElements((prev) =>
         prev.map((el) =>
-          el.id === selectedId ? { ...el, currentX: newCoords.x, currentY: newCoords.y } : el
+          el.id === selectedId ? { ...el, currentX: clampedX, currentY: clampedY } : el
         )
       );
 
@@ -1094,6 +1159,82 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     requestAnimationFrame(() => updatePanelPlacement());
   };
 
+  // Arrow rotation handlers
+  const handleArrowRotateStep = (deltaDeg: number) => {
+    if (!selectedId || !selectedElement || selectedElement.type !== 'arrow') return;
+    const curRot = dragCoords?.rotation ?? selectedElement.currentRotation ?? selectedElement.originalRotation ?? 0;
+    const nextRot = (Math.round(curRot + deltaDeg) % 360 + 360) % 360;
+
+    setDragCoords((prev) => ({
+      x: prev?.x ?? selectedElement.currentX,
+      y: prev?.y ?? selectedElement.currentY,
+      width: prev?.width ?? selectedElement.currentWidth,
+      height: prev?.height ?? selectedElement.currentHeight,
+      rotation: nextRot,
+    }));
+
+    setElements((prev) =>
+      prev.map((el) => (el.id === selectedId ? { ...el, currentRotation: nextRot } : el))
+    );
+  };
+
+  const handleArrowRotateSet = (exactDeg: number) => {
+    if (!selectedId || !selectedElement || selectedElement.type !== 'arrow') return;
+    const nextRot = (Math.round(exactDeg) % 360 + 360) % 360;
+
+    setDragCoords((prev) => ({
+      x: prev?.x ?? selectedElement.currentX,
+      y: prev?.y ?? selectedElement.currentY,
+      width: prev?.width ?? selectedElement.currentWidth,
+      height: prev?.height ?? selectedElement.currentHeight,
+      rotation: nextRot,
+    }));
+
+    setElements((prev) =>
+      prev.map((el) => (el.id === selectedId ? { ...el, currentRotation: nextRot } : el))
+    );
+  };
+
+  // Arrow size handlers
+  const handleArrowSizeStep = (deltaSize: number) => {
+    if (!selectedId || !selectedElement || selectedElement.type !== 'arrow') return;
+    const curSize = dragCoords?.width ?? selectedElement.currentWidth ?? selectedElement.originalWidth ?? 48;
+    const nextSize = Math.max(24, Math.min(120, Math.round(curSize + deltaSize)));
+
+    setDragCoords((prev) => ({
+      x: prev?.x ?? selectedElement.currentX,
+      y: prev?.y ?? selectedElement.currentY,
+      width: nextSize,
+      height: nextSize,
+      rotation: prev?.rotation ?? selectedElement.currentRotation,
+    }));
+
+    setElements((prev) =>
+      prev.map((el) =>
+        el.id === selectedId ? { ...el, currentWidth: nextSize, currentHeight: nextSize } : el
+      )
+    );
+  };
+
+  const handleArrowSizeSet = (exactSize: number) => {
+    if (!selectedId || !selectedElement || selectedElement.type !== 'arrow') return;
+    const nextSize = Math.max(24, Math.min(120, Math.round(exactSize)));
+
+    setDragCoords((prev) => ({
+      x: prev?.x ?? selectedElement.currentX,
+      y: prev?.y ?? selectedElement.currentY,
+      width: nextSize,
+      height: nextSize,
+      rotation: prev?.rotation ?? selectedElement.currentRotation,
+    }));
+
+    setElements((prev) =>
+      prev.map((el) =>
+        el.id === selectedId ? { ...el, currentWidth: nextSize, currentHeight: nextSize } : el
+      )
+    );
+  };
+
   // 7. Save Position and Size to persistent database
   const handleSavePosition = (targetId?: string) => {
     const idToSave = targetId || selectedId;
@@ -1150,21 +1291,34 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     // MAP VIEW POINTS SAVE
     if (el.type === 'arrow') {
       const currentArrows = getGalleryArrows(currentGalleryId);
+      const finalRot = dragCoords?.rotation ?? el.currentRotation ?? el.originalRotation ?? (el.extra?.rotation ?? 0);
+      const finalSize = dragCoords?.width ?? el.currentWidth ?? el.originalWidth ?? (el.extra?.size ?? 48);
       const updated = currentArrows.map((a) =>
-        a.id === idToSave ? { ...a, x: finalX, y: finalY } : a
+        a.id === idToSave ? { ...a, x: finalX, y: finalY, rotation: finalRot, size: finalSize } : a
       );
       saveGalleryArrows(currentGalleryId, updated);
+      showToast(
+        `تنظیمات فلش «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY} , زاویه: ${finalRot}° , اندازه: ${finalSize}px`,
+        'success'
+      );
     } else if (el.type === 'puzzle') {
       const currentPuzzles = getGalleryPuzzlePoints(currentGalleryId);
       const updated = currentPuzzles.map((p) =>
         p.id === idToSave ? { ...p, x: finalX, y: finalY } : p
       );
       saveGalleryPuzzlePoints(currentGalleryId, updated);
+      showToast(`موقعیت «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY}`, 'success');
     } else if (el.type === 'experience') {
       saveExperiencePointPosition(idToSave, finalX, finalY, currentGalleryId);
+      showToast(`موقعیت «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY}`, 'success');
     } else if (el.type === 'lamp') {
       const targetGalleryId = el.extra?.galleryId || el.subType || el.id.replace('lamp-', '');
       saveGalleryLampPosition(targetGalleryId, finalX, finalY);
+      showToast(`موقعیت «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY}`, 'success');
+    } else if (el.type === 'lock') {
+      const targetGalleryId = el.extra?.galleryId || el.subType || el.id.replace('lock-', '');
+      saveGalleryLockPosition(targetGalleryId, finalX, finalY);
+      showToast(`موقعیت «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY}`, 'success');
     } else {
       // Star / Collection Point
       const currentPoints = getGalleryPoints(currentGalleryId);
@@ -1172,6 +1326,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         p.id === idToSave ? { ...p, x: finalX, y: finalY } : p
       );
       saveGalleryPoints(currentGalleryId, updated);
+      showToast(`موقعیت «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY}`, 'success');
     }
 
     // Dispatch update events for live map components and admin
@@ -1186,12 +1341,22 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     setElements((prev) =>
       prev.map((item) =>
         item.id === idToSave
-          ? { ...item, originalX: finalX, originalY: finalY, currentX: finalX, currentY: finalY }
+          ? {
+              ...item,
+              originalX: finalX,
+              originalY: finalY,
+              currentX: finalX,
+              currentY: finalY,
+              originalWidth: dragCoords?.width ?? item.originalWidth,
+              originalHeight: dragCoords?.height ?? item.originalHeight,
+              currentWidth: dragCoords?.width ?? item.currentWidth,
+              currentHeight: dragCoords?.height ?? item.currentHeight,
+              originalRotation: dragCoords?.rotation ?? item.originalRotation,
+              currentRotation: dragCoords?.rotation ?? item.currentRotation,
+            }
           : item
       )
     );
-
-    showToast(`موقعیت «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY}`, 'success');
   };
 
   // Reset selected element to original position/size
@@ -1234,6 +1399,32 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         })
       );
       showToast(`موقعیت و اندازه «${el.title}» به حالت اولیه بازگردانده شد`, 'info');
+      return;
+    }
+
+    if (el.type === 'arrow') {
+      setDragCoords({
+        x: el.originalX,
+        y: el.originalY,
+        width: el.originalWidth,
+        height: el.originalHeight,
+        rotation: el.originalRotation,
+      });
+      setElements((prev) =>
+        prev.map((item) =>
+          item.id === selectedId
+            ? {
+                ...item,
+                currentX: item.originalX,
+                currentY: item.originalY,
+                currentWidth: item.originalWidth,
+                currentHeight: item.originalHeight,
+                currentRotation: item.originalRotation,
+              }
+            : item
+        )
+      );
+      showToast(`موقعیت، زاویه و اندازه «${el.title}» بازگردانده شد`, 'info');
       return;
     }
 
@@ -1396,6 +1587,28 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                         ))}
                     </optgroup>
                   )}
+                  {elements.some((e) => e.type === 'lock') && (
+                    <optgroup label="🔒 قفل‌های گالری‌ها (Gallery Locks)">
+                      {elements
+                        .filter((e) => e.type === 'lock')
+                        .map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.title} (X: {e.currentX}, Y: {e.currentY})
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
+                  {elements.some((e) => e.type === 'icon') && (
+                    <optgroup label="📍 آیکون‌های لوکیشن (Location Pins)">
+                      {elements
+                        .filter((e) => e.type === 'icon')
+                        .map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.title} (X: {e.currentX}, Y: {e.currentY})
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
                 </>
               )}
             </select>
@@ -1533,6 +1746,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                         ? 'border border-dashed border-purple-400/70 bg-purple-950/40 hover:border-purple-300 hover:bg-purple-900/50'
                         : item.type === 'lamp'
                         ? 'border border-dashed border-yellow-400/90 bg-yellow-950/50 hover:border-yellow-300 hover:bg-yellow-900/60 shadow-[0_0_12px_rgba(250,204,21,0.35)]'
+                        : item.type === 'lock'
+                        ? 'border border-dashed border-amber-600/90 bg-amber-950/50 hover:border-amber-400 hover:bg-amber-900/60 shadow-[0_0_12px_rgba(217,119,6,0.35)]'
+                        : item.type === 'icon'
+                        ? 'border border-dashed border-amber-500/80 bg-amber-950/40 hover:border-amber-400 hover:bg-amber-900/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]'
                         : 'border border-dashed border-stone-400/60 bg-stone-900/30 hover:border-amber-300/80 hover:bg-stone-900/50'
                     }`}
                   >
@@ -1541,9 +1758,33 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                         <span className="text-base select-none leading-none">💡</span>
                         <div className="absolute -inset-1 rounded-full bg-yellow-400/30 blur-[2px] pointer-events-none" />
                       </div>
+                    ) : item.type === 'lock' ? (
+                      <div className="relative flex items-center justify-center pointer-events-none">
+                        <span className="text-base select-none leading-none">🔒</span>
+                        <div className="absolute -inset-1 rounded-full bg-amber-500/30 blur-[2px] pointer-events-none" />
+                      </div>
+                    ) : item.type === 'icon' ? (
+                      <div className="relative flex items-center justify-center pointer-events-none">
+                        <span className="text-sm select-none leading-none">📍</span>
+                      </div>
+                    ) : item.type === 'arrow' ? (
+                      <div
+                        className="relative flex items-center justify-center pointer-events-none transition-transform"
+                        style={{
+                          transform: `rotate(${
+                            isSelected && dragCoords?.rotation !== undefined
+                              ? dragCoords.rotation
+                              : item.currentRotation || 0
+                          }deg)`,
+                        }}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-amber-500/30 border border-amber-400 flex items-center justify-center shadow-lg">
+                          <Compass className="w-5 h-5 text-amber-300" />
+                        </div>
+                      </div>
                     ) : (
                       <div
-                        className={`w-2 h-2 rounded-full ${
+                        className={`w-2.5 h-2.5 rounded-full ${
                           isSelected
                             ? 'bg-amber-400 ring-2 ring-stone-950'
                             : item.type === 'experience'
@@ -1552,6 +1793,11 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                         }`}
                       />
                     )}
+
+                    {/* Exact Coordinate Center Indicator */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-400 ring-1 ring-stone-950" />
+                    </div>
                   </div>
 
                   {/* Tiny identifier chip above marker */}
@@ -1561,6 +1807,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                         ? 'bg-amber-500 text-stone-950 font-bold opacity-100 shadow-md'
                         : item.type === 'lamp'
                         ? 'bg-yellow-950/90 text-yellow-300 border border-yellow-500/50 opacity-95'
+                        : item.type === 'lock'
+                        ? 'bg-amber-950/90 text-amber-300 border border-amber-500/50 opacity-95'
+                        : item.type === 'icon'
+                        ? 'bg-amber-950/90 text-amber-300 border border-amber-500/50 opacity-95'
                         : 'bg-stone-900/80 text-stone-300 opacity-80'
                     }`}
                   >
@@ -1569,6 +1819,8 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                     {item.type === 'arrow' && '🧭 '}
                     {item.type === 'experience' && '✨ '}
                     {item.type === 'lamp' && '💡 '}
+                    {item.type === 'lock' && '🔒 '}
+                    {item.type === 'icon' && '📍 '}
                     {item.id}
                   </div>
                 </div>
@@ -1681,6 +1933,28 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                     <optgroup label="💡 چراغ‌های موقعیت گالری (Gallery Lamps)">
                       {elements
                         .filter((e) => e.type === 'lamp')
+                        .map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.title} (X: {e.currentX}, Y: {e.currentY})
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
+                  {elements.some((e) => e.type === 'lock') && (
+                    <optgroup label="🔒 قفل‌های گالری‌ها (Gallery Locks)">
+                      {elements
+                        .filter((e) => e.type === 'lock')
+                        .map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.title} (X: {e.currentX}, Y: {e.currentY})
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
+                  {elements.some((e) => e.type === 'icon') && (
+                    <optgroup label="📍 آیکون‌های لوکیشن (Location Pins)">
+                      {elements
+                        .filter((e) => e.type === 'icon')
                         .map((e) => (
                           <option key={e.id} value={e.id}>
                             {e.title} (X: {e.currentX}, Y: {e.currentY})
@@ -1897,6 +2171,222 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                   title="+5px"
                 >
                   +5
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ARROW ROTATION & SIZE CONTROLS */}
+          {selectedElement.type === 'arrow' && (
+            <div className="bg-stone-900/70 p-2.5 rounded-xl border border-stone-800 flex flex-col gap-2">
+              {/* Rotation / Direction Header & Readout */}
+              <div className="flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-1 text-amber-300 font-semibold">
+                  <Compass className="w-3.5 h-3.5" />
+                  <span>زاویه و جهت فلش:</span>
+                </div>
+                <div className="font-mono-custom text-stone-200 text-[11px] flex items-center gap-1.5 bg-stone-950 px-2 py-0.5 rounded border border-stone-800">
+                  <span className="text-amber-400 font-bold">{activeRotation}°</span>
+                  <span className="text-stone-400 text-[10px]">
+                    {activeRotation === 0
+                      ? '⬆️ بالا'
+                      : activeRotation === 90
+                      ? '➡️ راست'
+                      : activeRotation === 180
+                      ? '⬇️ پایین'
+                      : activeRotation === 270
+                      ? '⬅️ چپ'
+                      : `${activeRotation}°`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Cardinal Directions Quick Presets */}
+              <div className="grid grid-cols-4 gap-1 text-[10px] font-sans-custom">
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateSet(0)}
+                  className={`py-1 px-1 rounded text-center transition-colors cursor-pointer ${
+                    activeRotation === 0
+                      ? 'bg-amber-500 text-stone-950 font-bold shadow'
+                      : 'bg-stone-800 hover:bg-stone-700 text-stone-200'
+                  }`}
+                  title="زاویه ۰ درجه (بالا)"
+                >
+                  ⬆️ بالا (۰°)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateSet(90)}
+                  className={`py-1 px-1 rounded text-center transition-colors cursor-pointer ${
+                    activeRotation === 90
+                      ? 'bg-amber-500 text-stone-950 font-bold shadow'
+                      : 'bg-stone-800 hover:bg-stone-700 text-stone-200'
+                  }`}
+                  title="زاویه ۹۰ درجه (راست)"
+                >
+                  ➡️ راست (۹۰°)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateSet(180)}
+                  className={`py-1 px-1 rounded text-center transition-colors cursor-pointer ${
+                    activeRotation === 180
+                      ? 'bg-amber-500 text-stone-950 font-bold shadow'
+                      : 'bg-stone-800 hover:bg-stone-700 text-stone-200'
+                  }`}
+                  title="زاویه ۱۸۰ درجه (پایین)"
+                >
+                  ⬇️ پایین (۱۸۰°)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateSet(270)}
+                  className={`py-1 px-1 rounded text-center transition-colors cursor-pointer ${
+                    activeRotation === 270
+                      ? 'bg-amber-500 text-stone-950 font-bold shadow'
+                      : 'bg-stone-800 hover:bg-stone-700 text-stone-200'
+                  }`}
+                  title="زاویه ۲۷۰ درجه (چپ)"
+                >
+                  ⬅️ چپ (۲۷۰°)
+                </button>
+              </div>
+
+              {/* Step Rotation Buttons */}
+              <div className="flex items-center justify-between gap-1 font-mono-custom text-[10px]">
+                <span className="text-[10px] text-stone-400 font-sans-custom">تنظیم زاویه:</span>
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateStep(-45)}
+                  className="px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 cursor-pointer"
+                  title="-45°"
+                >
+                  -45°
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateStep(-15)}
+                  className="px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 cursor-pointer"
+                  title="-15°"
+                >
+                  -15°
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateStep(-5)}
+                  className="px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 cursor-pointer"
+                  title="-5°"
+                >
+                  -5°
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateStep(5)}
+                  className="px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 cursor-pointer"
+                  title="+5°"
+                >
+                  +5°
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateStep(15)}
+                  className="px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 cursor-pointer"
+                  title="+15°"
+                >
+                  +15°
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowRotateStep(45)}
+                  className="px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 cursor-pointer"
+                  title="+45°"
+                >
+                  +45°
+                </button>
+              </div>
+
+              {/* Slider for smooth rotation */}
+              <div className="flex items-center gap-2 pt-0.5">
+                <input
+                  type="range"
+                  min="0"
+                  max="359"
+                  value={activeRotation}
+                  onChange={(e) => handleArrowRotateSet(parseInt(e.target.value, 10))}
+                  className="w-full accent-amber-400 h-1.5 bg-stone-800 rounded-lg cursor-pointer"
+                />
+              </div>
+
+              {/* Arrow Size Header & Controls */}
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-stone-800/80">
+                <div className="flex items-center gap-1 text-amber-300 font-semibold">
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  <span>اندازه فلش:</span>
+                </div>
+                <div className="font-mono-custom text-amber-400 font-bold text-[11px]">
+                  {activeArrowSize}px
+                </div>
+              </div>
+
+              {/* Size step and preset buttons */}
+              <div className="flex items-center justify-between gap-1 font-mono-custom text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => handleArrowSizeSet(36)}
+                  className={`px-1.5 py-0.5 rounded cursor-pointer ${
+                    activeArrowSize === 36 ? 'bg-amber-500 text-stone-950 font-bold' : 'bg-stone-800 hover:bg-stone-700 text-stone-200'
+                  }`}
+                  title="اندازه کوچک (36px)"
+                >
+                  36
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowSizeSet(44)}
+                  className={`px-1.5 py-0.5 rounded cursor-pointer ${
+                    activeArrowSize === 44 ? 'bg-amber-500 text-stone-950 font-bold' : 'bg-stone-800 hover:bg-stone-700 text-stone-200'
+                  }`}
+                  title="اندازه استاندارد (44px)"
+                >
+                  44
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowSizeSet(48)}
+                  className={`px-1.5 py-0.5 rounded cursor-pointer ${
+                    activeArrowSize === 48 ? 'bg-amber-500 text-stone-950 font-bold' : 'bg-stone-800 hover:bg-stone-700 text-stone-200'
+                  }`}
+                  title="اندازه معمولی (48px)"
+                >
+                  48
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowSizeSet(56)}
+                  className={`px-1.5 py-0.5 rounded cursor-pointer ${
+                    activeArrowSize === 56 ? 'bg-amber-500 text-stone-950 font-bold' : 'bg-stone-800 hover:bg-stone-700 text-stone-200'
+                  }`}
+                  title="اندازه بزرگ (56px)"
+                >
+                  56
+                </button>
+                <div className="w-[1px] h-4 bg-stone-800" />
+                <button
+                  type="button"
+                  onClick={() => handleArrowSizeStep(-2)}
+                  className="p-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 cursor-pointer"
+                  title="-2px"
+                >
+                  <Minus className="w-2.5 h-2.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleArrowSizeStep(2)}
+                  className="p-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 cursor-pointer"
+                  title="+2px"
+                >
+                  <Plus className="w-2.5 h-2.5" />
                 </button>
               </div>
             </div>

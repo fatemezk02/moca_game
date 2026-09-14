@@ -9,147 +9,95 @@ interface Gallery08MapSvgProps extends React.SVGProps<SVGSVGElement> {
 
 /**
  * Architectural SVG Map for Gallery 08.
- * Exact SVG specification as provided.
- * viewBox="0 0 762.8 1147.2"
+ * Tight coordinate space around actual visible artwork (viewBox="0 0 501.5 642.18").
  */
 export const Gallery08MapSvg = forwardRef<SVGSVGElement, Gallery08MapSvgProps>(
   ({ className = '', children, mapMode, ...props }, ref) => {
     return (
       <svg
         ref={ref}
-        version="1.1"
         id="Layer_1"
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
-        x="0px"
-        y="0px"
-        viewBox="0 0 762.8 1147.2"
-        style={{ enableBackground: 'new 0 0 762.8 1147.2' }}
+        viewBox="0 0 501.5 642.18"
+        style={{ enableBackground: 'new 0 0 501.5 642.18' }}
         xmlSpace="preserve"
         className={className}
         {...props}
       >
         <defs>
-          <style type="text/css">
-            {`
-              .st0{fill:#F8EFE8;}
-              .st1{fill:#2A2623;}
-              .st2{fill:url(#SVGID_1_);}
-              .st3{fill:url(#SVGID_00000132785013793165948160000000332474940824001719_);}
-              .st4{fill:#C9AC59;stroke:#2D2824;stroke-miterlimit:10;}
-              .st5{fill:url(#SVGID_00000149376631618869257580000015609599305653076362_);}
-              .st6{fill:url(#SVGID_00000017498353689431545630000010488042934420510143_);}
-              .st7{fill:#998F56;stroke:#353329;stroke-miterlimit:10;}
-              .st8{fill:url(#SVGID_00000168831477604003519490000002990206415096436643_);}
-              .st9{fill:url(#SVGID_00000052063824641248338480000013339454257444908703_);}
-              .st10{fill:none;stroke:#2A2623;stroke-width:11;stroke-miterlimit:10;}
-              .st11{fill:url(#SVGID_00000110472741598493684350000014494481887544543125_);}
-              .st12{fill:url(#SVGID_00000167359719221346430380000004563121170528340608_);}
-              .st13{fill:url(#SVGID_00000065794437998003919180000017889681091819901081_);}
-              .st14{opacity:0.2;}
-              .st15{opacity:0.63;}
-              .st16{fill:url(#SVGID_00000091695911004216431980000015092153661944012684_);}
-              .st17{fill:url(#SVGID_00000131349121331487098900000002287721527106099586_);}
-              .st18{opacity:0.2;fill:#2A2623;}
-              .st19{fill:url(#SVGID_00000058583573331101194560000013360281770290378943_);}
-              .st20{fill:url(#SVGID_00000049936095736978907600000000721980303085916808_);}
-              .st21{fill:url(#SVGID_00000080899146406035950350000017752558134222539710_);}
-              .st22{fill:url(#SVGID_00000072992623117188067020000011773122336511813252_);}
-              .st23{opacity:0.2;fill:none;stroke:#2A2623;stroke-width:11;stroke-miterlimit:10;}
-            `}
-          </style>
-        </defs>
-        <g>
-          <linearGradient
-            id="SVGID_1_"
-            gradientUnits="userSpaceOnUse"
-            x1="358.1684"
-            y1="979.3728"
-            x2="358.1684"
-            y2="801.714"
-          >
-            <stop offset="1.704893e-07" style={{ stopColor: '#FFFFFF', stopOpacity: 0 }} />
-            <stop offset="9.146164e-02" style={{ stopColor: '#FEFDFD', stopOpacity: 0.09146148 }} />
-            <stop offset="1" style={{ stopColor: '#F8EFE8' }} />
-          </linearGradient>
-          <rect x="311.1" y="776.2" className="st2" width="94.1" height="158.3" />
-          <rect x="534.3" y="468.9" className="st0" width="86.6" height="90.8" />
-          
-          <linearGradient
-            id="SVGID_00000018209299552265017750000004098641335491345328_"
-            gradientUnits="userSpaceOnUse"
-            x1="576.0493"
-            y1="468.8931"
-            x2="576.0493"
-            y2="309.5089"
-          >
-            <stop offset="0" style={{ stopColor: '#F8EFE8' }} />
-            <stop offset="0.9085" style={{ stopColor: '#FEFDFD', stopOpacity: 0.09146148 }} />
-            <stop offset="1" style={{ stopColor: '#FFFFFF', stopOpacity: 0 }} />
-          </linearGradient>
-          
-          <rect
-            x="531.2"
-            y="326.9"
-            style={{ fill: 'url(#SVGID_00000018209299552265017750000004098641335491345328_)' }}
-            width="89.7"
-            height="142"
-          />
-          <rect x="525.2" y="468.9" className="st0" width="35.8" height="94.8" />
-          <path
-            className="st0"
-            d="M525.2,365.5v198.2H410.7v219.1H204.1V673.9c0-52,0-103.2,0-103.2s-67.7,3.4-67.7-52.1
-            c0-55.4,67.6-52.1,67.7-52.1V365.5h101.5c0,0-3.4-67.7,52.1-67.7c55.4,0,52.1,67.6,52.1,67.7C409.8,365.5,524.9,365.5,525.2,365.5z"
-          />
-          <path
-            className="st10"
-            d="M410.7,465.5h114.5v-100c-0.3,0-115.4,0-115.4,0c0-0.1,3.3-67.7-52.1-67.7c-55.5,0-52.1,67.7-52.1,67.7H204.1
-            v101.1c-0.1,0-67.7-3.3-67.7,52.1c0,55.5,67.7,52.1,67.7,52.1s0,211.4,0,212c0,0,101.5,0,101.5,0v31"
-          />
-          <line className="st10" x1="305.6" y1="365.5" x2="305.6" y2="465.5" />
-          <line className="st10" x1="305.6" y1="563.7" x2="305.6" y2="706.1" />
-          <line className="st10" x1="204.1" y1="673.9" x2="305.6" y2="673.9" />
-          <line className="st10" x1="305.6" y1="782.7" x2="305.6" y2="755.2" />
-          <polyline className="st23" points="410.7,782.7 525.2,782.7 525.2,883.1" />
-          <polyline className="st10" points="525.2,563.7 410.7,563.7 410.7,782.7 410.7,813.7" />
-          <line className="st23" x1="525.2" y1="716.8" x2="525.2" y2="563.7" />
-          <polyline className="st10" points="525.2,563.7 626.4,563.7 626.4,534.5" />
-          <path
-            className="st7"
-            d="M631.9,499.6V518c0,1.7-1.3,3-3,3h-5c-1.7,0-3-1.3-3-3v-18.5c0-1.7,1.3-3,3-3h5
-            C630.5,496.6,631.9,497.9,631.9,499.6z"
-          />
-          <path
-            className="st7"
-            d="M631.9,435.4v18.5c0,1.7-1.3,3-3,3h-5c-1.7,0-3-1.3-3-3v-18.5c0-1.7,1.3-3,3-3h5
-            C630.5,432.4,631.9,433.7,631.9,435.4z"
-          />
-          <path
-            className="st1"
-            d="M628.9,484.5h-5c-1.7,0-3-1.3-3-3v-9.6c0-1.7,1.3-3,3-3h5c1.7,0,3,1.3,3,3v9.6
-            C631.9,483.2,630.5,484.5,628.9,484.5z"
-          />
-          <path
-            className="st7"
-            d="M416.2,847.6v-18.5c0-1.7-1.3-3-3-3h-5c-1.7,0-3,1.3-3,3v18.5c0,1.7,1.3,3,3,3h5
-            C414.9,850.6,416.2,849.3,416.2,847.6z"
-          />
-          <path
-            className="st1"
-            d="M413.2,862.7h-5c-1.7,0-3,1.3-3,3v9.6c0,1.7,1.3,3,3,3h5c1.7,0,3-1.3,3-3v-9.6
-            C416.2,864,414.9,862.7,413.2,862.7z"
-          />
-          <path
-            className="st7"
-            d="M311.1,847.6v-18.5c0-1.7-1.3-3-3-3h-5c-1.7,0-3,1.3-3,3v18.5c0,1.7,1.3,3,3,3h5
-            C309.8,850.6,311.1,849.3,311.1,847.6z"
-          />
-          <path
-            className="st1"
-            d="M308.1,862.7h-5c-1.7,0-3,1.3-3,3v9.6c0,1.7,1.3,3,3,3h5c1.7,0,3-1.3,3-3v-9.6
-            C311.1,864,309.8,862.7,308.1,862.7z"
-          />
-        </g>
+          <style>
+              {`
+                .cls-1{fill:url(#linear-gradient);}
+                .cls-2{fill:#f8efe8;}
+                .cls-3{fill:url(#linear-gradient-2);}
+                .cls-4,.cls-5{fill:none;stroke:#2a2623;stroke-width:11px;}
+                .cls-4,.cls-5,.cls-6{stroke-miterlimit:10;}
+                .cls-5{opacity:0.2;}
+                .cls-6{fill:#998f56;stroke:#353329;}
+                .cls-7{fill:#2a2623;}
+              `}
+            </style>
+            <linearGradient
+              id="linear-gradient"
+              x1="227.28"
+              y1="687.12"
+              x2="227.28"
+              y2="509.46"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0" stopColor="#fff" stopOpacity="0" />
+              <stop offset="0.32" stopColor="#fdf9f7" stopOpacity="0.36" />
+              <stop offset="0.65" stopColor="#faf4ef" stopOpacity="0.7" />
+              <stop offset="0.89" stopColor="#f9f0ea" stopOpacity="0.92" />
+              <stop offset="1" stopColor="#f8efe8" />
+            </linearGradient>
+            <linearGradient
+              id="linear-gradient-2"
+              x1="445.16"
+              y1="176.64"
+              x2="445.16"
+              y2="17.25"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0" stopColor="#f8efe8" />
+              <stop offset="0.11" stopColor="#f9f0ea" stopOpacity="0.92" />
+              <stop offset="0.35" stopColor="#faf4ef" stopOpacity="0.7" />
+              <stop offset="0.68" stopColor="#fdf9f7" stopOpacity="0.36" />
+              <stop offset="1" stopColor="#fff" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <g id="Layer_2" data-name="Layer 2">
+            <g id="Layer_1-2" data-name="Layer 1">
+              <rect className="cls-1" x="180.22" y="483.91" width="94.11" height="158.27" />
+              <rect className="cls-2" x="403.38" y="176.64" width="86.62" height="90.77" />
+              <rect className="cls-3" x="400.32" y="34.65" width="89.68" height="141.99" />
+              <rect className="cls-2" x="394.31" y="176.64" width="35.79" height="94.77" />
+              <path
+                className="cls-2"
+                d="M394.31,73.21V271.4H279.83V490.47H73.21v-212S5.5,281.82,5.5,226.37s67.56-52.09,67.71-52.09V73.21H174.72S171.35,5.5,226.81,5.5s52.09,67.56,52.08,67.71Z"
+              />
+              <path
+                className="cls-4"
+                d="M279.83,173.24H394.31v-100H278.89c0-.15,3.33-67.71-52.08-67.71s-52.09,67.67-52.09,67.71H73.21V174.28c-.15,0-67.71-3.32-67.71,52.09s67.71,52.09,67.71,52.09v212H174.72v31"
+              />
+              <line className="cls-4" x1="174.72" y1="73.21" x2="174.72" y2="173.24" />
+              <line className="cls-4" x1="174.72" y1="271.4" x2="174.72" y2="413.87" />
+              <line className="cls-4" x1="73.21" y1="381.66" x2="174.72" y2="381.66" />
+              <line className="cls-4" x1="174.72" y1="490.47" x2="174.72" y2="462.97" />
+              <polyline className="cls-5" points="279.83 490.47 394.31 490.47 394.31 590.81" />
+              <polyline className="cls-4" points="394.31 271.4 279.83 271.4 279.83 490.47 279.83 521.49" />
+              <line className="cls-5" x1="394.31" y1="424.53" x2="394.31" y2="271.4" />
+              <polyline className="cls-4" points="394.31 271.4 495.5 271.4 495.5 242.28" />
+              <rect className="cls-6" x="490" y="204.31" width="11" height="24.46" rx="3" />
+              <rect className="cls-6" x="490" y="140.12" width="11" height="24.46" rx="3" />
+              <rect className="cls-7" x="490" y="176.64" width="11" height="15.62" rx="3" />
+              <rect className="cls-6" x="274.33" y="533.93" width="11" height="24.46" rx="3" />
+              <rect className="cls-7" x="274.33" y="570.45" width="11" height="15.62" rx="3" />
+              <rect className="cls-6" x="169.22" y="533.93" width="11" height="24.46" rx="3" />
+              <rect className="cls-7" x="169.22" y="570.45" width="11" height="15.62" rx="3" />
+            </g>
+          </g>
         {children}
       </svg>
     );
@@ -157,3 +105,4 @@ export const Gallery08MapSvg = forwardRef<SVGSVGElement, Gallery08MapSvgProps>(
 );
 
 Gallery08MapSvg.displayName = 'Gallery08MapSvg';
+

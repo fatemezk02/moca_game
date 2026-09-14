@@ -23,6 +23,7 @@ import {
   markArrowUsed,
 } from '../data/arrowConditionsStore';
 import { setCurrentGalleryId } from '../data/playerLocationStore';
+import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
 import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian, normalizeGalleryId } from '../services/content/mappers';
 import { GalleryInfoModal } from './GalleryInfoModal';
@@ -50,6 +51,9 @@ interface Gallery09ViewProps {
   onSelectTab?: (tab: 'map' | 'collection' | 'tasks' | 'curator') => void;
 }
 
+const GALLERY_09_MAP_WIDTH = 453.09;
+const GALLERY_09_MAP_HEIGHT = 846.45;
+
 export const Gallery09View: React.FC<Gallery09ViewProps> = ({
   onNavigateBack,
   onNavigateToQuestions,
@@ -69,6 +73,8 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
   const [activePuzzlePoint, setActivePuzzlePoint] = useState<AdminPuzzlePoint | null>(null);
   const [activeGalleryInfoId, setActiveGalleryInfoId] = useState<string | null>(null);
   const [, setPuzzleUpdateTrigger] = useState<number>(0);
+  const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
+  const [locationAnimKey, setLocationAnimKey] = useState<number>(0);
 
   // Sync with Admin point changes dynamically
   useEffect(() => {
@@ -83,6 +89,19 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
       window.removeEventListener('museum_puzzle_progress_updated', handleUpdate);
       window.removeEventListener('museum_content_service_updated', handleUpdate);
     };
+  }, []);
+
+  // Listen to location pin visibility toggle event
+  useEffect(() => {
+    const handleVisUpdate = (e: any) => {
+      const isVis = typeof e?.detail?.visible === 'boolean' ? e.detail.visible : getLocationPinsVisible();
+      setAreLocationPinsVisible(isVis);
+      if (isVis) {
+        setLocationAnimKey(Date.now());
+      }
+    };
+    window.addEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
+    return () => window.removeEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
   }, []);
 
   // Sync with Admin arrow changes and usage dynamically
@@ -145,7 +164,9 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
 
   const handleArrowClick = (arrow: AdminArrowPoint, e: React.MouseEvent) => {
     e.stopPropagation();
-    markArrowUsed(arrow.id);
+    if (!arrow.title?.includes('بازگشت') && !arrow.id.includes('-to-g08')) {
+      markArrowUsed(arrow.id);
+    }
     if (arrow.destination) {
       setCurrentGalleryId(arrow.destination);
       if (onNavigateToGallery) {
@@ -304,11 +325,10 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
-      mapWidth={763}
-      mapHeight={1147}
+      mapWidth={GALLERY_09_MAP_WIDTH}
+      mapHeight={GALLERY_09_MAP_HEIGHT}
       mapSvg={
         <Gallery09MapSvg
-          style={{ transform: 'translateY(-2%) scale(0.97)', transformOrigin: 'center' }}
           className="w-full h-full object-contain filter drop-shadow-sm pointer-events-auto"
         />
       }
@@ -316,8 +336,8 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
     >
       {/* 1. Dynamic Navigation Arrows Layer */}
       {visibleArrows.map((arrow) => {
-        const leftPercent = (arrow.x / 763) * 100;
-        const topPercent = (arrow.y / 1147) * 100;
+        const leftPercent = (arrow.x / GALLERY_09_MAP_WIDTH) * 100;
+        const topPercent = (arrow.y / GALLERY_09_MAP_HEIGHT) * 100;
 
         return (
           <div
@@ -339,31 +359,47 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
         );
       })}
 
-      {/* 2. Custom Icon Points */}
-      {effectiveIconPoints.map((iconPoint) => {
-        const leftPercent = (iconPoint.x / 763) * 100;
-        const topPercent = (iconPoint.y / 1147) * 100;
+      {/* 2. Custom Icon Points — Gallery guide questions always visible; other location pins gated by areLocationPinsVisible */}
+      {effectiveIconPoints
+        .filter((iconPoint) => iconPoint.iconType === 'preset-question' || areLocationPinsVisible)
+        .map((iconPoint, idx) => {
+          const leftPercent = (iconPoint.x / GALLERY_09_MAP_WIDTH) * 100;
+          const topPercent = (iconPoint.y / GALLERY_09_MAP_HEIGHT) * 100;
+          const isGuideQuestion = iconPoint.iconType === 'preset-question';
 
-        return (
-          <div
-            key={iconPoint.id}
-            id={`icon-point-${iconPoint.id}`}
-            style={{
-              left: `${leftPercent}%`,
-              top: `${topPercent}%`,
-            }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-20"
-          >
-            <button
-              onClick={(e) => handleIconPointClick(iconPoint, e)}
-              aria-label={`Open ${iconPoint.title}`}
-              className="relative group flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-105 active:scale-95"
+          return (
+            <div
+              key={`${iconPoint.id}-${locationAnimKey}`}
+              id={`icon-point-${iconPoint.id}`}
+              style={{
+                left: `${leftPercent}%`,
+                top: `${topPercent}%`,
+              }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-20"
             >
-              <CustomIconRender point={iconPoint} />
-            </button>
-          </div>
-        );
-      })}
+              <div
+                className={isGuideQuestion ? 'relative' : 'relative animate-quick-grow origin-bottom'}
+                style={!isGuideQuestion ? { animationDelay: `${idx * 0.08}s` } : undefined}
+              >
+                {!isGuideQuestion && (
+                  <span
+                    className="absolute inset-0 rounded-full border-2 border-[#f59e0b] animate-location-burst-ring pointer-events-none"
+                    style={{
+                      animationDelay: `${idx * 0.08}s`,
+                    }}
+                  />
+                )}
+                <button
+                  onClick={(e) => handleIconPointClick(iconPoint, e)}
+                  aria-label={`Open ${iconPoint.title}`}
+                  className="relative group flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-105 active:scale-95"
+                >
+                  <CustomIconRender point={iconPoint} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
 
       {/* 3. Interactive Puzzle Points (Type: Puzzle) */}
       {puzzlePoints.map((puzzlePoint) => (
@@ -371,8 +407,8 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
           key={puzzlePoint.id}
           puzzlePoint={puzzlePoint}
           galleryId="gallery-09"
-          mapWidth={763}
-          mapHeight={1147}
+          mapWidth={GALLERY_09_MAP_WIDTH}
+          mapHeight={GALLERY_09_MAP_HEIGHT}
           onClick={handlePuzzlePointClick}
           isSelected={activePuzzlePoint?.id === puzzlePoint.id}
         />
@@ -390,8 +426,8 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
               y={artwork.y}
               title={artwork.title}
               galleryId="gallery-09"
-              mapWidth={763}
-              mapHeight={1147}
+              mapWidth={GALLERY_09_MAP_WIDTH}
+              mapHeight={GALLERY_09_MAP_HEIGHT}
               isSelected={selectedStarPointId === artwork.id}
               onSelect={() => {
                 setSelectedArtwork(null);
@@ -406,10 +442,10 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
           );
         }
 
-        const leftPercent = (artwork.x / 763) * 100;
-        const topPercent = (artwork.y / 1147) * 100;
+        const leftPercent = (artwork.x / GALLERY_09_MAP_WIDTH) * 100;
+        const topPercent = (artwork.y / GALLERY_09_MAP_HEIGHT) * 100;
         const isSelected = selectedArtwork?.id === artwork.id;
-        const isRightSide = artwork.x > 381;
+        const isRightSide = artwork.x > GALLERY_09_MAP_WIDTH / 2;
 
         return (
           <div

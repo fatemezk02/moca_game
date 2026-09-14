@@ -73,66 +73,119 @@ export function mapStarContentToDiscoveryItem(
       ? star.id
       : `star-q-${(star.id || '').replace(/^star[-_]?/i, '').padStart(2, '0')}`);
 
-  const question: StarPointQuestion = {
-    question: star.questionText,
-    textFa: star.questionText,
-    options: star.questionOptions || [],
-    correctAnswer: star.correctAnswer || '',
-    correctIndex: star.correctIndex ?? 0,
-    correctReward: star.reward ?? 50,
-    wrongReward: star.wrongReward ?? 0,
-    explanation: star.explanation || '',
+  // Find fallback definition in DEFAULT_STAR_DISCOVERIES for field hydration
+  const extractNum = (s?: string): number | null => {
+    if (!s) return null;
+    const m = s.match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
   };
 
-  // Resolve artwork image strictly via:
-  // Star -> artwork_id -> Artworks.artwork_id -> Artworks.image_url
+  const num = extractNum(star.starId || star.id) ?? extractNum(star.starNumber) ?? extractNum(starPointId);
+  const formattedNumKey = num !== null ? `star-${String(num).padStart(2, '0')}` : null;
+
+  const fallback: StarDiscoveryItem | undefined =
+    (star.starId && DEFAULT_STAR_DISCOVERIES[star.starId]) ||
+    (star.id && DEFAULT_STAR_DISCOVERIES[star.id]) ||
+    (DEFAULT_STAR_DISCOVERIES[starPointId]) ||
+    (formattedNumKey && DEFAULT_STAR_DISCOVERIES[formattedNumKey]) ||
+    (starPointId === 'artwork-01' ? DEFAULT_STAR_DISCOVERIES['star-01'] : undefined) ||
+    (starPointId === 'artwork-g03-star' ? DEFAULT_STAR_DISCOVERIES['star-03'] : undefined);
+
+  const fallbackQ = fallback?.question || fallback?.discoveryQuestion;
+  const rawQText = (star.questionText || '').trim();
+  const questionText = rawQText || fallbackQ?.question || 'درباره این اثر هنری چه نکته‌ای را به خاطر می‌سپارید؟';
+
+  const options =
+    star.questionOptions && star.questionOptions.length > 0
+      ? star.questionOptions
+      : fallbackQ?.options && fallbackQ.options.length > 0
+      ? fallbackQ.options
+      : ['گزینه الف', 'گزینه ب', 'گزینه ج'];
+
+  const correctAnswer = (star.correctAnswer || '').trim() || fallbackQ?.correctAnswer || options[0] || '';
+  const explanation = (star.explanation || '').trim() || fallbackQ?.explanation || '';
+
+  const question: StarPointQuestion = {
+    question: questionText,
+    textFa: questionText,
+    options,
+    correctAnswer,
+    correctIndex: star.correctIndex ?? fallbackQ?.correctIndex ?? 0,
+    correctReward: star.reward ?? fallbackQ?.correctReward ?? 50,
+    wrongReward: star.wrongReward ?? fallbackQ?.wrongReward ?? 0,
+    explanation,
+  };
+
+  // Resolve artwork image hierarchy:
+  // 1. Star -> artwork_id -> Artworks.artwork_id -> Artworks.image_url
+  // 2. star.artworkImageUrl (direct URL on star)
+  // 3. Fallback image in DEFAULT_STAR_DISCOVERIES
+  // 4. GALLERY_01_ARTWORK_SRC asset
   let resolvedImageUrl = '';
   if (star.artworkId) {
     const artwork = contentService.getArtworkById(star.artworkId);
-    if (artwork) {
-      if (artwork.imageUrl && artwork.imageUrl.trim()) {
-        resolvedImageUrl = artwork.imageUrl.trim();
-      } else {
-        console.warn(
-          `[StarDiscovery] Artwork "${star.artworkId}" for star "${star.id}" was found but its image_url is empty.`
-        );
-      }
-    } else {
-      console.warn(
-        `[StarDiscovery] Star "${star.id}" references artwork_id "${star.artworkId}" which does not exist in Artworks.`
-      );
+    if (artwork && artwork.imageUrl && artwork.imageUrl.trim()) {
+      resolvedImageUrl = artwork.imageUrl.trim();
     }
   }
+  if (!resolvedImageUrl && star.artworkImageUrl && star.artworkImageUrl.trim()) {
+    resolvedImageUrl = star.artworkImageUrl.trim();
+  }
+  if (!resolvedImageUrl && fallback) {
+    resolvedImageUrl = fallback.information?.image || fallback.discoveryArtwork?.image || '';
+  }
+  if (
+    !resolvedImageUrl &&
+    (star.id === 'star-01' ||
+      starPointId === 'artwork-01' ||
+      star.galleryId === 'gallery-01' ||
+      star.galleryId === 'gallery_01')
+  ) {
+    resolvedImageUrl = GALLERY_01_ARTWORK_SRC;
+  }
+
+  const rawTextFa = (star.artworkTextFa || '').trim();
+  const fallbackInfo = fallback?.information || fallback?.discoveryArtwork;
+  const isGenericPlaceholder = rawTextFa === 'اطلاعات و تاریخچه این شاهکار هنری در گالری ثبت شده است.';
+  const informationTextFa =
+    (!rawTextFa || isGenericPlaceholder) && fallbackInfo?.textFa
+      ? fallbackInfo.textFa
+      : rawTextFa || fallbackInfo?.textFa || 'اطلاعات و تاریخچه این شاهکار هنری در گالری ثبت شده است.';
+  const informationTextEn = (star.artworkTextEn || '').trim() || fallbackInfo?.textEn || '';
 
   const information: StarPointInformation = {
     image: resolvedImageUrl,
-    textFa: star.artworkTextFa || '',
-    textEn: star.artworkTextEn || '',
+    textFa: informationTextFa,
+    textEn: informationTextEn,
   };
 
   const starIdStr = star.id || star.starId || '';
   const starIdNumMatch = starIdStr ? starIdStr.match(/\d+/)?.[0] : null;
   const rawStarNum =
     star.starNumber ||
-    (starIdNumMatch ? parseInt(starIdNumMatch, 10).toString() : undefined);
+    (starIdNumMatch ? parseInt(starIdNumMatch, 10).toString() : num !== null ? String(num) : undefined);
+
+  const titleFa = (star.titleFa || '').trim() || fallback?.titleFa || `ستاره کشف ${rawStarNum || ''}`;
+  const introFa = (star.introFa || '').trim() || fallback?.introFa || titleFa;
+  const labelTextFa = (star.labelTextFa || '').trim() || fallback?.labelTextFa || introFa;
 
   return {
     id: starPointId,
     starId: star.starId || star.id,
     starNumber: rawStarNum,
     questionId: rawQid,
-    galleryId: star.galleryId,
-    artworkId: star.artworkId,
-    galleryNumber: gallery?.galleryNumber,
-    galleryNameFa: gallery?.nameFa,
-    galleryNameEn: gallery?.nameEn,
-    galleryDescriptionFa: gallery?.descriptionFa,
-    galleryDescriptionEn: gallery?.descriptionEn,
-    labelTextFa: star.labelTextFa || '',
-    titleFa: star.titleFa || '',
-    introFa: star.introFa || '',
-    discoveryCost: star.discoveryCost || star.informationCost || 30,
-    informationCost: star.informationCost || 30,
+    galleryId: star.galleryId || fallback?.galleryId || 'gallery-01',
+    artworkId: star.artworkId || fallback?.artworkId,
+    galleryNumber: gallery?.galleryNumber || fallback?.galleryNumber,
+    galleryNameFa: gallery?.nameFa || fallback?.galleryNameFa,
+    galleryNameEn: gallery?.nameEn || fallback?.galleryNameEn,
+    galleryDescriptionFa: gallery?.descriptionFa || fallback?.galleryDescriptionFa,
+    galleryDescriptionEn: gallery?.descriptionEn || fallback?.galleryDescriptionEn,
+    labelTextFa,
+    titleFa,
+    introFa,
+    discoveryCost: star.discoveryCost || star.informationCost || fallback?.discoveryCost || 30,
+    informationCost: star.informationCost || fallback?.informationCost || 30,
     discoveryQuestion: question,
     question,
     discoveryArtwork: information,
@@ -1318,6 +1371,33 @@ export function getStarDiscovery(
     return mapStarContentToDiscoveryItem(star, starPointId);
   }
 
-  // If no match found in ContentService, return null so component handles missing record safely
+  // Robust Direct Fallback from DEFAULT_STAR_DISCOVERIES:
+  // Check exact starId, starPointId, or numeric mapping
+  const extractNum = (s?: string): number | null => {
+    if (!s) return null;
+    const m = s.match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
+  };
+
+  const num = extractNum(starId) ?? extractNum(starPointId);
+  const formattedKey = num !== null ? `star-${String(num).padStart(2, '0')}` : null;
+
+  const fallback =
+    (starId && DEFAULT_STAR_DISCOVERIES[starId]) ||
+    (starPointId && DEFAULT_STAR_DISCOVERIES[starPointId]) ||
+    (formattedKey && DEFAULT_STAR_DISCOVERIES[formattedKey]) ||
+    (starPointId === 'artwork-01' ? DEFAULT_STAR_DISCOVERIES['star-01'] : null) ||
+    (starPointId === 'artwork-g03-star' ? DEFAULT_STAR_DISCOVERIES['star-03'] : null) ||
+    (galleryId === 'gallery-01' || galleryId === 'gallery_01' ? DEFAULT_STAR_DISCOVERIES['star-01'] : null) ||
+    DEFAULT_STAR_DISCOVERIES['star-01'];
+
+  if (fallback) {
+    return {
+      ...fallback,
+      id: starPointId || fallback.id,
+      galleryId: galleryId || fallback.galleryId,
+    };
+  }
+
   return null;
 }

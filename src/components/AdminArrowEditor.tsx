@@ -517,7 +517,7 @@ export const AdminArrowEditor: React.FC<AdminArrowEditorProps> = ({
                 width: currentGallery.id === 'gallery-00' ? '560px' : '460px',
                 maxWidth: '100%',
               }}
-              className="relative bg-[#fbf9f9] border border-[#0e0f0f] shadow-xl p-4"
+              className="relative bg-[#fbf9f9] border border-[#0e0f0f] shadow-xl overflow-hidden"
             >
               {currentGallery.id === 'gallery-01' ? (
                 <svg
@@ -596,7 +596,7 @@ export const AdminArrowEditor: React.FC<AdminArrowEditorProps> = ({
               )}
 
               {/* Arrow Overlay Layer (SVG ViewBox Coordinate System) */}
-              <div className="absolute inset-4 pointer-events-none">
+              <div className="absolute inset-0 pointer-events-none">
                 {arrows.map((arrow) => {
                   const leftPercent = (arrow.x / vbWidth) * 100;
                   const topPercent = (arrow.y / vbHeight) * 100;

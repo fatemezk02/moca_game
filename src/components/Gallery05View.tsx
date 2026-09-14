@@ -31,6 +31,7 @@ import {
   markArrowUsed,
 } from '../data/arrowConditionsStore';
 import { setCurrentGalleryId } from '../data/playerLocationStore';
+import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
 import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian } from '../services/content/mappers';
 import { GalleryInfoModal } from './GalleryInfoModal';
@@ -54,6 +55,9 @@ interface Gallery05ViewProps {
   onSelectTab?: (tab: 'map' | 'collection' | 'tasks' | 'curator') => void;
 }
 
+const GALLERY_05_MAP_WIDTH = 682.05;
+const GALLERY_05_MAP_HEIGHT = 729.06;
+
 export const Gallery05View: React.FC<Gallery05ViewProps> = ({
   onNavigateBack,
   onNavigateToQuestions,
@@ -75,6 +79,8 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
   const [selectedExperiencePointId, setSelectedExperiencePointId] = useState<string | null>(null);
   const [activeExperience, setActiveExperience] = useState<ExperienceContent | null>(null);
   const [puzzleUpdateTrigger, setPuzzleUpdateTrigger] = useState<number>(0);
+  const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
+  const [locationAnimKey, setLocationAnimKey] = useState<number>(0);
 
   // Sync with Admin point changes dynamically
   useEffect(() => {
@@ -87,6 +93,19 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
       window.removeEventListener('museum_points_updated', handleUpdate);
       window.removeEventListener('museum_puzzle_progress_updated', handleUpdate);
     };
+  }, []);
+
+  // Listen to location pin visibility toggle event
+  useEffect(() => {
+    const handleVisUpdate = (e: any) => {
+      const isVis = typeof e?.detail?.visible === 'boolean' ? e.detail.visible : getLocationPinsVisible();
+      setAreLocationPinsVisible(isVis);
+      if (isVis) {
+        setLocationAnimKey(Date.now());
+      }
+    };
+    window.addEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
+    return () => window.removeEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
   }, []);
 
   // Sync with Admin arrow changes and usage dynamically
@@ -150,7 +169,9 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
 
   const handleArrowClick = (arrow: AdminArrowPoint, e: React.MouseEvent) => {
     e.stopPropagation();
-    markArrowUsed(arrow.id);
+    if (!arrow.title?.includes('بازگشت') && !arrow.id.includes('-to-g04')) {
+      markArrowUsed(arrow.id);
+    }
     if (arrow.destination) {
       setCurrentGalleryId(arrow.destination);
       if (onNavigateToGallery) {
@@ -170,7 +191,7 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
   const collectionPoints = points.filter(
     (p): p is AdminCollectionPoint => p.type === 'collection'
   );
-  const iconPoints = points.filter((p): p is AdminIconPoint => p.type === 'icon');
+  const iconPoints = points.filter((p): p is AdminIconPoint => p.type === 'icon' && p.id !== 'icon-3527');
   const puzzlePoints = points.filter((p): p is AdminPuzzlePoint => p.type === 'puzzle');
   const experiencePoints = React.useMemo(() => getExperiencePointsForGallery('gallery-05'), [puzzleUpdateTrigger]);
 
@@ -184,8 +205,8 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
             type: 'icon',
             galleryId: 'gallery-05',
             title: 'اطلاعات گالری ۰۵',
-            x: 381,
-            y: 574,
+            x: 341,
+            y: 365,
             iconType: 'preset-question',
             width: 48,
             height: 34,
@@ -262,11 +283,10 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
-      mapWidth={763}
-      mapHeight={1147}
+      mapWidth={GALLERY_05_MAP_WIDTH}
+      mapHeight={GALLERY_05_MAP_HEIGHT}
       mapSvg={
         <Gallery05MapSvg
-          style={{ transform: 'scale(0.89)', transformOrigin: 'center' }}
           className="w-full h-full object-contain filter drop-shadow-sm pointer-events-auto"
         />
       }
@@ -274,8 +294,8 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
     >
       {/* 1. Dynamic Navigation Arrows Layer */}
       {visibleArrows.map((arrow) => {
-        const leftPercent = (arrow.x / 763) * 100;
-        const topPercent = (arrow.y / 1147) * 100;
+        const leftPercent = (arrow.x / GALLERY_05_MAP_WIDTH) * 100;
+        const topPercent = (arrow.y / GALLERY_05_MAP_HEIGHT) * 100;
 
         return (
           <div
@@ -297,31 +317,47 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
         );
       })}
 
-      {/* 2. Custom Icon Points (Type B) — Central Info Icon */}
-      {effectiveIconPoints.map((iconPoint) => {
-        const leftPercent = (iconPoint.x / 763) * 100;
-        const topPercent = (iconPoint.y / 1147) * 100;
+      {/* 2. Custom Icon Points (Type B) — Gallery guide questions always visible; other location pins gated by areLocationPinsVisible */}
+      {effectiveIconPoints
+        .filter((iconPoint) => iconPoint.iconType === 'preset-question' || areLocationPinsVisible)
+        .map((iconPoint, idx) => {
+          const leftPercent = (iconPoint.x / GALLERY_05_MAP_WIDTH) * 100;
+          const topPercent = (iconPoint.y / GALLERY_05_MAP_HEIGHT) * 100;
+          const isGuideQuestion = iconPoint.iconType === 'preset-question';
 
-        return (
-          <div
-            key={iconPoint.id}
-            id={`icon-point-${iconPoint.id}`}
-            style={{
-              left: `${leftPercent}%`,
-              top: `${topPercent}%`,
-            }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-20"
-          >
-            <button
-              onClick={(e) => handleIconPointClick(iconPoint, e)}
-              aria-label={`Open ${iconPoint.title}`}
-              className="relative group flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-105 active:scale-95"
+          return (
+            <div
+              key={`${iconPoint.id}-${locationAnimKey}`}
+              id={`icon-point-${iconPoint.id}`}
+              style={{
+                left: `${leftPercent}%`,
+                top: `${topPercent}%`,
+              }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-20"
             >
-              <CustomIconRender point={iconPoint} />
-            </button>
-          </div>
-        );
-      })}
+              <div
+                className={isGuideQuestion ? 'relative' : 'relative animate-quick-grow origin-bottom'}
+                style={!isGuideQuestion ? { animationDelay: `${idx * 0.08}s` } : undefined}
+              >
+                {!isGuideQuestion && (
+                  <span
+                    className="absolute inset-0 rounded-full border-2 border-[#f59e0b] animate-location-burst-ring pointer-events-none"
+                    style={{
+                      animationDelay: `${idx * 0.08}s`,
+                    }}
+                  />
+                )}
+                <button
+                  onClick={(e) => handleIconPointClick(iconPoint, e)}
+                  aria-label={`Open ${iconPoint.title}`}
+                  className="relative group flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-105 active:scale-95"
+                >
+                  <CustomIconRender point={iconPoint} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
 
       {/* 3. Interactive Puzzle Points (Type: Puzzle) */}
       {puzzlePoints.map((puzzlePoint) => (
@@ -329,8 +365,8 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
           key={puzzlePoint.id}
           puzzlePoint={puzzlePoint}
           galleryId="gallery-05"
-          mapWidth={763}
-          mapHeight={1147}
+          mapWidth={GALLERY_05_MAP_WIDTH}
+          mapHeight={GALLERY_05_MAP_HEIGHT}
           onClick={handlePuzzlePointClick}
           isSelected={activePuzzlePoint?.id === puzzlePoint.id}
         />
@@ -348,8 +384,8 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
           iconId={exp.iconId}
           label={exp.labelFa}
           title={exp.title}
-          mapWidth={763}
-          mapHeight={1147}
+          mapWidth={GALLERY_05_MAP_WIDTH}
+          mapHeight={GALLERY_05_MAP_HEIGHT}
           isSelected={selectedExperiencePointId === exp.id}
           onSelect={() => {
             setSelectedArtwork(null);
@@ -377,8 +413,8 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
               y={artwork.y}
               title={artwork.title}
               galleryId="gallery-05"
-              mapWidth={763}
-              mapHeight={1147}
+              mapWidth={GALLERY_05_MAP_WIDTH}
+              mapHeight={GALLERY_05_MAP_HEIGHT}
               isSelected={selectedStarPointId === artwork.id}
               onSelect={() => {
                 setSelectedArtwork(null);
@@ -393,10 +429,10 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
           );
         }
 
-        const leftPercent = (artwork.x / 763) * 100;
-        const topPercent = (artwork.y / 1147) * 100;
+        const leftPercent = (artwork.x / GALLERY_05_MAP_WIDTH) * 100;
+        const topPercent = (artwork.y / GALLERY_05_MAP_HEIGHT) * 100;
         const isSelected = selectedArtwork?.id === artwork.id;
-        const isRightSide = artwork.x > 381;
+        const isRightSide = artwork.x > GALLERY_05_MAP_WIDTH / 2;
 
         return (
           <div

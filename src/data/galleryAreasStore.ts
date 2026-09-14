@@ -3,10 +3,21 @@ import { normalizeGalleryId } from '../services/content/mappers';
 
 const STORAGE_KEY = 'museum_gallery_areas_config';
 export const STORAGE_GALLERY_LAMPS_KEY = 'museum_gallery_lamps_config';
+export const STORAGE_GALLERY_LOCKS_KEY = 'museum_gallery_locks_config';
 
 export interface GalleryLampItem {
   id: string;
   galleryId: string;
+  masterMapGalleryId?: string;
+  title: string;
+  x: number;
+  y: number;
+}
+
+export interface GalleryLockItem {
+  id: string;
+  galleryId: string;
+  masterMapGalleryId?: string;
   title: string;
   x: number;
   y: number;
@@ -239,6 +250,7 @@ export function getAllGalleryLamps(): GalleryLampItem[] {
     lamps.push({
       id: `lamp-${canonId}`,
       galleryId: canonId,
+      masterMapGalleryId: 'gallery-00',
       title: def.title,
       x: pos.x,
       y: pos.y,
@@ -255,6 +267,7 @@ export function getAllGalleryLamps(): GalleryLampItem[] {
       lamps.push({
         id: `lamp-${canonId}`,
         galleryId: canonId,
+        masterMapGalleryId: 'gallery-00',
         title: `چراغ ${area.title || canonId}`,
         x: pos.x,
         y: pos.y,
@@ -388,3 +401,151 @@ export function createNewGalleryArea(galleryId: string, title?: string): Gallery
     },
   };
 }
+
+/**
+ * Standard known museum gallery locks on the Master Map SVG (0 0 604.8 844.86)
+ */
+export const DEFAULT_GALLERY_LOCKS: Array<{ galleryId: string; title: string; defaultX: number; defaultY: number }> = [
+  { galleryId: 'gallery_02', title: 'قفل گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 302, defaultY: 85 },
+  { galleryId: 'gallery_03', title: 'قفل گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 475, defaultY: 335 },
+  { galleryId: 'gallery_04', title: 'قفل گالری ۰۴ (ثبت دوام ما)', defaultX: 135, defaultY: 335 },
+  { galleryId: 'gallery_05', title: 'قفل گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 135, defaultY: 550 },
+  { galleryId: 'gallery_06', title: 'قفل گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 475, defaultY: 550 },
+  { galleryId: 'gallery_07', title: 'قفل گالری ۰۷ (گذر از برون به درون)', defaultX: 135, defaultY: 700 },
+  { galleryId: 'gallery_08', title: 'قفل گالری ۰۸ (آونگ زمان)', defaultX: 475, defaultY: 700 },
+  { galleryId: 'gallery_09', title: 'قفل گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 302, defaultY: 750 },
+];
+
+/**
+ * Get all saved gallery lock positions overrides from localStorage
+ */
+export function getSavedGalleryLocks(): Record<string, { x: number; y: number }> {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(STORAGE_GALLERY_LOCKS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load saved gallery locks:', err);
+  }
+  return {};
+}
+
+/**
+ * Persists a gallery lock position using exact SVG viewBox coordinates.
+ * Preserves the gallery association and updates dedicated lock storage.
+ */
+export function saveGalleryLockPosition(rawGalleryId: string, x: number, y: number): void {
+  const roundedX = Math.round(x * 10) / 10;
+  const roundedY = Math.round(y * 10) / 10;
+  const canonId = normalizeGalleryId(rawGalleryId) || rawGalleryId;
+
+  // 1. Update saved locks dictionary
+  const current = getSavedGalleryLocks();
+  current[canonId] = { x: roundedX, y: roundedY };
+  current[rawGalleryId] = { x: roundedX, y: roundedY };
+
+  // Also cross-link legacy aliases (e.g. gallery_02 <-> gallery-01)
+  if (canonId === 'gallery_02') {
+    current['gallery-01'] = { x: roundedX, y: roundedY };
+  } else if (canonId === 'gallery_03') {
+    current['gallery-03'] = { x: roundedX, y: roundedY };
+  } else if (canonId === 'gallery_04') {
+    current['gallery-04'] = { x: roundedX, y: roundedY };
+  } else if (canonId === 'gallery_00') {
+    current['gallery-00'] = { x: roundedX, y: roundedY };
+    current['gallery_01'] = { x: roundedX, y: roundedY };
+  }
+
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(STORAGE_GALLERY_LOCKS_KEY, JSON.stringify(current));
+    }
+  } catch (err) {
+    console.error('Failed to persist gallery lock position:', err);
+  }
+
+  // 2. Dispatch update events
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('museum_lock_position_updated', {
+        detail: { galleryId: canonId, rawGalleryId, x: roundedX, y: roundedY },
+      })
+    );
+    window.dispatchEvent(new CustomEvent('museum_gallery_areas_updated'));
+  }
+}
+
+/**
+ * Resolves the dynamic lock position for a gallery on the Master Map SVG (604.8 × 844.86).
+ * Priority:
+ * 1. Dedicated saved lock position (from Development Positioning Tool)
+ * 2. Fallback to this gallery's lamp position
+ */
+export function getLockPositionForGallery(galleryId: string): { x: number; y: number } {
+  const canonId = normalizeGalleryId(galleryId);
+  const saved = getSavedGalleryLocks();
+
+  // 1. Saved lock positions
+  if (saved[galleryId]) return saved[galleryId];
+  if (saved[canonId]) return saved[canonId];
+  if (canonId === 'gallery_02' && saved['gallery-01']) return saved['gallery-01'];
+  if (canonId === 'gallery_03' && saved['gallery-03']) return saved['gallery-03'];
+  if (canonId === 'gallery_04' && saved['gallery-04']) return saved['gallery-04'];
+
+  // 2. Fallback to lamp position of this gallery
+  return getLampPositionForGallery(galleryId);
+}
+
+/**
+ * Returns list of all existing gallery locks for the Master Map.
+ * Ensures exactly one lock per gallery and preserves gallery association.
+ */
+export function getAllGalleryLocks(): GalleryLockItem[] {
+  const locks: GalleryLockItem[] = [];
+  const seenGalleries = new Set<string>();
+
+  // 1. Process known standard museum galleries
+  for (const def of DEFAULT_GALLERY_LOCKS) {
+    const canonId = normalizeGalleryId(def.galleryId);
+    if (seenGalleries.has(canonId)) continue;
+    seenGalleries.add(canonId);
+
+    const pos = getLockPositionForGallery(def.galleryId);
+    locks.push({
+      id: `lock-${canonId}`,
+      galleryId: canonId,
+      masterMapGalleryId: 'gallery-00',
+      title: def.title,
+      x: pos.x,
+      y: pos.y,
+    });
+  }
+
+  // 2. Check if any other gallery area exists that was not in standard list
+  const areas = getGalleryAreas();
+  for (const area of areas) {
+    const canonId = normalizeGalleryId(area.galleryId);
+    if (canonId === 'gallery_00') continue;
+    if (!seenGalleries.has(canonId)) {
+      seenGalleries.add(canonId);
+      const pos = getLockPositionForGallery(area.galleryId);
+      locks.push({
+        id: `lock-${canonId}`,
+        galleryId: canonId,
+        masterMapGalleryId: 'gallery-00',
+        title: `قفل ${area.title || canonId}`,
+        x: pos.x,
+        y: pos.y,
+      });
+    }
+  }
+
+  return locks;
+}
+

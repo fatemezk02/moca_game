@@ -3,6 +3,8 @@ import { resetAllQuestionsProgress } from './questionProgressStore';
 import { resetStarPointProgress } from './starPointProgressStore';
 import { resetUsedArrows, resetAnsweredQuestions } from './arrowConditionsStore';
 import { resetPlayerLocation } from './playerLocationStore';
+import { resetReachedGalleries } from './reachedGalleriesStore';
+import { resetFinalCompletionState } from './finalCompletionStore';
 
 /**
  * Full, authoritative game reset.
@@ -26,11 +28,18 @@ export function resetEntireGame(): void {
     resetUsedArrows();
     resetAnsweredQuestions();
 
-    // 6. Reset active gallery navigation storage
+    // 6. Reset reached galleries record
+    resetReachedGalleries();
+
+    // 7. Reset final completion award & card code
+    resetFinalCompletionState();
+
+    // 7. Reset active gallery navigation storage
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('museum_active_gallery', 'gallery-00');
       localStorage.setItem('museum_current_gallery', 'gallery-00');
-      localStorage.setItem('museum_player_current_gallery', 'gallery-00');
+      localStorage.setItem('museum_player_current_gallery', 'gallery-02');
+      localStorage.setItem('currentGalleryId', 'gallery-02');
     }
 
     // 7. Dispatch global reset notification event

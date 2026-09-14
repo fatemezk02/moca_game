@@ -46,6 +46,7 @@ import {
   LayoutGrid,
   Navigation,
   Puzzle,
+  Trees,
 } from 'lucide-react';
 
 interface AdminManagementViewProps {
@@ -1142,7 +1143,7 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
                               : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
                           }`}
                         >
-                          <span>علامت سؤال (?)</span>
+                          <span>کاغذ راهنما (?)</span>
                         </button>
 
                         <button
@@ -1177,6 +1178,74 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
                         >
                           <Star className="w-3.5 h-3.5" />
                           <span>رویداد ویژه (ستاره)</span>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
+                              iconType: 'preset-location-frame',
+                            })
+                          }
+                          className={`p-2 border text-center flex items-center justify-center gap-1.5 cursor-pointer font-bold ${
+                            (selectedPoint as AdminIconPoint).iconType === 'preset-location-frame'
+                              ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                              : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                          }`}
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-[#fbbf24]" />
+                          <span>پین لوکیشن (قاب/فریم)</span>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
+                              iconType: 'preset-location-coffee',
+                            })
+                          }
+                          className={`p-2 border text-center flex items-center justify-center gap-1.5 cursor-pointer font-bold ${
+                            (selectedPoint as AdminIconPoint).iconType === 'preset-location-coffee'
+                              ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                              : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                          }`}
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-[#f59e0b]" />
+                          <span>پین لوکیشن (کافه)</span>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
+                              iconType: 'preset-location-shop',
+                            })
+                          }
+                          className={`p-2 border text-center flex items-center justify-center gap-1.5 cursor-pointer font-bold ${
+                            (selectedPoint as AdminIconPoint).iconType === 'preset-location-shop'
+                              ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                              : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                          }`}
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-[#ea580c]" />
+                          <span>پین لوکیشن (فروشگاه)</span>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
+                              iconType: 'preset-location-tree',
+                            })
+                          }
+                          className={`p-2 border text-center flex items-center justify-center gap-1.5 cursor-pointer font-bold ${
+                            (selectedPoint as AdminIconPoint).iconType === 'preset-location-tree'
+                              ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                              : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                          }`}
+                        >
+                          <Trees className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>پین لوکیشن (درخت / باغ)</span>
                         </button>
 
                         <button

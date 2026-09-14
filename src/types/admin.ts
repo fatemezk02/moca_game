@@ -45,7 +45,9 @@ export interface AdminIconPoint {
     | 'preset-star'
     | 'preset-info'
     | 'preset-location-coffee'
-    | 'preset-location-shop';
+    | 'preset-location-shop'
+    | 'preset-location-frame'
+    | 'preset-location-tree';
   iconData?: string; // SVG raw string or base64 data URL
   width: number;
   height: number;
@@ -130,6 +132,36 @@ export interface AdminArrowPoint {
   hiddenInAdminPreview?: boolean;
 }
 
+export interface GalleryLampItem {
+  id: string;
+  galleryId: string;
+  masterMapGalleryId?: string;
+  title: string;
+  x: number;
+  y: number;
+}
+
+export interface GalleryLockItem {
+  id: string;
+  galleryId: string;
+  masterMapGalleryId?: string;
+  title: string;
+  x: number;
+  y: number;
+}
+
+export interface GalleryExperiencePointItem {
+  id: string;
+  experienceId: string;
+  galleryId: string;
+  iconId: string;
+  icon_id?: string;
+  x: number;
+  y: number;
+  labelFa?: string;
+  title?: string;
+}
+
 export interface GalleryConfig {
   id: string;
   name: string;
@@ -150,6 +182,9 @@ export interface GalleryMapConfig {
   iconPoints: AdminIconPoint[];
   puzzlePoints?: AdminPuzzlePoint[];
   arrows: AdminArrowPoint[];
+  lamps?: GalleryLampItem[];
+  locks?: GalleryLockItem[];
+  experiencePoints?: GalleryExperiencePointItem[];
 }
 
 export type MuseumMapDatabase = Record<string, GalleryMapConfig>;

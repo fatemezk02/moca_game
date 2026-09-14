@@ -10,7 +10,7 @@ import { CustomIconRender } from './CustomIconRender';
 import { CollectionPointMarker } from './CollectionPointMarker';
 import { PuzzlePointMarker } from './PuzzlePointMarker';
 import { Gallery00MapSvg } from './Gallery00MapSvg';
-import { Gallery01MapSvg } from './Gallery01MapSvg';
+import { Gallery02MapSvg } from './Gallery02MapSvg';
 import { Gallery03MapSvg } from './Gallery03MapSvg';
 import { Gallery04MapSvg } from './Gallery04MapSvg';
 import { Gallery05MapSvg } from './Gallery05MapSvg';
@@ -188,11 +188,11 @@ export const AdminMapCanvas: React.FC<AdminMapCanvasProps> = ({
             width: gallery.id === 'gallery-00' ? '560px' : '460px',
             maxWidth: '100%',
           }}
-          className="relative bg-[#fbf9f9] border border-[#0e0f0f] shadow-xl p-4"
+          className="relative bg-[#fbf9f9] border border-[#0e0f0f] shadow-xl overflow-hidden"
         >
           {gallery.id === 'gallery-01' ? (
-            /* Gallery 01 Architectural SVG Plan */
-            <Gallery01MapSvg
+            /* Gallery 02 Architectural SVG Plan */
+            <Gallery02MapSvg
               ref={svgRef}
               className="w-full h-full object-contain pointer-events-auto"
             />
@@ -247,7 +247,7 @@ export const AdminMapCanvas: React.FC<AdminMapCanvasProps> = ({
           )}
 
           {/* Interactive Points Overlay (Anchored exactly in SVG coordinate percentage space) */}
-          <div className="absolute inset-4 pointer-events-none">
+          <div className="absolute inset-0 pointer-events-none">
             {points.map((pt, idx) => {
               const leftPercent = (pt.x / vbWidth) * 100;
               const topPercent = (pt.y / vbHeight) * 100;

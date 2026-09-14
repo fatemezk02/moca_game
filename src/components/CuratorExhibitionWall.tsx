@@ -3,7 +3,12 @@ import { ArtworkFrame } from './ArtworkFrame';
 import { contentService } from '../services/content/contentService';
 import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
 import { GALLERIES } from '../data/mapConfig';
-import { MapPin, X, Eye, Lock, Sparkles } from 'lucide-react';
+import { MapPin, X, Eye, Lock, Sparkles, Award } from 'lucide-react';
+import {
+  areAll8GalleryPuzzlesCompleted,
+  isFinalCompletionAwarded,
+} from '../data/finalCompletionStore';
+import { FinalCompletionCardBack } from './FinalCompletionCardBack';
 import {
   getCuratorFrameConfig,
   CURATOR_VIRTUAL_WIDTH,
@@ -50,6 +55,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
   const [selectedArtwork, setSelectedArtwork] = useState<ExhibitionArtwork | null>(null);
   const [lockedHint, setLockedHint] = useState<string | null>(null);
   const [wallTheme, setWallTheme] = useState<'light' | 'dark'>('light');
+  const [showCertificate, setShowCertificate] = useState<boolean>(false);
 
   // Load artworks dynamically from ContentService and check completion via puzzleProgressStore
   const [artworks, setArtworks] = useState<ExhibitionArtwork[]>([]);
@@ -177,7 +183,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
     };
   }, []);
 
-  // Measure container using ResizeObserver to ensure 100% single-screen fit
+  // Measure container using ResizeObserver to ensure 100% responsive fit on all screens
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -194,31 +200,96 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
     return () => ro.disconnect();
   }, []);
 
-  // Uniform scaling factor: fits at least the base 720x580 layout within available space
-  const headerHeight = 0;
-  const paddingX = dimensions.width >= 640 ? 16 : 8;
-  const paddingTop = 4;
-  const paddingBottom = 8;
-  const availableWallWidth = Math.max(dimensions.width - paddingX, 280);
-  const availableWallHeight = Math.max(dimensions.height - headerHeight - paddingTop - paddingBottom, 260);
+  const slots = SALON_SLOTS;
 
-  // Compute uniform scaling factor based on 720x580 baseline
+  // Calculate geometry for every artwork frame in virtual coordinates
+  const frameItems = artworks.map((art, index) => {
+    const fallbackSlot = slots[index] || slots[slots.length - 1];
+    const frameConfig = getCuratorFrameConfig(art.galleryId, fallbackSlot, index);
+    const liveOverride = liveDragOverrides[art.galleryId];
+
+    const posX = liveOverride ? liveOverride.x : frameConfig.x;
+    const posY = liveOverride ? liveOverride.y : frameConfig.y;
+    const frameWidth = liveOverride ? liveOverride.width : frameConfig.width;
+    const frameHeight = liveOverride ? liveOverride.height : frameConfig.height;
+
+    // Frame dimensions strictly match the artwork's real aspect ratio
+    const realRatio =
+      art.aspectRatio ||
+      frameConfig.aspectRatio ||
+      frameWidth / Math.max(1, frameHeight);
+
+    const fitted = calculateFittedFrameDimensions(
+      posX,
+      posY,
+      frameWidth,
+      frameHeight,
+      realRatio
+    );
+
+    return {
+      art,
+      index,
+      frameConfig,
+      realRatio,
+      x: fitted.x,
+      y: fitted.y,
+      width: fitted.width,
+      height: fitted.height,
+      rotation: frameConfig.rotation ?? 0,
+    };
+  });
+
+  // Calculate the collective bounding box of the entire Curator artwork composition
+  const boundingBox = React.useMemo(() => {
+    if (frameItems.length === 0) {
+      return { minX: 0, minY: 0, maxX: 720, maxY: 580, width: 720, height: 580 };
+    }
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (const item of frameItems) {
+      minX = Math.min(minX, item.x);
+      minY = Math.min(minY, item.y);
+      maxX = Math.max(maxX, item.x + item.width);
+      maxY = Math.max(maxY, item.y + item.height);
+    }
+
+    // Add safe visual margin (in virtual units) for frame borders, moulding, and drop-shadows
+    const margin = 10;
+    const compMinX = isFinite(minX) ? minX - margin : 0;
+    const compMinY = isFinite(minY) ? minY - margin : 0;
+    const compMaxX = isFinite(maxX) ? maxX + margin : 720;
+    const compMaxY = isFinite(maxY) ? maxY + margin : 580;
+
+    return {
+      minX: compMinX,
+      minY: compMinY,
+      maxX: compMaxX,
+      maxY: compMaxY,
+      width: Math.max(100, compMaxX - compMinX),
+      height: Math.max(100, compMaxY - compMinY),
+    };
+  }, [frameItems]);
+
+  // Compute available space with safe content boundary padding
+  const paddingX = dimensions.width >= 640 ? 20 : 10;
+  const paddingY = dimensions.height >= 640 ? 20 : 10;
+  const availableWallWidth = Math.max(dimensions.width - paddingX * 2, 80);
+  const availableWallHeight = Math.max(dimensions.height - paddingY * 2, 80);
+
+  // Compute ONE shared uniform scale factor for the entire composition
   const scale = Math.min(
-    availableWallWidth / 720,
-    availableWallHeight / 580
+    availableWallWidth / boundingBox.width,
+    availableWallHeight / boundingBox.height
   );
 
-  // Determine if aspect ratio is taller than the standard 720/580 ratio
-  const isTall = availableWallWidth / 720 < availableWallHeight / 580;
-  // Scaled wall dimensions:
-  // Height always spans 100% of the available wall height
-  const scaledWallHeight = availableWallHeight;
-  const scaledWallWidth = isTall ? availableWallWidth : Math.round(720 * scale);
-
-  // Virtual canvas dimensions matching the actual scaled wall
-  const virtualWidth = 720;
-  const virtualHeight = Math.max(580, Math.round(availableWallHeight / scale));
-  const slots = SALON_SLOTS;
+  // Scaled dimensions of the unified composition container
+  const scaledWallWidth = Math.round(boundingBox.width * scale);
+  const scaledWallHeight = Math.round(boundingBox.height * scale);
 
   const handleFrameClick = (art: ExhibitionArtwork) => {
     // If dev positioning tool is active on screen, select this frame for editing
@@ -243,6 +314,11 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
   };
 
   const isLight = wallTheme === 'light';
+  const isAllExhibitionCompleted =
+    artworks.length > 0 &&
+    (artworks.every((a) => a.isCompleted) ||
+      areAll8GalleryPuzzlesCompleted() ||
+      isFinalCompletionAwarded());
 
   return (
     <div
@@ -254,8 +330,23 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
           'radial-gradient(ellipse at 50% 32%, #faf8f5 0%, #e5e2d8 100%)',
       }}
     >
-      {/* Main Single-Screen Wall Area */}
-      <div className="relative flex-1 w-full h-full overflow-hidden flex flex-col items-center justify-start pt-1 px-1 sm:px-2 pb-2">
+      {/* Final Certificate Floating Button when all 8 artworks are completed */}
+      {isAllExhibitionCompleted && (
+        <div className="absolute top-3 left-3 z-20">
+          <button
+            type="button"
+            id="curator-wall-certificate-badge-btn"
+            onClick={() => setShowCertificate(true)}
+            className="py-2 px-3 sm:px-4 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e1b18] font-sans-custom font-black text-[12px] sm:text-[13px] rounded-xl border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] flex items-center gap-1.5 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#1e1b18]" />
+            <span>گواهی‌نامه نهایی موزه 🏆</span>
+          </button>
+        </div>
+      )}
+
+      {/* Main Single-Screen Wall Area - Centered in available space */}
+      <div className="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center p-2 sm:p-4">
         {/* Museum Wall Lighting Subtle Vignette */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -268,8 +359,10 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
         {/* The Scaled Salon Wall Canvas matching image.png */}
         <div
           id="museum-salon-wall"
-          data-virtual-width={virtualWidth}
-          data-virtual-height={virtualHeight}
+          data-virtual-width={boundingBox.width}
+          data-virtual-height={boundingBox.height}
+          data-offset-x={boundingBox.minX}
+          data-offset-y={boundingBox.minY}
           data-scale={scale}
           className="relative flex-none"
           style={{
@@ -277,34 +370,14 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
             height: `${scaledWallHeight}px`,
           }}
         >
-          {artworks.map((art, index) => {
-            const fallbackSlot = slots[index] || slots[slots.length - 1];
-            const frameConfig = getCuratorFrameConfig(art.galleryId, fallbackSlot, index);
-            const liveOverride = liveDragOverrides[art.galleryId];
+          {frameItems.map((item) => {
+            const { art, realRatio } = item;
 
-            const posX = liveOverride ? liveOverride.x : frameConfig.x;
-            const posY = liveOverride ? liveOverride.y : frameConfig.y;
-            const frameWidth = liveOverride ? liveOverride.width : frameConfig.width;
-            const frameHeight = liveOverride ? liveOverride.height : frameConfig.height;
-
-            // Frame dimensions strictly match the artwork's real aspect ratio
-            const realRatio =
-              art.aspectRatio ||
-              frameConfig.aspectRatio ||
-              frameWidth / Math.max(1, frameHeight);
-            const fitted = calculateFittedFrameDimensions(
-              posX,
-              posY,
-              frameWidth,
-              frameHeight,
-              realRatio
-            );
-
-            // Calculate scaled pixel positions
-            const left = Math.max(0, fitted.x * scale);
-            const top = Math.max(0, fitted.y * scale);
-            const width = fitted.width * scale;
-            const height = fitted.height * scale;
+            // Calculate scaled pixel positions relative to the composition bounding box
+            const left = (item.x - boundingBox.minX) * scale;
+            const top = (item.y - boundingBox.minY) * scale;
+            const width = item.width * scale;
+            const height = item.height * scale;
 
             return (
               <div
@@ -317,7 +390,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                   top: `${top}px`,
                   width: `${width}px`,
                   height: `${height}px`,
-                  transform: frameConfig.rotation ? `rotate(${frameConfig.rotation}deg)` : undefined,
+                  transform: item.rotation ? `rotate(${item.rotation}deg)` : undefined,
                 }}
                 title={art.isCompleted ? art.title : 'اثر قفل است'}
               >
@@ -364,26 +437,6 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                     </div>
                   )}
                 </ArtworkFrame>
-
-                {/* Requirement 4: LABELS */}
-                {/* Completed Artworks: Show artwork title plaque under the frame without affecting frame height */}
-                {art.isCompleted && (
-                  <div
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-20 text-center pointer-events-none whitespace-nowrap max-w-[130%]"
-                  >
-                    <div className="px-2 py-0.5 rounded-md shadow-[1.5px_1.5px_0px_#1e1b18] inline-block border-2 border-[#1e1b18] bg-[#ffffff] text-[#1e1b18]">
-                      <span
-                        className="font-sans-custom font-bold leading-tight block truncate text-center"
-                        style={{
-                          fontSize: `${Math.max(Math.min(width * 0.075, 11), 8.5)}px`,
-                          maxWidth: `${Math.max(width * 1.25, 95)}px`,
-                        }}
-                      >
-                        {art.title}
-                      </span>
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })}
@@ -480,6 +533,26 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Final Completion Certificate Modal */}
+      {showCertificate && (
+        <div
+          id="curator-wall-certificate-backdrop"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs select-none"
+          onClick={() => setShowCertificate(false)}
+        >
+          <div
+            className="w-full max-w-md bg-[#fcfaf7] rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FinalCompletionCardBack
+              onClose={() => setShowCertificate(false)}
+              onFlipBack={() => setShowCertificate(false)}
+              isFlipped={true}
+            />
           </div>
         </div>
       )}

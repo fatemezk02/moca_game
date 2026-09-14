@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type LocationMarkerIconType = 'coffee' | 'shop' | 'info' | 'star' | 'general';
+export type LocationMarkerIconType = 'coffee' | 'shop' | 'frame' | 'artwork' | 'exhibit' | 'info' | 'star' | 'tree' | 'general';
 
 export interface LocationPointMarkerProps {
   iconType?: LocationMarkerIconType;
@@ -95,11 +95,58 @@ export const LocationPointMarker: React.FC<LocationPointMarkerProps> = ({
           cx="16"
           cy="13.5"
           r="7.2"
-          fill="#ffffff"
+          fill={
+            iconType === 'frame' || iconType === 'artwork' || iconType === 'exhibit'
+              ? '#1e1b18'
+              : '#ffffff'
+          }
           stroke="#1e1b18"
           strokeWidth="1.2"
           className="pointer-events-none"
         />
+
+        {/* Inner Glyph: Frame / Square with White Outline & Corner Reflection Lines */}
+        {(iconType === 'frame' || iconType === 'artwork' || iconType === 'exhibit') && (
+          <g id="glyph-display-frame" className="pointer-events-none">
+            {/* Outer Perspective/Trapezoid Frame with White Outline */}
+            <path
+              d="M 12.2 9.8
+                 L 19.8 9.8
+                 L 21.0 17.2
+                 L 11.0 17.2
+                 Z"
+              fill="#1e1b18"
+              stroke="#ffffff"
+              strokeWidth="1.15"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+
+            {/* Top-Left Inner Corner Line (┌) */}
+            <path
+              d="M 12.8 13.0
+                 L 12.8 11.2
+                 L 15.6 11.2"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.0"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* Bottom-Right Inner Corner Line (┘) */}
+            <path
+              d="M 19.2 14.0
+                 L 19.2 15.8
+                 L 16.4 15.8"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.0"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </g>
+        )}
 
         {/* Inner Glyph (Coffee Cup or other Location Types) */}
         {iconType === 'coffee' && (
@@ -192,8 +239,59 @@ export const LocationPointMarker: React.FC<LocationPointMarkerProps> = ({
           </g>
         )}
 
+        {/* Inner Glyph: Simple Minimalist Tree */}
+        {iconType === 'tree' && (
+          <g id="glyph-tree" className="pointer-events-none">
+            {/* Trunk */}
+            <rect
+              x="15.1"
+              y="14.6"
+              width="1.8"
+              height="2.8"
+              rx="0.3"
+              fill="#78350f"
+              stroke="#1e1b18"
+              strokeWidth="0.9"
+            />
+            {/* Simple Crisp Tree Crown */}
+            <path
+              d="M 12.2 14.6
+                 C 11.0 14.6 10.2 13.4 10.6 12.2
+                 C 10.1 11.0 11.3 9.8 12.5 10.0
+                 C 13.2 8.6 15.0 8.2 16.0 8.9
+                 C 17.0 8.2 18.8 8.6 19.5 10.0
+                 C 20.7 9.8 21.9 11.0 21.4 12.2
+                 C 21.8 13.4 21.0 14.6 19.8 14.6
+                 Z"
+              fill="#16a34a"
+              stroke="#1e1b18"
+              strokeWidth="1.1"
+              strokeLinejoin="round"
+            />
+            {/* Minimalist leaf / inner accent branch */}
+            <path
+              d="M 16.0 10.4 V 13.5"
+              stroke="#14532d"
+              strokeWidth="0.8"
+              strokeLinecap="round"
+            />
+            <path
+              d="M 16.0 11.8 L 14.5 11.0"
+              stroke="#14532d"
+              strokeWidth="0.75"
+              strokeLinecap="round"
+            />
+            <path
+              d="M 16.0 12.6 L 17.5 11.8"
+              stroke="#14532d"
+              strokeWidth="0.75"
+              strokeLinecap="round"
+            />
+          </g>
+        )}
+
         {/* Fallback general glyph */}
-        {iconType !== 'coffee' && iconType !== 'shop' && (
+        {iconType !== 'coffee' && iconType !== 'shop' && iconType !== 'tree' && iconType !== 'frame' && iconType !== 'artwork' && iconType !== 'exhibit' && (
           <circle
             cx="16"
             cy="13.5"

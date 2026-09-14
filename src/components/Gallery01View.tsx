@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Compass, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BottomNavBar } from './BottomNavBar';
 import { getGalleryPoints, getGalleryArrows } from '../data/mapConfig';
 import {
   AdminMapPoint,
@@ -13,14 +11,10 @@ import {
 import { ConfiguredArtworkReveal } from './ConfiguredArtworkReveal';
 import { CustomIconRender } from './CustomIconRender';
 import { CollectionPointMarker } from './CollectionPointMarker';
-import { PuzzlePointMarker } from './PuzzlePointMarker';
 import { NavigationArrowRender } from './NavigationArrowRender';
-import { PlayerStatusBar } from './PlayerStatusBar';
-import { usePlayerStats } from '../hooks/usePlayerStats';
-import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
-import { Gallery01MapSvg } from './Gallery01MapSvg';
+import { Gallery02MapSvg } from './Gallery02MapSvg';
 import { isPuzzlePieceCollected } from '../data/puzzleProgressStore';
-import { StarDiscoveryModal } from './StarDiscoveryModal';
+import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
 import { PuzzleQuestionModal } from './PuzzleQuestionModal';
 import { PuzzlePoint } from './PuzzlePoint';
 import { StarQuestionPopup } from './StarQuestionPopup';
@@ -37,6 +31,7 @@ import { setCurrentGalleryId } from '../data/playerLocationStore';
 import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian } from '../services/content/mappers';
 import { GalleryInfoModal } from './GalleryInfoModal';
+import { SharedGalleryPageLayout } from './SharedGalleryPageLayout';
 
 interface Gallery01ViewProps {
   onNavigateBack: () => void;
@@ -46,6 +41,9 @@ interface Gallery01ViewProps {
   onSelectTab?: (tab: 'map' | 'collection' | 'tasks' | 'curator') => void;
 }
 
+const GALLERY_02_MAP_WIDTH = 524.2;
+const GALLERY_02_MAP_HEIGHT = 822.62;
+
 export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   onNavigateBack,
   onNavigateToQuestions,
@@ -53,11 +51,9 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   onNavigateToGallery,
   onSelectTab,
 }) => {
-  const playerStats = usePlayerStats();
-  const { containerRef, dimensions } = useFitMapDimensions(848, 1264, 1.4);
   const galleryRecord = contentService.getGalleryById('gallery_02');
   const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '02');
-  const galleryNameFa = galleryRecord?.nameFa?.trim() || '';
+  const galleryNameFa = galleryRecord?.nameFa?.trim() || 'کیمیای نور';
 
   // Current Gallery ID for this page is gallery_02
   useEffect(() => {
@@ -72,6 +68,8 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   const [activePuzzlePoint, setActivePuzzlePoint] = useState<AdminPuzzlePoint | null>(null);
   const [activeGalleryInfoId, setActiveGalleryInfoId] = useState<string | null>(null);
   const [puzzleUpdateTrigger, setPuzzleUpdateTrigger] = useState<number>(0);
+  const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
+  const [locationAnimKey, setLocationAnimKey] = useState<number>(0);
 
   // Sync with Admin point changes dynamically
   useEffect(() => {
@@ -80,6 +78,19 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
     };
     window.addEventListener('museum_points_updated', handleUpdate);
     return () => window.removeEventListener('museum_points_updated', handleUpdate);
+  }, []);
+
+  // Listen to location pin visibility toggle event
+  useEffect(() => {
+    const handleVisUpdate = (e: any) => {
+      const isVis = typeof e?.detail?.visible === 'boolean' ? e.detail.visible : getLocationPinsVisible();
+      setAreLocationPinsVisible(isVis);
+      if (isVis) {
+        setLocationAnimKey(Date.now());
+      }
+    };
+    window.addEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
+    return () => window.removeEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
   }, []);
 
   // Sync with Admin arrow changes and usage dynamically
@@ -91,12 +102,14 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
     window.addEventListener('museum_used_arrows_updated', handleArrowsUpdate);
     window.addEventListener('museum_player_progress_updated', handleArrowsUpdate);
     window.addEventListener('museum_answered_questions_updated', handleArrowsUpdate);
+    window.addEventListener('museum_puzzle_progress_updated', handleArrowsUpdate);
 
     return () => {
       window.removeEventListener('museum_arrows_updated', handleArrowsUpdate);
       window.removeEventListener('museum_used_arrows_updated', handleArrowsUpdate);
       window.removeEventListener('museum_player_progress_updated', handleArrowsUpdate);
       window.removeEventListener('museum_answered_questions_updated', handleArrowsUpdate);
+      window.removeEventListener('museum_puzzle_progress_updated', handleArrowsUpdate);
     };
   }, []);
 
@@ -132,10 +145,18 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
       return;
     }
 
-    // Mark arrow as used so it disappears from source map
-    markArrowUsed(arrow.id);
+    // Mark arrow as used so it disappears from source map (except return arrows)
+    if (!arrow.title?.includes('بازگشت') && !arrow.id.includes('-to-g00')) {
+      markArrowUsed(arrow.id);
+    }
 
-    if (arrow.destination === 'gallery-00') {
+    if (
+      arrow.destination === 'gallery-00' ||
+      arrow.destination === 'gallery-01-master' ||
+      arrow.destination === 'main-map' ||
+      arrow.id === 'arrow-g01-to-g00' ||
+      arrow.id === 'arrow-g02-to-g00'
+    ) {
       onNavigateBack();
     } else if (arrow.destination === 'gallery-01') {
       // Stay on Gallery 01
@@ -163,9 +184,8 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
     } else if (iconPoint.destination === 'collection' || iconPoint.destination === 'tasks' || iconPoint.destination === 'curator') {
       onSelectTab?.(iconPoint.destination);
     } else {
-      // Requirement 1 & 11: Central icon on gallery map opens Gallery Information Modal
-      const targetGalleryId = iconPoint.galleryId || 'gallery_02';
-      setActiveGalleryInfoId(targetGalleryId);
+      // Requirement 1 & 11: Central icon on gallery map opens Gallery Information Modal for Gallery 02
+      setActiveGalleryInfoId('gallery_02');
     }
   };
 
@@ -189,8 +209,8 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
         {
           id: 'icon-g01-questions',
           type: 'icon' as const,
-          galleryId: 'gallery-01',
-          title: 'Gallery 01 Questions & Quiz',
+          galleryId: 'gallery_02',
+          title: 'Gallery 02 Questions & Quiz',
           x: 424,
           y: 675,
           iconType: 'preset-question' as const,
@@ -200,257 +220,8 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
         },
       ];
 
-  return (
-    <div
-      id="gallery-01-view-root"
-      className="user-facing-app h-screen w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom select-none"
-      onClick={handleClosePopup}
-    >
-      {/* Top App Bar Header */}
-      <header
-        id="gallery-01-top-bar"
-        dir="ltr"
-        className="bg-gradient-to-b from-[#fdfcfb] to-[#f7f4ee] border-b border-[#e2dcd2] shadow-xs flex justify-between items-center px-4 sm:px-6 py-3 z-40 relative select-none shrink-0"
-      >
-        {/* Left Action (Back Arrow to Gallery 00) */}
-        <button
-          id="gallery-01-back-btn"
-          onClick={onNavigateBack}
-          aria-label="بازگشت به گالری ۰۰"
-          title="بازگشت به گالری ۰۰"
-          className="text-[#0e0f0f] p-2 hover:bg-[#0e0f0f] hover:text-[#fbf9f9] transition-colors border border-[#0e0f0f] active:scale-95 flex items-center justify-center cursor-pointer"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-
-        {/* Center Title */}
-        <div className="flex items-center gap-2">
-          <h1 className="font-sans-custom text-[18px] sm:text-[20px] font-bold text-[#1c1917] tracking-tight">
-            گالری {galleryNumFa}
-          </h1>
-          <span className="font-mono-custom text-[9px] px-2 py-0.5 bg-[#fef9c3] text-[#854d0e] border border-[#fde68a] tracking-wider rounded-md font-bold">
-            {galleryNameFa}
-          </span>
-        </div>
-
-        {/* Right Spacer to keep center alignment */}
-        <div className="w-9 h-9" aria-hidden="true" />
-      </header>
-
-      {/* Compact Player Status Bar */}
-      <PlayerStatusBar stars={playerStats.stars} coins={playerStats.coins} />
-
-      {/* Main Floor Plan Canvas - Available Viewport between Header and Bottom Nav */}
-      <main
-        ref={containerRef}
-        id="gallery-01-canvas-area"
-        className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-3 sm:p-5 mb-16 sm:mb-[68px]"
-      >
-        <div
-          style={{
-            ...(dimensions
-              ? { width: `${dimensions.width}px`, height: `${dimensions.height}px` }
-              : { width: '100%', height: '100%' }),
-            aspectRatio: '848 / 1264',
-          }}
-          className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
-        >
-          {/* Base SVG Architectural Plan */}
-          <Gallery01MapSvg className="w-full h-full object-contain filter drop-shadow-sm pointer-events-auto" />
-
-          {/* Map Overlay for Interactive Points (Coordinates relative to 848 x 1264 SVG map) */}
-          <div className="absolute inset-0 pointer-events-none">
-            {/* Dynamic Navigation Arrows Layer */}
-            {arrows.filter(isArrowVisibleToPlayer).map((arrow) => {
-              const leftPercent = (arrow.x / 848) * 100;
-              const topPercent = (arrow.y / 1264) * 100;
-
-              return (
-                <div
-                  key={arrow.id}
-                  id={`arrow-${arrow.id}`}
-                  style={{
-                    left: `${leftPercent}%`,
-                    top: `${topPercent}%`,
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                  className="absolute z-30 pointer-events-auto"
-                >
-                  <NavigationArrowRender
-                    arrow={arrow}
-                    isInteractive={true}
-                    onClick={(e) => handleArrowClick(arrow, e)}
-                  />
-                </div>
-              );
-            })}
-
-            {/* Custom Icon Points (Type B) — without default dot/marker */}
-            {effectiveIconPoints.map((iconPoint) => {
-              const leftPercent = (iconPoint.x / 848) * 100;
-              const topPercent = (iconPoint.y / 1264) * 100;
-
-              return (
-                <div
-                  key={iconPoint.id}
-                  style={{
-                    left: `${leftPercent}%`,
-                    top: `${topPercent}%`,
-                  }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-20"
-                >
-                  <button
-                    onClick={(e) => handleIconPointClick(iconPoint, e)}
-                    aria-label={`Open ${iconPoint.title}`}
-                    className="relative group flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-105 active:scale-95"
-                  >
-                    <CustomIconRender point={iconPoint} />
-                  </button>
-                </div>
-              );
-            })}
-
-            {/* Interactive Puzzle Points (Type: Puzzle) */}
-            {puzzlePoints.map((puzzlePoint) => (
-              <PuzzlePoint
-                key={puzzlePoint.id}
-                puzzlePoint={puzzlePoint}
-                galleryId="gallery_02"
-                onClick={handlePuzzlePointClick}
-                isSelected={activePuzzlePoint?.id === puzzlePoint.id}
-              />
-            ))}
-
-            {/* Interactive Collection Points and Standardized Star Points */}
-            {collectionPoints.map((artwork) => {
-              if (artwork.pointType === 'star') {
-                return (
-                  <StarPoint
-                    key={artwork.id}
-                    id={artwork.id}
-                    starId={artwork.starId || artwork.id}
-                    x={artwork.x}
-                    y={artwork.y}
-                    title={artwork.title}
-                    galleryId="gallery-01"
-                    mapWidth={848}
-                    mapHeight={1264}
-                    isSelected={selectedStarPointId === artwork.id}
-                    onSelect={() => {
-                      setSelectedArtwork(null);
-                      setSelectedStarPointId(artwork.id);
-                    }}
-                    onOpenDiscoveryModal={(starId) => {
-                      setSelectedArtwork(null);
-                      setSelectedStarPointId(null);
-                      setActiveStarDiscoveryId(starId);
-                    }}
-                  />
-                );
-              }
-
-              const leftPercent = (artwork.x / 848) * 100;
-              const topPercent = (artwork.y / 1264) * 100;
-              const isSelected = selectedArtwork?.id === artwork.id;
-              const isRightSide = artwork.x > 424;
-
-              return (
-                <div
-                  key={artwork.id}
-                  id={`artwork-point-${artwork.id}`}
-                  style={{
-                    left: `${leftPercent}%`,
-                    top: `${topPercent}%`,
-                  }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30"
-                >
-                  {/* Clickable Map Marker Button */}
-                  <button
-                    onClick={(e) => handlePointClick(artwork, e)}
-                    aria-label={`Artwork Point: ${artwork.title}`}
-                    className="relative group flex items-center justify-center p-1 rounded-full cursor-pointer focus:outline-none"
-                  >
-                    <CollectionPointMarker
-                      pointType="normal"
-                      isSelected={isSelected}
-                      showPulse={true}
-                    />
-                  </button>
-
-                  {/* Direct Artwork Frames Reveal with configured frames and reveal animation */}
-                  <AnimatePresence>
-                    {isSelected && (
-                      <motion.div
-                        key={`artwork-reveal-${artwork.id}`}
-                        initial={{
-                          clipPath: isRightSide
-                            ? 'inset(0% 0% 0% 100%)'
-                            : 'inset(0% 100% 0% 0%)',
-                        }}
-                        animate={{
-                          clipPath: 'inset(0% 0% 0% 0%)',
-                        }}
-                        exit={{
-                          clipPath: isRightSide
-                            ? 'inset(0% 0% 0% 100%)'
-                            : 'inset(0% 100% 0% 0%)',
-                        }}
-                        transition={{
-                          duration: 0.35,
-                          ease: [0.16, 1, 0.3, 1],
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleClosePopup();
-                        }}
-                        className={`absolute z-50 pointer-events-auto cursor-pointer ${
-                          isRightSide
-                            ? 'right-full mr-2 sm:mr-3 top-1/2 -translate-y-1/2'
-                            : 'left-full ml-2 sm:ml-3 top-1/2 -translate-y-1/2'
-                        }`}
-                        title="Click to dismiss artwork"
-                      >
-                        <ConfiguredArtworkReveal frames={artwork.frames} />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </main>
-
-      {/* Bottom Right Floating Circular Toggle Button to return to Gallery 00 */}
-      <div
-        id="gallery-01-floating-controls"
-        className="absolute bottom-20 right-4 sm:right-6 z-30 flex items-center justify-center select-none"
-      >
-        <button
-          id="btn-gallery-01-toggle-map"
-          onClick={onNavigateBack}
-          aria-label="بازگشت به نقشه اصلی (گالری ۰۰)"
-          title="بازگشت به نقشه اصلی (گالری ۰۰)"
-          className="w-12 h-12 rounded-full border border-[#0e0f0f] bg-[#fbf9f9] text-[#0e0f0f] hover:bg-[#0e0f0f] hover:text-[#fbf9f9] active:scale-95 shadow-md flex items-center justify-center transition-all duration-200 cursor-pointer focus:outline-none"
-        >
-          <Map className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Bottom Navigation Bar - Matching Gallery 00 exactly */}
-      <BottomNavBar
-        activeTab="map"
-        onTabChange={(tab) => {
-          if (tab === 'map') {
-            onNavigateBack();
-          } else {
-            onSelectTab?.(tab);
-            onNavigateBack();
-          }
-        }}
-        collectionCount={8}
-      />
-
+  const modalsContent = (
+    <>
       {/* Dedicated Star Point "Discover More" Modal */}
       {activeStarDiscoveryId && (
         <StarQuestionPopup
@@ -472,10 +243,203 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
 
       {/* Shared Gallery Information Modal for Gallery Center Icon */}
       <GalleryInfoModal
-        galleryId={activeGalleryInfoId}
+        galleryId={activeGalleryInfoId || 'gallery_02'}
         isOpen={Boolean(activeGalleryInfoId)}
         onClose={() => setActiveGalleryInfoId(null)}
       />
-    </div>
+    </>
+  );
+
+  return (
+    <SharedGalleryPageLayout
+      galleryId="gallery-01"
+      galleryNumberPersian={galleryNumFa}
+      galleryNamePersian={galleryNameFa}
+      onNavigateBack={onNavigateBack}
+      onSelectTab={onSelectTab}
+      onClickOutside={handleClosePopup}
+      mapWidth={GALLERY_02_MAP_WIDTH}
+      mapHeight={GALLERY_02_MAP_HEIGHT}
+      mapSvg={
+        <Gallery02MapSvg className="w-full h-full object-contain filter drop-shadow-sm pointer-events-auto" />
+      }
+      modals={modalsContent}
+    >
+      {/* Dynamic Navigation Arrows Layer */}
+      {arrows.filter(isArrowVisibleToPlayer).map((arrow) => {
+        const leftPercent = (arrow.x / GALLERY_02_MAP_WIDTH) * 100;
+        const topPercent = (arrow.y / GALLERY_02_MAP_HEIGHT) * 100;
+
+        return (
+          <div
+            key={arrow.id}
+            id={`arrow-${arrow.id}`}
+            style={{
+              left: `${leftPercent}%`,
+              top: `${topPercent}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+            className="absolute z-30 pointer-events-auto"
+          >
+            <NavigationArrowRender
+              arrow={arrow}
+              isInteractive={true}
+              onClick={(e) => handleArrowClick(arrow, e)}
+            />
+          </div>
+        );
+      })}
+
+      {/* Custom Icon Points (Type B) — Gallery guide questions always visible; other location pins gated by areLocationPinsVisible */}
+      {effectiveIconPoints
+        .filter((iconPoint) => iconPoint.iconType === 'preset-question' || areLocationPinsVisible)
+        .map((iconPoint, idx) => {
+          const leftPercent = (iconPoint.x / GALLERY_02_MAP_WIDTH) * 100;
+          const topPercent = (iconPoint.y / GALLERY_02_MAP_HEIGHT) * 100;
+          const isGuideQuestion = iconPoint.iconType === 'preset-question';
+
+          return (
+            <div
+              key={`${iconPoint.id}-${locationAnimKey}`}
+              style={{
+                left: `${leftPercent}%`,
+                top: `${topPercent}%`,
+              }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-20"
+            >
+              <div
+                className={isGuideQuestion ? 'relative' : 'relative animate-quick-grow origin-bottom'}
+                style={!isGuideQuestion ? { animationDelay: `${idx * 0.08}s` } : undefined}
+              >
+                {!isGuideQuestion && (
+                  <span
+                    className="absolute inset-0 rounded-full border-2 border-[#f59e0b] animate-location-burst-ring pointer-events-none"
+                    style={{
+                      animationDelay: `${idx * 0.08}s`,
+                    }}
+                  />
+                )}
+                <button
+                  onClick={(e) => handleIconPointClick(iconPoint, e)}
+                  aria-label={`Open ${iconPoint.title}`}
+                  className="relative group flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-105 active:scale-95"
+                >
+                  <CustomIconRender point={iconPoint} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+      {/* Interactive Puzzle Points (Type: Puzzle) */}
+      {puzzlePoints.map((puzzlePoint) => (
+        <PuzzlePoint
+          key={puzzlePoint.id}
+          puzzlePoint={puzzlePoint}
+          galleryId="gallery_02"
+          mapWidth={GALLERY_02_MAP_WIDTH}
+          mapHeight={GALLERY_02_MAP_HEIGHT}
+          onClick={handlePuzzlePointClick}
+          isSelected={activePuzzlePoint?.id === puzzlePoint.id}
+        />
+      ))}
+
+      {/* Interactive Collection Points and Standardized Star Points */}
+      {collectionPoints.map((artwork) => {
+        if (artwork.pointType === 'star') {
+          return (
+            <StarPoint
+              key={artwork.id}
+              id={artwork.id}
+              starId={artwork.starId || artwork.id}
+              x={artwork.x}
+              y={artwork.y}
+              title={artwork.title}
+              galleryId="gallery-01"
+              mapWidth={GALLERY_02_MAP_WIDTH}
+              mapHeight={GALLERY_02_MAP_HEIGHT}
+              isSelected={selectedStarPointId === artwork.id}
+              onSelect={() => {
+                setSelectedArtwork(null);
+                setSelectedStarPointId(artwork.id);
+              }}
+              onOpenDiscoveryModal={(starId) => {
+                setSelectedArtwork(null);
+                setSelectedStarPointId(null);
+                setActiveStarDiscoveryId(starId);
+              }}
+            />
+          );
+        }
+
+        const leftPercent = (artwork.x / GALLERY_02_MAP_WIDTH) * 100;
+        const topPercent = (artwork.y / GALLERY_02_MAP_HEIGHT) * 100;
+        const isSelected = selectedArtwork?.id === artwork.id;
+        const isRightSide = artwork.x > GALLERY_02_MAP_WIDTH / 2;
+
+        return (
+          <div
+            key={artwork.id}
+            id={`artwork-point-${artwork.id}`}
+            style={{
+              left: `${leftPercent}%`,
+              top: `${topPercent}%`,
+            }}
+            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30"
+          >
+            {/* Clickable Map Marker Button */}
+            <button
+              onClick={(e) => handlePointClick(artwork, e)}
+              aria-label={`Artwork Point: ${artwork.title}`}
+              className="relative group flex items-center justify-center p-1 rounded-full cursor-pointer focus:outline-none"
+            >
+              <CollectionPointMarker
+                pointType="normal"
+                isSelected={isSelected}
+                showPulse={true}
+              />
+            </button>
+
+            {/* Direct Artwork Frames Reveal with configured frames and reveal animation */}
+            <AnimatePresence>
+              {isSelected && (
+                <motion.div
+                  key={`artwork-reveal-${artwork.id}`}
+                  initial={{
+                    clipPath: isRightSide
+                      ? 'inset(0% 0% 0% 100%)'
+                      : 'inset(0% 100% 0% 0%)',
+                  }}
+                  animate={{
+                    clipPath: 'inset(0% 0% 0% 0%)',
+                  }}
+                  exit={{
+                    clipPath: isRightSide
+                      ? 'inset(0% 0% 0% 100%)'
+                      : 'inset(0% 100% 0% 0%)',
+                  }}
+                  transition={{
+                    duration: 0.35,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClosePopup();
+                  }}
+                  className={`absolute z-50 pointer-events-auto cursor-pointer ${
+                    isRightSide
+                      ? 'right-full mr-2 sm:mr-3 top-1/2 -translate-y-1/2'
+                      : 'left-full ml-2 sm:ml-3 top-1/2 -translate-y-1/2'
+                  }`}
+                  title="Click to dismiss artwork"
+                >
+                  <ConfiguredArtworkReveal frames={artwork.frames} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
+    </SharedGalleryPageLayout>
   );
 };

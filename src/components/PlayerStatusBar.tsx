@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Star, Coins, RotateCcw, AlertTriangle, X } from 'lucide-react';
+import { Puzzle, Coins, Star, RotateCcw, AlertTriangle, X } from 'lucide-react';
 import { resetEntireGame } from '../data/gameReset';
 
 export interface PlayerStatusBarProps {
+  puzzles?: number;
   stars?: number;
   coins?: number;
   className?: string;
@@ -11,16 +12,19 @@ export interface PlayerStatusBarProps {
 
 /**
  * Compact Player Progress / Status Bar
- * Displays stars, coins, and quick game reset control.
+ * Displays completed puzzles, stars, coins, and quick game reset control.
  * Positioned directly below the top header on gallery map views.
  */
 export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
-  stars = 0,
+  puzzles,
+  stars,
   coins = 0,
   className = '',
   showResetButton = true,
 }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const displayPuzzles = puzzles ?? 0;
+  const displayStars = stars ?? 0;
 
   const handleConfirmReset = () => {
     resetEntireGame();
@@ -51,30 +55,60 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
           )}
         </div>
 
-        {/* Right Side: Badges grouped together */}
-        <div className="flex items-center gap-2 pointer-events-auto">
-          {/* Stars Badge / Counter */}
+        {/* Right Side: Badges grouped together with separated icon medallion and number capsule */}
+        <div className="flex items-center gap-2 sm:gap-2.5 pointer-events-auto" dir="ltr">
+          {/* Stars Badge: Circular Star Medallion + Separate Number Capsule */}
           <div
             id="player-stars-badge"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 border-[#1e1b18] bg-[#fef08a] shadow-[2px_2px_0px_#1e1b18] text-[#1e1b18] cursor-default"
-            title={`امتیاز: ${stars} ستاره (${stars} پاسخ به پرسش‌ها)`}
+            className="relative flex items-center cursor-default group"
+            title={`ستاره‌های کسب شده: ${displayStars} ستاره`}
           >
-            <Star className="w-4 h-4 fill-[#f59e0b] text-[#1e1b18] shrink-0 stroke-[2]" />
-            <span className="font-mono-custom text-xs font-black leading-none">
-              {stars}
-            </span>
+            {/* Star Icon Medallion */}
+            <div className="relative z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-[#1e1b18] bg-[#fef3c7] flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e1b18] shrink-0">
+              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1e1b18] fill-[#f59e0b] stroke-[1.5]" />
+            </div>
+            {/* Value Capsule */}
+            <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[36px] sm:min-w-[40px] flex items-center justify-center">
+              <span className="font-mono-custom text-xs sm:text-[13px] font-black text-[#1e1b18] leading-none select-none">
+                {displayStars}
+              </span>
+            </div>
           </div>
 
-          {/* Coins Badge / Counter */}
+          {/* Puzzles Badge: Circular Puzzle Medallion + Separate Number Capsule */}
+          <div
+            id="player-puzzles-badge"
+            className="relative flex items-center cursor-default group"
+            title={`پازل‌های تکمیل شده: ${displayPuzzles} پازل`}
+          >
+            {/* Puzzle Icon Medallion */}
+            <div className="relative z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-[#1e1b18] bg-[#ede9fe] flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e1b18] shrink-0">
+              <Puzzle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1e1b18] fill-[#8b5cf6] stroke-[2]" />
+            </div>
+            {/* Value Capsule */}
+            <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[36px] sm:min-w-[40px] flex items-center justify-center">
+              <span className="font-mono-custom text-xs sm:text-[13px] font-black text-[#1e1b18] leading-none select-none">
+                {displayPuzzles}
+              </span>
+            </div>
+          </div>
+
+          {/* Coins Badge: Circular Coin Medallion + Separate Number Capsule */}
           <div
             id="player-coins-badge"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 border-[#1e1b18] bg-[#fed7aa] shadow-[2px_2px_0px_#1e1b18] text-[#1e1b18] cursor-default"
+            className="relative flex items-center cursor-default group"
             title={`پاداش: ${coins} سکه`}
           >
-            <Coins className="w-4 h-4 text-[#ea580c] fill-[#fb923c] shrink-0 stroke-[2]" />
-            <span className="font-mono-custom text-xs font-black leading-none">
-              {coins}
-            </span>
+            {/* Coin Icon Medallion */}
+            <div className="relative z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-[#1e1b18] bg-[#fed7aa] flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e1b18] shrink-0">
+              <Coins className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ea580c] fill-[#fb923c] stroke-[2]" />
+            </div>
+            {/* Value Capsule */}
+            <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[36px] sm:min-w-[40px] flex items-center justify-center">
+              <span className="font-mono-custom text-xs sm:text-[13px] font-black text-[#1e1b18] leading-none select-none">
+                {coins}
+              </span>
+            </div>
           </div>
         </div>
       </div>

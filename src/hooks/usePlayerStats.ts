@@ -15,11 +15,13 @@ export function usePlayerStats(): PlayerStats {
 
     window.addEventListener('museum_question_progress_updated', handleUpdate);
     window.addEventListener('museum_player_stats_updated', handleUpdate);
+    window.addEventListener('museum_puzzle_progress_updated', handleUpdate);
     window.addEventListener('storage', handleUpdate);
 
     return () => {
       window.removeEventListener('museum_question_progress_updated', handleUpdate);
       window.removeEventListener('museum_player_stats_updated', handleUpdate);
+      window.removeEventListener('museum_puzzle_progress_updated', handleUpdate);
       window.removeEventListener('storage', handleUpdate);
     };
   }, []);

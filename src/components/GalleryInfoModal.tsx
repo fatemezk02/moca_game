@@ -131,7 +131,7 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 12 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="relative z-10 w-full max-w-lg min-h-[385px] sm:min-h-[425px] [perspective:1200px]"
+          className="relative z-10 w-full max-w-lg [perspective:1200px]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Card Flip Container */}
@@ -143,7 +143,7 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
               transformStyle: 'preserve-3d',
               WebkitTransformStyle: 'preserve-3d',
             }}
-            className="relative w-full h-full min-h-[385px] sm:min-h-[425px]"
+            className="relative w-full"
           >
             {/* ================================================== */}
             {/* 1. FRONT FACE: Gallery Information                 */}
@@ -154,134 +154,169 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
               }}
-              className={`w-full min-h-[385px] sm:min-h-[425px] bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-3xl p-5 sm:p-7 shadow-[6px_6px_0px_#1e1b18] flex flex-col overflow-hidden relative ${
+              className={`w-full min-h-[300px] sm:min-h-[340px] max-h-[85vh] bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-3xl p-4 sm:p-6 shadow-[6px_6px_0px_#1e1b18] flex flex-col justify-between overflow-y-auto relative ${
                 isFlipped ? 'pointer-events-none select-none' : 'pointer-events-auto'
               }`}
               dir="rtl"
             >
-              {/* TOP: Header (Close Button at Top-Left, Title Centered, Flip Button at Top-Right) */}
-              <div
-                id="gallery-info-modal-header"
-                className="relative flex items-center justify-center border-b-2 border-[#1e1b18] pb-3 sm:pb-3.5 px-11"
-              >
-                {/* Close Button (Top-Left) */}
-                <button
-                  id="gallery-info-modal-close-btn"
-                  onClick={onClose}
-                  aria-label="بستن پنجره اطلاعات گالری"
-                  className="absolute left-0 top-0 w-8 h-8 rounded-full bg-[#fee2e2] hover:bg-[#ef4444] hover:text-white transition-all text-[#1e1b18] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex items-center justify-center cursor-pointer"
-                >
-                  <X className="w-4 h-4 stroke-[2.5]" />
-                </button>
-
-                {/* Centered Gallery Number Title */}
-                <div className="flex items-center justify-center gap-1.5 text-center">
-                  <Sparkles className="w-4 h-4 text-[#ea580c] shrink-0" />
-                  <h2
-                    id="gallery-info-modal-title"
-                    className="font-sans-custom text-[18px] sm:text-[21px] font-black text-[#1e1b18] text-center"
-                  >
-                    {galleryDisplayTitle}
-                  </h2>
-                </div>
-
-                {/* Flip Button (Top-Right) */}
-                <button
-                  id="gallery-info-modal-flip-btn"
-                  onClick={() => setIsFlipped(true)}
-                  aria-label="نمایش راهنمای بازی"
-                  title="نمایش راهنمای بازی"
-                  className="absolute right-0 top-0 w-8 h-8 rounded-full bg-[#fef3c7] hover:bg-[#fde68a] active:translate-x-[1px] active:translate-y-[1px] text-[#1e1b18] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center cursor-pointer transition-all group"
-                >
-                  <RotateCw className="w-4 h-4 stroke-[2.5] text-[#1e1b18] group-hover:rotate-45 transition-transform duration-200" />
-                </button>
-              </div>
-
-              {/* CENTER / HIGHER UP: Gallery Name as Title & Gallery Description */}
-              {/* Positioned higher up, significantly closer to the header */}
-              <div
-                id="gallery-info-modal-body"
-                className="relative flex flex-col items-center pt-2.5 sm:pt-3.5 px-2 sm:px-4"
-              >
+              <div className="w-full flex flex-col">
+                {/* TOP: Header (Close Button at Top-Left, Title Centered, Flip Button at Top-Right) */}
                 <div
-                  id="gallery-info-description-container"
-                  className="w-full max-w-[260px] sm:max-w-[320px] text-center mx-auto z-10 select-text"
+                  id="gallery-info-modal-header"
+                  className="relative flex items-center justify-center border-b-2 border-[#1e1b18] pb-3 sm:pb-3.5 px-11 shrink-0"
                 >
-                  {/* Gallery Name as heading above description */}
-                  {gallery.nameFa && (
-                    <h3
-                      id="gallery-info-name-heading"
-                      className="font-sans-custom text-[16px] sm:text-[18px] font-black text-[#1e1b18] mb-1.5 sm:mb-2 text-center"
+                  {/* Close Button (Top-Left) */}
+                  <button
+                    id="gallery-info-modal-close-btn"
+                    onClick={onClose}
+                    aria-label="بستن پنجره اطلاعات گالری"
+                    className="absolute left-0 top-0 w-8 h-8 rounded-full bg-[#fee2e2] hover:bg-[#ef4444] hover:text-white transition-all text-[#1e1b18] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex items-center justify-center cursor-pointer"
+                  >
+                    <X className="w-4 h-4 stroke-[2.5]" />
+                  </button>
+
+                  {/* Centered Gallery Number Title */}
+                  <div className="flex items-center justify-center gap-1.5 text-center">
+                    <Sparkles className="w-4 h-4 text-[#ea580c] shrink-0" />
+                    <h2
+                      id="gallery-info-modal-title"
+                      className="font-sans-custom text-[18px] sm:text-[21px] font-black text-[#1e1b18] text-center"
                     >
-                      {gallery.nameFa}
-                    </h3>
-                  )}
-                  <p
-                    id="gallery-info-description-text"
-                    className="font-sans-custom text-[14px] sm:text-[15.5px] text-[#292524] leading-[1.8] sm:leading-[1.95] font-medium text-center"
+                      {galleryDisplayTitle}
+                    </h2>
+                  </div>
+
+                  {/* Flip Button (Top-Right) */}
+                  <button
+                    id="gallery-info-modal-flip-btn"
+                    onClick={() => setIsFlipped(true)}
+                    aria-label="نمایش راهنمای بازی"
+                    title="نمایش راهنمای بازی"
+                    className="absolute right-0 top-0 w-8 h-8 rounded-full bg-[#fef3c7] hover:bg-[#fde68a] active:translate-x-[1px] active:translate-y-[1px] text-[#1e1b18] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center cursor-pointer transition-all group"
                   >
-                    {gallery.descriptionFa}
-                  </p>
+                    <RotateCw className="w-4 h-4 stroke-[2.5] text-[#1e1b18] group-hover:rotate-45 transition-transform duration-200" />
+                  </button>
+                </div>
+
+                {/* GALLERY NAME AS TITLE & GALLERY DESCRIPTION (Full-width, natural document flow) */}
+                <div
+                  id="gallery-info-modal-body"
+                  className="w-full pt-3 sm:pt-4 px-1 sm:px-2 flex flex-col items-center"
+                >
+                  <div
+                    id="gallery-info-description-container"
+                    className="w-full text-center mx-auto select-text"
+                  >
+                    {/* Gallery Name as heading above description */}
+                    {gallery.nameFa && (
+                      <h3
+                        id="gallery-info-name-heading"
+                        className="font-sans-custom text-[16px] sm:text-[18.5px] font-black text-[#1e1b18] mb-2 text-center"
+                      >
+                        {gallery.nameFa}
+                      </h3>
+                    )}
+                    <p
+                      id="gallery-info-description-text"
+                      className="font-sans-custom text-[14px] sm:text-[15.5px] text-[#292524] leading-[1.85] sm:leading-[1.95] font-medium text-center"
+                    >
+                      {gallery.descriptionFa}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* BOTTOM CORNERS: Independently Anchored Curator Elements */}
-              {/* 1. Prominent Curator Image (~40% modal width, ~45% modal max-height, object-fit contain, direct on modal bg) */}
-              {hasCuratorImage && (
+              {/* DEDICATED GUIDE / CURATOR SECTION (Strictly BELOW the complete description in document flow) */}
+              {(hasCuratorImage || hasCuratorName) && (
                 <div
-                  id="gallery-info-curator-image-anchor"
-                  style={{
-                    width: '40%',
-                    maxWidth: '40%',
-                    height: '45%',
-                    maxHeight: '45%',
-                  }}
-                  className={`absolute z-20 pointer-events-none select-none bg-transparent flex items-end ${
-                    imageSide === 'right'
-                      ? 'bottom-2.5 right-3.5 sm:bottom-3.5 sm:right-5 justify-end'
-                      : 'bottom-2.5 left-3.5 sm:bottom-3.5 sm:left-5 justify-start'
-                  }`}
+                  id="gallery-info-curator-section"
+                  className="w-full mt-4 sm:mt-5 pt-3 border-t border-[#f1f5f9] flex flex-col justify-end shrink-0"
                 >
-                  <img
-                    id="gallery-info-curator-image"
-                    src={gallery.curatorUrl}
-                    alt={gallery.curator ? `نام راهنما: ${gallery.curator}` : 'تصویر راهنما'}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                    }}
-                    className={`bg-transparent block select-none ${
-                      imageSide === 'right' ? 'object-bottom-right' : 'object-bottom-left'
-                    }`}
-                    referrerPolicy="no-referrer"
-                    onError={() => {
-                      console.warn(
-                        `[GalleryInfoModal] Failed to load curator image from: "${gallery.curatorUrl}". Hiding image area.`
-                      );
-                      setImageError(true);
-                    }}
-                  />
-                </div>
-              )}
+                  <div className="w-full flex items-end justify-between gap-3">
+                    {isGallery5or9 ? (
+                      <>
+                        {/* Right Side: Curator Image */}
+                        {hasCuratorImage ? (
+                          <div
+                            id="gallery-info-curator-image-container"
+                            className="shrink-0 flex items-end justify-start max-w-[50%] h-[150px] sm:h-[188px]"
+                          >
+                            <img
+                              id="gallery-info-curator-image"
+                              src={gallery.curatorUrl}
+                              alt={gallery.curator ? `نام راهنما: ${gallery.curator}` : 'تصویر راهنما'}
+                              className="h-full w-auto max-w-full object-contain block select-none"
+                              referrerPolicy="no-referrer"
+                              onError={() => {
+                                console.warn(
+                                  `[GalleryInfoModal] Failed to load curator image from: "${gallery.curatorUrl}". Hiding image area.`
+                                );
+                                setImageError(true);
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex-1" />
+                        )}
 
-              {/* 2. Curator Name (Opposite corner from Curator Image) */}
-              {hasCuratorName && (
-                <div
-                  id="gallery-info-curator-name-anchor"
-                  className={`absolute z-20 select-text pointer-events-auto max-w-[40%] sm:max-w-[45%] ${
-                    nameSide === 'right'
-                      ? 'bottom-4 right-4 sm:bottom-5 sm:right-6 text-right'
-                      : 'bottom-4 left-4 sm:bottom-5 sm:left-6 text-right'
-                  }`}
-                >
-                  <span
-                    id="gallery-info-curator-name-text"
-                    className="font-sans-custom text-[11px] sm:text-[13px] font-black text-[#1e1b18] leading-snug block"
-                  >
-                    نام راهنما:{' '}
-                    <span className="font-black text-[#ea580c]">{gallery.curator}</span>
-                  </span>
+                        {/* Left Side: Curator Name */}
+                        {hasCuratorName && (
+                          <div
+                            id="gallery-info-curator-name-container"
+                            className="flex-1 select-text text-left pb-1 sm:pb-2"
+                          >
+                            <span
+                              id="gallery-info-curator-name-text"
+                              className="font-sans-custom text-[12px] sm:text-[13.5px] font-black text-[#1e1b18] leading-snug inline-block bg-[#f8fafc] border border-[#e2e8f0] px-2.5 py-1.5 rounded-xl shadow-xs"
+                            >
+                              نام راهنما:{' '}
+                              <span className="font-black text-[#ea580c]">{gallery.curator}</span>
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {/* Right Side: Curator Name */}
+                        {hasCuratorName && (
+                          <div
+                            id="gallery-info-curator-name-container"
+                            className="flex-1 select-text text-right pb-1 sm:pb-2"
+                          >
+                            <span
+                              id="gallery-info-curator-name-text"
+                              className="font-sans-custom text-[12px] sm:text-[13.5px] font-black text-[#1e1b18] leading-snug inline-block bg-[#f8fafc] border border-[#e2e8f0] px-2.5 py-1.5 rounded-xl shadow-xs"
+                            >
+                              نام راهنما:{' '}
+                              <span className="font-black text-[#ea580c]">{gallery.curator}</span>
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Left Side: Curator Image */}
+                        {hasCuratorImage && (
+                          <div
+                            id="gallery-info-curator-image-container"
+                            className="shrink-0 flex items-end justify-end max-w-[50%] h-[150px] sm:h-[188px]"
+                          >
+                            <img
+                              id="gallery-info-curator-image"
+                              src={gallery.curatorUrl}
+                              alt={gallery.curator ? `نام راهنما: ${gallery.curator}` : 'تصویر راهنما'}
+                              className="h-full w-auto max-w-full object-contain block select-none"
+                              referrerPolicy="no-referrer"
+                              onError={() => {
+                                console.warn(
+                                  `[GalleryInfoModal] Failed to load curator image from: "${gallery.curatorUrl}". Hiding image area.`
+                                );
+                                setImageError(true);
+                              }}
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -297,7 +332,7 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
                 transform: 'rotateY(180deg)',
                 WebkitTransform: 'rotateY(180deg)',
               }}
-              className={`absolute inset-0 w-full h-full min-h-[385px] sm:min-h-[425px] bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-3xl p-5 sm:p-7 shadow-[6px_6px_0px_#1e1b18] flex flex-col justify-between overflow-hidden ${
+              className={`absolute inset-0 w-full h-full bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-3xl p-4 sm:p-6 shadow-[6px_6px_0px_#1e1b18] flex flex-col justify-between overflow-y-auto ${
                 !isFlipped ? 'pointer-events-none select-none' : 'pointer-events-auto'
               }`}
               dir="rtl"

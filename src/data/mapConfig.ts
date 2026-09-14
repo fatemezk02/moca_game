@@ -37,73 +37,73 @@ export const GALLERIES: GalleryConfig[] = [
     id: 'gallery-01',
     name: 'Gallery 01 — Architectural Hall',
     nameFa: 'گالری ۰۱ — تالار معماری',
-    viewBox: '0 0 848 1264',
-    width: 848,
-    height: 1264,
+    viewBox: '0 0 524.2 822.62',
+    width: 524.2,
+    height: 822.62,
   },
   {
     id: 'gallery-02',
     name: 'Gallery 02 — Vault Pavilion (Coming Soon)',
     nameFa: 'گالری ۰۲ — پاویون طاق‌ها (به‌زودی)',
-    viewBox: '0 0 1000 1000',
-    width: 1000,
-    height: 1000,
+    viewBox: '0 0 524.2 822.62',
+    width: 524.2,
+    height: 822.62,
   },
   {
     id: 'gallery-03',
     name: 'Gallery 03 — Modern Hall',
     nameFa: 'گالری ۰۳ — تالار مدرن',
-    viewBox: '0 0 848 1264',
-    width: 848,
-    height: 1264,
+    viewBox: '0 0 561.28 851.79',
+    width: 561.28,
+    height: 851.79,
   },
   {
     id: 'gallery-04',
     name: 'Gallery 04 — Recording Our Endurance',
     nameFa: 'گالری ۰۴ — ثبت دوام ما',
-    viewBox: '0 0 848 1264',
-    width: 848,
-    height: 1264,
+    viewBox: '0 0 498.55 851.79',
+    width: 498.55,
+    height: 851.79,
   },
   {
     id: 'gallery-05',
     name: 'Gallery 05 — City Rhythm',
     nameFa: 'گالری ۰۵ — ضرب آهنگ شهر',
-    viewBox: '0 0 763 1147',
-    width: 763,
-    height: 1147,
+    viewBox: '0 0 682.05 729.06',
+    width: 682.05,
+    height: 729.06,
   },
   {
     id: 'gallery-06',
     name: 'Gallery 06 — Between Gaze and Mastery',
     nameFa: 'گالری ۰۶ — در کشاکش تماشا و استیلا',
-    viewBox: '0 0 762.8 1147.2',
-    width: 762.8,
-    height: 1147.2,
+    viewBox: '0 0 486.92 793.01',
+    width: 486.92,
+    height: 793.01,
   },
   {
     id: 'gallery-07',
     name: 'Gallery 07 — Passing from Outside to Inside',
     nameFa: 'گالری ۰۷ — گذر از برون به درون',
-    viewBox: '0 0 762.8 1147.2',
-    width: 762.8,
-    height: 1147.2,
+    viewBox: '0 0 544.58 650',
+    width: 544.58,
+    height: 650,
   },
   {
     id: 'gallery-08',
     name: 'Gallery 08 — Pendulum of Time',
     nameFa: 'گالری ۰۸ — آونگ زمان',
-    viewBox: '0 0 762.8 1147.2',
-    width: 762.8,
-    height: 1147.2,
+    viewBox: '0 0 501.5 642.18',
+    width: 501.5,
+    height: 642.18,
   },
   {
     id: 'gallery-09',
     name: 'Gallery 09 — Intersection of Media',
     nameFa: 'گالری ۰۹ — تلاقی رسانه‌ها',
-    viewBox: '0 0 762.78 1147.23',
-    width: 762.78,
-    height: 1147.23,
+    viewBox: '0 0 453.09 846.45',
+    width: 453.09,
+    height: 846.45,
   },
 ];
 
@@ -120,48 +120,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     height: 844.86,
     collectionPoints: [
       {
-        id: 'col-02',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-00',
-        title: 'Epigraphic Tablets & Scribes Guild',
-        roomCode: 'SEC 02',
-        roomSection: 'Northern Archive Corridor',
-        x: 438, // 72.5%
-        y: 177, // 21.0%
-        direction: 'right',
-        frames: [
-          {
-            id: 'col-02-f1',
-            order: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-          },
-        ],
-      },
-      {
-        id: 'col-04',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-00',
-        title: 'Architectural Capitals & Columnar Orders',
-        roomCode: 'SEC 04',
-        roomSection: 'East Peristyle Wing',
-        x: 490, // 81.0%
-        y: 355, // 42.0%
-        direction: 'right',
-        frames: [
-          {
-            id: 'col-04-f1',
-            order: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-          },
-        ],
-      },
-      {
         id: 'col-05',
         type: 'collection',
         pointType: 'normal',
@@ -175,27 +133,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [
           {
             id: 'col-05-f1',
-            order: 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-          },
-        ],
-      },
-      {
-        id: 'col-07',
-        type: 'collection',
-        pointType: 'normal',
-        galleryId: 'gallery-00',
-        title: 'Mosaic Pavements & Polychrome Glass',
-        roomCode: 'SEC 07',
-        roomSection: 'Southeast Corridor',
-        x: 460, // 76.0%
-        y: 583, // 69.0%
-        direction: 'right',
-        frames: [
-          {
-            id: 'col-07-f1',
             order: 1,
             x: 0,
             y: 0,
@@ -230,6 +167,18 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-00',
       },
       {
+        id: 'icon-g00-frame',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'قاب معرفی آثار (Exhibition Frame)',
+        x: 302,
+        y: 775,
+        iconType: 'preset-location-frame',
+        width: 32,
+        height: 32,
+        destination: 'gallery-00',
+      },
+      {
         id: 'icon-g00-shop',
         type: 'icon',
         galleryId: 'gallery-00',
@@ -237,6 +186,18 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         x: 370,
         y: 775,
         iconType: 'preset-location-shop',
+        width: 32,
+        height: 32,
+        destination: 'gallery-00',
+      },
+      {
+        id: 'icon-g00-tree',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'باغ موزه (Museum Garden)',
+        x: 302,
+        y: 422,
+        iconType: 'preset-location-tree',
         width: 32,
         height: 32,
         destination: 'gallery-00',
@@ -291,8 +252,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         x: 424, // 50% of 848
         y: 675,
         iconType: 'preset-question',
-        width: 48,
-        height: 34,
+        width: 28,
+        height: 36,
         destination: 'gallery-01-questions',
       },
     ],
@@ -333,6 +294,18 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     ],
     arrows: [
       {
+        id: 'arrow-g01-to-g00',
+        type: 'arrow',
+        galleryId: 'gallery-01',
+        title: 'بازگشت به نقشه اصلی (گالری ۰۱)',
+        x: 424,
+        y: 1120,
+        rotation: 180,
+        size: 48,
+        destination: 'gallery-00',
+        visibilityConditions: [],
+      },
+      {
         id: 'arrow-g01-to-g03',
         type: 'arrow',
         galleryId: 'gallery-01',
@@ -344,19 +317,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-03',
         visibilityConditions: [
           {
-            id: 'cond-g01-piece01',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery01-piece-01',
-          },
-          {
-            id: 'cond-g01-piece02',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery01-piece-02',
-          },
-          {
-            id: 'cond-g01-piece03',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery01-piece-03',
+            id: 'cond-g01-puzzle-completed',
+            type: 'galleryPuzzleCompleted',
+            galleryId: 'gallery-01',
           },
         ],
       },
@@ -372,16 +335,41 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     height: 1000,
     collectionPoints: [],
     iconPoints: [],
-    arrows: [],
+    arrows: [
+      {
+        id: 'arrow-g02-to-g00',
+        type: 'arrow',
+        galleryId: 'gallery-02',
+        title: 'بازگشت به نقشه اصلی (گالری ۰۱)',
+        x: 500,
+        y: 920,
+        rotation: 180,
+        size: 48,
+        destination: 'gallery-00',
+        visibilityConditions: [],
+      },
+      {
+        id: 'arrow-g02-to-g03',
+        type: 'arrow',
+        galleryId: 'gallery-02',
+        title: 'ورود به گالری ۰۳',
+        x: 800,
+        y: 280,
+        rotation: 90,
+        size: 48,
+        destination: 'gallery-03',
+        visibilityConditions: [],
+      },
+    ],
   },
 
   'gallery-03': {
     galleryId: 'gallery-03',
     name: 'Gallery 03 — Modern Hall',
     nameFa: 'گالری ۰۳ — تالار مدرن',
-    viewBox: '0 0 848 1264',
-    width: 848,
-    height: 1264,
+    viewBox: '0 0 561.28 851.79',
+    width: 561.28,
+    height: 851.79,
     collectionPoints: [
       {
         id: 'artwork-g03-star',
@@ -449,6 +437,18 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     ],
     arrows: [
       {
+        id: 'arrow-g03-to-g02',
+        type: 'arrow',
+        galleryId: 'gallery-03',
+        title: 'بازگشت به گالری ۰۲',
+        x: 100,
+        y: 780,
+        rotation: 270,
+        size: 48,
+        destination: 'gallery-01',
+        visibilityConditions: [],
+      },
+      {
         id: 'arrow-g03-to-g04',
         type: 'arrow',
         galleryId: 'gallery-03',
@@ -460,19 +460,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-04',
         visibilityConditions: [
           {
-            id: 'cond-g03-piece01',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery03-piece-01',
-          },
-          {
-            id: 'cond-g03-piece02',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery03-piece-02',
-          },
-          {
-            id: 'cond-g03-piece03',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery03-piece-03',
+            id: 'cond-g03-puzzle-completed',
+            type: 'galleryPuzzleCompleted',
+            galleryId: 'gallery-03',
           },
         ],
       },
@@ -483,9 +473,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     galleryId: 'gallery-04',
     name: 'Gallery 04',
     nameFa: 'ثبت دوام ما',
-    viewBox: '0 0 848 1264',
-    width: 848,
-    height: 1264,
+    viewBox: '0 0 498.55 851.79',
+    width: 498.55,
+    height: 851.79,
     collectionPoints: [
       {
         id: 'star-07',
@@ -560,19 +550,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-05',
         visibilityConditions: [
           {
-            id: 'cond-g04-piece01',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery04-piece-01',
-          },
-          {
-            id: 'cond-g04-piece02',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery04-piece-02',
-          },
-          {
-            id: 'cond-g04-piece03',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery04-piece-03',
+            id: 'cond-g04-puzzle-completed',
+            type: 'galleryPuzzleCompleted',
+            galleryId: 'gallery-04',
           },
         ],
       },
@@ -594,9 +574,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     galleryId: 'gallery-05',
     name: 'Gallery 05',
     nameFa: 'ضرب آهنگ شهر',
-    viewBox: '0 0 763 1147',
-    width: 763,
-    height: 1147,
+    viewBox: '0 0 682.05 729.06',
+    width: 682.05,
+    height: 729.06,
     collectionPoints: [
       {
         id: 'star-08',
@@ -705,19 +685,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-06',
         visibilityConditions: [
           {
-            id: 'cond-g05-piece01',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery05-piece-01',
-          },
-          {
-            id: 'cond-g05-piece02',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery05-piece-02',
-          },
-          {
-            id: 'cond-g05-piece03',
-            type: 'puzzlePieceCollected',
-            puzzlePieceId: 'gallery05-piece-03',
+            id: 'cond-g05-puzzle-completed',
+            type: 'galleryPuzzleCompleted',
+            galleryId: 'gallery-05',
           },
         ],
       },
@@ -739,9 +709,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     galleryId: 'gallery-06',
     name: 'Gallery 06',
     nameFa: 'در کشاکش تماشا و استیلا',
-    viewBox: '0 0 762.8 1147.2',
-    width: 762.8,
-    height: 1147.2,
+    viewBox: '0 0 486.92 793.01',
+    width: 486.92,
+    height: 793.01,
     collectionPoints: [
       {
         id: 'star-12',
@@ -850,15 +820,33 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-05',
         visibilityConditions: [],
       },
+      {
+        id: 'arrow-g06-to-g07',
+        type: 'arrow',
+        galleryId: 'gallery-06',
+        title: 'ورود به گالری ۰۷',
+        x: 670,
+        y: 380,
+        rotation: 90,
+        size: 48,
+        destination: 'gallery-07',
+        visibilityConditions: [
+          {
+            id: 'cond-g06-puzzle-completed',
+            type: 'galleryPuzzleCompleted',
+            galleryId: 'gallery-06',
+          },
+        ],
+      },
     ],
   },
   'gallery-07': {
     galleryId: 'gallery-07',
     name: 'Gallery 07',
     nameFa: 'گذر از برون به درون',
-    viewBox: '0 0 762.8 1147.2',
-    width: 762.8,
-    height: 1147.2,
+    viewBox: '0 0 544.58 650',
+    width: 544.58,
+    height: 650,
     collectionPoints: [
       {
         id: 'star-19',
@@ -946,6 +934,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-08',
         visibilityConditions: [
           {
+            id: 'cond-g07-puzzle-completed',
             type: 'galleryPuzzleCompleted',
             galleryId: 'gallery-07',
           },
@@ -957,9 +946,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     galleryId: 'gallery-08',
     name: 'Gallery 08',
     nameFa: 'آونگ زمان',
-    viewBox: '0 0 762.8 1147.2',
-    width: 762.8,
-    height: 1147.2,
+    viewBox: '0 0 501.5 642.18',
+    width: 501.5,
+    height: 642.18,
     collectionPoints: [],
     iconPoints: [
       {
@@ -1035,6 +1024,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-09',
         visibilityConditions: [
           {
+            id: 'cond-g08-puzzle-completed',
             type: 'galleryPuzzleCompleted',
             galleryId: 'gallery-08',
           },
@@ -1046,9 +1036,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     galleryId: 'gallery-09',
     name: 'Gallery 09',
     nameFa: 'تلاقی رسانه‌ها',
-    viewBox: '0 0 762.78 1147.23',
-    width: 762.78,
-    height: 1147.23,
+    viewBox: '0 0 453.09 846.45',
+    width: 453.09,
+    height: 846.45,
     collectionPoints: [
       {
         id: 'star-24',
@@ -1135,6 +1125,24 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-08',
         visibilityConditions: [],
       },
+      {
+        id: 'arrow-g09-to-g00',
+        type: 'arrow',
+        galleryId: 'gallery-09',
+        title: 'بازگشت به سرسرای موزه',
+        x: 397,
+        y: 300,
+        rotation: 0,
+        size: 48,
+        destination: 'gallery-00',
+        visibilityConditions: [
+          {
+            id: 'cond-g09-puzzle-completed',
+            type: 'galleryPuzzleCompleted',
+            galleryId: 'gallery-09',
+          },
+        ],
+      },
     ],
   },
 };
@@ -1165,10 +1173,10 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
           for (const key of Object.keys(DEFAULT_MAP_DATABASE)) {
             if (parsed[key]) {
               const defaultIcons = DEFAULT_MAP_DATABASE[key]?.iconPoints || [];
-              const savedIcons = parsed[key].iconPoints || [];
+              const savedIcons = (parsed[key].iconPoints || []).filter((i: any) => i.id !== 'icon-3527');
               const combinedIcons = [...savedIcons];
               for (const defIcon of defaultIcons) {
-                if (!combinedIcons.some((i) => i.id === defIcon.id)) {
+                if (defIcon.id !== 'icon-3527' && !combinedIcons.some((i) => i.id === defIcon.id)) {
                   combinedIcons.push(defIcon);
                 }
               }
@@ -1219,6 +1227,9 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
               merged[key] = {
                 ...DEFAULT_MAP_DATABASE[key],
                 ...parsed[key],
+                width: DEFAULT_MAP_DATABASE[key]?.width ?? parsed[key].width,
+                height: DEFAULT_MAP_DATABASE[key]?.height ?? parsed[key].height,
+                viewBox: DEFAULT_MAP_DATABASE[key]?.viewBox ?? parsed[key].viewBox,
                 collectionPoints: combinedCollections,
                 iconPoints: combinedIcons,
                 puzzlePoints: combinedPuzzles,
@@ -1261,6 +1272,7 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
       collectionPoints: (rawConfig.collectionPoints || [])
         .filter(
           (cp) =>
+            !((safeGalleryId === 'gallery-00' || canonId === 'gallery-00' || safeGalleryId === 'gallery_00' || canonId === 'gallery_00') && (cp.id === 'col-02' || cp.id === 'col-04' || cp.id === 'col-07')) &&
             !((safeGalleryId === 'gallery-01' || canonId === 'gallery-01') && (cp.id === 'artwork-02' || cp.id === 'artwork-03' || cp.id === 'artwork-04')) &&
             !((safeGalleryId === 'gallery-07' || canonId === 'gallery-07' || safeGalleryId === 'gallery_07' || canonId === 'gallery_07') && (cp.id === 'star-16' || cp.id === 'star-17' || cp.id === 'star-18')) &&
             !((safeGalleryId === 'gallery-08' || canonId === 'gallery-08' || safeGalleryId === 'gallery_08' || canonId === 'gallery_08') && (cp.id === 'star-20' || cp.id === 'star-21' || cp.id === 'star-22' || cp.id === 'star-23')) &&
@@ -1285,11 +1297,41 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
             } else {
               list = list.map((ip) => (ip.id === 'icon-g00-shop' ? { ...ip, width: targetWidth, height: targetHeight } : ip));
             }
+            if (!list.some((ip) => ip.id === 'icon-g00-frame')) {
+              const defaultFrame = DEFAULT_MAP_DATABASE['gallery-00']?.iconPoints?.find((ip) => ip.id === 'icon-g00-frame');
+              if (defaultFrame) {
+                list.push({ ...defaultFrame, width: targetWidth, height: targetHeight });
+              }
+            } else {
+              list = list.map((ip) => (ip.id === 'icon-g00-frame' ? { ...ip, width: targetWidth, height: targetHeight } : ip));
+            }
+            if (!list.some((ip) => ip.id === 'icon-g00-tree')) {
+              const defaultTree = DEFAULT_MAP_DATABASE['gallery-00']?.iconPoints?.find((ip) => ip.id === 'icon-g00-tree');
+              if (defaultTree) {
+                list.push({ ...defaultTree, width: targetWidth, height: targetHeight });
+              }
+            } else {
+              list = list.map((ip) => (ip.id === 'icon-g00-tree' ? { ...ip, width: targetWidth, height: targetHeight } : ip));
+            }
             return list;
           })()
-        : (rawConfig.iconPoints || []),
+        : (rawConfig.iconPoints || []).filter((ip) => ip.id !== 'icon-3527'),
       puzzlePoints: rawConfig.puzzlePoints || (DEFAULT_MAP_DATABASE[safeGalleryId]?.puzzlePoints ? [...DEFAULT_MAP_DATABASE[safeGalleryId].puzzlePoints!] : []),
-      arrows: rawConfig.arrows || [],
+      arrows: (() => {
+        const baseArrows = rawConfig.arrows || [];
+        const defArrows =
+          DEFAULT_MAP_DATABASE[safeGalleryId]?.arrows ||
+          DEFAULT_MAP_DATABASE[canonId]?.arrows ||
+          DEFAULT_MAP_DATABASE[underscoreId]?.arrows ||
+          [];
+        const res = [...baseArrows];
+        for (const da of defArrows) {
+          if (!res.some((a) => a.id === da.id)) {
+            res.push(da);
+          }
+        }
+        return res;
+      })(),
     };
   }
   // Fallback default

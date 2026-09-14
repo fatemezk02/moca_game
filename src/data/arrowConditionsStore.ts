@@ -333,16 +333,11 @@ export function evaluateArrowConditions(
 
 /**
  * Evaluates whether an arrow should currently be rendered on the user-facing map:
- * 1. Must NOT have been marked as used (used one-time arrows disappear)
- * 2. Progression conditions must be satisfied (if a progression rule is associated)
- * 3. ALL custom visibility conditions must be satisfied
+ * 1. Progression conditions must be satisfied (if a progression rule is associated)
+ * 2. ALL custom visibility conditions must be satisfied
+ * Note: Navigation arrows (both next gallery and return arrows) remain permanently visible once unlocked/received.
  */
 export function isArrowVisibleToPlayer(arrow: AdminArrowPoint): boolean {
-  // If the arrow has already been used, it is hidden forever from the source map
-  if (isArrowUsed(arrow.id)) {
-    return false;
-  }
-
   // Check progression rules for game progression arrows
   const progressionRule = getProgressionRuleForArrow(arrow.id);
   if (progressionRule && progressionRule.requiredPuzzlePiecesCount > 0) {

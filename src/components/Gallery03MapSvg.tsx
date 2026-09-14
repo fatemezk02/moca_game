@@ -9,10 +9,7 @@ interface Gallery03MapSvgProps extends React.SVGProps<SVGSVGElement> {
 
 /**
  * Architectural SVG Map for Gallery 03 — Modern Hall.
- * Styled in the rich neo-architectural comic palette:
- * - Walls: #2a2623 & #45240c
- * - Accents / Portals: #da985f
- * - Floor base: #f8efe8
+ * Tight coordinate space around actual visible artwork (viewBox="0 0 561.28 851.79").
  */
 export const Gallery03MapSvg = forwardRef<SVGSVGElement, Gallery03MapSvgProps>(
   ({ className = '', children, mapMode, ...props }, ref) => {
@@ -22,144 +19,81 @@ export const Gallery03MapSvg = forwardRef<SVGSVGElement, Gallery03MapSvgProps>(
         id="Layer_1"
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
-        x="0px"
-        y="0px"
-        viewBox="0 0 695.3 1147.2"
-        style={{ enableBackground: 'new 0 0 695.3 1147.2' }}
+        viewBox="0 0 561.28 851.79"
+        style={{ enableBackground: 'new 0 0 561.28 851.79' }}
         xmlSpace="preserve"
         className={className}
         {...props}
       >
         <defs>
-          <style type="text/css">
-            {`
-              .st0{fill:#F8EFE8;}
-              .st1{fill:#2A2623;}
-              .st2{fill:url(#SVGID_1_);}
-              .st3{fill:url(#SVGID_00000034064596820564715020000011117298167356574339_);}
-              .st4{fill:url(#SVGID_00000111188958216661915700000015615957035328935045_);}
-              .st5{fill:url(#SVGID_00000101065639324461917560000008253760442540681609_);}
-              .st6{fill:#C9AC59;stroke:#2D2824;stroke-miterlimit:10;}
-              .st7{fill:#998F56;stroke:#353329;stroke-miterlimit:10;}
-            `}
-          </style>
-          <linearGradient
-            id="SVGID_1_"
-            gradientUnits="userSpaceOnUse"
-            x1="508.3052"
-            y1="735.9635"
-            x2="508.3052"
-            y2="337.3049"
-          >
-            <stop offset="0" stopColor="#F8EFE8" />
-            <stop offset="0.9085" stopColor="#FEFDFD" stopOpacity="0.091461" />
-            <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
-          </linearGradient>
-
-          <linearGradient
-            id="SVGID_00000080187263621947109240000009085739883803146159_"
-            gradientUnits="userSpaceOnUse"
-            x1="75.4647"
-            y1="797.72"
-            x2="150.3513"
-            y2="797.72"
-          >
-            <stop offset="1.704893e-07" stopColor="#FFFFFF" stopOpacity="0" />
-            <stop offset="0.5675" stopColor="#FAF3EE" stopOpacity="0.5675" />
-            <stop offset="1" stopColor="#F8EFE8" />
-          </linearGradient>
-        </defs>
-
-        <g>
-          <path
-            className="st0"
-            d="M551.2,730.4h-93.5V225.7h-67.7V225h-29c0,0,0-60.9-57.5-60.9C246,164.1,246,225,246,225H218v0.7h-67.6v718.5
-		h89.1h6.6c0.1,4.2,2.2,60.7,57.5,60.7c55.4,0,57.4-56.4,57.5-60.7h39.5h57.2v-98.7h92.5c0,0,60.9,0,60.9-57.5
-		C611.2,734.8,559.1,730.7,551.2,730.4z"
-          />
-          <rect x="463.3" y="337.3" className="st2" width="90" height="398.7" />
-          <rect
-            x="75.5"
-            y="755.6"
-            style={{ fill: 'url(#SVGID_00000080187263621947109240000009085739883803146159_)' }}
-            width="74.9"
-            height="84.3"
-          />
-        </g>
-
-        <g>
-          <path
-            className="st1"
-            d="M236.5,744.9h-77.6c-1.7,0-3-1.3-3-3V233.5c0-1.7,1.3-3,3-3h89.7c1.7,0,3-1.3,3-3V225c0-0.1,0.1-14.2,6.7-28.1
-		c8.6-18.1,23.8-27.3,45.3-27.3c51.2,0,52,53.2,52,55.4v2.5c0,1.7,1.3,3,3,3h90.7c1.7,0,3,1.3,3,3l-0.5,351l0.2,157.4
-		c0,1.7-1.3,3-3,3h-77.4c-1.7,0-3,1.3-3,3v5c0,1.7,1.3,3,3,3H460c1.7,0,3-1.3,3-3l-0.2-168.4l0.3-241.6h39.4c1.7,0,3-1.3,3-3v-5
-		c0-1.7-1.3-3-3-3h-36.4c-1.7,0-3-1.3-3-3l0.1-103.2v-3.2c0-1.7-1.3-3-3-3l-91.4,0c-1.5,0-2.8-1.1-3-2.6c-0.8-6.3-2.7-15.5-7.1-24.7
-		c-7.2-15.3-22.7-33.6-55.3-33.6c-32.6,0-48.1,18.3-55.3,33.6c-4.4,9.2-6.3,18.4-7.1,24.7c-0.2,1.5-1.5,2.6-3,2.6l-90.4,0
-		c-1.7,0-3,1.3-3,3v522.4h-14.7c-1.7,0-3,1.3-3,3v5c0,1.7,1.3,3,3,3h106.3c1.7,0,3-1.3,3-3v-5C239.5,746.2,238.1,744.9,236.5,744.9z
-		"
-          />
-          <path
-            className="st1"
-            d="M556.7,722.8l0-281h0.7c1.7,0,3-1.3,3-3v-5c0-1.7-1.3-3-3-3h-8.7c-1.7,0-3,1.3-3,3v299.1c0,1.6,1.3,2.9,2.9,3
-		l2.4,0.1c9.1,0.3,54.6,4.5,54.6,52c0,51.2-53.2,52-55.4,52H345.7c-1.7,0-3,1.3-3,3v5c0,1.7,1.3,3,3,3h103.5c1.7,0,3,1.3,3,3
-		l0.1,81.5c0,1.7-1.3,3-3,3h-88.2l-2.5-0.1c-1.7-0.1-3.2,1.4-3.1,3.1l0.1,2.4l0,0.2c0,1.6-0.5,15.8-7.4,29.5
-		c-8.7,17.1-23.7,25.7-44.6,25.7c-49.4,0-51.9-49.3-52-55.2v-2.7c0-1.7-1.3-3-3-3h-89.7c-1.7,0-3-1.3-3-3v-81.5c0-1.7,1.3-3,3-3
-		h103.6c1.7,0,3-1.3,3-3v-5c0-1.7-1.3-3-3-3H130.2c-1.7,0-3,1.3-3,3v5c0,1.7,1.3,3,3,3h14.7v95.5c0,1.7,1.3,3,3,3l90.3,0
-		c1.5,0,2.8,1.1,3,2.6c0.9,6.7,3,16.7,8,26.6c7.4,14.5,22.8,31.7,54.4,31.7c31.6,0,47-17.3,54.4-31.7c5-9.9,7.1-19.8,8-26.6
-		c0.2-1.5,1.5-2.6,3-2.6c13.8,0,76.8,0,91.4,0c1.7,0,3-1.3,3-3l-0.1-95.5h87.1c0.7,0,16.6-0.1,32.8-7.7
-		c15.3-7.2,33.6-22.7,33.6-55.3c0-48.4-39.6-59.6-57.4-62.2C557.8,725.5,556.7,724.2,556.7,722.8z"
-          />
-          <path
-            className="st1"
-            d="M530.2,331.8h-9.6c-1.7,0-3,1.3-3,3v5c0,1.7,1.3,3,3,3h9.6c1.7,0,3-1.3,3-3v-5
-		C533.2,333.1,531.9,331.8,530.2,331.8z"
-          />
-          <path
-            className="st7"
-            d="M566.7,331.8h-18.5c-1.7,0-3,1.3-3,3v5c0,1.7,1.3,3,3,3h18.5c1.7,0,3-1.3,3-3v-5
-		C569.7,333.1,568.4,331.8,566.7,331.8z"
-          />
-          <path
-            className="st1"
-            d="M594.4,331.8h-9.6c-1.7,0-3,1.3-3,3v5c0,1.7,1.3,3,3,3h9.6c1.7,0,3-1.3,3-3v-5
-		C597.4,333.1,596.1,331.8,594.4,331.8z"
-          />
-          <path
-            className="st7"
-            d="M593.8,430.7h-18.5c-1.7,0-3,1.3-3,3v5c0,1.7,1.3,3,3,3h18.5c1.7,0,3-1.3,3-3v-5
-		C596.8,432.1,595.4,430.7,593.8,430.7z"
-          />
-          <path
-            className="st1"
-            d="M608.9,433.7v5c0,1.7,1.3,3,3,3h9.6c1.7,0,3-1.3,3-3v-5c0-1.7-1.3-3-3-3h-9.6
-		C610.2,430.7,608.9,432.1,608.9,433.7z"
-          />
-          <g>
-            <path
-              className="st7"
-              d="M93.9,839.9h18.5c1.7,0,3,1.3,3,3v5c0,1.7-1.3,3-3,3H93.9c-1.7,0-3-1.3-3-3v-5
-			C90.9,841.2,92.2,839.9,93.9,839.9z"
-            />
-            <path
-              className="st1"
-              d="M78.8,842.9v5c0,1.7,1.3,3,3,3h-9.6c-1.7,0-3-1.3-3-3v-5c0-1.7,1.3-3,3-3h9.6
-			C77.5,839.9,78.8,841.2,78.8,842.9z"
-            />
+            <style>
+              {`
+                .cls-1{fill:#f8efe8;}
+                .cls-2{fill:url(#linear-gradient);}
+                .cls-3{fill:url(#linear-gradient-2);}
+                .cls-4{fill:#2a2623;}
+                .cls-5{fill:#998f56;stroke:#353329;stroke-miterlimit:10;}
+              `}
+            </style>
+            <linearGradient
+              id="linear-gradient"
+              x1="445.12"
+              y1="577.41"
+              x2="445.12"
+              y2="178.75"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0" stopColor="#f8efe8" />
+              <stop offset="0.11" stopColor="#f9f0ea" stopOpacity="0.92" />
+              <stop offset="0.35" stopColor="#faf4ef" stopOpacity="0.7" />
+              <stop offset="0.68" stopColor="#fdf9f7" stopOpacity="0.36" />
+              <stop offset="1" stopColor="#fff" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient
+              id="linear-gradient-2"
+              x1="12.28"
+              y1="639.17"
+              x2="87.16"
+              y2="639.17"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0" stopColor="#fff" stopOpacity="0" />
+              <stop offset="0.1" stopColor="#fefcfb" stopOpacity="0.16" />
+              <stop offset="0.29" stopColor="#fcf8f6" stopOpacity="0.41" />
+              <stop offset="0.47" stopColor="#fbf5f1" stopOpacity="0.62" />
+              <stop offset="0.63" stopColor="#faf2ed" stopOpacity="0.78" />
+              <stop offset="0.78" stopColor="#f9f1ea" stopOpacity="0.9" />
+              <stop offset="0.91" stopColor="#f8efe9" stopOpacity="0.97" />
+              <stop offset="1" stopColor="#f8efe8" />
+            </linearGradient>
+          </defs>
+          <g id="Layer_2" data-name="Layer 2">
+            <g id="Layer_1-2" data-name="Layer 1">
+              <path
+                className="cls-1"
+                d="M488.05,571.89H394.59V67.1H326.88v-.69h-29s0-60.91-57.52-60.91-57.51,60.91-57.51,60.91H154.79v.69H87.16V785.63h95.69c.08,4.25,2.17,60.66,57.51,60.66s57.44-56.43,57.51-60.66h96.72V686.89h92.46s60.91,0,60.91-57.51C548,576.22,495.92,572.19,488.05,571.89Z"
+              />
+              <rect className="cls-2" x="400.14" y="178.75" width="89.96" height="398.66" />
+              <rect className="cls-3" x="12.28" y="597.01" width="74.89" height="84.31" />
+              <path
+                className="cls-4"
+                d="M173.3,586.35H95.66a3,3,0,0,1-3-3V74.91a3,3,0,0,1,3-3h89.69a3,3,0,0,0,3-3v-2.5A74.21,74.21,0,0,1,195,38.3C203.57,20.19,218.82,11,240.36,11c51.24,0,52,53.16,52,55.41v2.5a3,3,0,0,0,3,3h90.7a3,3,0,0,1,3,3l-.5,351,.23,157.45a3,3,0,0,1-3,3H308.45a3,3,0,0,0-3,3v5a3,3,0,0,0,3,3h88.38a3,3,0,0,0,3-3l-.25-168.45.35-241.65h39.41a3,3,0,0,0,3-3v-5a3,3,0,0,0-3-3H403a3,3,0,0,1-3-3l.14-103.15V63.91a3,3,0,0,0-3-3H305.72a3,3,0,0,1-3-2.61,84.59,84.59,0,0,0-7.08-24.69C288.43,18.28,273,0,240.36,0s-48.05,18.28-55.29,33.61A84.28,84.28,0,0,0,178,58.3a3,3,0,0,1-3,2.61H84.66a3,3,0,0,0-3,3V586.35H67a3,3,0,0,0-3,3v5a3,3,0,0,0,3,3H173.3a3,3,0,0,0,3-3v-5A3,3,0,0,0,173.3,586.35Z"
+              />
+              <path
+                className="cls-4"
+                d="M493.55,564.2v-281h.66a3,3,0,0,0,3-3v-5a3,3,0,0,0-3-3h-8.66a3,3,0,0,0-3,3V574.3a3,3,0,0,0,2.89,3l2.4.1c9.12.34,54.62,4.49,54.62,52,0,51.23-53.15,52-55.41,52H282.47a3,3,0,0,0-3,3v5a3,3,0,0,0,3,3H386a3,3,0,0,1,3,3l.12,81.49a3,3,0,0,1-3,3h-88.2l-2.48-.09a3,3,0,0,0-3.12,3.11l.1,2.43v.21A73.44,73.44,0,0,1,285,815.05c-8.69,17.08-23.69,25.74-44.59,25.74-49.39,0-51.89-49.32-52-55.21v-2.7a3,3,0,0,0-3-3H95.66a3,3,0,0,1-3-3V695.39a3,3,0,0,1,3-3H199.27a3,3,0,0,0,3-3v-5a3,3,0,0,0-3-3H67a3,3,0,0,0-3,3v5a3,3,0,0,0,3,3H81.66v95.49a3,3,0,0,0,3,3H175a3,3,0,0,1,3,2.6,83.6,83.6,0,0,0,8,26.57c7.38,14.48,22.79,31.74,54.38,31.74s47-17.27,54.39-31.75a82.92,82.92,0,0,0,8-26.56,3,3,0,0,1,3-2.6H397.1a3,3,0,0,0,3-3L400,692.39h87.09a84.83,84.83,0,0,0,32.8-7.72c15.34-7.23,33.61-22.7,33.61-55.29,0-48.36-39.59-59.6-57.36-62.22A3,3,0,0,1,493.55,564.2Z"
+              />
+              <rect className="cls-4" x="454.4" y="173.25" width="15.62" height="11" rx="3" />
+              <rect className="cls-5" x="482.08" y="173.25" width="24.46" height="11" rx="3" />
+              <rect className="cls-4" x="518.6" y="173.25" width="15.62" height="11" rx="3" />
+              <rect className="cls-5" x="509.15" y="272.16" width="24.46" height="11" rx="3" />
+              <rect className="cls-4" x="545.66" y="272.16" width="15.62" height="11" rx="3" />
+              <rect className="cls-5" x="27.68" y="681.32" width="24.46" height="11" rx="3" />
+              <rect className="cls-4" y="681.32" width="15.62" height="11" rx="3" />
+              <rect className="cls-5" x="27.68" y="586.01" width="24.46" height="11" rx="3" />
+              <rect className="cls-4" y="586.01" width="15.62" height="11" rx="3" />
+            </g>
           </g>
-          <g>
-            <path
-              className="st7"
-              d="M93.9,744.6h18.5c1.7,0,3,1.3,3,3v5c0,1.7-1.3,3-3,3H93.9c-1.7,0-3-1.3-3-3v-5
-			C90.9,745.9,92.2,744.6,93.9,744.6z"
-            />
-            <path
-              className="st1"
-              d="M78.8,747.6v5c0,1.7,1.3,3,3,3h-9.6c-1.7,0-3-1.3-3-3v-5c0-1.7,1.3-3,3-3h9.6
-			C77.5,744.6,78.8,745.9,78.8,747.6z"
-            />
-          </g>
-        </g>
-
         {children}
       </svg>
     );
@@ -167,3 +101,4 @@ export const Gallery03MapSvg = forwardRef<SVGSVGElement, Gallery03MapSvgProps>(
 );
 
 Gallery03MapSvg.displayName = 'Gallery03MapSvg';
+

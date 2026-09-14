@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Map } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { BottomNavBar } from './BottomNavBar';
 import { PlayerStatusBar } from './PlayerStatusBar';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
 import { contentService } from '../services/content/contentService';
-import { formatTwoDigitPersian } from '../services/content/mappers';
+import { formatTwoDigitPersian, normalizeGalleryId } from '../services/content/mappers';
+import {
+  getLocationPinsVisible,
+  toggleLocationPinsVisible,
+} from '../data/locationPinsVisibilityStore';
 
 export interface SharedGalleryPageLayoutProps {
   galleryId: string;
@@ -21,11 +26,31 @@ export interface SharedGalleryPageLayoutProps {
   modals?: React.ReactNode;
 }
 
+const GALLERY_METADATA_MAP: Record<string, { num: string; name: string }> = {
+  'gallery-01': { num: '۰۲', name: 'کیمیای نور' },
+  'gallery_02': { num: '۰۲', name: 'کیمیای نور' },
+  'gallery-02': { num: '۰۲', name: 'کیمیای نور' },
+  'gallery-03': { num: '۰۳', name: 'آلبوم‌های دیپلماتیک' },
+  'gallery_03': { num: '۰۳', name: 'آلبوم‌های دیپلماتیک' },
+  'gallery-04': { num: '۰۴', name: 'ثبت دوام ما' },
+  'gallery_04': { num: '۰۴', name: 'ثبت دوام ما' },
+  'gallery-05': { num: '۰۵', name: 'ضرب آهنگ شهر' },
+  'gallery_05': { num: '۰۵', name: 'ضرب آهنگ شهر' },
+  'gallery-06': { num: '۰۶', name: 'در کشاکش تماشا و استیلا' },
+  'gallery_06': { num: '۰۶', name: 'در کشاکش تماشا و استیلا' },
+  'gallery-07': { num: '۰۷', name: 'گذر از برون به درون' },
+  'gallery_07': { num: '۰۷', name: 'گذر از برون به درون' },
+  'gallery-08': { num: '۰۸', name: 'آونگ زمان' },
+  'gallery_08': { num: '۰۸', name: 'آونگ زمان' },
+  'gallery-09': { num: '۰۹', name: 'تلاقی رسانه‌ها' },
+  'gallery_09': { num: '۰۹', name: 'تلاقی رسانه‌ها' },
+};
+
 /**
  * Shared reusable visual layout shell for all individual museum gallery pages.
  * Enforces unified:
- * - background styling (#fbf9f9)
- * - header with back button, gallery number, and badge
+ * - App-style top header with amber accent strip & comic-style back button
+ * - 5-second alternating title between Gallery Name and Gallery Number
  * - compact player status bar
  * - centered responsive map container with consistent aspect ratio
  * - floating circular map toggle button
@@ -46,69 +71,125 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
 }) => {
   const playerStats = usePlayerStats();
   const galleryRecord = contentService.getGalleryById(galleryId);
-  const { containerRef, dimensions } = useFitMapDimensions(mapWidth, mapHeight, 1.4);
+  const { containerRef, dimensions } = useFitMapDimensions(mapWidth, mapHeight);
+  const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
+
+  // 5-second interval state for alternating between gallery name and gallery number
+  const [showGalleryName, setShowGalleryName] = useState<boolean>(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setShowGalleryName((prev) => !prev);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleVisUpdate = (e: any) => {
+      const isVis = typeof e?.detail?.visible === 'boolean' ? e.detail.visible : getLocationPinsVisible();
+      setAreLocationPinsVisible(isVis);
+    };
+    window.addEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
+    return () => window.removeEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
+  }, []);
+
+  const fallback =
+    GALLERY_METADATA_MAP[galleryId] ||
+    GALLERY_METADATA_MAP[normalizeGalleryId(galleryId)] || { num: '۰۲', name: 'کیمیای نور' };
 
   const numFa =
     galleryNumberPersian ||
-    formatTwoDigitPersian(
-      galleryRecord?.galleryNumber || (galleryId ? galleryId.replace('gallery-', '') : '01')
-    );
-  const nameFa = galleryNamePersian || galleryRecord?.nameFa?.trim() || '';
+    (galleryRecord?.galleryNumber
+      ? formatTwoDigitPersian(galleryRecord.galleryNumber)
+      : fallback.num);
+
+  const nameFa = galleryNamePersian || galleryRecord?.nameFa?.trim() || fallback.name;
 
   return (
     <div
       id={`${galleryId}-view-root`}
-      className="user-facing-app h-screen w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom select-none"
+      className="user-facing-app h-screen h-[100dvh] max-h-[100dvh] w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom select-none"
       onClick={onClickOutside}
     >
-      {/* Top App Bar Header */}
+      {/* Top App Bar Header with app visual identity & 5s alternating name/number */}
       <header
         id={`${galleryId}-top-bar`}
         dir="ltr"
-        className="bg-gradient-to-b from-[#fdfcfb] to-[#f7f4ee] border-b border-[#e2dcd2] shadow-xs flex justify-between items-center px-4 sm:px-6 py-3 z-40 relative select-none shrink-0"
+        className="bg-[#ffffff] border-b-[1.25px] border-[#1e1b18] shadow-[0px_2px_0px_#1e1b18] flex flex-col w-full z-40 relative select-none pt-safe shrink-0"
       >
-        {/* Left Action (Back Arrow to Gallery 00) */}
-        <button
-          id={`${galleryId}-back-btn`}
-          onClick={onNavigateBack}
-          aria-label="بازگشت به گالری ۰۰"
-          title="بازگشت به گالری ۰۰"
-          className="text-[#0e0f0f] p-2 hover:bg-[#0e0f0f] hover:text-[#fbf9f9] transition-colors border border-[#0e0f0f] active:scale-95 flex items-center justify-center cursor-pointer"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+        {/* Top phone-style accent bar matching main TopAppBar */}
+        <div className="h-[5px] w-full bg-[#f59e0b] border-b border-[#1e1b18]" />
 
-        {/* Center Title */}
-        <div className="flex items-center gap-2">
-          <h1 className="font-sans-custom text-[18px] sm:text-[20px] font-bold text-[#1c1917] tracking-tight">
-            گالری {numFa}
-          </h1>
-          {nameFa && (
-            <span className="font-mono-custom text-[9px] px-2 py-0.5 bg-[#fef9c3] text-[#854d0e] border border-[#fde68a] tracking-wider rounded-md font-bold">
-              {nameFa}
-            </span>
-          )}
+        <div className="flex justify-between items-center px-3.5 sm:px-6 h-[56px] sm:h-[60px]">
+          {/* Left Action (Back Arrow to Gallery 00 / Main Floor Plan) */}
+          <button
+            id={`${galleryId}-back-btn`}
+            onClick={onNavigateBack}
+            aria-label="بازگشت به نقشه اصلی"
+            title="بازگشت به نقشه اصلی"
+            className="border-2 border-[#1e1b18] rounded-xl bg-[#fef3c7] hover:bg-[#fde047] text-[#1e1b18] p-2 shadow-[1.5px_1.5px_0px_#1e1b18] hover:shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-150"
+          >
+            <ArrowLeft className="w-5 h-5 text-[#1e1b18]" />
+          </button>
+
+          {/* Center Title (Alternating every 5s between Gallery Name and Gallery Number) */}
+          <div
+            id={`${galleryId}-header-title-container`}
+            className="flex items-center justify-center h-full relative px-2 overflow-hidden"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {showGalleryName ? (
+                <motion.div
+                  key="title-name"
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center justify-center text-center max-w-[220px] sm:max-w-xs"
+                >
+                  <h1 className="font-sans-custom text-[17px] sm:text-[19px] font-bold text-[#1e1b18] tracking-tight truncate">
+                    {nameFa}
+                  </h1>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="title-number"
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center justify-center text-center"
+                >
+                  <h1 className="font-sans-custom text-[18px] sm:text-[20px] font-bold text-[#1e1b18] tracking-tight">
+                    گالری {numFa}
+                  </h1>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Right Spacer to preserve optical center alignment */}
+          <div className="w-9 h-9 sm:w-10 sm:h-10 pointer-events-none opacity-0" aria-hidden="true" />
         </div>
-
-        {/* Right Spacer to keep center alignment */}
-        <div className="w-9 h-9" aria-hidden="true" />
       </header>
 
       {/* Compact Player Status Bar */}
-      <PlayerStatusBar stars={playerStats.stars} coins={playerStats.coins} />
+      <PlayerStatusBar puzzles={playerStats.completedPuzzles} stars={playerStats.stars} coins={playerStats.coins} />
 
       {/* Main Floor Plan Canvas - Available Viewport between Header and Bottom Nav */}
       <main
         ref={containerRef}
         id={`${galleryId}-canvas-area`}
-        className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-3 sm:p-5 mb-16 sm:mb-[68px]"
+        className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-2 sm:p-2.5 mb-[calc(64px+env(safe-area-inset-bottom,0px))] sm:mb-[calc(68px+env(safe-area-inset-bottom,0px))]"
       >
         <div
           style={{
             ...(dimensions
               ? { width: `${dimensions.width}px`, height: `${dimensions.height}px` }
-              : { width: '100%', height: '100%' }),
+              : { width: '100%', height: 'auto' }),
             aspectRatio: `${mapWidth} / ${mapHeight}`,
+            maxWidth: '100%',
+            maxHeight: '100%',
           }}
           className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
         >
@@ -125,19 +206,20 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
         </div>
       </main>
 
-      {/* Bottom Right Floating Circular Toggle Button to return to Gallery 00 */}
+      {/* Bottom Right Floating Controls */}
       <div
         id={`${galleryId}-floating-controls`}
         className="absolute bottom-20 right-4 sm:right-6 z-30 flex items-center justify-center select-none"
       >
+        {/* Gallery Toggle Button to return to Gallery 00 */}
         <button
           id={`btn-${galleryId}-toggle-map`}
           onClick={onNavigateBack}
           aria-label="بازگشت به نقشه اصلی (گالری ۰۰)"
           title="بازگشت به نقشه اصلی (گالری ۰۰)"
-          className="w-12 h-12 rounded-full border border-[#0e0f0f] bg-[#fbf9f9] text-[#0e0f0f] hover:bg-[#0e0f0f] hover:text-[#fbf9f9] active:scale-95 shadow-md flex items-center justify-center transition-all duration-200 cursor-pointer focus:outline-none"
+          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] hover:bg-[#d97706] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none"
         >
-          <Map className="w-5 h-5" />
+          <Map className="w-6 h-6 stroke-[2.5]" />
         </button>
       </div>
 

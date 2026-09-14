@@ -1,77 +1,99 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export interface MapDimensions {
   width: number;
   height: number;
+  scale: number;
 }
 
 /**
- * Custom hook to calculate the optimal responsive dimensions for an aspect-ratio constrained map
- * so that it occupies the largest practical size that fits 100% completely inside its container
- * without any vertical or horizontal scrolling/overflow.
+ * Custom hook to dynamically calculate the maximum fitting scale for an aspect-ratio constrained map
+ * (Gallery 03–09, etc.) within the actual available area between Header and Bottom Navigation.
+ *
+ * Algorithm:
+ * 1. Measures available width and height of the container.
+ * 2. Calculates scale = Math.min(availableWidth / mapWidth, availableHeight / mapHeight).
+ * 3. Yields fittedWidth = mapWidth * scale and fittedHeight = mapHeight * scale.
+ * 4. Strictly preserves the SVG aspect ratio, avoids distortion, prevents overflow, and maximizes size.
  */
 export function useFitMapDimensions(
   mapWidth: number,
   mapHeight: number,
-  scaleMultiplier: number = 1.0
+  safeMargin: number = 8
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState<MapDimensions | null>(null);
+
+  const calculateFitting = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const style = window.getComputedStyle(el);
+
+    const paddingLeft = parseFloat(style.paddingLeft) || 0;
+    const paddingRight = parseFloat(style.paddingRight) || 0;
+    const paddingTop = parseFloat(style.paddingTop) || 0;
+    const paddingBottom = parseFloat(style.paddingBottom) || 0;
+
+    // Available width and height inside container
+    const availWidth = Math.max(0, rect.width - paddingLeft - paddingRight);
+    const availHeight = Math.max(0, rect.height - paddingTop - paddingBottom);
+
+    if (availWidth <= 0 || availHeight <= 0) return;
+
+    // Conceptually:
+    // scale = min(availableWidth / mapWidth, availableHeight / mapHeight)
+    const scale = Math.min(availWidth / mapWidth, availHeight / mapHeight);
+
+    // Apply scale to both dimensions preserving original aspect ratio exactly:
+    const fittedWidth = Math.floor(mapWidth * scale * 10) / 10;
+    const fittedHeight = Math.floor(mapHeight * scale * 10) / 10;
+
+    setDimensions((prev) => {
+      if (
+        prev &&
+        Math.abs(prev.width - fittedWidth) < 0.5 &&
+        Math.abs(prev.height - fittedHeight) < 0.5 &&
+        Math.abs(prev.scale - scale) < 0.001
+      ) {
+        return prev;
+      }
+      return { width: fittedWidth, height: fittedHeight, scale };
+    });
+  }, [mapWidth, mapHeight]);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    const updateSize = () => {
-      const style = window.getComputedStyle(el);
-      const paddingX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-      const paddingY = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
-
-      const availWidth = Math.max(0, el.clientWidth - paddingX);
-      const availHeight = Math.max(0, el.clientHeight - paddingY);
-
-      if (availWidth <= 0 || availHeight <= 0) return;
-
-      const mapAspect = mapWidth / mapHeight;
-      const containerAspect = availWidth / availHeight;
-
-      let w: number;
-      let h: number;
-
-      if (containerAspect > mapAspect) {
-        // Container is wider than the map: height is the limiting factor
-        h = Math.round(availHeight * scaleMultiplier);
-        w = Math.round(availHeight * mapAspect * scaleMultiplier);
-      } else {
-        // Container is narrower/taller than the map: width is the limiting factor
-        w = Math.round(availWidth * scaleMultiplier);
-        h = Math.round((availWidth / mapAspect) * scaleMultiplier);
-      }
-
-      setDimensions({ width: w, height: h });
-    };
-
-    updateSize();
+    calculateFitting();
 
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(() => {
-        updateSize();
+        calculateFitting();
       });
       resizeObserver.observe(el);
     }
 
-    window.addEventListener('resize', updateSize);
-    window.addEventListener('orientationchange', updateSize);
+    window.addEventListener('resize', calculateFitting);
+    window.addEventListener('orientationchange', calculateFitting);
+
+    // Initial tick to guarantee layout synchronization after initial frame render
+    const frameId = requestAnimationFrame(calculateFitting);
 
     return () => {
+      cancelAnimationFrame(frameId);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
-      window.removeEventListener('resize', updateSize);
-      window.removeEventListener('orientationchange', updateSize);
+      window.removeEventListener('resize', calculateFitting);
+      window.removeEventListener('orientationchange', calculateFitting);
     };
-  }, [mapWidth, mapHeight, scaleMultiplier]);
+  }, [calculateFitting]);
 
-  return { containerRef, dimensions };
+  return { containerRef, dimensions, recalculate: calculateFitting };
 }
+
+

@@ -25,11 +25,16 @@ import {
   markPuzzlePointCompleted,
 } from '../data/puzzleProgressStore';
 import { markQuestionAnswered } from '../data/arrowConditionsStore';
-import { awardCoins } from '../data/questionProgressStore';
 import { contentService } from '../services/content/contentService';
-import { formatTwoDigitPersian, normalizeGalleryId } from '../services/content/mappers';
+import { formatTwoDigitPersian, normalizeGalleryId, toPersianDigits } from '../services/content/mappers';
 import { JigsawPieceGraphic } from './JigsawPieceGraphic';
 import { ArtworkFrame } from './ArtworkFrame';
+import { FinalCompletionCardBack } from './FinalCompletionCardBack';
+import {
+  areAll8GalleryPuzzlesCompleted,
+  isFinalCompletionAwarded,
+  evaluateAndTriggerFinalCompletion,
+} from '../data/finalCompletionStore';
 
 export interface PuzzleQuestionModalProps {
   galleryId: string;
@@ -42,7 +47,8 @@ type ModalViewMode =
   | 'piece_reward'
   | 'already_collected'
   | 'assembling'
-  | 'completed';
+  | 'completed'
+  | 'final_certificate';
 
 /**
  * Shared reusable PuzzleQuestionModal component.
@@ -170,6 +176,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
   const [wrongOptionIndex, setWrongOptionIndex] = useState<number | null>(null);
   const [isAnswering, setIsAnswering] = useState<boolean>(false);
   const [assembledPiecesCount, setAssembledPiecesCount] = useState<number>(0);
+  const [isFinalCompletionFlow, setIsFinalCompletionFlow] = useState<boolean>(false);
 
   // Get live collected pieces list
   const [collectedPieces, setCollectedPieces] = useState<string[]>(() =>
@@ -193,6 +200,20 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
     }
   };
 
+  // Auto-transition to final certificate if all 8 puzzles are completed (~2 seconds after celebration)
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (viewMode === 'completed' && isFinalCompletionFlow) {
+      console.log('[FINAL CERTIFICATE] Auto-transitioning to certificate card after 2s delay');
+      timer = setTimeout(() => {
+        setViewMode('final_certificate');
+      }, 2000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [viewMode, isFinalCompletionFlow]);
+
   const handleSelectOption = (index: number) => {
     if (isAnswering || viewMode !== 'question' || !questionData) return;
 
@@ -214,11 +235,6 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
 
     // Mark question as answered in conditions store
     markQuestionAnswered(puzzlePoint.questionId);
-
-    // Award coins from Google Sheets reward_coins
-    if (questionData.reward && questionData.reward > 0) {
-      awardCoins(questionData.reward);
-    }
 
     // Save and collect puzzle piece & mark puzzle point completed by unique ID
     collectPuzzlePiece(
@@ -265,6 +281,13 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
     setTimeout(() => {
       markGalleryPuzzleCompleted(canonicalGalleryId);
       triggerCelebration();
+
+      // Check if all 8 gallery puzzles are now completed
+      const allDone = areAll8GalleryPuzzlesCompleted();
+      if (allDone) {
+        evaluateAndTriggerFinalCompletion(canonicalGalleryId);
+        setIsFinalCompletionFlow(true);
+      }
       setViewMode('completed');
     }, 2500);
   };
@@ -280,20 +303,37 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
           }
         }}
       >
-        <motion.div
-          id="puzzle-point-modal-card"
-          initial={{ opacity: 0, scale: 0.95, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 12 }}
-          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] overflow-hidden flex flex-col max-h-[88vh]"
-        >
-          {/* Top Header Bar */}
-          <div
-            id="puzzle-point-modal-header"
-            className="bg-[#e0f2fe] border-b-2 border-[#1e1b18] px-4 py-2.5 flex items-center justify-between shrink-0"
+        {viewMode === 'final_certificate' ? (
+          <motion.div
+            id="puzzle-certificate-modal-card"
+            initial={{ opacity: 0, scale: 0.95, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 12 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-[#fcfaf7] rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
           >
+            <FinalCompletionCardBack
+              onClose={onClose}
+              onFlipBack={() => setViewMode('completed')}
+              isFlipped={true}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            id="puzzle-point-modal-card"
+            initial={{ opacity: 0, scale: 0.95, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 12 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] overflow-hidden flex flex-col max-h-[88vh]"
+          >
+            {/* Top Header Bar */}
+            <div
+              id="puzzle-point-modal-header"
+              className="bg-[#e0f2fe] border-b-2 border-[#1e1b18] px-4 py-2.5 flex items-center justify-between shrink-0"
+            >
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-[#38bdf8] border-[1.5px] border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center text-[#1e1b18]">
                 <Puzzle className="w-3.5 h-3.5 text-[#1e1b18] fill-[#1e1b18]" />
@@ -309,13 +349,13 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
               {/* Puzzle Pieces Progress Badge */}
               <div
                 id="modal-puzzle-pieces-badge"
-                title={`پیشرفت پازل: ${collectedPieces.length} از ${totalPieces} قطعه`}
+                title={`پیشرفت پازل: ${toPersianDigits(collectedPieces.length)} از ${toPersianDigits(totalPieces)} قطعه`}
                 className="bg-[#ffffff] text-[#1e1b18] border-[1.5px] border-[#1e1b18] rounded-full px-2.5 py-0.5 shadow-[1px_1px_0px_#1e1b18] flex items-center gap-1 font-mono-custom text-[11px] font-bold"
               >
                 <span className="w-2 h-2 rounded-full bg-[#0284c7] inline-block"></span>
                 <span>🧩</span>
-                <span>
-                  {collectedPieces.length}/{totalPieces}
+                <span dir="ltr">
+                  {toPersianDigits(collectedPieces.length)}/{toPersianDigits(totalPieces)}
                 </span>
               </div>
 
@@ -497,12 +537,6 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                     <p className="text-[12px] font-medium text-[#64748b] mt-1">
                       آفرین! این قطعه با فرم واقعی به مجموعه پازل شما افزوده شد.
                     </p>
-                    {questionData?.reward ? (
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 mt-2 bg-[#fef3c7] border border-[#f59e0b] rounded-full text-xs font-bold text-[#b45309]">
-                        <Sparkles className="w-3.5 h-3.5 text-[#f59e0b]" />
-                        <span>+{questionData.reward} سکه پاداش دریافت شد</span>
-                      </div>
-                    ) : null}
                   </div>
 
                   {/* Genuine Jigsaw Cut Piece Graphic in Neo-Brutalist Frame */}
@@ -605,15 +639,27 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                       وضعیت پازل گالری:
                     </span>
                     <span className="font-mono-custom text-[14px] font-black text-[#0369a1] flex items-center gap-1">
-                      <span>{collectedPieces.length}</span>
+                      <span>{toPersianDigits(collectedPieces.length)}</span>
                       <span>از</span>
-                      <span>{totalPieces}</span>
+                      <span>{toPersianDigits(totalPieces)}</span>
                       <span>قطعه</span>
                     </span>
                   </div>
 
                   {/* Actions */}
                   <div className="space-y-2 pt-1">
+                    {(areAll8GalleryPuzzlesCompleted() || isFinalCompletionAwarded()) && (
+                      <button
+                        type="button"
+                        id="already-collected-view-certificate-btn"
+                        onClick={() => setViewMode('final_certificate')}
+                        className="w-full py-3 px-4 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e1b18] font-black text-[13px] border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
+                      >
+                        <Sparkles className="w-4 h-4 text-[#1e1b18]" />
+                        <span>مشاهده کارت دستاورد نهایی (گواهی‌نامه) 🏆</span>
+                      </button>
+                    )}
+
                     {isComplete ? (
                       <button
                         onClick={startAssemblySequence}
@@ -696,7 +742,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
 
                   <div className="bg-[#f8fafc] border-2 border-[#1e1b18] rounded-xl px-4 py-2 shadow-[2px_2px_0px_#1e1b18] text-xs font-mono-custom font-bold text-[#64748b]">
                     <span>
-                      قطعه {assembledPiecesCount} از {totalPieces} در جای خود قرار گرفت
+                      قطعه {toPersianDigits(assembledPiecesCount)} از {toPersianDigits(totalPieces)} در جای خود قرار گرفت
                     </span>
                   </div>
                 </motion.div>
@@ -742,6 +788,18 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                     تمام قطعات پازل {puzzleConfig.galleryNameFa} با موفقیت سرهم شده و تصویر شاهکار کامل گردید.
                   </p>
 
+                  {(areAll8GalleryPuzzlesCompleted() || isFinalCompletionAwarded()) && (
+                    <button
+                      type="button"
+                      id="completed-puzzle-view-certificate-btn"
+                      onClick={() => setViewMode('final_certificate')}
+                      className="w-full py-3 px-4 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e1b18] font-black text-[13px] border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
+                    >
+                      <Sparkles className="w-4 h-4 text-[#1e1b18]" />
+                      <span>مشاهده کارت دستاورد نهایی (گواهی‌نامه) 🏆</span>
+                    </button>
+                  )}
+
                   <button
                     onClick={onClose}
                     className="w-full py-3 bg-[#1e1b18] hover:bg-[#2a2b2b] text-[#ffffff] font-black text-[13px] rounded-xl shadow-[3px_3px_0px_#1e1b18] cursor-pointer transition-all flex items-center justify-center gap-2"
@@ -753,6 +811,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
             </AnimatePresence>
           </div>
         </motion.div>
+        )}
       </div>
     </AnimatePresence>
   );

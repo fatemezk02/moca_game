@@ -1,34 +1,46 @@
-import React from 'react';
-import { Landmark, Info, Sparkles } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Info, Sparkles } from 'lucide-react';
 import { AppLogo } from './AppLogo';
+import { ProfileAvatar } from './ProfileAvatar';
+import { getUserProfile, UserProfile } from '../data/userProfileStore';
 
 interface TopAppBarProps {
   onOpenInfo: () => void;
+  onOpenProfile: () => void;
   activeFilter?: string;
   onFilterChange?: (filter: string) => void;
 }
 
 export const TopAppBar: React.FC<TopAppBarProps> = ({
   onOpenInfo,
+  onOpenProfile,
 }) => {
+  const [profile, setProfile] = useState<UserProfile | null>(() => getUserProfile());
+
+  useEffect(() => {
+    const handleProfileUpdate = (e: any) => setProfile(e.detail);
+    window.addEventListener('museum_user_profile_updated', handleProfileUpdate);
+    return () => window.removeEventListener('museum_user_profile_updated', handleProfileUpdate);
+  }, []);
+
   return (
     <header
       id="top-app-bar"
-      className="bg-[#ffffff] border-b-[1.25px] border-[#1e1b18] shadow-[0px_2px_0px_#1e1b18] flex flex-col w-full z-40 relative select-none"
+      className="bg-[#ffffff] border-b-[1.25px] border-[#1e1b18] shadow-[0px_2px_0px_#1e1b18] flex flex-col w-full z-40 relative select-none pt-safe shrink-0"
     >
       {/* Top phone-style accent bar */}
       <div className="h-[5px] w-full bg-[#f59e0b] border-b border-[#1e1b18]" />
 
       <div className="flex justify-between items-center px-3.5 sm:px-6 h-[56px] sm:h-[60px]">
-        {/* Left Icon Button (Museum Archive Emblem) */}
+        {/* Left Icon Button (Profile Avatar instead of Museum Emblem) */}
         <button
-          id="museum-emblem-btn"
-          onClick={onOpenInfo}
-          aria-label="اطلاعات موزه و راهنما"
-          title="اطلاعات موزه و راهنما"
-          className="border-2 border-[#1e1b18] rounded-xl bg-[#fef3c7] hover:bg-[#fde047] text-[#1e1b18] p-2 shadow-[1.5px_1.5px_0px_#1e1b18] hover:shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-150"
+          id="profile-trigger-btn"
+          onClick={onOpenProfile}
+          aria-label="پروفایل کاربری"
+          title="پروفایل کاربری"
+          className="active:scale-95 transition-all duration-150 rounded-full cursor-pointer"
         >
-          <Landmark className="w-5 h-5 text-[#b45309]" />
+          <ProfileAvatar avatarId={profile?.avatarId} size="md" />
         </button>
 
         {/* Center Logo & Title */}

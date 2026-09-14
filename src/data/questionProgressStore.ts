@@ -3,6 +3,8 @@
  * Stores and manages question completion and answered states per gallery independently.
  */
 
+import { getCompletedGalleryPuzzles } from './puzzleProgressStore';
+
 export interface GalleryQuestionProgress {
   completed: boolean;
   answeredQuestionsCount?: number;
@@ -16,6 +18,8 @@ export interface PlayerStats {
   coins: number;
   completedArtworksCount: number;
   totalAnsweredQuestions: number;
+  completedPuzzles: number;
+  puzzles: number;
 }
 
 const STORAGE_QUESTION_PROGRESS_KEY = 'museum_question_progress';
@@ -136,12 +140,16 @@ export function getPlayerStats(): PlayerStats {
   const bonusCoins = getBonusCoins();
   const spentCoins = getSpentCoins();
   const coins = Math.max(0, earnedCoins + bonusCoins - spentCoins);
+  const completedGalleryPuzzles = getCompletedGalleryPuzzles();
+  const completedPuzzles = completedGalleryPuzzles.length;
 
   return {
     stars,
     coins,
     completedArtworksCount,
     totalAnsweredQuestions,
+    completedPuzzles,
+    puzzles: completedPuzzles,
   };
 }
 

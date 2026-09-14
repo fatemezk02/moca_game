@@ -5,8 +5,57 @@ interface NavigationArrowRenderProps {
   arrow: AdminArrowPoint;
   isSelected?: boolean;
   isInteractive?: boolean;
+  isBack?: boolean;
   className?: string;
   onClick?: (e: React.MouseEvent | React.TouchEvent) => void;
+}
+
+/**
+ * Checks if an arrow is a return/back arrow to a previous gallery
+ */
+export function isPreviousGalleryArrow(arrow: AdminArrowPoint): boolean {
+  if (!arrow) return false;
+
+  // 1. Explicit ID matches for previous gallery return arrows
+  const returnArrowIds = [
+    'arrow-g01-to-g00',
+    'arrow-g02-to-g00',
+    'arrow-g03-to-g02',
+    'arrow-g04-to-g03',
+    'arrow-g05-to-g04',
+    'arrow-g06-to-g05',
+    'arrow-g07-to-g06',
+    'arrow-g08-to-g07',
+    'arrow-g09-to-g08',
+  ];
+  if (returnArrowIds.includes(arrow.id)) {
+    return true;
+  }
+
+  // 2. Check title keywords specifically for return to previous gallery
+  const title = arrow.title || '';
+  if (
+    title.includes('بازگشت به گالری') ||
+    title.includes('بازگشت به نقشه اصلی') ||
+    title.includes('گالری قبلی')
+  ) {
+    return true;
+  }
+
+  // 3. Check numeric gallery progression (destination gallery < source gallery)
+  const sourceNumMatch = arrow.galleryId?.match(/\d+/);
+  const destNumMatch = arrow.destination?.match(/\d+/);
+  if (sourceNumMatch && destNumMatch) {
+    const sourceNum = parseInt(sourceNumMatch[0], 10);
+    const destNum = parseInt(destNumMatch[0], 10);
+    // If destination is previous gallery (e.g. source 4, dest 3, or source 1, dest 0)
+    // Exclude source 9 -> dest 0 which is the final exit
+    if (destNum < sourceNum && !(sourceNum === 9 && destNum === 0)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -18,10 +67,12 @@ export const NavigationArrowRender: React.FC<NavigationArrowRenderProps> = ({
   arrow,
   isSelected = false,
   isInteractive = true,
+  isBack,
   className = '',
   onClick,
 }) => {
   const isActionable = arrow.destination && arrow.destination !== 'none';
+  const isReturnArrow = isBack ?? isPreviousGalleryArrow(arrow);
 
   return (
     <div
@@ -50,8 +101,12 @@ export const NavigationArrowRender: React.FC<NavigationArrowRenderProps> = ({
         />
       )}
 
-      {/* Pure SVG Arrow Icon Asset with continuous directional pointing animation */}
-      <div className="w-full h-full animate-arrow-pointing pointer-events-none flex items-center justify-center">
+      {/* Pure SVG Arrow Icon Asset: forward arrows have continuous pointing animation; return arrows have NO animation */}
+      <div
+        className={`w-full h-full pointer-events-none flex items-center justify-center ${
+          isReturnArrow ? '' : 'animate-arrow-pointing'
+        }`}
+      >
         <svg
           viewBox="0 0 48 48"
           fill="none"
@@ -63,15 +118,17 @@ export const NavigationArrowRender: React.FC<NavigationArrowRenderProps> = ({
               : 'drop-shadow(2px 2px 0px #1e1b18)',
           }}
         >
-          {/* Main Refined Arrow Silhouette with softened rounded corners & museum gold fill */}
+          {/* Main Refined Arrow Silhouette: Red for back arrows, museum gold for forward arrows */}
           <path
             d="M 22.2 6.5 Q 24 4.5 25.8 6.5 L 37.2 20.8 Q 38.8 22.4 37.4 23.8 L 28.6 21.6 Q 27.2 21.4 27.2 23.2 L 27.2 40.5 Q 27.2 42.6 25.4 43 L 24 43.3 L 22.6 43 Q 20.8 42.6 20.8 40.5 L 20.8 23.2 Q 20.8 21.4 19.4 21.6 L 10.6 23.8 Q 9.2 22.4 10.8 20.8 L 22.2 6.5 Z"
-            fill={isSelected ? '#ef4444' : '#fbbf24'}
+            fill={isSelected ? '#ef4444' : isReturnArrow ? '#ef4444' : '#fbbf24'}
             stroke="#1e1b18"
             strokeWidth="1.6"
             strokeLinejoin="round"
             strokeLinecap="round"
-            className="transition-colors group-hover:fill-[#f59e0b]"
+            className={`transition-colors ${
+              isReturnArrow ? 'group-hover:fill-[#dc2626]' : 'group-hover:fill-[#f59e0b]'
+            }`}
           />
 
           {/* Left Flank Specular Highlight for subtle museum token depth */}

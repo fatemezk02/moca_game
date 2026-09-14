@@ -2,6 +2,7 @@ import React from 'react';
 import { AdminIconPoint } from '../types/admin';
 import { HelpCircle, LogIn, Star, Info } from 'lucide-react';
 import { LocationPointMarker } from './LocationPointMarker';
+import { GuidePaperMarker } from './GuidePaperMarker';
 
 interface CustomIconRenderProps {
   point?: AdminIconPoint;
@@ -71,21 +72,37 @@ export const CustomIconRender: React.FC<CustomIconRenderProps> = ({
         />
       );
 
+    case 'preset-location-frame':
+      return (
+        <LocationPointMarker
+          iconType="frame"
+          size={point.width || 32}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+
+    case 'preset-location-tree':
+      return (
+        <LocationPointMarker
+          iconType="tree"
+          size={point.width || 32}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+
     case 'preset-question':
       return (
-        <div
-          style={{ width: point.width, height: point.height }}
-          className={`relative group flex items-center justify-center ${className}`}
-        >
-          {/* Real-time animated border ring */}
-          <span className="absolute -inset-1 border border-[#0e0f0f]/30 rounded-xs animate-ping opacity-30 pointer-events-none" />
-          <span className="absolute -inset-0.5 border border-[#0e0f0f]/40 rounded-xs animate-pulse opacity-50 pointer-events-none" />
-          <span className="relative w-full h-full bg-white border border-[#0e0f0f] shadow-xs flex items-center justify-center">
-            <span className="font-mono-custom text-sm font-bold text-[#0e0f0f] leading-none select-none">
-              ?
-            </span>
-          </span>
-        </div>
+        <GuidePaperMarker
+          size={point.width ? Math.round(point.width * 0.8) : 28}
+          width={point.width ? Math.min(Math.round(point.width * 0.8), 30) : 28}
+          height={point.height ? Math.round(Math.min(Math.round((point.width || 36) * 0.8), 30) * 1.15) : undefined}
+          isSelected={isSelected}
+          className={className}
+        />
       );
 
     case 'preset-door':

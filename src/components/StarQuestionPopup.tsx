@@ -6,7 +6,7 @@ import { StarDiscoveryModal, StarDiscoveryModalProps } from './StarDiscoveryModa
  * Unifies Star Point questions, artwork preview, and discovery options across all galleries.
  */
 export const StarQuestionPopup: React.FC<StarDiscoveryModalProps> = (props) => {
-  return <StarDiscoveryModal {...props} />;
+  return <StarDiscoveryModal isOpen={props.isOpen ?? true} {...props} />;
 };
 
 export default StarQuestionPopup;

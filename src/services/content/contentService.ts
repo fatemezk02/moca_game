@@ -47,8 +47,30 @@ class ContentService {
     },
   };
 
+  private hasInitializedFromNetworkOrCache = false;
+
   constructor(provider?: IContentProvider) {
     this.provider = provider || new GoogleSheetsContentProvider();
+    try {
+      const cached = contentCache.get();
+      this.currentData = cached || buildDefaultSeedContent();
+      if (this.currentData) {
+        this.status = {
+          isLoading: false,
+          isLoaded: true,
+          source: cached ? 'cache' : 'seed-fallback',
+          error: null,
+          counts: {
+            questions: this.currentData.questions.length,
+            stars: this.currentData.stars.length,
+            artworks: this.currentData.artworks.length,
+            galleries: (this.currentData.galleries || []).length,
+          },
+        };
+      }
+    } catch {
+      this.currentData = buildDefaultSeedContent();
+    }
   }
 
   /**
@@ -80,8 +102,8 @@ class ContentService {
    * 4. On failure or offline, falls back to local cache or bundled seed data.
    */
   async initializeContent(forceReload = false): Promise<GameContentData> {
-    // If already loaded and not forcing reload, return existing data immediately (0 network requests)
-    if (this.currentData && !forceReload) {
+    // If already initialized and not forcing reload, return existing data immediately (0 network requests)
+    if (this.hasInitializedFromNetworkOrCache && this.currentData && !forceReload) {
       return this.currentData;
     }
 
@@ -100,6 +122,7 @@ class ContentService {
     this.initPromise = this.executeLoad()
       .then((data) => {
         this.currentData = data;
+        this.hasInitializedFromNetworkOrCache = true;
         this.status = {
           isLoading: false,
           isLoaded: true,
@@ -600,15 +623,15 @@ class ContentService {
         }
       }
 
-      // If no match in this gallery: Log clear console warning and return null (never cross-gallery or stars[0])
+      // If no match in this gallery: Attempt cross-gallery and global fallback
       const missingStarId = lookupStarId || lookupPointId;
-      console.warn(
-        `[ContentService] No matching Star record found for Star Point ID "${lookupPointId}", missing star_id: "${missingStarId}" in gallery "${galleryId}".`
+      console.info(
+        `[ContentService] Star Point ID "${lookupPointId}" (star_id: "${missingStarId}") not found within gallery "${galleryId}". Attempting cross-gallery fallback...`
       );
-      return null;
     }
 
-    // Fallback: Global lookup when no galleryId is provided (strictly match by ID, never use stars[0])
+    // Fallback: Global lookup across all active stars
+    // 1. Direct ID / starId match
     const singleMatch = activeStars.find((s) => {
       const sId = s.starId || s.id;
       if (lookupStarId && isCleanMatch(sId, lookupStarId)) return true;
@@ -618,6 +641,58 @@ class ContentService {
 
     if (singleMatch) {
       return singleMatch;
+    }
+
+    // 2. Numeric match globally
+    const pNum = extractNumeric(lookupStarId) ?? extractNumeric(lookupPointId);
+    if (pNum !== null) {
+      const numMatch = activeStars.find((s) => {
+        const sNum = extractNumeric(s.starId || s.id) ?? extractNumeric(s.starNumber);
+        return sNum !== null && sNum === pNum;
+      });
+      if (numMatch) {
+        return numMatch;
+      }
+    }
+
+    // 3. Fallback to bundled seed stars
+    try {
+      const defaultSeed = buildDefaultSeedContent();
+      const seedStars = defaultSeed.stars || [];
+
+      // Try ID match in seed
+      const seedMatch = seedStars.find((s) => {
+        const sId = s.starId || s.id;
+        if (lookupStarId && isCleanMatch(sId, lookupStarId)) return true;
+        if (lookupPointId && isCleanMatch(sId, lookupPointId)) return true;
+        return false;
+      });
+      if (seedMatch) return seedMatch;
+
+      // Try numeric match in seed
+      if (pNum !== null) {
+        const seedNumMatch = seedStars.find((s) => {
+          const sNum = extractNumeric(s.starId || s.id);
+          return sNum !== null && sNum === pNum;
+        });
+        if (seedNumMatch) return seedNumMatch;
+      }
+
+      // Try alias match in seed (e.g. artwork-01 -> star-01)
+      if (lookupPointId.toLowerCase() === 'artwork-01' || lookupPointId.toLowerCase() === 'col-01') {
+        const s01 = seedStars.find((s) => s.id === 'star-01');
+        if (s01) return s01;
+      }
+      if (lookupPointId.toLowerCase() === 'artwork-g03-star') {
+        const s03 = seedStars.find((s) => s.id === 'star-03');
+        if (s03) return s03;
+      }
+
+      if (seedStars.length > 0) {
+        return seedStars[0];
+      }
+    } catch {
+      // ignore
     }
 
     const missingStarId = lookupStarId || lookupPointId;

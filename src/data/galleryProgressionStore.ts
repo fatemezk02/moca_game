@@ -8,7 +8,6 @@
  */
 
 import { isPuzzlePieceCollected, isGalleryPuzzleCompleted } from './puzzleProgressStore';
-import { isArrowUsed } from './arrowConditionsStore';
 
 export interface GalleryProgressionRule {
   galleryId: string;
@@ -28,6 +27,17 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
   },
   'gallery-01': {
     galleryId: 'gallery-01',
+    targetGalleryId: 'gallery-03',
+    arrowId: 'arrow-g01-to-g03',
+    requiredPuzzlePiecesCount: 3,
+    requiredPuzzlePieceIds: [
+      'gallery01-piece-01',
+      'gallery01-piece-02',
+      'gallery01-piece-03',
+    ],
+  },
+  'gallery-02': {
+    galleryId: 'gallery-02',
     targetGalleryId: 'gallery-03',
     arrowId: 'arrow-g01-to-g03',
     requiredPuzzlePiecesCount: 3,
@@ -97,36 +107,38 @@ export function getProgressionRuleForGallery(galleryId: string): GalleryProgress
  * - Gallery 03 -> Requires all 3 puzzle pieces collected (piece1 && piece2 && piece3)
  */
 export function isProgressionConditionsSatisfied(galleryId: string): boolean {
-  const rule = getProgressionRuleForGallery(galleryId);
+  const rule = getProgressionRuleForGallery(galleryId) ||
+    (galleryId === 'gallery-02' || galleryId === 'gallery_02' ? getProgressionRuleForGallery('gallery-01') : undefined);
   if (!rule) return true;
 
   if (rule.requiredPuzzlePiecesCount === 0) {
     return true;
   }
 
+  // If gallery puzzle is already marked completed, progression is satisfied
+  if (isGalleryPuzzleCompleted(rule.galleryId) || isGalleryPuzzleCompleted(galleryId)) {
+    return true;
+  }
+
   // Check if all required puzzle pieces have been collected
   if (rule.requiredPuzzlePieceIds && rule.requiredPuzzlePieceIds.length > 0) {
     const allPiecesCollected = rule.requiredPuzzlePieceIds.every((pieceId) =>
-      isPuzzlePieceCollected(rule.galleryId, pieceId)
+      isPuzzlePieceCollected(rule.galleryId, pieceId) || isPuzzlePieceCollected(galleryId, pieceId)
     );
     if (!allPiecesCollected) {
       return false;
     }
   }
 
-  return isGalleryPuzzleCompleted(rule.galleryId);
+  return isGalleryPuzzleCompleted(rule.galleryId) || isGalleryPuzzleCompleted(galleryId);
 }
 
 /**
  * Checks whether a progression arrow is visible to the player:
- * - Must NOT be used (used one-time arrows disappear)
  * - Progression conditions for the gallery must be satisfied
+ * Note: Arrows remain visible for continuous navigation once unlocked.
  */
 export function isProgressionArrowVisible(arrowId: string): boolean {
-  if (isArrowUsed(arrowId)) {
-    return false;
-  }
-
   const rule = getProgressionRuleForArrow(arrowId);
   if (!rule) {
     return true;
