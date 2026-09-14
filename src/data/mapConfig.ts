@@ -223,9 +223,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     galleryId: 'gallery-01',
     name: 'Gallery 01 — Architectural Hall',
     nameFa: 'گالری ۰۱ — تالار معماری',
-    viewBox: '0 0 524.2 822.62',
-    width: 524.2,
-    height: 822.62,
+    viewBox: '0 0 848 1264',
+    width: 848,
+    height: 1264,
     collectionPoints: [
       {
         id: 'artwork-01',
@@ -234,8 +234,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-01',
         title: 'North Apse Monolith',
         roomSection: 'NORTH ROTUNDA',
-        x: 142.2,
-        y: 123.7,
+        x: 230,
+        y: 190,
         frames: [
           { id: 'artwork-01-f1', order: 1, x: 0, y: 0, scale: 1 },
           { id: 'artwork-01-f2', order: 2, x: 0, y: 0, scale: 1 },
@@ -249,8 +249,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'icon',
         galleryId: 'gallery-01',
         title: 'Gallery 01 Questions & Quiz',
-        x: 262.1,
-        y: 439.3,
+        x: 424, // 50% of 848
+        y: 675,
         iconType: 'preset-question',
         width: 28,
         height: 36,
@@ -263,8 +263,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-01',
         title: 'نقطه پازل ۰۱ — قطعه شمال غربی',
-        x: 142.2,
-        y: 247.4,
+        x: 230,
+        y: 380,
         questionId: 'gallery01-puzzle-q01',
         puzzlePieceId: 'gallery01-piece-01',
         isActive: true,
@@ -274,8 +274,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-01',
         title: 'نقطه پازل ۰۲ — قطعه جنوب غربی',
-        x: 262.1,
-        y: 546.7,
+        x: 424,
+        y: 840,
         questionId: 'gallery01-puzzle-q02',
         puzzlePieceId: 'gallery01-piece-02',
         isActive: true,
@@ -285,8 +285,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-01',
         title: 'نقطه پازل ۰۳ — قطعه شرقی (نهایی)',
-        x: 395.6,
-        y: 247.4,
+        x: 640,
+        y: 380,
         questionId: 'gallery01-puzzle-q03',
         puzzlePieceId: 'gallery01-piece-03',
         isActive: true,
@@ -298,8 +298,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'arrow',
         galleryId: 'gallery-01',
         title: 'بازگشت به نقشه اصلی (گالری ۰۱)',
-        x: 262.1,
-        y: 728.9,
+        x: 424,
+        y: 1120,
         rotation: 180,
         size: 48,
         destination: 'gallery-00',
@@ -310,8 +310,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'arrow',
         galleryId: 'gallery-01',
         title: 'فلش راهنما به گالری ۰۳',
-        x: 420.3,
-        y: 130.2,
+        x: 680,
+        y: 200,
         rotation: 90,
         size: 48,
         destination: 'gallery-03',
@@ -330,9 +330,9 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     galleryId: 'gallery-02',
     name: 'Gallery 02 — Vault Pavilion (Coming Soon)',
     nameFa: 'گالری ۰۲ — پاویون طاق‌ها (به‌زودی)',
-    viewBox: '0 0 524.2 822.62',
-    width: 524.2,
-    height: 822.62,
+    viewBox: '0 0 1000 1000',
+    width: 1000,
+    height: 1000,
     collectionPoints: [],
     iconPoints: [],
     arrows: [
@@ -341,8 +341,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'arrow',
         galleryId: 'gallery-02',
         title: 'بازگشت به نقشه اصلی (گالری ۰۱)',
-        x: 262.1,
-        y: 728.9,
+        x: 500,
+        y: 920,
         rotation: 180,
         size: 48,
         destination: 'gallery-00',
@@ -353,8 +353,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'arrow',
         galleryId: 'gallery-02',
         title: 'ورود به گالری ۰۳',
-        x: 420.3,
-        y: 130.2,
+        x: 800,
+        y: 280,
         rotation: 90,
         size: 48,
         destination: 'gallery-03',
@@ -1174,7 +1174,7 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
             if (parsed[key]) {
               const defaultIcons = DEFAULT_MAP_DATABASE[key]?.iconPoints || [];
               const savedIcons = (parsed[key].iconPoints || []).filter((i: any) => i.id !== 'icon-3527');
-              let combinedIcons = [...savedIcons];
+              const combinedIcons = [...savedIcons];
               for (const defIcon of defaultIcons) {
                 if (defIcon.id !== 'icon-3527' && !combinedIcons.some((i) => i.id === defIcon.id)) {
                   combinedIcons.push(defIcon);
@@ -1183,7 +1183,7 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
 
               const defaultPuzzles = DEFAULT_MAP_DATABASE[key]?.puzzlePoints || [];
               const savedPuzzles = parsed[key].puzzlePoints || [];
-              let combinedPuzzles = [...savedPuzzles];
+              const combinedPuzzles = [...savedPuzzles];
               for (const defPuzzle of defaultPuzzles) {
                 if (!combinedPuzzles.some((p: any) => p.id === defPuzzle.id)) {
                   combinedPuzzles.push(defPuzzle);
@@ -1191,8 +1191,8 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
               }
 
               const defaultArrows = DEFAULT_MAP_DATABASE[key]?.arrows || [];
-              const savedArrows = (parsed[key].arrows || []).filter((a: any) => a.id !== 'arrow-gallery-01-mtjz71ve');
-              let combinedArrows = [...savedArrows];
+              const savedArrows = parsed[key].arrows || [];
+              const combinedArrows = [...savedArrows];
               for (const defArrow of defaultArrows) {
                 const existingIdx = combinedArrows.findIndex((a: any) => a.id === defArrow.id);
                 if (existingIdx === -1) {
@@ -1214,7 +1214,7 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                   !((key === 'gallery-08' || key === 'gallery_08') && (c.id === 'star-20' || c.id === 'star-21' || c.id === 'star-22' || c.id === 'star-23')) &&
                   !((key === 'gallery-09' || key === 'gallery_09') && (c.id === 'star-26' || c.id === 'star-27'))
               );
-              let combinedCollections = [...savedCollections];
+              const combinedCollections = [...savedCollections];
               for (const defCol of defaultCollections) {
                 const existingIdx = combinedCollections.findIndex((c: any) => c.id === defCol.id);
                 if (existingIdx === -1) {
@@ -1222,20 +1222,6 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                 } else if (defCol.pointType === 'star') {
                   combinedCollections[existingIdx].pointType = 'star';
                 }
-              }
-
-              if (key === 'gallery-01' || key === 'gallery-02' || key === 'gallery_02') {
-                const fixPt = (pt: any) => {
-                  let x = pt.x;
-                  let y = pt.y;
-                  if (x > 524.2) x = Math.round((x * 524.2) / 848 * 10) / 10;
-                  if (y > 822.62) y = Math.round((y * 822.62) / 1264 * 10) / 10;
-                  return { ...pt, x, y };
-                };
-                combinedCollections = combinedCollections.map(fixPt);
-                combinedIcons = combinedIcons.map(fixPt);
-                combinedPuzzles = combinedPuzzles.map(fixPt);
-                combinedArrows = combinedArrows.map(fixPt);
               }
 
               merged[key] = {
@@ -1332,7 +1318,7 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
         : (rawConfig.iconPoints || []).filter((ip) => ip.id !== 'icon-3527'),
       puzzlePoints: rawConfig.puzzlePoints || (DEFAULT_MAP_DATABASE[safeGalleryId]?.puzzlePoints ? [...DEFAULT_MAP_DATABASE[safeGalleryId].puzzlePoints!] : []),
       arrows: (() => {
-        const baseArrows = (rawConfig.arrows || []).filter((a) => a.id !== 'arrow-gallery-01-mtjz71ve');
+        const baseArrows = rawConfig.arrows || [];
         const defArrows =
           DEFAULT_MAP_DATABASE[safeGalleryId]?.arrows ||
           DEFAULT_MAP_DATABASE[canonId]?.arrows ||
