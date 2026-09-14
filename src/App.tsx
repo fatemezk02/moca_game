@@ -44,12 +44,25 @@ import { Volume2, Pause, Play, X, Compass, Sparkles } from 'lucide-react';
 import { DevMapPositioningTool, IS_DEV_POSITIONING_ENABLED } from './components/DevMapPositioningTool';
 import { ProfileCreationPage } from './components/ProfileCreationPage';
 import { ProfileModal } from './components/ProfileModal';
+import { FinalCertificateModal } from './components/FinalCertificateModal';
 import { getUserProfile, UserProfile } from './data/userProfileStore';
 
 export default function App() {
   const playerStats = usePlayerStats();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => getUserProfile());
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isFinalCertificateOpen, setIsFinalCertificateOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenCertificate = () => setIsFinalCertificateOpen(true);
+    const handleCloseCertificate = () => setIsFinalCertificateOpen(false);
+    window.addEventListener('museum_open_final_certificate', handleOpenCertificate);
+    window.addEventListener('museum_close_final_certificate', handleCloseCertificate);
+    return () => {
+      window.removeEventListener('museum_open_final_certificate', handleOpenCertificate);
+      window.removeEventListener('museum_close_final_certificate', handleCloseCertificate);
+    };
+  }, []);
 
   // Gallery Route state
   const [currentGallery, setCurrentGallery] = useState<
@@ -702,6 +715,10 @@ export default function App() {
           <ProfileModal
             isOpen={isProfileModalOpen}
             onClose={() => setIsProfileModalOpen(false)}
+          />
+          <FinalCertificateModal
+            isOpen={isFinalCertificateOpen}
+            onClose={() => setIsFinalCertificateOpen(false)}
           />
         </>
       )}

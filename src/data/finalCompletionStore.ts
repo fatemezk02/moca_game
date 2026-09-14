@@ -1,4 +1,4 @@
-import { isGalleryPuzzleCompleted, markGalleryPuzzleCompleted } from './puzzleProgressStore';
+import { isGalleryPuzzleCompleted } from './puzzleProgressStore';
 
 export const STORAGE_FINAL_COMPLETION_AWARDED = 'museum_final_completion_awarded';
 export const STORAGE_FINAL_CARD_CODE = 'museum_final_card_code';
@@ -31,6 +31,28 @@ export const ALL_8_GALLERY_IDS = [
   'gallery-09',
 ];
 
+// In-session tracking to avoid duplicate auto-transition sequences
+let certificateSequenceTimer: NodeJS.Timeout | null = null;
+let hasCertificateSequenceTriggeredInSession = false;
+
+/**
+ * Opens the independent final certificate modal.
+ */
+export function openFinalCertificateModal(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('museum_open_final_certificate'));
+  }
+}
+
+/**
+ * Closes the independent final certificate modal.
+ */
+export function closeFinalCertificateModal(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('museum_close_final_certificate'));
+  }
+}
+
 /**
  * Checks whether the final completion card has already been awarded.
  */
@@ -44,7 +66,7 @@ export function isFinalCompletionAwarded(): boolean {
   } catch (err) {
     console.error('Error reading final completion awarded status:', err);
   }
-  return areAll8GalleryPuzzlesCompleted();
+  return false;
 }
 
 /**
@@ -89,6 +111,7 @@ export function areAllPrerequisitePuzzlesCompleted(): boolean {
 
 /**
  * Checks whether all 8 gallery puzzles in the museum are completed.
+ * Independent of stars, star counts, or star modal state.
  */
 export function areAll8GalleryPuzzlesCompleted(): boolean {
   const candidateGalleries = [
@@ -111,40 +134,63 @@ export function areAll8GalleryPuzzlesCompleted(): boolean {
 }
 
 /**
- * Evaluates whether answering this Star question in Gallery 09 triggers the final completion flow.
- * Trigger conditions:
- * - The player is in Gallery 09
- * - The final Star question is answered correctly
- * - Completes and commits the 8th puzzle (Gallery 09) to existing game progress state
- * - Verifies all 8 required gallery puzzles are now complete
+ * Starts the final certificate sequence:
+ * - Commits final completion awarded
+ * - Dispatches sequence started event
+ * - Waits 2 seconds
+ * - Opens the independent Certificate modal
  */
-export function evaluateAndTriggerFinalCompletion(galleryId?: string): boolean {
-  if (galleryId) {
-    const norm = galleryId.toLowerCase().replace('_', '-');
-    if (norm === 'gallery-09') {
-      markGalleryPuzzleCompleted('gallery-09');
-    }
+export function startFinalCertificateSequence(): void {
+  setFinalCompletionAwarded();
+  hasCertificateSequenceTriggeredInSession = true;
+
+  console.log('[FINAL CERTIFICATE] All 8 puzzles completed. Sequence started (waiting 2s)...');
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('museum_final_certificate_sequence_started', {
+        detail: { timestamp: Date.now() },
+      })
+    );
   }
 
-  // Query the actual newly completed final state from the existing source of truth
-  const completedGalleries = ALL_8_GALLERY_IDS.filter((id) => isGalleryPuzzleCompleted(id));
-  const allCompleted = completedGalleries.length >= 8 || areAll8GalleryPuzzlesCompleted();
+  if (certificateSequenceTimer) {
+    clearTimeout(certificateSequenceTimer);
+  }
 
-  console.log('[FINAL CERTIFICATE] Completed puzzles:', completedGalleries, 'Total count:', completedGalleries.length);
-  console.log('[FINAL CERTIFICATE] All 8 puzzles completed:', allCompleted);
+  certificateSequenceTimer = setTimeout(() => {
+    console.log('[FINAL CERTIFICATE] 2 seconds elapsed. Opening independent Certificate modal.');
+    openFinalCertificateModal();
+    certificateSequenceTimer = null;
+  }, 2000);
+}
+
+/**
+ * Checks whether all required puzzles have been completed and starts the sequence if so.
+ * This is triggered ONLY by puzzle completion / puzzle progression events.
+ */
+export function checkAndTriggerFinalCertificate(force = false): boolean {
+  const allCompleted = areAll8GalleryPuzzlesCompleted();
 
   if (!allCompleted) {
     return false;
   }
 
-  console.log('[FINAL CERTIFICATE] Final completion detected', {
-    galleryId: galleryId || 'all-8',
-    completedPuzzles: completedGalleries,
-  });
+  // Prevent repeated auto-triggers in the same session unless forced
+  if (!force && (hasCertificateSequenceTriggeredInSession || isFinalCompletionAwarded())) {
+    return true;
+  }
 
-  // Persist that the final completion has been awarded
-  setFinalCompletionAwarded();
+  startFinalCertificateSequence();
   return true;
+}
+
+/**
+ * Backward compatibility alias for any existing callers.
+ * Evaluates puzzle completion state only (stars are completely ignored).
+ */
+export function evaluateAndTriggerFinalCompletion(_galleryId?: string): boolean {
+  return checkAndTriggerFinalCertificate();
 }
 
 /**
@@ -217,6 +263,11 @@ export function generateAndSaveFinalCardCode(): string {
  * Resets the final completion state (for testing/game reset).
  */
 export function resetFinalCompletionState(): void {
+  hasCertificateSequenceTriggeredInSession = false;
+  if (certificateSequenceTimer) {
+    clearTimeout(certificateSequenceTimer);
+    certificateSequenceTimer = null;
+  }
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.removeItem(STORAGE_FINAL_COMPLETION_AWARDED);
@@ -226,4 +277,17 @@ export function resetFinalCompletionState(): void {
   } catch (err) {
     console.error('Error resetting final completion state:', err);
   }
+}
+
+// Global listener: whenever puzzle progress or puzzle completion occurs,
+// evaluate if all 8 required puzzles are complete.
+if (typeof window !== 'undefined') {
+  const handlePuzzleUpdate = () => {
+    if (areAll8GalleryPuzzlesCompleted()) {
+      checkAndTriggerFinalCertificate();
+    }
+  };
+
+  window.addEventListener('museum_puzzle_progress_updated', handlePuzzleUpdate);
+  window.addEventListener('museum_completed_gallery_puzzles_updated', handlePuzzleUpdate);
 }

@@ -29,11 +29,10 @@ import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian, normalizeGalleryId, toPersianDigits } from '../services/content/mappers';
 import { JigsawPieceGraphic } from './JigsawPieceGraphic';
 import { ArtworkFrame } from './ArtworkFrame';
-import { FinalCompletionCardBack } from './FinalCompletionCardBack';
 import {
   areAll8GalleryPuzzlesCompleted,
   isFinalCompletionAwarded,
-  evaluateAndTriggerFinalCompletion,
+  openFinalCertificateModal,
 } from '../data/finalCompletionStore';
 
 export interface PuzzleQuestionModalProps {
@@ -47,8 +46,7 @@ type ModalViewMode =
   | 'piece_reward'
   | 'already_collected'
   | 'assembling'
-  | 'completed'
-  | 'final_certificate';
+  | 'completed';
 
 /**
  * Shared reusable PuzzleQuestionModal component.
@@ -176,7 +174,6 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
   const [wrongOptionIndex, setWrongOptionIndex] = useState<number | null>(null);
   const [isAnswering, setIsAnswering] = useState<boolean>(false);
   const [assembledPiecesCount, setAssembledPiecesCount] = useState<number>(0);
-  const [isFinalCompletionFlow, setIsFinalCompletionFlow] = useState<boolean>(false);
 
   // Get live collected pieces list
   const [collectedPieces, setCollectedPieces] = useState<string[]>(() =>
@@ -200,19 +197,16 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
     }
   };
 
-  // Auto-transition to final certificate if all 8 puzzles are completed (~2 seconds after celebration)
+  // Auto-close puzzle modal if independent certificate modal opens
   useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-    if (viewMode === 'completed' && isFinalCompletionFlow) {
-      console.log('[FINAL CERTIFICATE] Auto-transitioning to certificate card after 2s delay');
-      timer = setTimeout(() => {
-        setViewMode('final_certificate');
-      }, 2000);
-    }
-    return () => {
-      if (timer) clearTimeout(timer);
+    const handleCertificateOpen = () => {
+      onClose();
     };
-  }, [viewMode, isFinalCompletionFlow]);
+    window.addEventListener('museum_open_final_certificate', handleCertificateOpen);
+    return () => {
+      window.removeEventListener('museum_open_final_certificate', handleCertificateOpen);
+    };
+  }, [onClose]);
 
   const handleSelectOption = (index: number) => {
     if (isAnswering || viewMode !== 'question' || !questionData) return;
@@ -281,13 +275,6 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
     setTimeout(() => {
       markGalleryPuzzleCompleted(canonicalGalleryId);
       triggerCelebration();
-
-      // Check if all 8 gallery puzzles are now completed
-      const allDone = areAll8GalleryPuzzlesCompleted();
-      if (allDone) {
-        evaluateAndTriggerFinalCompletion(canonicalGalleryId);
-        setIsFinalCompletionFlow(true);
-      }
       setViewMode('completed');
     }, 2500);
   };
@@ -303,32 +290,15 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
           }
         }}
       >
-        {viewMode === 'final_certificate' ? (
-          <motion.div
-            id="puzzle-certificate-modal-card"
-            initial={{ opacity: 0, scale: 0.95, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 12 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-[#fcfaf7] rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
-          >
-            <FinalCompletionCardBack
-              onClose={onClose}
-              onFlipBack={() => setViewMode('completed')}
-              isFlipped={true}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            id="puzzle-point-modal-card"
-            initial={{ opacity: 0, scale: 0.95, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 12 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] overflow-hidden flex flex-col max-h-[88vh]"
-          >
+        <motion.div
+          id="puzzle-point-modal-card"
+          initial={{ opacity: 0, scale: 0.95, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 12 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          onClick={(e) => e.stopPropagation()}
+          className="w-full max-w-md bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] overflow-hidden flex flex-col max-h-[88vh]"
+        >
             {/* Top Header Bar */}
             <div
               id="puzzle-point-modal-header"
@@ -792,7 +762,10 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                     <button
                       type="button"
                       id="completed-puzzle-view-certificate-btn"
-                      onClick={() => setViewMode('final_certificate')}
+                      onClick={() => {
+                        openFinalCertificateModal();
+                        onClose();
+                      }}
                       className="w-full py-3 px-4 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e1b18] font-black text-[13px] border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
                     >
                       <Sparkles className="w-4 h-4 text-[#1e1b18]" />
@@ -811,7 +784,6 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
             </AnimatePresence>
           </div>
         </motion.div>
-        )}
       </div>
     </AnimatePresence>
   );
