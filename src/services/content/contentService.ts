@@ -53,23 +53,24 @@ class ContentService {
     this.provider = provider || new GoogleSheetsContentProvider();
     try {
       const cached = contentCache.get();
-      this.currentData = cached || buildDefaultSeedContent();
-      if (this.currentData) {
+      if (cached) {
+        this.currentData = cached;
         this.status = {
           isLoading: false,
           isLoaded: true,
-          source: cached ? 'cache' : 'seed-fallback',
+          source: 'cache',
           error: null,
           counts: {
-            questions: this.currentData.questions.length,
-            stars: this.currentData.stars.length,
-            artworks: this.currentData.artworks.length,
-            galleries: (this.currentData.galleries || []).length,
+            questions: cached.questions.length,
+            stars: cached.stars.length,
+            artworks: cached.artworks.length,
+            galleries: (cached.galleries || []).length,
+            experiences: (cached.experiences || []).length,
           },
         };
       }
     } catch {
-      this.currentData = buildDefaultSeedContent();
+      // Lazy fallback will populate currentData in ensureDataLoaded() when needed at runtime
     }
   }
 
@@ -258,6 +259,21 @@ class ContentService {
   private ensureDataLoaded(): GameContentData {
     if (!this.currentData) {
       this.currentData = contentCache.get() || buildDefaultSeedContent();
+      if (this.currentData && !this.status.isLoaded) {
+        this.status = {
+          isLoading: false,
+          isLoaded: true,
+          source: contentCache.has() ? 'cache' : 'seed-fallback',
+          error: null,
+          counts: {
+            questions: this.currentData.questions.length,
+            stars: this.currentData.stars.length,
+            artworks: this.currentData.artworks.length,
+            galleries: (this.currentData.galleries || []).length,
+            experiences: (this.currentData.experiences || []).length,
+          },
+        };
+      }
     }
     return this.currentData;
   }

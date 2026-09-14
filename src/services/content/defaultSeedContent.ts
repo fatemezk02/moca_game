@@ -266,7 +266,11 @@ export function buildDefaultSeedContent(): GameContentData {
   });
 
   // 2. Stars Seed
-  const stars: StarContent[] = Object.values(DEFAULT_STAR_DISCOVERIES).map((star) => ({
+  const rawStarDiscoveries =
+    typeof DEFAULT_STAR_DISCOVERIES !== 'undefined' && DEFAULT_STAR_DISCOVERIES
+      ? DEFAULT_STAR_DISCOVERIES
+      : {};
+  const stars: StarContent[] = Object.values(rawStarDiscoveries).map((star) => ({
     id: star.id,
     starId: star.id,
     galleryId: star.galleryId,
