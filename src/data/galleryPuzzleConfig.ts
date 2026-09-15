@@ -101,8 +101,8 @@ const G01_PATH_PIECE_03 = `
 export const GALLERY_PUZZLE_REGISTRY: Record<string, GalleryPuzzleConfig> = {
   'gallery-01': {
     galleryId: 'gallery-01',
-    galleryNameFa: 'تالار معماری',
-    galleryNameEn: 'Architectural Hall',
+    galleryNameFa: 'کیمیای نور',
+    galleryNameEn: 'Alchemy of Light',
     totalPieces: 3,
     aspectRatio: '1/1',
     artworkWidth: 1000,
@@ -154,8 +154,8 @@ export const GALLERY_PUZZLE_REGISTRY: Record<string, GalleryPuzzleConfig> = {
   },
   'gallery-03': {
     galleryId: 'gallery-03',
-    galleryNameFa: 'تالار مدرن',
-    galleryNameEn: 'Modern Hall',
+    galleryNameFa: 'آلبوم‌های دیپلماتیک',
+    galleryNameEn: 'Diplomatic Albums',
     totalPieces: 3,
     aspectRatio: '1/1',
     artworkWidth: 1000,

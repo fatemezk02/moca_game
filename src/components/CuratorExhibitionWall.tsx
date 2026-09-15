@@ -337,116 +337,98 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
         </div>
       )}
 
-      {/* Main Single-Screen Wall Area - Centered in available space */}
-      <div className="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center p-2 sm:p-4">
-        {/* Museum Wall Lighting Subtle Vignette */}
+      {/* Main Responsive 2-Column Grid Area */}
+      <div className="relative flex-1 w-full h-full overflow-y-auto px-3 sm:px-6 pt-4 pb-28">
+        {/* Subtle Ambient Vignette */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="fixed inset-0 pointer-events-none opacity-40"
           style={{
             background:
-              'radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.7) 0%, rgba(220, 216, 206, 0.3) 75%)',
+              'radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.8) 0%, rgba(220, 216, 206, 0.3) 85%)',
           }}
         />
 
-        {/* The Scaled Salon Wall Canvas (Reference coordinate system: 580 x 720) */}
-        <div
-          id="museum-salon-wall"
-          data-virtual-width={CURATOR_VIRTUAL_WIDTH}
-          data-virtual-height={CURATOR_VIRTUAL_HEIGHT}
-          className="relative flex-none"
-          style={{
-            width: `${Math.round(wallWidth)}px`,
-            height: `${Math.round(wallHeight)}px`,
-            maxWidth: '100%',
-            maxHeight: '100%',
-          }}
-        >
-          {frameItems.map((item) => {
-            const { art, realRatio } = item;
+        <div className="relative max-w-2xl mx-auto z-10">
+          {/* Header Banner */}
+          <div className="mb-4 text-center">
+            <h2 className="font-sans-custom font-black text-[18px] sm:text-[20px] text-[#1e1b18]">
+              مجموعه آثار کشف‌شده
+            </h2>
+            <p className="font-sans-custom text-[11px] sm:text-[12px] text-[#78716c] mt-0.5">
+              {artworks.filter((a) => a.isCompleted).length} از {artworks.length} اثر کشف شده است
+            </p>
+          </div>
 
-            // Virtual SVG coordinate system scaled to rendered wall
-            // wallScale = wallWidth / 580
-            const pixelCenterX = item.centerX * wallScale;
-            const pixelCenterY = item.centerY * wallScale;
-            const pixelWidth = item.refWidth * wallScale;
-            const pixelHeight = item.refHeight * wallScale;
+          {/* 2-Column Grid of Artwork Items in original sequence */}
+          <div
+            id="collection-artworks-2col-grid"
+            className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5"
+          >
+            {artworks.map((art) => {
+              const realRatio =
+                getArtworkRealAspectRatio(art.galleryId, art.imageUrl) || art.aspectRatio || 1;
 
-            return (
-              <div
-                key={art.id}
-                id={`wall-frame-item-${art.galleryId}`}
-                onClick={() => handleFrameClick(art)}
-                className="absolute cursor-pointer transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] z-10"
-                style={{
-                  left: `${pixelCenterX}px`,
-                  top: `${pixelCenterY}px`,
-                  width: `${pixelWidth}px`,
-                  height: `${pixelHeight}px`,
-                  transform: `translate(-50%, -50%) ${item.rotation ? `rotate(${item.rotation}deg)` : ''}`,
-                }}
-                title={art.isCompleted ? art.title : 'اثر قفل است'}
-              >
-                {/* Single unified Artwork Frame: strictly matches artwork aspect ratio */}
-                <ArtworkFrame
-                  fillContainer
-                  aspectRatio={realRatio}
-                  wallScale={wallScale}
-                  frameWidth={pixelWidth}
-                  frameHeight={pixelHeight}
-                  className="w-full h-full shadow-[0_8px_20px_-4px_rgba(30,27,24,0.22)]"
+              return (
+                <div
+                  key={art.id}
+                  id={`wall-frame-item-${art.galleryId}`}
+                  onClick={() => handleFrameClick(art)}
+                  className="group relative flex flex-col items-center bg-[#ffffff]/95 hover:bg-[#ffffff] rounded-2xl border-2 border-[#1e1b18] p-2 sm:p-3 shadow-[3px_3px_0px_#1e1b18] hover:shadow-[4px_4px_0px_#1e1b18] transition-all cursor-pointer select-none active:translate-x-[1px] active:translate-y-[1px]"
+                  title={art.isCompleted ? art.title : 'اثر قفل است'}
                 >
-                  {art.isCompleted && art.imageUrl ? (
-                    /* Completed Artwork Image: Fits snugly without cropping or distortion, zero black areas */
-                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#faf8f5]">
-                      <img
-                        src={art.imageUrl}
-                        alt={art.title}
-                        className="w-full h-full object-fill select-none pointer-events-none block"
-                        loading="lazy"
-                        onLoad={(e) => {
-                          const img = e.currentTarget;
-                          if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-                            registerArtworkRealAspectRatio(
-                              art.galleryId,
-                              art.imageUrl,
-                              img.naturalWidth / img.naturalHeight
-                            );
-                          }
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    /* Incomplete / Empty Frame: Same dimensions and aperture with elegant museum backing */
-                    <div
-                      className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden select-none bg-[#f8f6f0]"
-                      style={{
-                        backgroundImage:
-                          'radial-gradient(ellipse at 50% 50%, #faf8f3 0%, #eae5d8 100%)',
-                      }}
-                    >
-                      <div className="flex flex-col items-center justify-center">
-                        <div
-                          className="rounded-full bg-[#fef3c7] border border-[#d97706] flex items-center justify-center shadow-xs"
-                          style={{
-                            width: `${Math.max(14, Math.min(26, Math.round(pixelWidth * 0.16)))}px`,
-                            height: `${Math.max(14, Math.min(26, Math.round(pixelWidth * 0.16)))}px`,
-                          }}
+                  {/* Inner Frame Container maintaining clean fitting and exact aspect ratio */}
+                  <div className="relative w-full flex items-center justify-center p-2 min-h-[140px] sm:min-h-[180px] bg-[#f8f6f0] rounded-xl border border-[#e5e1d3] overflow-hidden">
+                    {art.isCompleted && art.imageUrl ? (
+                      <div className="relative max-w-full max-h-[160px] sm:max-h-[210px] flex items-center justify-center">
+                        <ArtworkFrame
+                          aspectRatio={realRatio}
+                          wallScale={0.85}
+                          className="shadow-md max-h-[160px] sm:max-h-[210px]"
                         >
-                          <Lock
-                            className="text-[#b45309]"
-                            style={{
-                              width: `${Math.max(8, Math.min(15, Math.round(pixelWidth * 0.09)))}px`,
-                              height: `${Math.max(8, Math.min(15, Math.round(pixelWidth * 0.09)))}px`,
+                          <img
+                            src={art.imageUrl}
+                            alt={art.title}
+                            className="max-h-[140px] sm:max-h-[190px] w-auto h-auto max-w-full object-contain select-none pointer-events-none block rounded-[2px]"
+                            loading="lazy"
+                            onLoad={(e) => {
+                              const img = e.currentTarget;
+                              if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+                                registerArtworkRealAspectRatio(
+                                  art.galleryId,
+                                  art.imageUrl,
+                                  img.naturalWidth / img.naturalHeight
+                                );
+                              }
                             }}
                           />
-                        </div>
+                        </ArtworkFrame>
                       </div>
-                    </div>
-                  )}
-                </ArtworkFrame>
-              </div>
-            );
-          })}
+                    ) : (
+                      /* Incomplete / Locked state */
+                      <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center space-y-2 select-none">
+                        <div className="w-10 h-10 rounded-full bg-[#fef3c7] border-2 border-[#1e1b18] flex items-center justify-center shadow-[2px_2px_0px_#1e1b18]">
+                          <Lock className="w-4 h-4 text-[#b45309]" />
+                        </div>
+                        <span className="text-[11px] font-sans-custom font-bold text-[#78716c]">
+                          اثر قفل است
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Artwork & Gallery Label */}
+                  <div className="w-full mt-2 text-center flex flex-col items-center px-1">
+                    <span className="text-[10px] sm:text-[11px] font-sans-custom font-black text-[#ea580c] line-clamp-1">
+                      {art.galleryNameFa}
+                    </span>
+                    <span className="text-[12px] sm:text-[13px] font-sans-custom font-bold text-[#1e1b18] mt-0.5 line-clamp-1">
+                      {art.isCompleted ? art.title : 'هنوز کشف نشده'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 

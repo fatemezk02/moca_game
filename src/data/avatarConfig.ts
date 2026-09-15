@@ -16,65 +16,71 @@ export interface AvatarOption {
 }
 
 export const AVATAR_OPTIONS: AvatarOption[] = [
-  // 1. دختر با موی شینیون بالای سر (تصویر دوم)
-  {
-    id: 'female_01',
-    gender: 'female',
-    nameFa: 'سارا',
-    titleFa: 'موی شینیون بالای سر',
-    bgGradient: 'from-white to-white',
-    borderColor: '#1e1b18',
-    accentColor: '#1e1b18',
-  },
-  // 2. دختر با چتری مواج و موی بلند (تصویر سوم سمت چپ)
-  {
-    id: 'female_02',
-    gender: 'female',
-    nameFa: 'مریم',
-    titleFa: 'چتری مواج و موی بلند',
-    bgGradient: 'from-white to-white',
-    borderColor: '#1e1b18',
-    accentColor: '#1e1b18',
-  },
-  // 3. دختر با موهای پشت گوش و پیشانی باز (تصویر سوم سمت راست)
-  {
-    id: 'female_03',
-    gender: 'female',
-    nameFa: 'نیلوفر',
-    titleFa: 'موی صاف پشت گوش',
-    bgGradient: 'from-white to-white',
-    borderColor: '#1e1b18',
-    accentColor: '#1e1b18',
-  },
-  // 4. پسر با موی کوتاه بغل زده و لبخند ملایم (تصویر اول سمت چپ)
+  // 1. پسر با کلاه برعکس و پیراهن سفید روی تی‌شرت مشکی (تصویر ۱)
   {
     id: 'male_01',
     gender: 'male',
     nameFa: 'آرش',
-    titleFa: 'موی کوتاه بغل زده',
-    bgGradient: 'from-white to-white',
+    titleFa: 'کلاه برعکس',
+    bgGradient: 'from-[#dbe896] to-[#dbe896]',
     borderColor: '#1e1b18',
     accentColor: '#1e1b18',
+    imageSrc: '/avatars/avatar_cap_male.svg',
   },
-  // 5. پسر با موهای پرپشت موج‌دار و لبخند باز (تصویر اول وسط)
+  // 2. دختر با موهای کوتاه باب، گوشواره و کت سفید (تصویر ۲)
+  {
+    id: 'female_03',
+    gender: 'female',
+    nameFa: 'نیلوفر',
+    titleFa: 'موی کوتاه و گوشواره',
+    bgGradient: 'from-[#dbe896] to-[#dbe896]',
+    borderColor: '#1e1b18',
+    accentColor: '#1e1b18',
+    imageSrc: '/avatars/avatar_bob_female.svg',
+  },
+  // 3. دختر با موی شینیون گوجه‌ای و هودی سفید (تصویر ۳)
+  {
+    id: 'female_01',
+    gender: 'female',
+    nameFa: 'سارا',
+    titleFa: 'شینیون گوجه‌ای و هودی',
+    bgGradient: 'from-[#dbe896] to-[#dbe896]',
+    borderColor: '#1e1b18',
+    accentColor: '#1e1b18',
+    imageSrc: '/avatars/avatar_bun_female.svg',
+  },
+  // 4. پسر عینکی با پلیور سفید یقه راه‌راه (تصویر ۴)
+  {
+    id: 'male_03',
+    gender: 'male',
+    nameFa: 'کاوه',
+    titleFa: 'عینک فریم‌دار',
+    bgGradient: 'from-[#dbe896] to-[#dbe896]',
+    borderColor: '#1e1b18',
+    accentColor: '#1e1b18',
+    imageSrc: '/avatars/avatar_glasses_male.svg',
+  },
+  // 5. پسر با موی پرپشت موج‌دار و تی‌شرت مشکی (تصویر ۵)
   {
     id: 'male_02',
     gender: 'male',
     nameFa: 'کیان',
     titleFa: 'موی پرپشت موج‌دار',
-    bgGradient: 'from-white to-white',
+    bgGradient: 'from-[#dbe896] to-[#dbe896]',
     borderColor: '#1e1b18',
     accentColor: '#1e1b18',
+    imageSrc: '/avatars/avatar_wavy_male.svg',
   },
-  // 6. پسر عینکی با موی شانه زده بالا (تصویر اول سمت راست)
+  // 6. دختر با موهای بلند موج‌دار و لباس یقه هفت (تصویر ۶)
   {
-    id: 'male_03',
-    gender: 'male',
-    nameFa: 'کاوه',
-    titleFa: 'عینک فریم مستطیلی',
-    bgGradient: 'from-white to-white',
+    id: 'female_02',
+    gender: 'female',
+    nameFa: 'مریم',
+    titleFa: 'موی بلند موج‌دار',
+    bgGradient: 'from-[#dbe896] to-[#dbe896]',
     borderColor: '#1e1b18',
     accentColor: '#1e1b18',
+    imageSrc: '/avatars/avatar_wavy_female.svg',
   },
 ];
 

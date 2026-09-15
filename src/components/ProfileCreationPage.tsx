@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AVATAR_OPTIONS } from '../data/avatarConfig';
 import { ProfileAvatar } from './ProfileAvatar';
+import { AppLogo } from './AppLogo';
 import { saveUserProfile } from '../data/userProfileStore';
 
 interface ProfileCreationPageProps {
@@ -30,8 +31,16 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
     <div className="fixed inset-0 bg-[#fbf9f9] text-[#1e1b18] z-50 flex flex-col items-center justify-center p-4 sm:p-6 font-sans-custom overflow-y-auto" dir="rtl">
       <div className="w-full max-w-md bg-white border-[3px] border-[#1e1b18] rounded-3xl p-6 sm:p-8 shadow-[4px_4px_0px_#1e1b18] flex flex-col gap-8 my-auto shrink-0">
         
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-black text-[#1e1b18]">پروفایل خود را بسازید</h1>
+        <div className="text-center flex flex-col items-center">
+          <div className="flex items-center justify-center mb-1">
+            <AppLogo className="h-14 sm:h-16 w-auto object-contain cursor-default" />
+          </div>
+          <span className="text-xs sm:text-sm font-semibold text-[#78716c] tracking-wide">
+            موزه هنرهای معاصر تهران
+          </span>
+          <h1 className="text-xl sm:text-2xl font-black text-[#1e1b18] mt-4">
+            به سفر تاریخی عکاسی خوش آمدید
+          </h1>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">

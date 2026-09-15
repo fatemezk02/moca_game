@@ -7,12 +7,13 @@ interface CharacterAvatarProps {
 
 /**
  * CharacterAvatarSVG:
- * Exact vector recreations of the 6 line-art cartoon personas from the user's reference images:
- * - 3 Males (Short side-part hair, Fluffy wavy hair, Combed hair with rectangular glasses)
- * - 3 Females (Top bun/chignon, Wavy scalloped bangs with shoulder hair, Smooth hair behind ears)
- * - Warm skin-tone fill (#fedac2) on face and ears
- * - Pure solid white background (#ffffff)
- * - Jet-black hair (#1e1b18) and clean inking matching the reference illustrations precisely
+ * High-fidelity vector representations matching the 6 cartoon line-art avatar images:
+ * - male_01: Boy with white backwards cap & open white shirt over black inner t-shirt
+ * - female_03: Girl with chic black bob, pearl earrings, white blazer
+ * - female_01: Girl with topknot bun, side wisps, white hoodie with drawstrings
+ * - male_03: Boy with glasses, parted hair, sweater with striped collar
+ * - male_02: Boy with wavy fluffy dark hair, solid black crewneck t-shirt
+ * - female_02: Girl with long cascading wavy dark hair, white v-neck shirt
  */
 export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
   id,
@@ -20,498 +21,214 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
 }) => {
   const normId = id.toLowerCase().replace('-', '_');
 
-  // Skin tone fill
-  const skinColor = '#fedac2';
-  const inkColor = '#1e1b18';
-
   switch (normId) {
     // =========================================================================
-    // 1. MALE 1: Boy with Short Neat Side-Part Hair & Gentle Smile (Image 1, Left)
+    // 1. MALE 01: Backwards Cap, Open Collar Shirt (Image 1)
     // =========================================================================
     case 'male_01':
-    case 'avatar_03':
+    case 'cap':
     case 'arash':
-    case 'sidepart':
       return (
-        <svg
-          viewBox="0 0 100 100"
-          className={`${className} select-none`}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <clipPath id="clip-m1">
-              <circle cx="50" cy="50" r="48" />
-            </clipPath>
-          </defs>
-
-          <g clipPath="url(#clip-m1)">
-            {/* Pure White Background */}
-            <rect width="100" height="100" fill="#ffffff" />
-
-            {/* Left Ear */}
-            <ellipse cx="23" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 24,52 C 21,53.5 21,58 24.5,59.5 C 26,60 25.5,57 23.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Right Ear */}
-            <ellipse cx="77" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 76,52 C 79,53.5 79,58 75.5,59.5 C 74,60 74.5,57 76.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Face & Rounded Chin */}
-            <path
-              d="M 26,46 C 26,72 34,82 50,82 C 66,82 74,72 74,46 C 74,32 26,32 26,46 Z"
-              fill={skinColor}
-              stroke={inkColor}
-              strokeWidth="3.2"
-              strokeLinejoin="round"
-            />
-
-            {/* Short Neat Side-Part Hair */}
-            <path
-              d="M 23,49 C 21,28 32,18 50,18 C 68,18 78,28 77,49 C 76,43 73,38 69,36 C 65,34 58,35 48,32 C 38,29 30,33 27,41 C 25,44 24,47 23,49 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-
-            {/* Eyebrows */}
-            <line x1="36" y1="47" x2="45" y2="47" stroke={inkColor} strokeWidth="3.2" strokeLinecap="round" />
-            <line x1="55" y1="47" x2="64" y2="47" stroke={inkColor} strokeWidth="3.2" strokeLinecap="round" />
-
-            {/* Eyes */}
-            <ellipse cx="40.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-            <ellipse cx="59.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-
-            {/* Nose Curve */}
-            <path d="M 48.5,61 C 49.5,62.5 51.5,62.5 52.5,61" fill="none" stroke={inkColor} strokeWidth="2.4" strokeLinecap="round" />
-
-            {/* Pleasant Closed Smile */}
-            <path d="M 45,68 Q 50,72.5 55,68" fill="none" stroke={inkColor} strokeWidth="2.8" strokeLinecap="round" />
-          </g>
-
-          {/* Outer Border */}
-          <circle cx="50" cy="50" r="48.5" fill="none" stroke={inkColor} strokeWidth="3" />
+        <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#dbe896" />
+          <path d="M 55,200 L 65,160 L 78,145 L 122,145 L 135,160 L 145,200 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 80,145 L 85,190 C 95,195 105,195 115,190 L 120,145 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4" />
+          <path d="M 78,145 L 60,178 L 86,170 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 122,145 L 140,178 L 114,170 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 60,178 L 52,200" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
+          <path d="M 140,178 L 148,200" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
+          <path d="M 80,115 L 80,148 C 90,154 110,154 120,148 L 120,115 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 56,88 C 44,88 44,115 56,115" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 52,98 C 50,102 54,106 56,104" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 144,88 C 156,88 156,115 144,115" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 148,98 C 150,102 146,106 144,104" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 56,85 C 56,128 72,143 100,143 C 128,143 144,128 144,85" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 54,78 C 54,92 56,102 65,98 C 65,88 67,82 72,82 C 78,82 79,88 88,85 C 93,83 98,86 104,85 C 112,85 118,82 128,82 C 133,82 135,88 135,98 C 144,102 146,92 146,78 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
+          <path d="M 54,76 C 52,25 148,25 146,76 C 146,78 54,78 54,76 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 82,64 C 82,46 118,46 118,64 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4" />
+          <path d="M 83,57 L 117,57" stroke="#ffffff" strokeWidth="8" strokeLinecap="square" />
+          <circle cx="90" cy="57" r="1.5" fill="#1e1b18" />
+          <circle cx="96" cy="57" r="1.5" fill="#1e1b18" />
+          <circle cx="104" cy="57" r="1.5" fill="#1e1b18" />
+          <circle cx="110" cy="57" r="1.5" fill="#1e1b18" />
+          <path d="M 82,57 L 118,57" fill="none" stroke="#1e1b18" strokeWidth="2.5" />
+          <path d="M 52,75 C 48,72 152,72 148,75" fill="none" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
+          <path d="M 68,85 Q 80,82 89,86" fill="none" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
+          <path d="M 111,86 Q 120,82 132,85" fill="none" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
+          <ellipse cx="79" cy="97" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="121" cy="97" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="100" cy="113" rx="1.5" ry="2" fill="#1e1b18" />
+          <path d="M 94,124 L 106,124" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
         </svg>
       );
 
     // =========================================================================
-    // 2. MALE 2: Boy with Fluffy Wavy Hair & Open Smile (Image 1, Middle)
-    // =========================================================================
-    case 'male_02':
-    case 'avatar_04':
-    case 'kian':
-    case 'fluffy':
-      return (
-        <svg
-          viewBox="0 0 100 100"
-          className={`${className} select-none`}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <clipPath id="clip-m2">
-              <circle cx="50" cy="50" r="48" />
-            </clipPath>
-          </defs>
-
-          <g clipPath="url(#clip-m2)">
-            {/* Pure White Background */}
-            <rect width="100" height="100" fill="#ffffff" />
-
-            {/* Left Ear */}
-            <ellipse cx="23" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 24,52 C 21,53.5 21,58 24.5,59.5 C 26,60 25.5,57 23.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Right Ear */}
-            <ellipse cx="77" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 76,52 C 79,53.5 79,58 75.5,59.5 C 74,60 74.5,57 76.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Face & Rounded Chin */}
-            <path
-              d="M 26,46 C 26,72 34,82 50,82 C 66,82 74,72 74,46 C 74,32 26,32 26,46 Z"
-              fill={skinColor}
-              stroke={inkColor}
-              strokeWidth="3.2"
-              strokeLinejoin="round"
-            />
-
-            {/* Fluffy Wavy 3-Lobed Hair */}
-            <path
-              d="M 24,50 C 20,44 20,33 27,27 C 32,22 38,24 41,20 C 46,15 54,15 59,20 C 62,24 68,22 73,27 C 80,33 80,44 76,50 C 74,44 71,39 67,37 C 62,35 57,37 50,33 C 43,37 38,35 33,37 C 29,39 26,44 24,50 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-
-            {/* Eyebrows */}
-            <path d="M 36,48 Q 41,45.5 46,47.5" fill="none" stroke={inkColor} strokeWidth="2.8" strokeLinecap="round" />
-            <path d="M 54,47.5 Q 59,45.5 64,48" fill="none" stroke={inkColor} strokeWidth="2.8" strokeLinecap="round" />
-
-            {/* Eyes */}
-            <ellipse cx="40.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-            <ellipse cx="59.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-
-            {/* Nose Dot */}
-            <ellipse cx="50" cy="61" rx="1.4" ry="1.4" fill={inkColor} />
-
-            {/* Open Cheerful Smile */}
-            <path
-              d="M 44.5,67 Q 50,74 55.5,67 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-            <path d="M 45.5,67.8 Q 50,72 54.5,67.8 Z" fill="#ffffff" />
-          </g>
-
-          <circle cx="50" cy="50" r="48.5" fill="none" stroke={inkColor} strokeWidth="3" />
-        </svg>
-      );
-
-    // =========================================================================
-    // 3. MALE 3: Boy with Combed Hair & Rectangular Glasses (Image 1, Right)
-    // =========================================================================
-    case 'male_03':
-    case 'avatar_05':
-    case 'kaveh':
-    case 'boss':
-    case 'glasses':
-      return (
-        <svg
-          viewBox="0 0 100 100"
-          className={`${className} select-none`}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <clipPath id="clip-m3">
-              <circle cx="50" cy="50" r="48" />
-            </clipPath>
-          </defs>
-
-          <g clipPath="url(#clip-m3)">
-            {/* Pure White Background */}
-            <rect width="100" height="100" fill="#ffffff" />
-
-            {/* Left Ear */}
-            <ellipse cx="23" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 24,52 C 21,53.5 21,58 24.5,59.5 C 26,60 25.5,57 23.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Right Ear */}
-            <ellipse cx="77" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 76,52 C 79,53.5 79,58 75.5,59.5 C 74,60 74.5,57 76.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Face & Rounded Chin */}
-            <path
-              d="M 26,46 C 26,72 34,82 50,82 C 66,82 74,72 74,46 C 74,32 26,32 26,46 Z"
-              fill={skinColor}
-              stroke={inkColor}
-              strokeWidth="3.2"
-              strokeLinejoin="round"
-            />
-
-            {/* Tall Combed Hair (Pompadour Volume) */}
-            <path
-              d="M 23,48 C 21,24 31,16 50,16 C 69,16 79,24 77,48 C 76,41 73,34 68,31 C 61,28 55,29 50,28 C 45,29 39,28 32,31 C 27,34 24,41 23,48 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-
-            {/* Eyebrows */}
-            <line x1="36" y1="46" x2="45" y2="46" stroke={inkColor} strokeWidth="3" strokeLinecap="round" />
-            <line x1="55" y1="46" x2="64" y2="46" stroke={inkColor} strokeWidth="3" strokeLinecap="round" />
-
-            {/* Rectangular Glasses Frames */}
-            {/* Bridge */}
-            <line x1="47.5" y1="54" x2="52.5" y2="54" stroke={inkColor} strokeWidth="3" strokeLinecap="round" />
-            {/* Left Frame */}
-            <rect x="31.5" y="49" width="16" height="11.5" rx="3.5" fill="#ffffff" stroke={inkColor} strokeWidth="3" />
-            {/* Right Frame */}
-            <rect x="52.5" y="49" width="16" height="11.5" rx="3.5" fill="#ffffff" stroke={inkColor} strokeWidth="3" />
-
-            {/* Eyes Centered in Glasses */}
-            <ellipse cx="39.5" cy="54.8" rx="2.3" ry="3.5" fill={inkColor} />
-            <ellipse cx="60.5" cy="54.8" rx="2.3" ry="3.5" fill={inkColor} />
-
-            {/* Nose Dot */}
-            <ellipse cx="50" cy="63" rx="1.3" ry="1.3" fill={inkColor} />
-
-            {/* Open Happy Smile */}
-            <ellipse cx="50" cy="69.5" rx="4.8" ry="3.2" fill={inkColor} />
-            <ellipse cx="50" cy="69.5" rx="3.6" ry="1.9" fill="#ffffff" />
-          </g>
-
-          <circle cx="50" cy="50" r="48.5" fill="none" stroke={inkColor} strokeWidth="3" />
-        </svg>
-      );
-
-    // =========================================================================
-    // 4. FEMALE 1: Girl with Top Bun / Chignon & Open Smile (Image 2)
-    // =========================================================================
-    case 'female_01':
-    case 'avatar_01':
-    case 'sara':
-    case 'bun':
-      return (
-        <svg
-          viewBox="0 0 100 100"
-          className={`${className} select-none`}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <clipPath id="clip-f1">
-              <circle cx="50" cy="50" r="48" />
-            </clipPath>
-          </defs>
-
-          <g clipPath="url(#clip-f1)">
-            {/* Pure White Background */}
-            <rect width="100" height="100" fill="#ffffff" />
-
-            {/* Top Bun sitting right on top */}
-            <ellipse cx="50" cy="18" rx="11.5" ry="9" fill={inkColor} stroke={inkColor} strokeWidth="2" />
-
-            {/* Left Ear */}
-            <ellipse cx="23" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 24,52 C 21,53.5 21,58 24.5,59.5 C 26,60 25.5,57 23.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Right Ear */}
-            <ellipse cx="77" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 76,52 C 79,53.5 79,58 75.5,59.5 C 74,60 74.5,57 76.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Face & Rounded Chin */}
-            <path
-              d="M 26,44 C 26,30 74,30 74,44 C 74,72 66,82 50,82 C 34,82 26,72 26,44 Z"
-              fill={skinColor}
-              stroke={inkColor}
-              strokeWidth="3.2"
-              strokeLinejoin="round"
-            />
-
-            {/* Sleek Hair pulled up to bun with smooth hairline */}
-            <path
-              d="M 23,48 C 21,28 31,23 50,23 C 69,23 79,28 77,48 C 75,34 68,28 50,28 C 32,28 25,34 23,48 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-
-            {/* Arched Eyebrows */}
-            <path d="M 36,48 Q 41,45 46,47" fill="none" stroke={inkColor} strokeWidth="2.6" strokeLinecap="round" />
-            <path d="M 54,47 Q 59,45 64,48" fill="none" stroke={inkColor} strokeWidth="2.6" strokeLinecap="round" />
-
-            {/* Eyes */}
-            <ellipse cx="40.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-            <ellipse cx="59.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-
-            {/* Nose Curve */}
-            <path d="M 48.5,61 C 49.5,62.5 51.5,62.5 52.5,61" fill="none" stroke={inkColor} strokeWidth="2.4" strokeLinecap="round" />
-
-            {/* Open Happy Smile */}
-            <path
-              d="M 44.5,67 Q 50,74 55.5,67 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-            <path d="M 45.5,67.8 Q 50,72 54.5,67.8 Z" fill="#ffffff" />
-          </g>
-
-          <circle cx="50" cy="50" r="48.5" fill="none" stroke={inkColor} strokeWidth="3" />
-        </svg>
-      );
-
-    // =========================================================================
-    // 5. FEMALE 2: Girl with Scalloped Bangs, Eyelashes & Shoulder Hair (Image 3, Left)
-    // =========================================================================
-    case 'female_02':
-    case 'avatar_02':
-    case 'maryam':
-    case 'bangs':
-      return (
-        <svg
-          viewBox="0 0 100 100"
-          className={`${className} select-none`}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <clipPath id="clip-f2">
-              <circle cx="50" cy="50" r="48" />
-            </clipPath>
-          </defs>
-
-          <g clipPath="url(#clip-f2)">
-            {/* Pure White Background */}
-            <rect width="100" height="100" fill="#ffffff" />
-
-            {/* Shoulder-length Hair flowing behind face */}
-            <path
-              d="M 23,45 C 18,62 20,78 28,84 C 33,86 35,80 32,70 C 29,60 28,50 30,42 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M 77,45 C 82,62 80,78 72,84 C 67,86 65,80 68,70 C 71,60 72,50 70,42 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-
-            {/* Left Ear */}
-            <ellipse cx="23" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 24,52 C 21,53.5 21,58 24.5,59.5 C 26,60 25.5,57 23.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Right Ear */}
-            <ellipse cx="77" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 76,52 C 79,53.5 79,58 75.5,59.5 C 74,60 74.5,57 76.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Face & Rounded Chin */}
-            <path
-              d="M 26,46 C 26,72 34,82 50,82 C 66,82 74,72 74,46 C 74,32 26,32 26,46 Z"
-              fill={skinColor}
-              stroke={inkColor}
-              strokeWidth="3.2"
-              strokeLinejoin="round"
-            />
-
-            {/* Scalloped Wavy Fringe Bangs & Crown Hair */}
-            <path
-              d="M 24,48 C 21,26 31,18 50,18 C 69,18 79,26 76,48 C 74,44 71,43 67,42 C 63,45 59,45 55,42 C 51,45 49,45 45,42 C 41,45 37,45 33,42 C 29,43 26,44 24,48 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-
-            {/* Arched Eyebrows */}
-            <path d="M 36,47 Q 41,44.5 46,46.5" fill="none" stroke={inkColor} strokeWidth="2.6" strokeLinecap="round" />
-            <path d="M 54,46.5 Q 59,44.5 64,47" fill="none" stroke={inkColor} strokeWidth="2.6" strokeLinecap="round" />
-
-            {/* Eyes with Eyelashes */}
-            <g id="eyes-f2">
-              <ellipse cx="40.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-              {/* Left Eyelash Flick */}
-              <path d="M 42,51 L 45,49" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-              <ellipse cx="59.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-              {/* Right Eyelash Flick */}
-              <path d="M 61,51 L 64,49" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-            </g>
-
-            {/* Nose Curve */}
-            <path d="M 48.5,61 C 49.5,62.5 51.5,62.5 52.5,61" fill="none" stroke={inkColor} strokeWidth="2.4" strokeLinecap="round" />
-
-            {/* Open Happy Smile */}
-            <path
-              d="M 44.5,67 Q 50,74 55.5,67 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-            <path d="M 45.5,67.8 Q 50,72 54.5,67.8 Z" fill="#ffffff" />
-          </g>
-
-          <circle cx="50" cy="50" r="48.5" fill="none" stroke={inkColor} strokeWidth="3" />
-        </svg>
-      );
-
-    // =========================================================================
-    // 6. FEMALE 3: Girl with Long Hair Tucked Behind Ears & Clean Forehead (Image 3, Right)
+    // 2. FEMALE 03: Short Bob, Earrings, White Blazer (Image 2)
     // =========================================================================
     case 'female_03':
-    case 'avatar_06':
+    case 'bob':
     case 'niloofar':
-    case 'smooth':
+      return (
+        <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#dbe896" />
+          <path d="M 46,95 C 40,115 42,138 60,146 C 70,150 82,152 100,152 C 118,152 130,150 140,146 C 158,138 160,115 154,95 C 158,55 145,28 100,28 C 55,28 42,55 46,95 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 50,200 L 60,165 L 82,148 L 118,148 L 140,165 L 150,200 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 80,148 L 84,192 C 94,195 106,195 116,192 L 120,148 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4" />
+          <path d="M 82,148 L 62,175 L 84,185 L 82,200" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 118,148 L 138,175 L 116,185 L 118,200" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 82,118 L 82,150 C 92,155 108,155 118,150 L 118,118 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 58,92 C 48,92 48,114 58,114" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <circle cx="58" cy="113" r="3.5" fill="#ffffff" stroke="#1e1b18" strokeWidth="2.5" />
+          <path d="M 142,92 C 152,92 152,114 142,114" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <circle cx="142" cy="113" r="3.5" fill="#ffffff" stroke="#1e1b18" strokeWidth="2.5" />
+          <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 46,90 C 44,52 60,30 100,30 C 140,30 156,52 154,90 C 154,102 148,114 144,118 C 144,95 138,82 130,80 C 118,78 114,84 102,80 C 92,76 88,84 76,82 C 68,80 62,94 56,118 C 52,114 46,102 46,90 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
+          <path d="M 94,48 C 104,65 116,84 106,85" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 86,45 C 92,60 98,75 92,78" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M 112,88 Q 120,84 130,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <ellipse cx="79" cy="98" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="121" cy="98" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="100" cy="113" rx="1.5" ry="2" fill="#1e1b18" />
+          <path d="M 94,124 L 106,124" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+        </svg>
+      );
+
+    // =========================================================================
+    // 3. FEMALE 01: Topknot Bun, Hoodie (Image 3)
+    // =========================================================================
+    case 'female_01':
+    case 'bun':
+    case 'sara':
+      return (
+        <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#dbe896" />
+          <ellipse cx="100" cy="30" rx="22" ry="20" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4.5" />
+          <path d="M 86,44 C 92,41 108,41 114,44 C 114,48 86,48 86,44 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="3" strokeLinejoin="round" />
+          <path d="M 90,26 C 94,18 106,18 110,26" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 50,200 L 58,168 L 76,150 L 124,150 L 142,168 L 150,200 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 76,150 C 76,180 124,180 124,150" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 88,168 L 88,198" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <circle cx="88" cy="198" r="2.5" fill="#1e1b18" />
+          <path d="M 112,168 L 112,198" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <circle cx="112" cy="198" r="2.5" fill="#1e1b18" />
+          <path d="M 82,118 L 82,150 C 92,155 108,155 118,150 L 118,118 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 58,92 C 48,92 48,114 58,114" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 54,100 C 52,103 55,106 58,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 142,92 C 152,92 152,114 142,114" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 146,100 C 148,103 145,106 142,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 56,92 Q 48,110 50,126" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M 144,92 Q 152,110 150,126" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 52,90 C 48,52 64,44 100,44 C 136,44 152,52 148,90 C 146,82 140,75 132,74 C 122,72 116,80 102,78 C 94,76 86,72 74,74 C 64,75 58,82 52,90 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
+          <path d="M 88,52 C 94,65 98,75 92,84" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M 112,88 Q 120,84 130,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <ellipse cx="79" cy="98" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="121" cy="98" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="100" cy="113" rx="1.5" ry="2" fill="#1e1b18" />
+          <path d="M 94,124 L 106,124" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+        </svg>
+      );
+
+    // =========================================================================
+    // 4. MALE 03: Glasses & Sweater (Image 4)
+    // =========================================================================
+    case 'male_03':
+    case 'glasses':
+    case 'kaveh':
+      return (
+        <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#dbe896" />
+          <path d="M 50,200 L 60,165 L 78,148 L 122,148 L 140,165 L 150,200 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 78,148 C 78,168 122,168 122,148" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 85,152 L 85,160" stroke="#1e1b18" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 91,154 L 91,163" stroke="#1e1b18" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 97,155 L 97,164" stroke="#1e1b18" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 103,155 L 103,164" stroke="#1e1b18" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 109,154 L 109,163" stroke="#1e1b18" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 115,152 L 115,160" stroke="#1e1b18" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 82,118 L 82,150 C 92,155 108,155 118,150 L 118,118 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 58,90 C 46,90 46,115 58,115" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 54,98 C 52,102 55,106 58,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 142,90 C 154,90 154,115 142,115" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 146,98 C 148,102 145,106 142,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 58,88 C 58,130 74,144 100,144 C 126,144 142,130 142,88" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 54,88 C 48,46 64,30 100,30 C 136,30 152,46 146,88 C 144,78 136,68 126,66 C 114,64 108,72 96,70 C 86,68 76,64 64,68 C 58,70 55,78 54,88 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
+          <path d="M 94,40 C 98,52 102,62 96,70" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 68,78 Q 80,74 90,78" fill="none" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 110,78 Q 120,74 132,78" fill="none" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <rect x="65" y="86" width="28" height="24" rx="9" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" />
+          <rect x="107" y="86" width="28" height="24" rx="9" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" />
+          <path d="M 93,96 C 96,93 104,93 107,96" fill="none" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
+          <path d="M 65,96 L 56,95" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M 135,96 L 144,95" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <ellipse cx="79" cy="98" rx="4.5" ry="5.5" fill="#1e1b18" />
+          <ellipse cx="121" cy="98" rx="4.5" ry="5.5" fill="#1e1b18" />
+          <ellipse cx="100" cy="116" rx="1.5" ry="2" fill="#1e1b18" />
+          <path d="M 94,126 L 106,126" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+        </svg>
+      );
+
+    // =========================================================================
+    // 5. MALE 02: Wavy Hair & Black T-Shirt (Image 5)
+    // =========================================================================
+    case 'male_02':
+    case 'wavy_male':
+    case 'kian':
+      return (
+        <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#dbe896" />
+          <path d="M 50,200 L 60,165 L 78,148 L 122,148 L 140,165 L 150,200 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 78,148 C 78,165 122,165 122,148" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 82,118 L 82,150 C 92,155 108,155 118,150 L 118,118 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 58,90 C 46,90 46,115 58,115" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 54,98 C 52,102 55,106 58,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 142,90 C 154,90 154,115 142,115" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 146,98 C 148,102 145,106 142,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 58,88 C 58,130 74,144 100,144 C 126,144 142,130 142,88" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 52,88 C 42,70 44,45 62,32 C 78,20 122,20 138,32 C 156,45 158,70 148,88 C 146,78 138,68 126,64 C 114,60 108,68 96,65 C 84,62 76,60 64,65 C 58,68 55,76 52,88 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
+          <path d="M 72,42 C 82,34 94,36 98,46" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 108,36 C 118,34 130,42 128,52" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 88,54 C 95,62 102,68 96,74" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 68,85 Q 80,82 89,86" fill="none" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
+          <path d="M 111,86 Q 120,82 132,85" fill="none" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
+          <ellipse cx="79" cy="97" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="121" cy="97" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="100" cy="113" rx="1.5" ry="2" fill="#1e1b18" />
+          <path d="M 94,124 L 106,124" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+        </svg>
+      );
+
+    // =========================================================================
+    // 6. FEMALE 02: Long Wavy Hair, V-Neck (Image 6)
+    // =========================================================================
+    case 'female_02':
+    case 'wavy_female':
+    case 'maryam':
     default:
       return (
-        <svg
-          viewBox="0 0 100 100"
-          className={`${className} select-none`}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <clipPath id="clip-f3">
-              <circle cx="50" cy="50" r="48" />
-            </clipPath>
-          </defs>
-
-          <g clipPath="url(#clip-f3)">
-            {/* Pure White Background */}
-            <rect width="100" height="100" fill="#ffffff" />
-
-            {/* Long Hair flowing down behind ears */}
-            <path
-              d="M 24,46 C 20,62 22,76 29,82 C 33,84 34,78 32,68 C 30,58 30,48 31,42 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M 76,46 C 80,62 78,76 71,82 C 67,84 66,78 68,68 C 70,58 70,48 69,42 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-
-            {/* Left Ear */}
-            <ellipse cx="23" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 24,52 C 21,53.5 21,58 24.5,59.5 C 26,60 25.5,57 23.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Right Ear */}
-            <ellipse cx="77" cy="56" rx="5" ry="7.5" fill={skinColor} stroke={inkColor} strokeWidth="3" />
-            <path d="M 76,52 C 79,53.5 79,58 75.5,59.5 C 74,60 74.5,57 76.5,57" fill="none" stroke={inkColor} strokeWidth="2.2" strokeLinecap="round" />
-
-            {/* Face & Rounded Chin */}
-            <path
-              d="M 26,44 C 26,30 74,30 74,44 C 74,72 66,82 50,82 C 34,82 26,72 26,44 Z"
-              fill={skinColor}
-              stroke={inkColor}
-              strokeWidth="3.2"
-              strokeLinejoin="round"
-            />
-
-            {/* Smooth Hair Crown revealing clean forehead */}
-            <path
-              d="M 23,48 C 21,24 31,18 50,18 C 69,18 79,24 77,48 C 75,32 68,26 50,26 C 32,26 25,32 23,48 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-
-            {/* Arched Eyebrows */}
-            <path d="M 36,47 Q 41,44.5 46,46.5" fill="none" stroke={inkColor} strokeWidth="2.6" strokeLinecap="round" />
-            <path d="M 54,46.5 Q 59,44.5 64,47" fill="none" stroke={inkColor} strokeWidth="2.6" strokeLinecap="round" />
-
-            {/* Eyes */}
-            <ellipse cx="40.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-            <ellipse cx="59.5" cy="54" rx="2.4" ry="3.8" fill={inkColor} />
-
-            {/* Nose Curve */}
-            <path d="M 48.5,61 C 49.5,62.5 51.5,62.5 52.5,61" fill="none" stroke={inkColor} strokeWidth="2.4" strokeLinecap="round" />
-
-            {/* Open Cheerful Smile */}
-            <path
-              d="M 44.5,67 Q 50,74 55.5,67 Z"
-              fill={inkColor}
-              stroke={inkColor}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-            <path d="M 45.5,67.8 Q 50,72 54.5,67.8 Z" fill="#ffffff" />
-          </g>
-
-          <circle cx="50" cy="50" r="48.5" fill="none" stroke={inkColor} strokeWidth="3" />
+        <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="#dbe896" />
+          <path d="M 44,95 C 32,120 30,150 42,185 C 46,195 56,200 68,200 C 66,175 62,150 64,135 C 64,115 64,100 64,95 C 64,48 76,28 100,28 C 124,28 136,48 136,95 C 136,100 136,115 136,135 C 138,150 134,175 132,200 C 144,200 154,195 158,185 C 170,150 168,120 156,95 C 160,50 145,28 100,28 C 55,28 40,50 44,95 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 50,200 L 60,165 L 78,148 L 122,148 L 140,165 L 150,200 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 80,148 L 100,180 L 120,148" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 82,118 L 82,150 C 92,155 108,155 118,150 L 118,118 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
+          <path d="M 58,92 C 48,92 48,114 58,114" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 54,100 C 52,103 55,106 58,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 142,92 C 152,92 152,114 142,114" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M 146,100 C 148,103 145,106 142,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 44,92 C 40,54 58,30 100,30 C 142,30 160,54 156,92 C 154,115 142,140 146,165 C 148,175 144,182 136,180 C 132,160 136,130 134,105 C 134,88 126,80 116,78 C 106,76 102,84 94,80 C 86,76 80,78 72,82 C 64,88 64,105 66,130 C 64,160 68,160 64,180 C 56,182 52,175 54,165 C 58,140 46,115 44,92 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
+          <path d="M 94,42 C 104,58 116,72 108,82" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 48,110 C 44,130 52,150 48,170" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 152,110 C 156,130 148,150 152,170" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M 112,88 Q 120,84 130,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
+          <ellipse cx="79" cy="98" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="121" cy="98" rx="5" ry="6" fill="#1e1b18" />
+          <ellipse cx="100" cy="113" rx="1.5" ry="2" fill="#1e1b18" />
+          <path d="M 94,124 L 106,124" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
         </svg>
       );
   }

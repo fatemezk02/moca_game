@@ -27,7 +27,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`relative rounded-full flex items-center justify-center bg-white shadow-[1.5px_1.5px_0px_#1e1b18] overflow-hidden shrink-0 ${
+      className={`relative rounded-full flex items-center justify-center bg-[#dbe896] shadow-[1.5px_1.5px_0px_#1e1b18] overflow-hidden shrink-0 ${
         onClick ? 'cursor-pointer hover:shadow-[2.5px_2.5px_0px_#1e1b18] hover:scale-105 active:scale-95 transition-all' : ''
       } ${sizeClasses[size]} ${className}`}
       style={{ border: '2.5px solid #1e1b18' }}

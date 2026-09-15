@@ -35,8 +35,8 @@ export const GALLERIES: GalleryConfig[] = [
   },
   {
     id: 'gallery-01',
-    name: 'Gallery 01 — Architectural Hall',
-    nameFa: 'گالری ۰۱ — تالار معماری',
+    name: 'Gallery 02 — Alchemy of Light',
+    nameFa: 'گالری ۰۲ـ کیمیای نور',
     viewBox: '0 0 524.2 822.62',
     width: 524.2,
     height: 822.62,
@@ -51,8 +51,8 @@ export const GALLERIES: GalleryConfig[] = [
   },
   {
     id: 'gallery-03',
-    name: 'Gallery 03 — Modern Hall',
-    nameFa: 'گالری ۰۳ — تالار مدرن',
+    name: 'Gallery 03 — Diplomatic Albums',
+    nameFa: 'گالری۰۳ـ آلبومهای دیپلماتیک',
     viewBox: '0 0 561.28 851.79',
     width: 561.28,
     height: 851.79,
@@ -221,8 +221,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
 
   'gallery-01': {
     galleryId: 'gallery-01',
-    name: 'Gallery 01 — Architectural Hall',
-    nameFa: 'گالری ۰۱ — تالار معماری',
+    name: 'Gallery 02 — Alchemy of Light',
+    nameFa: 'گالری ۰۲ـ کیمیای نور',
     viewBox: '0 0 524.2 822.62',
     width: 524.2,
     height: 822.62,
@@ -438,8 +438,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
 
   'gallery-03': {
     galleryId: 'gallery-03',
-    name: 'Gallery 03 — Modern Hall',
-    nameFa: 'گالری ۰۳ — تالار مدرن',
+    name: 'Gallery 03 — Diplomatic Albums',
+    nameFa: 'گالری۰۳ـ آلبومهای دیپلماتیک',
     viewBox: '0 0 561.28 851.79',
     width: 561.28,
     height: 851.79,
@@ -462,8 +462,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-03',
         title: 'ژاپن در یک قاب',
-        x: 504,
-        y: 120,
+        x: 120,
+        y: 504,
         frames: [],
       },
       {
@@ -772,7 +772,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-05',
         title: 'نقطه پازل ۰۳ — ضرب آهنگ شهر (قطعه نهایی)',
-        x: 662,
+        x: 615,
         y: 427,
         questionId: '12',
         puzzlePieceId: 'gallery05-piece-03',
@@ -1398,7 +1398,7 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                   !(key === 'gallery-01' && (c.id === 'artwork-02' || c.id === 'artwork-03' || c.id === 'artwork-04')) &&
                   !((key === 'gallery-07' || key === 'gallery_07') && (c.id === 'star-16' || c.id === 'star-17' || c.id === 'star-18')) &&
                   !((key === 'gallery-08' || key === 'gallery_08') && (c.id === 'star-20' || c.id === 'star-21' || c.id === 'star-22' || c.id === 'star-23')) &&
-                  !((key === 'gallery-09' || key === 'gallery_09') && (c.id === 'star-26' || c.id === 'star-27'))
+                  !((key === 'gallery-09' || key === 'gallery_09') && (c.id === 'star-26' || c.id === 'star-27' || c.id === 'star-28'))
               );
               const combinedCollections = [...savedCollections];
               for (const defCol of defaultCollections) {
@@ -1462,7 +1462,7 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
             !((safeGalleryId === 'gallery-01' || canonId === 'gallery-01') && (cp.id === 'artwork-02' || cp.id === 'artwork-03' || cp.id === 'artwork-04')) &&
             !((safeGalleryId === 'gallery-07' || canonId === 'gallery-07' || safeGalleryId === 'gallery_07' || canonId === 'gallery_07') && (cp.id === 'star-16' || cp.id === 'star-17' || cp.id === 'star-18')) &&
             !((safeGalleryId === 'gallery-08' || canonId === 'gallery-08' || safeGalleryId === 'gallery_08' || canonId === 'gallery_08') && (cp.id === 'star-20' || cp.id === 'star-21' || cp.id === 'star-22' || cp.id === 'star-23')) &&
-            !((safeGalleryId === 'gallery-09' || canonId === 'gallery-09' || safeGalleryId === 'gallery_09' || canonId === 'gallery_09') && (cp.id === 'star-26' || cp.id === 'star-27'))
+            !((safeGalleryId === 'gallery-09' || canonId === 'gallery-09' || safeGalleryId === 'gallery_09' || canonId === 'gallery_09') && (cp.id === 'star-26' || cp.id === 'star-27' || cp.id === 'star-28'))
         )
         .map((cp) => ({
           ...cp,

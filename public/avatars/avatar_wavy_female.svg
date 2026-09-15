@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <!-- Background -->
+  <rect width="200" height="200" fill="#dbe896"/>
+
+  <!-- Long Cascading Back & Shoulder Hair -->
+  <path d="M 44,95 C 32,120 30,150 42,185 C 46,195 56,200 68,200 C 66,175 62,150 64,135 C 64,115 64,100 64,95 C 64,48 76,28 100,28 C 124,28 136,48 136,95 C 136,100 136,115 136,135 C 138,150 134,175 132,200 C 144,200 154,195 158,185 C 170,150 168,120 156,95 C 160,50 145,28 100,28 C 55,28 40,50 44,95 Z" fill="#1e1b18" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
+
+  <!-- V-Neck Shirt Clothes -->
+  <path d="M 50,200 L 60,165 L 78,148 L 122,148 L 140,165 L 150,200 Z" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
+  <!-- V-Neck Line -->
+  <path d="M 80,148 L 100,180 L 120,148" fill="#ffffff" stroke="#1e1b18" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- Neck -->
+  <path d="M 82,118 L 82,150 C 92,155 108,155 118,150 L 118,118 Z" fill="#ffffff" stroke="#1e1b18" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- Ears -->
+  <path d="M 58,92 C 48,92 48,114 58,114" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M 54,100 C 52,103 55,106 58,105" fill="none" stroke="#1e1b18" stroke-width="3" stroke-linecap="round"/>
+
+  <path d="M 142,92 C 152,92 152,114 142,114" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M 146,100 C 148,103 145,106 142,105" fill="none" stroke="#1e1b18" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Face Contour -->
+  <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
+
+  <!-- Front Voluminous Parted Hair & Side Waves -->
+  <path d="M 44,92 C 40,54 58,30 100,30 C 142,30 160,54 156,92 C 154,115 142,140 146,165 C 148,175 144,182 136,180 C 132,160 136,130 134,105 C 134,88 126,80 116,78 C 106,76 102,84 94,80 C 86,76 80,78 72,82 C 64,88 64,105 66,130 C 64,160 68,160 64,180 C 56,182 52,175 54,165 C 58,140 46,115 44,92 Z" fill="#1e1b18" stroke="#1e1b18" stroke-width="2"/>
+
+  <!-- Wavy hair highlights / inner lines -->
+  <path d="M 94,42 C 104,58 116,72 108,82" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 48,110 C 44,130 52,150 48,170" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 152,110 C 156,130 148,150 152,170" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Eyebrows -->
+  <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M 112,88 Q 120,84 130,88" fill="none" stroke="#1e1b18" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Eyes -->
+  <ellipse cx="79" cy="98" rx="5" ry="6" fill="#1e1b18"/>
+  <ellipse cx="121" cy="98" rx="5" ry="6" fill="#1e1b18"/>
+
+  <!-- Nose -->
+  <ellipse cx="100" cy="113" rx="1.5" ry="2" fill="#1e1b18"/>
+
+  <!-- Mouth -->
+  <path d="M 94,124 L 106,124" stroke="#1e1b18" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

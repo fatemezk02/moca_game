@@ -86,7 +86,7 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
     'gallery-03': [
       { id: 'artwork-g03-star', starId: 'star-03', title: 'در جست‌وجوی فن و فضیلت', defaultX: 363, defaultY: 446 },
       { id: 'star-04', starId: 'star-04', title: 'چهره‌های مشهور، در یک قاب', defaultX: 362, defaultY: 227 },
-      { id: 'star-05', starId: 'star-05', title: 'ژاپن در یک قاب', defaultX: 504, defaultY: 120 },
+      { id: 'star-05', starId: 'star-05', title: 'ژاپن در یک قاب', defaultX: 120, defaultY: 504 },
       { id: 'star-06', starId: 'star-06', title: 'خودنگارهٔ چرخان نادار', defaultX: 442, defaultY: 214 },
     ],
     'gallery-04': [
