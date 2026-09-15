@@ -204,8 +204,8 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
             type: 'icon',
             galleryId: 'gallery-05',
             title: 'اطلاعات گالری ۰۵',
-            x: 341,
-            y: 365,
+            x: 215,
+            y: 242,
             iconType: 'preset-question',
             width: 48,
             height: 34,
@@ -285,7 +285,8 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
             style={{
               left: `${leftPercent}%`,
               top: `${topPercent}%`,
-              transform: 'translate(-50%, -50%)',
+              transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+              transformOrigin: 'center center',
             }}
             className="absolute z-30 pointer-events-auto"
           >
@@ -313,8 +314,12 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
               style={{
                 left: `${leftPercent}%`,
                 top: `${topPercent}%`,
+                transform: isGuideQuestion
+                  ? 'translate(-50%, -50%) scale(var(--map-point-scale, 1))'
+                  : 'translate(-50%, -100%) scale(var(--map-point-scale, 1))',
+                transformOrigin: isGuideQuestion ? 'center center' : 'bottom center',
               }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-20"
+              className="absolute pointer-events-auto z-20"
             >
               <div
                 className={isGuideQuestion ? 'relative' : 'relative animate-quick-grow origin-bottom'}
@@ -422,8 +427,10 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
             style={{
               left: `${leftPercent}%`,
               top: `${topPercent}%`,
+              transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+              transformOrigin: 'center center',
             }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30"
+            className="absolute pointer-events-auto z-30"
           >
             {/* Clickable Map Marker Button */}
             <button

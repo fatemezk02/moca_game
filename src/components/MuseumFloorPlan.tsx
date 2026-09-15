@@ -333,6 +333,9 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           aspectRatio: '604.8 / 844.86',
           maxWidth: '100%',
           maxHeight: '100%',
+          ['--map-point-scale' as any]: dimensions
+            ? (dimensions.width / 360).toFixed(4)
+            : '1',
         }}
         className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
       >
@@ -450,7 +453,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
               style={{
                 left: `${posX}%`,
                 top: `${posY}%`,
-                transform: 'translate(-50%, -50%)',
+                transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                transformOrigin: 'center center',
               }}
               className="absolute z-30 pointer-events-auto"
             >
@@ -479,7 +483,10 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                 style={{
                   left: `${posX}%`,
                   top: `${posY}%`,
-                  transform: isLocationPin ? 'translate(-50%, -100%)' : 'translate(-50%, -50%)',
+                  transform: isLocationPin
+                    ? 'translate(-50%, -100%) scale(var(--map-point-scale, 1))'
+                    : 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                  transformOrigin: isLocationPin ? 'bottom center' : 'center center',
                 }}
                 className="absolute z-30 pointer-events-auto"
               >
@@ -560,7 +567,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
               style={{
                 left: `${posX}%`,
                 top: `${posY}%`,
-                transform: 'translate(-50%, -50%)',
+                transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                transformOrigin: 'center center',
               }}
               className="absolute z-30 pointer-events-auto"
             >

@@ -244,7 +244,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
       <AnimatePresence>
         <div
           id="star-discovery-modal-backdrop"
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0e0f0f]/60 backdrop-blur-xs select-none"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-[#0e0f0f]/60 backdrop-blur-xs select-none"
           onClick={onClose}
         >
           <motion.div
@@ -287,7 +287,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
     <AnimatePresence>
       <div
         id="star-discovery-modal-backdrop"
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0e0f0f]/60 backdrop-blur-xs select-none"
+        className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-[#0e0f0f]/60 backdrop-blur-xs select-none"
         onClick={onClose}
       >
         <motion.div

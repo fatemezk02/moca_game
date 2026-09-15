@@ -51,8 +51,10 @@ export const PuzzlePoint: React.FC<PuzzlePointProps> = ({
       style={{
         left: `${leftPercent}%`,
         top: `${topPercent}%`,
+        transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+        transformOrigin: 'center center',
       }}
-      className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-25"
+      className="absolute pointer-events-auto z-25"
     >
       <button
         onClick={(e) => onClick(puzzlePoint, e)}

@@ -52,7 +52,7 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({
       <div
         id="experience-modal-backdrop"
         onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-[#1e1b18]/65 backdrop-blur-sm overflow-y-auto"
+        className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-[#1e1b18]/65 backdrop-blur-sm overflow-y-auto"
         dir="rtl"
       >
         <motion.div

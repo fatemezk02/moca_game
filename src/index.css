@@ -13,6 +13,7 @@
     --neo-yellow: #fbbf24;
     --neo-blue: #93c5fd;
     --neo-red: #ef4444;
+    --map-point-scale: 1;
   }
 
   body {

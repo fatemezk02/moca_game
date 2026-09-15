@@ -233,8 +233,8 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
           type: 'icon' as const,
           galleryId: 'gallery-03',
           title: 'Gallery 03 Questions & Quiz',
-          x: 281,
-          y: 426,
+          x: 240,
+          y: 374,
           iconType: 'preset-question' as const,
           width: 48,
           height: 34,
@@ -311,7 +311,8 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
                   style={{
                     left: `${leftPercent}%`,
                     top: `${topPercent}%`,
-                    transform: 'translate(-50%, -50%)',
+                    transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                    transformOrigin: 'center center',
                   }}
                   className="absolute z-30 pointer-events-auto"
                 >
@@ -339,8 +340,12 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
                     style={{
                       left: `${leftPercent}%`,
                       top: `${topPercent}%`,
+                      transform: isGuideQuestion
+                        ? 'translate(-50%, -50%) scale(var(--map-point-scale, 1))'
+                        : 'translate(-50%, -100%) scale(var(--map-point-scale, 1))',
+                      transformOrigin: isGuideQuestion ? 'center center' : 'bottom center',
                     }}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-20"
+                    className="absolute pointer-events-auto z-20"
                   >
                     <div
                       className={isGuideQuestion ? 'relative' : 'relative animate-quick-grow origin-bottom'}
@@ -448,8 +453,10 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
                   style={{
                     left: `${leftPercent}%`,
                     top: `${topPercent}%`,
+                    transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                    transformOrigin: 'center center',
                   }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30"
+                  className="absolute pointer-events-auto z-30"
                 >
                   {/* Clickable Map Marker Button */}
                   <button

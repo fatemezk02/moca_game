@@ -23,7 +23,7 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#1e1b18]/60 backdrop-blur-xs select-none">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-[#1e1b18]/60 backdrop-blur-xs select-none">
         {/* Backdrop click to dismiss */}
         <div className="absolute inset-0" onClick={onClose} />
 

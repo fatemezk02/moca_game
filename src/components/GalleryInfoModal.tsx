@@ -66,7 +66,7 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
       <AnimatePresence>
         <div
           id="gallery-info-modal-backdrop-fallback"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e1b18]/60 backdrop-blur-xs select-none"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1e1b18]/60 backdrop-blur-xs select-none"
           onClick={onClose}
         >
           <motion.div
@@ -121,7 +121,7 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
     <AnimatePresence>
       <div
         id="gallery-info-modal-backdrop"
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#1e1b18]/60 backdrop-blur-xs select-none"
+        className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-[#1e1b18]/60 backdrop-blur-xs select-none"
         onClick={onClose}
       >
         {/* Outer 3D Perspective Wrapper */}

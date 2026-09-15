@@ -127,8 +127,13 @@ export const StarPoint: React.FC<StarPointProps> = ({
       style={{
         left: `${leftPercent}%`,
         top: `${topPercent}%`,
+        transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+        transformOrigin: 'center center',
+        zIndex: isLabelOpen || isSelected ? 60 : 30,
       }}
-      className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30"
+      className={`absolute pointer-events-auto ${
+        isLabelOpen || isSelected ? 'z-[60]' : 'z-30'
+      }`}
     >
       {/* Clickable Star Marker with standard visual design & shine */}
       <button
@@ -161,9 +166,10 @@ export const StarPoint: React.FC<StarPointProps> = ({
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             style={{
               transformOrigin: isRightSide ? 'right center' : 'left center',
+              zIndex: 70,
             }}
             onClick={handleLabelClick}
-            className={`absolute top-1/2 -translate-y-1/2 z-40 pointer-events-auto cursor-pointer ${
+            className={`absolute top-1/2 -translate-y-1/2 z-[70] pointer-events-auto cursor-pointer ${
               isRightSide ? 'right-[90%]' : 'left-[90%]'
             }`}
           >

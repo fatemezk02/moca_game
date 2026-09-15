@@ -190,6 +190,9 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
             aspectRatio: `${mapWidth} / ${mapHeight}`,
             maxWidth: '100%',
             maxHeight: '100%',
+            ['--map-point-scale' as any]: dimensions
+              ? (dimensions.width / 360).toFixed(4)
+              : '1',
           }}
           className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
         >

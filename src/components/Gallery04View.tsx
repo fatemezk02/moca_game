@@ -206,8 +206,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
           type: 'icon' as const,
           galleryId: 'gallery-04',
           title: 'اطلاعات گالری ۰۴',
-          x: 249,
-          y: 426,
+          x: 244,
+          y: 387,
           iconType: 'preset-question' as const,
           width: 48,
           height: 34,
@@ -283,7 +283,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
             style={{
               left: `${leftPercent}%`,
               top: `${topPercent}%`,
-              transform: 'translate(-50%, -50%)',
+              transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+              transformOrigin: 'center center',
             }}
             className="absolute z-30 pointer-events-auto"
           >
@@ -308,8 +309,10 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
             style={{
               left: `${leftPercent}%`,
               top: `${topPercent}%`,
+              transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+              transformOrigin: 'center center',
             }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-20"
+            className="absolute pointer-events-auto z-20"
           >
             <button
               onClick={(e) => handleIconPointClick(iconPoint, e)}
@@ -404,8 +407,10 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
             style={{
               left: `${leftPercent}%`,
               top: `${topPercent}%`,
+              transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+              transformOrigin: 'center center',
             }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30"
+            className="absolute pointer-events-auto z-30"
           >
             {/* Clickable Map Marker Button */}
             <button

@@ -125,8 +125,10 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
       style={{
         left: `${leftPercent}%`,
         top: `${topPercent}%`,
+        transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+        transformOrigin: 'center center',
       }}
-      className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-30"
+      className="absolute pointer-events-auto z-30"
     >
       {/* Clickable Experience Marker */}
       <button

@@ -52,7 +52,8 @@ export const GalleryLockIndicator: React.FC<GalleryLockIndicatorProps> = ({
       style={{
         left: `${mapX}%`,
         top: `${mapY}%`,
-        transform: 'translate(-50%, -50%)',
+        transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+        transformOrigin: 'center center',
       }}
       className={`absolute z-35 pointer-events-auto select-none ${className}`}
       title={tooltipText}
