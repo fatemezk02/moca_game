@@ -186,8 +186,8 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
     const configuredCollectionPoints = points.filter(
       (p): p is AdminCollectionPoint =>
         p.type === 'collection' &&
-        !['star-26', 'star-27', 'star-28'].includes(p.id) &&
-        !['star-26', 'star-27', 'star-28'].includes(p.starId || '')
+        !['star-20', 'star-21', 'star-22', 'star-23', 'star-26', 'star-27', 'star-28'].includes(p.id) &&
+        !['star-20', 'star-21', 'star-22', 'star-23', 'star-26', 'star-27', 'star-28'].includes(p.starId || '')
     );
 
     // Query active stars from ContentService
@@ -197,7 +197,7 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
       const starId = s.starId || s.id;
       return (
         (gId === 'gallery_09' || gId === 'gallery-09') &&
-        !['star-26', 'star-27', 'star-28'].includes(starId)
+        !['star-20', 'star-21', 'star-22', 'star-23', 'star-26', 'star-27', 'star-28'].includes(starId)
       );
     });
 

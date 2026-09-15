@@ -232,7 +232,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
             </span>
           </div>
           <h1 className="font-sans-custom text-[20px] sm:text-[22px] font-black text-[#1e1b18] tracking-tight mt-0.5">
-            تالارها و مأموریت‌ها
+            کجا هستید؟
           </h1>
         </div>
 

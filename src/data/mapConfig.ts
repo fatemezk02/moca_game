@@ -312,7 +312,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'فلش راهنما به گالری ۰۳',
         x: 431,
         y: 216,
-        rotation: 180,
+        rotation: 90,
         size: 44,
         destination: 'gallery-03',
         visibilityConditions: [
@@ -428,7 +428,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'ورود به گالری ۰۳',
         x: 431,
         y: 216,
-        rotation: 180,
+        rotation: 90,
         size: 44,
         destination: 'gallery-03',
         visibilityConditions: [],
@@ -1398,7 +1398,7 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                   !(key === 'gallery-01' && (c.id === 'artwork-02' || c.id === 'artwork-03' || c.id === 'artwork-04')) &&
                   !((key === 'gallery-07' || key === 'gallery_07') && (c.id === 'star-16' || c.id === 'star-17' || c.id === 'star-18')) &&
                   !((key === 'gallery-08' || key === 'gallery_08') && (c.id === 'star-20' || c.id === 'star-21' || c.id === 'star-22' || c.id === 'star-23')) &&
-                  !((key === 'gallery-09' || key === 'gallery_09') && (c.id === 'star-26' || c.id === 'star-27' || c.id === 'star-28'))
+                  !((key === 'gallery-09' || key === 'gallery_09') && (c.id === 'star-20' || c.id === 'star-21' || c.id === 'star-22' || c.id === 'star-23' || c.id === 'star-26' || c.id === 'star-27' || c.id === 'star-28'))
               );
               const combinedCollections = [...savedCollections];
               for (const defCol of defaultCollections) {
@@ -1462,7 +1462,7 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
             !((safeGalleryId === 'gallery-01' || canonId === 'gallery-01') && (cp.id === 'artwork-02' || cp.id === 'artwork-03' || cp.id === 'artwork-04')) &&
             !((safeGalleryId === 'gallery-07' || canonId === 'gallery-07' || safeGalleryId === 'gallery_07' || canonId === 'gallery_07') && (cp.id === 'star-16' || cp.id === 'star-17' || cp.id === 'star-18')) &&
             !((safeGalleryId === 'gallery-08' || canonId === 'gallery-08' || safeGalleryId === 'gallery_08' || canonId === 'gallery_08') && (cp.id === 'star-20' || cp.id === 'star-21' || cp.id === 'star-22' || cp.id === 'star-23')) &&
-            !((safeGalleryId === 'gallery-09' || canonId === 'gallery-09' || safeGalleryId === 'gallery_09' || canonId === 'gallery_09') && (cp.id === 'star-26' || cp.id === 'star-27' || cp.id === 'star-28'))
+            !((safeGalleryId === 'gallery-09' || canonId === 'gallery-09' || safeGalleryId === 'gallery_09' || canonId === 'gallery_09') && (cp.id === 'star-20' || cp.id === 'star-21' || cp.id === 'star-22' || cp.id === 'star-23' || cp.id === 'star-26' || cp.id === 'star-27' || cp.id === 'star-28'))
         )
         .map((cp) => ({
           ...cp,

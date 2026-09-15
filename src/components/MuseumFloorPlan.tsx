@@ -519,7 +519,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
 
         {/* Clickable Marker Nodes Layer */}
         {collections
-          .filter((col) => !['col-02', 'col-04', 'col-07'].includes(col.id))
+          .filter((col) => !['col-02', 'col-04', 'col-05', 'col-07'].includes(col.id))
           .map((col) => {
           const isSelected = selectedCollection?.id === col.id;
           const isCenterMonolith = col.id === 'col-05';
