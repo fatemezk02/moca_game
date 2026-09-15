@@ -6,6 +6,7 @@ export interface ArtworkFrameProps {
   style?: React.CSSProperties;
   fillContainer?: boolean;
   aspectRatio?: number;
+  wallScale?: number;
 }
 
 /**
@@ -14,6 +15,7 @@ export interface ArtworkFrameProps {
  * Features a refined layered museum moulding, subtle brass/gold inlay, and restrained corner ornaments.
  * When fillContainer is true, fills 100% of the parent dimensions seamlessly.
  * Frame container and inner image container are mathematically bound to the same aspect ratio.
+ * Moulding border and padding scale proportionally with wallScale so they never choke small screens.
  */
 export const ArtworkFrame: React.FC<ArtworkFrameProps> = ({
   children,
@@ -21,28 +23,33 @@ export const ArtworkFrame: React.FC<ArtworkFrameProps> = ({
   style = {},
   fillContainer = false,
   aspectRatio,
+  wallScale = 1,
 }) => {
   const isFull = fillContainer || className.includes('w-full') || className.includes('h-full');
 
-  // Calculate proportional border/moulding padding to ensure the inner aperture
-  // has the exact same aspect ratio as the outer frame container:
-  // padX / padY === aspectRatio, so (W - 2*padX) / (H - 2*padY) === W / H === aspectRatio
+  // Calculate proportional border/moulding padding scaled by wallScale:
   const safeRatio = Math.max(0.2, Math.min(5, aspectRatio || 1));
-  const baseBorder = 7;
+  const scale = Math.max(0.2, Math.min(3, wallScale || 1));
+  const baseBorder = Math.max(2, Math.round(7 * scale * 10) / 10);
   const sqrtR = Math.sqrt(safeRatio);
   const padX = Math.round(baseBorder * sqrtR * 10) / 10;
   const padY = Math.round((baseBorder / sqrtR) * 10) / 10;
 
-  const filletPadX = Math.max(1, Math.round(padX * 0.25 * 10) / 10);
-  const filletPadY = Math.max(1, Math.round(padY * 0.25 * 10) / 10);
+  const filletPadX = Math.max(0.5, Math.round(padX * 0.25 * 10) / 10);
+  const filletPadY = Math.max(0.5, Math.round(padY * 0.25 * 10) / 10);
+  const outerBorderWidth = Math.max(1, Math.round(2 * scale));
+  const cornerSize = Math.max(6, Math.round(12 * scale));
 
   return (
     <div
       id="museum-artwork-frame"
       className={`relative ${
         isFull ? 'w-full h-full flex' : 'inline-flex'
-      } items-center justify-center bg-[#f6f4f0] border-2 border-[#1c1d1d] select-none box-border ${className}`}
+      } items-center justify-center bg-[#f6f4f0] select-none box-border ${className}`}
       style={{
+        borderWidth: `${outerBorderWidth}px`,
+        borderStyle: 'solid',
+        borderColor: '#1c1d1d',
         paddingTop: `${padY}px`,
         paddingBottom: `${padY}px`,
         paddingLeft: `${padX}px`,
@@ -55,7 +62,8 @@ export const ArtworkFrame: React.FC<ArtworkFrameProps> = ({
       {/* Decorative Corner Ornaments */}
       {/* Top-Left */}
       <svg
-        className="absolute top-1 left-1 w-2.5 h-2.5 sm:w-3 sm:h-3 pointer-events-none text-[#c5a059] z-10"
+        className="absolute top-0.5 left-0.5 pointer-events-none text-[#c5a059] z-10"
+        style={{ width: `${cornerSize}px`, height: `${cornerSize}px` }}
         viewBox="0 0 12 12"
         fill="none"
         aria-hidden="true"
@@ -65,7 +73,8 @@ export const ArtworkFrame: React.FC<ArtworkFrameProps> = ({
       </svg>
       {/* Top-Right */}
       <svg
-        className="absolute top-1 right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 pointer-events-none text-[#c5a059] z-10"
+        className="absolute top-0.5 right-0.5 pointer-events-none text-[#c5a059] z-10"
+        style={{ width: `${cornerSize}px`, height: `${cornerSize}px` }}
         viewBox="0 0 12 12"
         fill="none"
         aria-hidden="true"
@@ -75,7 +84,8 @@ export const ArtworkFrame: React.FC<ArtworkFrameProps> = ({
       </svg>
       {/* Bottom-Left */}
       <svg
-        className="absolute bottom-1 left-1 w-2.5 h-2.5 sm:w-3 sm:h-3 pointer-events-none text-[#c5a059] z-10"
+        className="absolute bottom-0.5 left-0.5 pointer-events-none text-[#c5a059] z-10"
+        style={{ width: `${cornerSize}px`, height: `${cornerSize}px` }}
         viewBox="0 0 12 12"
         fill="none"
         aria-hidden="true"
@@ -85,7 +95,8 @@ export const ArtworkFrame: React.FC<ArtworkFrameProps> = ({
       </svg>
       {/* Bottom-Right */}
       <svg
-        className="absolute bottom-1 right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 pointer-events-none text-[#c5a059] z-10"
+        className="absolute bottom-0.5 right-0.5 pointer-events-none text-[#c5a059] z-10"
+        style={{ width: `${cornerSize}px`, height: `${cornerSize}px` }}
         viewBox="0 0 12 12"
         fill="none"
         aria-hidden="true"

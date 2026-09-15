@@ -183,6 +183,35 @@ export function spendCoins(amount: number): boolean {
 }
 
 /**
+ * Deducts a specified amount of coins from the player's current balance as a penalty.
+ * Clamps deduction to current coin balance so balance never drops below zero.
+ */
+export function deductCoins(amount: number): number {
+  try {
+    if (amount <= 0) return 0;
+    const currentStats = getPlayerStats();
+    const actualDeduction = Math.min(currentStats.coins, amount);
+    if (actualDeduction <= 0) return 0;
+
+    const currentSpent = getSpentCoins();
+    const newSpent = currentSpent + actualDeduction;
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(STORAGE_SPENT_COINS_KEY, newSpent.toString());
+      window.dispatchEvent(
+        new CustomEvent('museum_player_stats_updated', {
+          detail: getPlayerStats(),
+        })
+      );
+    }
+    return actualDeduction;
+  } catch (err) {
+    console.error('Error deducting coins:', err);
+    return 0;
+  }
+}
+
+/**
  * Awards coins to the player's balance (e.g. from discovery rewards).
  */
 export function awardCoins(amount: number): void {

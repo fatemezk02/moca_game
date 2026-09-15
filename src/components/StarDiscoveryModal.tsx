@@ -24,6 +24,7 @@ import {
 import { contentService } from '../services/content/contentService';
 import { toPersianDigits, formatTwoDigitPersian } from '../services/content/mappers';
 import { usePlayerStats } from '../hooks/usePlayerStats';
+import { deductCoins } from '../data/questionProgressStore';
 import { ArtworkFrame } from './ArtworkFrame';
 
 export interface StarDiscoveryModalProps {
@@ -211,6 +212,8 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
       unlockStarPointViaQuestion(starPointId, netReward);
       setPhase('correct_answer');
     } else {
+      // Deduct exactly 3 coins from the player's current coin balance
+      deductCoins(3);
       // Incorrect answer: 0 coins, remains locked
       setPhase('incorrect_answer');
     }

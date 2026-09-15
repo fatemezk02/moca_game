@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MuseumCollection } from '../types';
 import { CuratorExhibitionWall } from './CuratorExhibitionWall';
+import { markCollectionsAsViewed } from '../data/collectionNotificationStore';
 
 interface CollectionListViewProps {
   collections: MuseumCollection[];
@@ -13,6 +14,10 @@ export const CollectionListView: React.FC<CollectionListViewProps> = ({
   onSelectCollectionOnMap,
   onOpenDetailModal,
 }) => {
+  useEffect(() => {
+    markCollectionsAsViewed();
+  }, []);
+
   return (
     <div className="w-full h-full overflow-hidden select-none">
       <CuratorExhibitionWall

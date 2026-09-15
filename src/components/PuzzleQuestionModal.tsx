@@ -24,6 +24,7 @@ import {
   isPuzzlePointCompleted,
   markPuzzlePointCompleted,
 } from '../data/puzzleProgressStore';
+import { deductCoins } from '../data/questionProgressStore';
 import { markQuestionAnswered } from '../data/arrowConditionsStore';
 import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian, normalizeGalleryId, toPersianDigits } from '../services/content/mappers';
@@ -216,6 +217,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
     const isCorrect = correctIdx === -1 || index === correctIdx;
 
     if (!isCorrect) {
+      deductCoins(5);
       setWrongOptionIndex(index);
       setIsAnswering(true);
       setTimeout(() => {

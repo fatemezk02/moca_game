@@ -11,6 +11,7 @@ import {
   getLocationPinsVisible,
   toggleLocationPinsVisible,
 } from '../data/locationPinsVisibilityStore';
+import { markCollectionsAsViewed } from '../data/collectionNotificationStore';
 
 export interface SharedGalleryPageLayoutProps {
   galleryId: string;
@@ -233,11 +234,13 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
           if (tab === 'map') {
             onNavigateBack();
           } else {
+            if (tab === 'collection') {
+              markCollectionsAsViewed();
+            }
             onSelectTab?.(tab);
             onNavigateBack();
           }
         }}
-        collectionCount={8}
       />
 
       {/* Modals & Popups */}

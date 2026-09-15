@@ -1,10 +1,11 @@
 import React from 'react';
 import { Map, Layers, ClipboardList } from 'lucide-react';
+import { useCollectionNotificationCount } from '../data/collectionNotificationStore';
 
 interface BottomNavBarProps {
   activeTab: 'map' | 'collection' | 'tasks' | 'curator';
   onTabChange: (tab: 'map' | 'collection' | 'tasks') => void;
-  collectionCount: number;
+  collectionCount?: number;
 }
 
 export const BottomNavBar: React.FC<BottomNavBarProps> = ({
@@ -12,6 +13,9 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
   onTabChange,
   collectionCount,
 }) => {
+  const unreadNotificationCount = useCollectionNotificationCount();
+  const displayCount = collectionCount !== undefined ? collectionCount : unreadNotificationCount;
+
   return (
     <nav
       id="bottom-navigation-bar"
@@ -44,10 +48,15 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
         >
           <div className="relative">
             <Layers className="w-5 h-5 mb-0.5" />
-            {/* Red notification badge matching reference image */}
-            <span className="absolute -top-1.5 -right-3 min-w-[18px] h-[18px] bg-[#ef4444] text-white text-[10px] font-black flex items-center justify-center px-1 rounded-full border-[1.5px] border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18]">
-              {collectionCount}
-            </span>
+            {/* Red notification badge matching reference image - only visible when displayCount > 0 */}
+            {displayCount > 0 && (
+              <span
+                id="collections-unread-badge"
+                className="absolute -top-1.5 -right-3 min-w-[18px] h-[18px] bg-[#ef4444] text-white text-[10px] font-black flex items-center justify-center px-1 rounded-full border-[1.5px] border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18] pointer-events-none"
+              >
+                {displayCount}
+              </span>
+            )}
           </div>
           <span className="font-sans-custom text-[11px] font-bold">مجموعه‌ها</span>
         </button>

@@ -405,19 +405,23 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         const puzzleArtwork = contentService.getGalleryPuzzleArtwork(gid);
         const config = getCuratorFrameConfig(gid, undefined, idx);
         const artworkTitle = puzzleArtwork?.title || gObj?.nameFa || gid;
+        const refW = config.refWidth ?? config.width;
+        const refH = config.refHeight ?? config.height;
+        const centerX = config.centerX ?? (config.centerNormX * mapWidth);
+        const centerY = config.centerY ?? (config.centerNormY * mapHeight);
 
         list.push({
           id: gid,
           type: 'curator-frame',
           title: `قاب ${gObj?.nameFa || gid} (${artworkTitle})`,
-          originalX: config.x,
-          originalY: config.y,
-          currentX: config.x,
-          currentY: config.y,
-          originalWidth: config.width,
-          originalHeight: config.height,
-          currentWidth: config.width,
-          currentHeight: config.height,
+          originalX: centerX,
+          originalY: centerY,
+          currentX: centerX,
+          currentY: centerY,
+          originalWidth: refW,
+          originalHeight: refH,
+          currentWidth: refW,
+          currentHeight: refH,
           aspectRatio: config.aspectRatio,
           subType: gid,
           extra: {
@@ -724,12 +728,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       const mRect = mapContainerEl.getBoundingClientRect();
       const posX = dragCoords && selectedElement ? dragCoords.x : selectedElement?.currentX ?? 0;
       const posY = dragCoords && selectedElement ? dragCoords.y : selectedElement?.currentY ?? 0;
-      const fW = dragCoords?.width ?? selectedElement?.currentWidth ?? 140;
-      const fH = dragCoords?.height ?? selectedElement?.currentHeight ?? 180;
 
       return {
-        x: mRect.left + ((posX + fW / 2) / mapWidth) * mRect.width,
-        y: mRect.top + ((posY + fH / 2) / mapHeight) * mRect.height,
+        x: mRect.left + (posX / mapWidth) * mRect.width,
+        y: mRect.top + (posY / mapHeight) * mRect.height,
       };
     }
 
@@ -913,10 +915,12 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       const nextW = Math.max(40, Math.min(550, Math.round(startW + deltaCanvasX)));
       // STRICT ASPECT RATIO PRESERVATION:
       const nextH = Math.max(30, Math.min(550, Math.round(nextW / ratio)));
+      const curCenterX = dragCoords?.x ?? selectedElement.currentX;
+      const curCenterY = dragCoords?.y ?? selectedElement.currentY;
 
       setDragCoords((prev) => ({
-        x: prev?.x ?? selectedElement.currentX,
-        y: prev?.y ?? selectedElement.currentY,
+        x: curCenterX,
+        y: curCenterY,
         width: nextW,
         height: nextH,
       }));
@@ -929,14 +933,16 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         )
       );
 
-      // Instant live preview event for the wall
+      // Instant live preview event for the wall with center-based coordinates
       window.dispatchEvent(
         new CustomEvent('curator_frame_live_drag', {
           detail: {
             galleryId: selectedElement.id,
             coords: {
-              x: dragCoords?.x ?? selectedElement.currentX,
-              y: dragCoords?.y ?? selectedElement.currentY,
+              centerX: curCenterX,
+              centerY: curCenterY,
+              x: Math.round(curCenterX - nextW / 2),
+              y: Math.round(curCenterY - nextH / 2),
               width: nextW,
               height: nextH,
             },
@@ -960,18 +966,18 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         const pointerCanvasX = offsetX + ((e.clientX - rect.left) / rect.width) * mapWidth;
         const pointerCanvasY = offsetY + ((e.clientY - rect.top) / rect.height) * mapHeight;
 
-        const targetX = Math.round(pointerCanvasX - dragOffsetRef.current.offsetX);
-        const targetY = Math.round(pointerCanvasY - dragOffsetRef.current.offsetY);
+        const targetCenterX = Math.round(pointerCanvasX - dragOffsetRef.current.offsetX);
+        const targetCenterY = Math.round(pointerCanvasY - dragOffsetRef.current.offsetY);
 
         const currentW = dragCoords?.width ?? selectedElement.currentWidth ?? 140;
         const currentH = dragCoords?.height ?? selectedElement.currentHeight ?? 180;
 
-        const clampedX = Math.max(0, targetX);
-        const clampedY = Math.max(0, targetY);
+        const clampedCenterX = Math.round(Math.max(currentW / 2, Math.min(mapWidth - currentW / 2, targetCenterX)));
+        const clampedCenterY = Math.round(Math.max(currentH / 2, Math.min(mapHeight - currentH / 2, targetCenterY)));
 
         setDragCoords((prev) => ({
-          x: clampedX,
-          y: clampedY,
+          x: clampedCenterX,
+          y: clampedCenterY,
           width: currentW,
           height: currentH,
         }));
@@ -979,7 +985,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         setElements((prev) =>
           prev.map((el) =>
             el.id === selectedId
-              ? { ...el, currentX: clampedX, currentY: clampedY }
+              ? { ...el, currentX: clampedCenterX, currentY: clampedCenterY }
               : el
           )
         );
@@ -989,8 +995,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
             detail: {
               galleryId: selectedElement.id,
               coords: {
-                x: clampedX,
-                y: clampedY,
+                centerX: clampedCenterX,
+                centerY: clampedCenterY,
+                x: Math.round(clampedCenterX - currentW / 2),
+                y: Math.round(clampedCenterY - currentH / 2),
                 width: currentW,
                 height: currentH,
               },
@@ -1054,10 +1062,15 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     const curY = dragCoords?.y ?? selectedElement.currentY;
     const curW = dragCoords?.width ?? selectedElement.currentWidth ?? 140;
     const curH = dragCoords?.height ?? selectedElement.currentHeight ?? 180;
+    const isCurator = selectedElement.type === 'curator-frame';
+    const minX = isCurator ? Math.round(curW / 2) : 0;
+    const maxX = isCurator ? Math.round(mapWidth - curW / 2) : mapWidth;
+    const minY = isCurator ? Math.round(curH / 2) : 0;
+    const maxY = isCurator ? Math.round(mapHeight - curH / 2) : mapHeight;
 
     const nextCoords = {
-      x: axis === 'x' ? Math.max(0, Math.min(mapWidth - (selectedElement.type === 'curator-frame' ? curW : 0), curX + delta)) : curX,
-      y: axis === 'y' ? Math.max(0, Math.min(mapHeight - (selectedElement.type === 'curator-frame' ? curH : 0), curY + delta)) : curY,
+      x: axis === 'x' ? Math.max(minX, Math.min(maxX, curX + delta)) : curX,
+      y: axis === 'y' ? Math.max(minY, Math.min(maxY, curY + delta)) : curY,
       width: curW,
       height: curH,
     };
@@ -1069,12 +1082,19 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       )
     );
 
-    if (selectedElement.type === 'curator-frame') {
+    if (isCurator) {
       window.dispatchEvent(
         new CustomEvent('curator_frame_live_drag', {
           detail: {
             galleryId: selectedElement.id,
-            coords: nextCoords,
+            coords: {
+              centerX: nextCoords.x,
+              centerY: nextCoords.y,
+              x: Math.round(nextCoords.x - curW / 2),
+              y: Math.round(nextCoords.y - curH / 2),
+              width: curW,
+              height: curH,
+            },
           },
         })
       );
@@ -1113,7 +1133,14 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       new CustomEvent('curator_frame_live_drag', {
         detail: {
           galleryId: selectedElement.id,
-          coords: nextCoords,
+          coords: {
+            centerX: nextCoords.x,
+            centerY: nextCoords.y,
+            x: Math.round(nextCoords.x - nextW / 2),
+            y: Math.round(nextCoords.y - nextH / 2),
+            width: nextW,
+            height: nextH,
+          },
         },
       })
     );
@@ -1151,7 +1178,14 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       new CustomEvent('curator_frame_live_drag', {
         detail: {
           galleryId: selectedElement.id,
-          coords: nextCoords,
+          coords: {
+            centerX: nextCoords.x,
+            centerY: nextCoords.y,
+            x: Math.round(nextCoords.x - nextW / 2),
+            y: Math.round(nextCoords.y - nextH / 2),
+            width: nextW,
+            height: nextH,
+          },
         },
       })
     );
@@ -1256,8 +1290,8 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         galleryId: el.id,
         artworkId: el.extra?.artworkId,
         title: el.extra?.artworkTitle || el.title,
-        x: finalX,
-        y: finalY,
+        centerX: finalX,
+        centerY: finalY,
         width: finalW,
         height: finalH,
         scaleMultiplier: scaleMult,
@@ -1390,8 +1424,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
           detail: {
             galleryId: el.id,
             coords: {
-              x: el.originalX,
-              y: el.originalY,
+              centerX: el.originalX,
+              centerY: el.originalY,
+              x: Math.round(el.originalX - el.originalWidth / 2),
+              y: Math.round(el.originalY - el.originalHeight / 2),
               width: el.originalWidth,
               height: el.originalHeight,
             },
@@ -1651,8 +1687,8 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                 const fW = isSelected && dragCoords?.width ? dragCoords.width : (item.currentWidth || 140);
                 const fH = isSelected && dragCoords?.height ? dragCoords.height : (item.currentHeight || 180);
 
-                const leftPct = (posX / mapWidth) * 100;
-                const topPct = (posY / mapHeight) * 100;
+                const centerPctX = (posX / mapWidth) * 100;
+                const centerPctY = (posY / mapHeight) * 100;
                 const widthPct = (fW / mapWidth) * 100;
                 const heightPct = (fH / mapHeight) * 100;
 
@@ -1661,10 +1697,11 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                     key={item.id}
                     id={`dev-curator-frame-${item.id}`}
                     style={{
-                      left: `${leftPct}%`,
-                      top: `${topPct}%`,
+                      left: `${centerPctX}%`,
+                      top: `${centerPctY}%`,
                       width: `${widthPct}%`,
                       height: `${heightPct}%`,
+                      transform: 'translate(-50%, -50%)',
                     }}
                     onPointerDown={(e) => handlePointerDown(item.id, e)}
                     onPointerMove={handlePointerMove}

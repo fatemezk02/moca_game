@@ -206,42 +206,49 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
   const frameItems = artworks.map((art, index) => {
     const fallbackSlot = slots[index] || slots[slots.length - 1];
     const frameConfig = getCuratorFrameConfig(art.galleryId, fallbackSlot, index);
-    const liveOverride = liveDragOverrides[art.galleryId];
+    const liveOverride = liveDragOverrides[art.galleryId] as
+      | { x: number; y: number; width: number; height: number; centerX?: number; centerY?: number }
+      | undefined;
 
-    const posX = liveOverride ? liveOverride.x : frameConfig.x;
-    const posY = liveOverride ? liveOverride.y : frameConfig.y;
-    const frameWidth = liveOverride ? liveOverride.width : frameConfig.width;
-    const frameHeight = liveOverride ? liveOverride.height : frameConfig.height;
+    const centerNormX =
+      liveOverride && typeof liveOverride.centerX === 'number'
+        ? liveOverride.centerX / CURATOR_VIRTUAL_WIDTH
+        : liveOverride
+        ? (liveOverride.x + liveOverride.width / 2) / CURATOR_VIRTUAL_WIDTH
+        : frameConfig.centerNormX;
 
-    // Frame dimensions strictly match the artwork's real aspect ratio
+    const centerNormY =
+      liveOverride && typeof liveOverride.centerY === 'number'
+        ? liveOverride.centerY / CURATOR_VIRTUAL_HEIGHT
+        : liveOverride
+        ? (liveOverride.y + liveOverride.height / 2) / CURATOR_VIRTUAL_HEIGHT
+        : frameConfig.centerNormY;
+
+    const refWidth = liveOverride?.width ?? frameConfig.refWidth ?? frameConfig.width;
+    const refHeight = liveOverride?.height ?? frameConfig.refHeight ?? frameConfig.height;
+
+    const normWidth = refWidth / CURATOR_VIRTUAL_WIDTH;
+    const normHeight = refHeight / CURATOR_VIRTUAL_HEIGHT;
+
+    // Real ratio of the artwork preserved for aperture fitting
     const realRatio =
       art.aspectRatio ||
       frameConfig.aspectRatio ||
-      frameWidth / Math.max(1, frameHeight);
-
-    const fitted = calculateFittedFrameDimensions(
-      posX,
-      posY,
-      frameWidth,
-      frameHeight,
-      realRatio
-    );
+      refWidth / Math.max(1, refHeight);
 
     return {
       art,
       index,
       frameConfig,
       realRatio,
-      x: fitted.x,
-      y: fitted.y,
-      width: fitted.width,
-      height: fitted.height,
-      centerX: fitted.centerX,
-      centerY: fitted.centerY,
-      centerNormX: fitted.centerNormX,
-      centerNormY: fitted.centerNormY,
-      normWidth: fitted.normWidth,
-      normHeight: fitted.normHeight,
+      refWidth,
+      refHeight,
+      centerX: centerNormX * CURATOR_VIRTUAL_WIDTH,
+      centerY: centerNormY * CURATOR_VIRTUAL_HEIGHT,
+      centerNormX,
+      centerNormY,
+      normWidth,
+      normHeight,
       rotation: frameConfig.rotation ?? 0,
     };
   });
@@ -252,7 +259,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
   const availableWallWidth = Math.max(dimensions.width - paddingX * 2, 80);
   const availableWallHeight = Math.max(dimensions.height - paddingY * 2, 80);
 
-  // Background salon wall scales uniformly while keeping reference aspect ratio (720 / 580)
+  // Background salon wall scales uniformly while keeping reference aspect ratio (580 / 720)
   const bgAspectRatio = CURATOR_VIRTUAL_WIDTH / CURATOR_VIRTUAL_HEIGHT;
   let wallWidth = availableWallWidth;
   let wallHeight = wallWidth / bgAspectRatio;
@@ -260,6 +267,9 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
     wallHeight = availableWallHeight;
     wallWidth = wallHeight * bgAspectRatio;
   }
+
+  // Global wall scale factor relative to 580 reference width
+  const wallScale = wallWidth / CURATOR_VIRTUAL_WIDTH;
 
   const handleFrameClick = (art: ExhibitionArtwork) => {
     // If dev positioning tool is active on screen, select this frame for editing
@@ -326,7 +336,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
           }}
         />
 
-        {/* The Scaled Salon Wall Canvas (Reference coordinate system: 720 x 580) */}
+        {/* The Scaled Salon Wall Canvas (Reference coordinate system: 580 x 720) */}
         <div
           id="museum-salon-wall"
           data-virtual-width={CURATOR_VIRTUAL_WIDTH}
@@ -367,15 +377,16 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                 <ArtworkFrame
                   fillContainer
                   aspectRatio={realRatio}
+                  wallScale={wallScale}
                   className="w-full h-full shadow-[0_8px_20px_-4px_rgba(30,27,24,0.22)]"
                 >
                   {art.isCompleted && art.imageUrl ? (
-                    /* Completed Artwork Image: Fits snugly without cropping or distortion */
-                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#1e1b18]">
+                    /* Completed Artwork Image: Fits snugly with object-contain without cropping or distortion */
+                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#121314]">
                       <img
                         src={art.imageUrl}
                         alt={art.title}
-                        className="w-full h-full object-cover select-none pointer-events-none"
+                        className="w-full h-full object-contain select-none pointer-events-none"
                         loading="lazy"
                         onLoad={(e) => {
                           const img = e.currentTarget;

@@ -46,6 +46,7 @@ import { ProfileCreationPage } from './components/ProfileCreationPage';
 import { ProfileModal } from './components/ProfileModal';
 import { FinalCertificateModal } from './components/FinalCertificateModal';
 import { getUserProfile, UserProfile } from './data/userProfileStore';
+import { markCollectionsAsViewed } from './data/collectionNotificationStore';
 
 export default function App() {
   const playerStats = usePlayerStats();
@@ -161,6 +162,13 @@ export default function App() {
   const [activeStarDiscoveryId, setActiveStarDiscoveryId] = useState<string | null>(null);
   const [detailModalCollection, setDetailModalCollection] = useState<MuseumCollection | null>(null);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+
+  // Automatically mark collections as viewed when active tab is collection
+  useEffect(() => {
+    if (activeTab === 'collection') {
+      markCollectionsAsViewed();
+    }
+  }, [activeTab]);
 
   // Map Filter & Zoom & Display Mode states
   const [activeFilter, setActiveFilter] = useState<string>('ALL SECTIONS');
@@ -683,8 +691,10 @@ export default function App() {
         onTabChange={(tab) => {
           setActiveTab(tab);
           setSelectedCollection(null);
+          if (tab === 'collection') {
+            markCollectionsAsViewed();
+          }
         }}
-        collectionCount={MUSEUM_COLLECTIONS.length}
       />
 
       {/* Star Point Discovery Modal for Gallery 00 Star Points */}

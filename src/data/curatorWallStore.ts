@@ -13,10 +13,12 @@
  * ============================================================================
  */
 
-export const CURATOR_VIRTUAL_WIDTH = 720;
-export const CURATOR_VIRTUAL_HEIGHT = 580;
+export const CURATOR_VIRTUAL_WIDTH = 580;
+export const CURATOR_VIRTUAL_HEIGHT = 720;
 
 export const STORAGE_CURATOR_WALL_KEY = 'museum_curator_wall_frames_v1';
+export const STORAGE_VERSION_KEY = 'museum_curator_wall_version';
+export const CURRENT_STORAGE_VERSION = 'v2_580x720';
 
 /**
  * Verified real aspect ratios (image width / image height) of each museum gallery puzzle artwork.
@@ -169,8 +171,8 @@ export function calculateFittedFrameDimensions(
 }
 
 export interface WallFramePosition {
-  x: number; // in virtual canvas 720x580
-  y: number;
+  x: number; // top-left x in 580x720 canvas
+  y: number; // top-left y in 580x720 canvas
   width: number;
   height: number;
   rotation?: number;
@@ -180,54 +182,172 @@ export interface CuratorFrameConfig {
   galleryId: string;
   artworkId: string;
   title?: string;
-  // Position in virtual canvas units (0..720, 0..580)
+  // Authoritative reference dimensions (in 580x720 canvas)
+  refWidth: number;
+  refHeight: number;
+  // Normalized center coordinates relative to 580x720 reference wall
+  centerNormX: number; // centerX / 580
+  centerNormY: number; // centerY / 720
+  // Center coordinates in reference units
+  centerX: number;
+  centerY: number;
+  // Top-left coordinates in reference units (centerX - refWidth/2, centerY - refHeight/2)
   x: number;
   y: number;
   width: number;
   height: number;
-  centerX?: number;
-  centerY?: number;
-  rotation?: number;
   // Background-relative normalized coordinates (0..1)
-  centerNormX: number; // centerX / 720
-  centerNormY: number; // centerY / 580
-  normX: number; // x / 720
-  normY: number; // y / 580
-  normWidth: number; // width / 720
-  normHeight: number; // height / 580
-  aspectRatio: number; // width / height (preserved during resize)
-  scaleMultiplier?: number; // relative scale compared to default size (1.0 = 100%)
+  normX: number; // x / 580
+  normY: number; // y / 720
+  normWidth: number; // refWidth / 580
+  normHeight: number; // refHeight / 720
+  aspectRatio: number; // width / height
+  rotation?: number;
+  scaleMultiplier?: number;
+  _schemaVersion?: string;
+}
+
+export interface ReferenceFrameDef {
+  galleryId: string;
+  topLeftX: number;
+  topLeftY: number;
+  width: number;
+  height: number;
+  aspectRatio: number;
 }
 
 /**
- * Default salon wall layout matching reference diagram (image.png).
- * Keys are gallery IDs matching the curator exhibition frames.
- * Configured with responsive percentage-based padding so frames never touch or overlap.
+ * The authoritative reference layout designed on the 580×720 reference background.
+ * Verified and audited coordinates (never altered at runtime).
+ */
+export const AUTHORITATIVE_REFERENCE_FRAMES: Record<string, ReferenceFrameDef> = {
+  'gallery-02': {
+    galleryId: 'gallery-02',
+    topLeftX: 110,
+    topLeftY: 613,
+    width: 205.4,
+    height: 176.9,
+    aspectRatio: 205.4 / 176.9, // 1.161108
+  },
+  'gallery-01': {
+    // Gallery 01 is an alias for Gallery 02's slot
+    galleryId: 'gallery-01',
+    topLeftX: 110,
+    topLeftY: 613,
+    width: 205.4,
+    height: 176.9,
+    aspectRatio: 205.4 / 176.9,
+  },
+  'gallery-03': {
+    galleryId: 'gallery-03',
+    topLeftX: 246,
+    topLeftY: 243,
+    width: 330,
+    height: 250,
+    aspectRatio: 330 / 250, // 1.32
+  },
+  'gallery-04': {
+    galleryId: 'gallery-04',
+    topLeftX: 522,
+    topLeftY: 305,
+    width: 257,
+    height: 179,
+    aspectRatio: 257 / 179, // 1.435754
+  },
+  'gallery-05': {
+    galleryId: 'gallery-05',
+    topLeftX: 17,
+    topLeftY: 339,
+    width: 239,
+    height: 192,
+    aspectRatio: 239 / 192, // 1.244792
+  },
+  'gallery-06': {
+    galleryId: 'gallery-06',
+    topLeftX: 318,
+    topLeftY: 608,
+    width: 237,
+    height: 329,
+    aspectRatio: 237 / 329, // 0.720365
+  },
+  'gallery-07': {
+    galleryId: 'gallery-07',
+    topLeftX: 44,
+    topLeftY: 57,
+    width: 243,
+    height: 180,
+    aspectRatio: 243 / 180, // 1.35
+  },
+  'gallery-08': {
+    galleryId: 'gallery-08',
+    topLeftX: 513,
+    topLeftY: 37,
+    width: 227,
+    height: 189,
+    aspectRatio: 227 / 189, // 1.201058
+  },
+  'gallery-09': {
+    galleryId: 'gallery-09',
+    topLeftX: 251,
+    topLeftY: 12,
+    width: 185,
+    height: 239,
+    aspectRatio: 185 / 239, // 0.774059
+  },
+};
+
+/**
+ * Builds a CuratorFrameConfig from an authoritative reference definition.
+ * Mathematically converts top-left coordinates to center-based normalized values.
+ */
+export function buildConfigFromReference(ref: ReferenceFrameDef): CuratorFrameConfig {
+  const centerX = ref.topLeftX + ref.width / 2;
+  const centerY = ref.topLeftY + ref.height / 2;
+  const centerNormX = centerX / CURATOR_VIRTUAL_WIDTH;
+  const centerNormY = centerY / CURATOR_VIRTUAL_HEIGHT;
+  const normX = ref.topLeftX / CURATOR_VIRTUAL_WIDTH;
+  const normY = ref.topLeftY / CURATOR_VIRTUAL_HEIGHT;
+  const normWidth = ref.width / CURATOR_VIRTUAL_WIDTH;
+  const normHeight = ref.height / CURATOR_VIRTUAL_HEIGHT;
+
+  return {
+    galleryId: ref.galleryId,
+    artworkId: `artwork-${ref.galleryId}`,
+    refWidth: ref.width,
+    refHeight: ref.height,
+    centerX: Math.round(centerX * 1000) / 1000,
+    centerY: Math.round(centerY * 1000) / 1000,
+    centerNormX,
+    centerNormY,
+    x: ref.topLeftX,
+    y: ref.topLeftY,
+    width: ref.width,
+    height: ref.height,
+    normX,
+    normY,
+    normWidth,
+    normHeight,
+    aspectRatio: ref.aspectRatio,
+    rotation: 0,
+    scaleMultiplier: 1.0,
+    _schemaVersion: CURRENT_STORAGE_VERSION,
+  };
+}
+
+/**
+ * Default salon wall layout matching reference diagram in 580x720 canvas.
+ * Provided for backward compatibility.
  */
 export const DEFAULT_CURATOR_FRAME_MAP: Record<string, WallFramePosition> = {
-  // Slot 0: Frame A (Top-Left): Tall Portrait frame (Qajar hall)
-  'gallery-01': { x: 87.5, y: 62.5, width: 135, height: 185, rotation: 0 },
-
-  // Slot 1: Frame B (Bottom-Left): Portrait frame (Diplomatic album)
-  'gallery-03': { x: 87.5, y: 285.5, width: 125, height: 165, rotation: 0 },
-
-  // Slot 2: Frame C (Top-Center): Portrait frame (Edward Steichen)
-  'gallery-04': { x: 262.5, y: 39.5, width: 105, height: 151, rotation: 0 },
-
-  // Slot 3: Frame D (Center-Middle): Wide prominent Landscape frame (City rhythm)
-  'gallery-05': { x: 252.5, y: 211.5, width: 175, height: 127, rotation: 0 },
-
-  // Slot 4: Frame E (Bottom-Center): Portrait frame (Critical gaze)
-  'gallery-06': { x: 265.0, y: 361.0, width: 120, height: 148, rotation: 0 },
-
-  // Slot 5: Frame F (Top-Right): Landscape frame (Pendulum of time)
-  'gallery-08': { x: 407.5, y: 64.4, width: 135, height: 101.25, rotation: 0 },
-
-  // Slot 6: Frame G (Bottom-Right): Wide Landscape frame (Media intersection)
-  'gallery-09': { x: 435.0, y: 345.1, width: 170, height: 119.76, rotation: 0 },
-
-  // Slot 7: Frame H (Mid-Right Extension): Landscape frame (Inside to outside)
-  'gallery-07': { x: 475.0, y: 195.7, width: 130, height: 98.66, rotation: 0 },
+  'gallery-01': { x: 110, y: 613, width: 205.4, height: 176.9, rotation: 0 },
+  'gallery-02': { x: 110, y: 613, width: 205.4, height: 176.9, rotation: 0 },
+  'gallery-03': { x: 246, y: 243, width: 330, height: 250, rotation: 0 },
+  'gallery-04': { x: 522, y: 305, width: 257, height: 179, rotation: 0 },
+  'gallery-05': { x: 17, y: 339, width: 239, height: 192, rotation: 0 },
+  'gallery-06': { x: 318, y: 608, width: 237, height: 329, rotation: 0 },
+  'gallery-07': { x: 44, y: 57, width: 243, height: 180, rotation: 0 },
+  'gallery-08': { x: 513, y: 37, width: 227, height: 189, rotation: 0 },
+  'gallery-09': { x: 251, y: 12, width: 185, height: 239, rotation: 0 },
 };
 
 /**
@@ -246,6 +366,7 @@ export const DEFAULT_SALON_SLOTS_LIST: WallFramePosition[] = [
 
 /**
  * Reads all saved curator frame configurations from persistent local storage.
+ * Performs a one-time migration to the 580x720 center-based coordinate system if necessary.
  */
 export function getSavedCuratorFrames(): Record<string, CuratorFrameConfig> {
   if (typeof window === 'undefined' || !window.localStorage) {
@@ -255,7 +376,79 @@ export function getSavedCuratorFrames(): Record<string, CuratorFrameConfig> {
     const raw = localStorage.getItem(STORAGE_CURATOR_WALL_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw);
-    return typeof parsed === 'object' && parsed !== null ? parsed : {};
+    if (typeof parsed !== 'object' || parsed === null) return {};
+
+    const savedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
+    if (savedVersion !== CURRENT_STORAGE_VERSION) {
+      // Migrate existing saved records to v2_580x720 schema
+      const migrated: Record<string, CuratorFrameConfig> = {};
+      let hasChanges = false;
+
+      for (const [key, item] of Object.entries(parsed)) {
+        const frame = item as Partial<CuratorFrameConfig> & Record<string, any>;
+        const gid = frame.galleryId || key.replace('artwork-', '');
+        const refDef = AUTHORITATIVE_REFERENCE_FRAMES[gid];
+
+        // Check if item has custom values vs old 720x580 defaults
+        const isOldDefaultX = frame.x === 87.5 || frame.x === 262.5 || frame.x === 252.5 || frame.x === 265.0 || frame.x === 407.5 || frame.x === 435.0 || frame.x === 475.0;
+
+        if (refDef && isOldDefaultX) {
+          // Replace old defaults with the audited 580x720 reference layout
+          migrated[key] = buildConfigFromReference(refDef);
+          hasChanges = true;
+        } else if (frame.centerNormX && frame.centerNormY && frame.refWidth && frame.refHeight && frame._schemaVersion === CURRENT_STORAGE_VERSION) {
+          migrated[key] = frame as CuratorFrameConfig;
+        } else {
+          // Convert existing customized data to center-anchored normalized coordinates
+          const w = frame.refWidth ?? frame.width ?? refDef?.width ?? 180;
+          const h = frame.refHeight ?? frame.height ?? refDef?.height ?? 200;
+          const cx = typeof frame.centerX === 'number'
+            ? frame.centerX
+            : (typeof frame.x === 'number' ? frame.x + w / 2 : (refDef ? refDef.topLeftX + refDef.width / 2 : CURATOR_VIRTUAL_WIDTH / 2));
+          const cy = typeof frame.centerY === 'number'
+            ? frame.centerY
+            : (typeof frame.y === 'number' ? frame.y + h / 2 : (refDef ? refDef.topLeftY + refDef.height / 2 : CURATOR_VIRTUAL_HEIGHT / 2));
+
+          const centerNormX = cx / CURATOR_VIRTUAL_WIDTH;
+          const centerNormY = cy / CURATOR_VIRTUAL_HEIGHT;
+          const topLeftX = cx - w / 2;
+          const topLeftY = cy - h / 2;
+
+          migrated[key] = {
+            galleryId: gid,
+            artworkId: frame.artworkId || `artwork-${gid}`,
+            title: frame.title,
+            refWidth: w,
+            refHeight: h,
+            centerX: Math.round(cx * 10) / 10,
+            centerY: Math.round(cy * 10) / 10,
+            centerNormX,
+            centerNormY,
+            x: Math.round(topLeftX * 10) / 10,
+            y: Math.round(topLeftY * 10) / 10,
+            width: w,
+            height: h,
+            normX: topLeftX / CURATOR_VIRTUAL_WIDTH,
+            normY: topLeftY / CURATOR_VIRTUAL_HEIGHT,
+            normWidth: w / CURATOR_VIRTUAL_WIDTH,
+            normHeight: h / CURATOR_VIRTUAL_HEIGHT,
+            aspectRatio: frame.aspectRatio || (w / h),
+            rotation: frame.rotation ?? 0,
+            scaleMultiplier: frame.scaleMultiplier ?? 1.0,
+            _schemaVersion: CURRENT_STORAGE_VERSION,
+          };
+          hasChanges = true;
+        }
+      }
+
+      if (hasChanges) {
+        localStorage.setItem(STORAGE_CURATOR_WALL_KEY, JSON.stringify(migrated));
+      }
+      localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_STORAGE_VERSION);
+      return migrated;
+    }
+
+    return parsed as Record<string, CuratorFrameConfig>;
   } catch (err) {
     console.error('Error reading curator frame configs from storage:', err);
     return {};
@@ -264,7 +457,9 @@ export function getSavedCuratorFrames(): Record<string, CuratorFrameConfig> {
 
 /**
  * Gets the effective configuration for a curator frame.
- * Priority: Saved override in database > default map by galleryId > fallback slot.
+ * Priority: Saved override in database > authoritative reference layout > fallback slot.
+ *
+ * NOTE: Destructive runtime resizing has been removed. Saved reference dimensions are authoritative.
  */
 export function getCuratorFrameConfig(
   galleryId: string,
@@ -272,8 +467,57 @@ export function getCuratorFrameConfig(
   indexFallback = 0
 ): CuratorFrameConfig {
   const savedAll = getSavedCuratorFrames();
-  const saved = savedAll[galleryId] || savedAll[`artwork-${galleryId}`];
+  // Check direct ID, artwork- prefixed ID, and aliases (gallery-01 and gallery-02)
+  const aliasId = galleryId === 'gallery-01' ? 'gallery-02' : (galleryId === 'gallery-02' ? 'gallery-01' : galleryId);
+  const saved =
+    savedAll[galleryId] ||
+    savedAll[`artwork-${galleryId}`] ||
+    savedAll[aliasId] ||
+    savedAll[`artwork-${aliasId}`];
 
+  if (saved && saved.centerNormX !== undefined && saved.centerNormY !== undefined) {
+    const refWidth = saved.refWidth ?? saved.width;
+    const refHeight = saved.refHeight ?? saved.height;
+    const centerX = saved.centerX ?? saved.centerNormX * CURATOR_VIRTUAL_WIDTH;
+    const centerY = saved.centerY ?? saved.centerNormY * CURATOR_VIRTUAL_HEIGHT;
+    const x = saved.x ?? (centerX - refWidth / 2);
+    const y = saved.y ?? (centerY - refHeight / 2);
+
+    return {
+      galleryId,
+      artworkId: saved.artworkId || `artwork-${galleryId}`,
+      title: saved.title,
+      refWidth,
+      refHeight,
+      centerX: Math.round(centerX * 10) / 10,
+      centerY: Math.round(centerY * 10) / 10,
+      centerNormX: saved.centerNormX,
+      centerNormY: saved.centerNormY,
+      x: Math.round(x * 10) / 10,
+      y: Math.round(y * 10) / 10,
+      width: refWidth,
+      height: refHeight,
+      normX: x / CURATOR_VIRTUAL_WIDTH,
+      normY: y / CURATOR_VIRTUAL_HEIGHT,
+      normWidth: refWidth / CURATOR_VIRTUAL_WIDTH,
+      normHeight: refHeight / CURATOR_VIRTUAL_HEIGHT,
+      aspectRatio: saved.aspectRatio || (refWidth / refHeight),
+      rotation: saved.rotation ?? 0,
+      scaleMultiplier: saved.scaleMultiplier ?? 1.0,
+      _schemaVersion: CURRENT_STORAGE_VERSION,
+    };
+  }
+
+  // Look up authoritative reference frame definition
+  const refDef = AUTHORITATIVE_REFERENCE_FRAMES[galleryId] || AUTHORITATIVE_REFERENCE_FRAMES[aliasId];
+  if (refDef) {
+    return buildConfigFromReference({
+      ...refDef,
+      galleryId,
+    });
+  }
+
+  // Fallback slot
   const defaultSlot: WallFramePosition =
     DEFAULT_CURATOR_FRAME_MAP[galleryId] ||
     fallbackSlot ||
@@ -285,120 +529,105 @@ export function getCuratorFrameConfig(
       rotation: 0,
     };
 
-  const targetRatio = getArtworkRealAspectRatio(galleryId);
-
-  if (saved) {
-    const rawX = typeof saved.x === 'number' ? saved.x : defaultSlot.x;
-    const rawY = typeof saved.y === 'number' ? saved.y : defaultSlot.y;
-    const rawWidth = typeof saved.width === 'number' ? saved.width : defaultSlot.width;
-    const rawHeight = typeof saved.height === 'number' ? saved.height : defaultSlot.height;
-
-    // Check if saved already explicitly matches targetRatio (within 1%)
-    const currentRatio = rawWidth / Math.max(1, rawHeight);
-    const ratioMatches = Math.abs(currentRatio - targetRatio) < 0.02;
-
-    const fitted = ratioMatches
-      ? { x: rawX, y: rawY, width: rawWidth, height: rawHeight, aspectRatio: currentRatio }
-      : calculateFittedFrameDimensions(rawX, rawY, rawWidth, rawHeight, targetRatio);
-
-    const centerX = fitted.x + fitted.width / 2;
-    const centerY = fitted.y + fitted.height / 2;
-
-    return {
-      galleryId,
-      artworkId: saved.artworkId || `artwork-${galleryId}`,
-      title: saved.title,
-      x: fitted.x,
-      y: fitted.y,
-      width: fitted.width,
-      height: fitted.height,
-      centerX: Math.round(centerX * 10) / 10,
-      centerY: Math.round(centerY * 10) / 10,
-      centerNormX: centerX / CURATOR_VIRTUAL_WIDTH,
-      centerNormY: centerY / CURATOR_VIRTUAL_HEIGHT,
-      rotation: saved.rotation ?? defaultSlot.rotation ?? 0,
-      normX: fitted.x / CURATOR_VIRTUAL_WIDTH,
-      normY: fitted.y / CURATOR_VIRTUAL_HEIGHT,
-      normWidth: fitted.width / CURATOR_VIRTUAL_WIDTH,
-      normHeight: fitted.height / CURATOR_VIRTUAL_HEIGHT,
-      aspectRatio: fitted.aspectRatio,
-      scaleMultiplier: saved.scaleMultiplier ?? fitted.width / Math.max(1, defaultSlot.width),
-    };
-  }
-
-  // Use default slot fitted to the artwork's real aspect ratio
-  const fittedDefault = calculateFittedFrameDimensions(
-    defaultSlot.x,
-    defaultSlot.y,
-    defaultSlot.width,
-    defaultSlot.height,
-    targetRatio
-  );
+  const centerX = defaultSlot.x + defaultSlot.width / 2;
+  const centerY = defaultSlot.y + defaultSlot.height / 2;
 
   return {
     galleryId,
     artworkId: `artwork-${galleryId}`,
-    x: fittedDefault.x,
-    y: fittedDefault.y,
-    width: fittedDefault.width,
-    height: fittedDefault.height,
-    centerX: fittedDefault.centerX,
-    centerY: fittedDefault.centerY,
-    centerNormX: fittedDefault.centerNormX,
-    centerNormY: fittedDefault.centerNormY,
+    refWidth: defaultSlot.width,
+    refHeight: defaultSlot.height,
+    centerX: Math.round(centerX * 10) / 10,
+    centerY: Math.round(centerY * 10) / 10,
+    centerNormX: centerX / CURATOR_VIRTUAL_WIDTH,
+    centerNormY: centerY / CURATOR_VIRTUAL_HEIGHT,
+    x: defaultSlot.x,
+    y: defaultSlot.y,
+    width: defaultSlot.width,
+    height: defaultSlot.height,
+    normX: defaultSlot.x / CURATOR_VIRTUAL_WIDTH,
+    normY: defaultSlot.y / CURATOR_VIRTUAL_HEIGHT,
+    normWidth: defaultSlot.width / CURATOR_VIRTUAL_WIDTH,
+    normHeight: defaultSlot.height / CURATOR_VIRTUAL_HEIGHT,
+    aspectRatio: defaultSlot.width / defaultSlot.height,
     rotation: defaultSlot.rotation ?? 0,
-    normX: fittedDefault.x / CURATOR_VIRTUAL_WIDTH,
-    normY: fittedDefault.y / CURATOR_VIRTUAL_HEIGHT,
-    normWidth: fittedDefault.width / CURATOR_VIRTUAL_WIDTH,
-    normHeight: fittedDefault.height / CURATOR_VIRTUAL_HEIGHT,
-    aspectRatio: fittedDefault.aspectRatio,
     scaleMultiplier: 1.0,
+    _schemaVersion: CURRENT_STORAGE_VERSION,
   };
 }
 
 /**
- * Persists a frame's position and size in the configuration system.
- * Emits custom events for instant real-time live preview update.
+ * Persists a frame's position and size in the 580x720 center-anchored coordinate system.
+ * Emits custom events for instant real-time live preview update across the app.
  */
 export function saveCuratorFrameConfig(params: {
   galleryId: string;
   artworkId?: string;
   title?: string;
-  x: number;
-  y: number;
+  centerX?: number;
+  centerY?: number;
+  x?: number;
+  y?: number;
   width: number;
   height: number;
   rotation?: number;
   scaleMultiplier?: number;
 }): CuratorFrameConfig {
-  const roundedX = Math.round(params.x * 10) / 10;
-  const roundedY = Math.round(params.y * 10) / 10;
-  const roundedWidth = Math.max(30, Math.round(params.width * 10) / 10);
-  const roundedHeight = Math.max(30, Math.round(params.height * 10) / 10);
-  const centerX = roundedX + roundedWidth / 2;
-  const centerY = roundedY + roundedHeight / 2;
+  const refWidth = Math.max(30, Math.round(params.width * 10) / 10);
+  const refHeight = Math.max(30, Math.round(params.height * 10) / 10);
 
-  const aspectRatio = roundedWidth / roundedHeight;
+  // Compute center coordinates
+  let centerX: number;
+  let centerY: number;
+
+  if (typeof params.centerX === 'number' && !isNaN(params.centerX)) {
+    centerX = Math.round(params.centerX * 10) / 10;
+  } else if (typeof params.x === 'number' && !isNaN(params.x)) {
+    centerX = Math.round((params.x + refWidth / 2) * 10) / 10;
+  } else {
+    centerX = CURATOR_VIRTUAL_WIDTH / 2;
+  }
+
+  if (typeof params.centerY === 'number' && !isNaN(params.centerY)) {
+    centerY = Math.round(params.centerY * 10) / 10;
+  } else if (typeof params.y === 'number' && !isNaN(params.y)) {
+    centerY = Math.round((params.y + refHeight / 2) * 10) / 10;
+  } else {
+    centerY = CURATOR_VIRTUAL_HEIGHT / 2;
+  }
+
+  const centerNormX = centerX / CURATOR_VIRTUAL_WIDTH;
+  const centerNormY = centerY / CURATOR_VIRTUAL_HEIGHT;
+  const x = centerX - refWidth / 2;
+  const y = centerY - refHeight / 2;
+  const normX = x / CURATOR_VIRTUAL_WIDTH;
+  const normY = y / CURATOR_VIRTUAL_HEIGHT;
+  const normWidth = refWidth / CURATOR_VIRTUAL_WIDTH;
+  const normHeight = refHeight / CURATOR_VIRTUAL_HEIGHT;
+  const aspectRatio = refWidth / refHeight;
 
   const fullConfig: CuratorFrameConfig = {
     galleryId: params.galleryId,
     artworkId: params.artworkId || `artwork-${params.galleryId}`,
     title: params.title,
-    x: roundedX,
-    y: roundedY,
-    width: roundedWidth,
-    height: roundedHeight,
-    centerX: Math.round(centerX * 10) / 10,
-    centerY: Math.round(centerY * 10) / 10,
-    centerNormX: centerX / CURATOR_VIRTUAL_WIDTH,
-    centerNormY: centerY / CURATOR_VIRTUAL_HEIGHT,
-    rotation: params.rotation ?? 0,
-    normX: roundedX / CURATOR_VIRTUAL_WIDTH,
-    normY: roundedY / CURATOR_VIRTUAL_HEIGHT,
-    normWidth: roundedWidth / CURATOR_VIRTUAL_WIDTH,
-    normHeight: roundedHeight / CURATOR_VIRTUAL_HEIGHT,
+    refWidth,
+    refHeight,
+    centerNormX,
+    centerNormY,
+    centerX,
+    centerY,
+    x: Math.round(x * 10) / 10,
+    y: Math.round(y * 10) / 10,
+    width: refWidth,
+    height: refHeight,
+    normX,
+    normY,
+    normWidth,
+    normHeight,
     aspectRatio,
-    scaleMultiplier: params.scaleMultiplier,
+    rotation: params.rotation ?? 0,
+    scaleMultiplier: params.scaleMultiplier ?? 1.0,
+    _schemaVersion: CURRENT_STORAGE_VERSION,
   };
 
   if (typeof window !== 'undefined' && window.localStorage) {
@@ -406,7 +635,12 @@ export function saveCuratorFrameConfig(params: {
       const current = getSavedCuratorFrames();
       current[params.galleryId] = fullConfig;
       current[fullConfig.artworkId] = fullConfig;
+      // Sync gallery-01 and gallery-02 aliases
+      if (params.galleryId === 'gallery-01') current['gallery-02'] = fullConfig;
+      if (params.galleryId === 'gallery-02') current['gallery-01'] = fullConfig;
+
       localStorage.setItem(STORAGE_CURATOR_WALL_KEY, JSON.stringify(current));
+      localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_STORAGE_VERSION);
 
       window.dispatchEvent(
         new CustomEvent('curator_wall_config_updated', {

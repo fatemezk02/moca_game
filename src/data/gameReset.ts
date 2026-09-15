@@ -5,6 +5,7 @@ import { resetUsedArrows, resetAnsweredQuestions } from './arrowConditionsStore'
 import { resetPlayerLocation } from './playerLocationStore';
 import { resetReachedGalleries } from './reachedGalleriesStore';
 import { resetFinalCompletionState } from './finalCompletionStore';
+import { resetCollectionNotificationStore } from './collectionNotificationStore';
 
 /**
  * Full, authoritative game reset.
@@ -33,6 +34,9 @@ export function resetEntireGame(): void {
 
     // 7. Reset final completion award & card code
     resetFinalCompletionState();
+
+    // 8. Reset collections unread notification store
+    resetCollectionNotificationStore();
 
     // 7. Reset active gallery navigation storage
     if (typeof window !== 'undefined' && window.localStorage) {

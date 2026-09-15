@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, Compass, Sparkles, Map } from 'lucide-react';
 import { BottomNavBar } from './BottomNavBar';
+import { markCollectionsAsViewed } from '../data/collectionNotificationStore';
 
 interface Gallery04PlaceholderViewProps {
   onNavigateBack: () => void;
@@ -71,10 +72,12 @@ export const Gallery04PlaceholderView: React.FC<Gallery04PlaceholderViewProps> =
           if (tab === 'map') {
             onNavigateBack();
           } else {
+            if (tab === 'collection') {
+              markCollectionsAsViewed();
+            }
             onSelectTab?.(tab);
           }
         }}
-        collectionCount={8}
       />
     </div>
   );

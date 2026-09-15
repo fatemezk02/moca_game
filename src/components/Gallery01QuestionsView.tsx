@@ -14,6 +14,7 @@ import {
   setGalleryAnsweredCount,
 } from '../data/questionProgressStore';
 import { markQuestionAnswered } from '../data/arrowConditionsStore';
+import { markCollectionsAsViewed } from '../data/collectionNotificationStore';
 
 interface Gallery01QuestionsViewProps {
   onNavigateBack: () => void;
@@ -354,11 +355,13 @@ export const Gallery01QuestionsView: React.FC<Gallery01QuestionsViewProps> = ({
           if (tab === 'map') {
             onNavigateBack();
           } else {
+            if (tab === 'collection') {
+              markCollectionsAsViewed();
+            }
             onSelectTab?.(tab);
             onNavigateBack();
           }
         }}
-        collectionCount={8}
       />
     </div>
   );
