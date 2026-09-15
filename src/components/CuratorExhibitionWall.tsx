@@ -202,7 +202,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
 
   const slots = SALON_SLOTS;
 
-  // Calculate geometry for every artwork frame in virtual coordinates
+  // Calculate geometry for every artwork frame relative to background coordinate system
   const frameItems = artworks.map((art, index) => {
     const fallbackSlot = slots[index] || slots[slots.length - 1];
     const frameConfig = getCuratorFrameConfig(art.galleryId, fallbackSlot, index);
@@ -236,60 +236,30 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
       y: fitted.y,
       width: fitted.width,
       height: fitted.height,
+      centerX: fitted.centerX,
+      centerY: fitted.centerY,
+      centerNormX: fitted.centerNormX,
+      centerNormY: fitted.centerNormY,
+      normWidth: fitted.normWidth,
+      normHeight: fitted.normHeight,
       rotation: frameConfig.rotation ?? 0,
     };
   });
 
-  // Calculate the collective bounding box of the entire Curator artwork composition
-  const boundingBox = React.useMemo(() => {
-    if (frameItems.length === 0) {
-      return { minX: 0, minY: 0, maxX: 720, maxY: 580, width: 720, height: 580 };
-    }
-
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-
-    for (const item of frameItems) {
-      minX = Math.min(minX, item.x);
-      minY = Math.min(minY, item.y);
-      maxX = Math.max(maxX, item.x + item.width);
-      maxY = Math.max(maxY, item.y + item.height);
-    }
-
-    // Add safe visual margin (in virtual units) for frame borders, moulding, and drop-shadows
-    const margin = 10;
-    const compMinX = isFinite(minX) ? minX - margin : 0;
-    const compMinY = isFinite(minY) ? minY - margin : 0;
-    const compMaxX = isFinite(maxX) ? maxX + margin : 720;
-    const compMaxY = isFinite(maxY) ? maxY + margin : 580;
-
-    return {
-      minX: compMinX,
-      minY: compMinY,
-      maxX: compMaxX,
-      maxY: compMaxY,
-      width: Math.max(100, compMaxX - compMinX),
-      height: Math.max(100, compMaxY - compMinY),
-    };
-  }, [frameItems]);
-
   // Compute available space with safe content boundary padding
-  const paddingX = dimensions.width >= 640 ? 20 : 10;
-  const paddingY = dimensions.height >= 640 ? 20 : 10;
+  const paddingX = dimensions.width >= 640 ? 24 : 12;
+  const paddingY = dimensions.height >= 640 ? 24 : 12;
   const availableWallWidth = Math.max(dimensions.width - paddingX * 2, 80);
   const availableWallHeight = Math.max(dimensions.height - paddingY * 2, 80);
 
-  // Compute ONE shared uniform scale factor for the entire composition
-  const scale = Math.min(
-    availableWallWidth / boundingBox.width,
-    availableWallHeight / boundingBox.height
-  );
-
-  // Scaled dimensions of the unified composition container
-  const scaledWallWidth = Math.round(boundingBox.width * scale);
-  const scaledWallHeight = Math.round(boundingBox.height * scale);
+  // Background salon wall scales uniformly while keeping reference aspect ratio (720 / 580)
+  const bgAspectRatio = CURATOR_VIRTUAL_WIDTH / CURATOR_VIRTUAL_HEIGHT;
+  let wallWidth = availableWallWidth;
+  let wallHeight = wallWidth / bgAspectRatio;
+  if (wallHeight > availableWallHeight) {
+    wallHeight = availableWallHeight;
+    wallWidth = wallHeight * bgAspectRatio;
+  }
 
   const handleFrameClick = (art: ExhibitionArtwork) => {
     // If dev positioning tool is active on screen, select this frame for editing
@@ -356,28 +326,27 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
           }}
         />
 
-        {/* The Scaled Salon Wall Canvas matching image.png */}
+        {/* The Scaled Salon Wall Canvas (Reference coordinate system: 720 x 580) */}
         <div
           id="museum-salon-wall"
-          data-virtual-width={boundingBox.width}
-          data-virtual-height={boundingBox.height}
-          data-offset-x={boundingBox.minX}
-          data-offset-y={boundingBox.minY}
-          data-scale={scale}
+          data-virtual-width={CURATOR_VIRTUAL_WIDTH}
+          data-virtual-height={CURATOR_VIRTUAL_HEIGHT}
           className="relative flex-none"
           style={{
-            width: `${scaledWallWidth}px`,
-            height: `${scaledWallHeight}px`,
+            width: `${Math.round(wallWidth)}px`,
+            height: `${Math.round(wallHeight)}px`,
+            maxWidth: '100%',
+            maxHeight: '100%',
           }}
         >
           {frameItems.map((item) => {
             const { art, realRatio } = item;
 
-            // Calculate scaled pixel positions relative to the composition bounding box
-            const left = (item.x - boundingBox.minX) * scale;
-            const top = (item.y - boundingBox.minY) * scale;
-            const width = item.width * scale;
-            const height = item.height * scale;
+            // Background-relative percentage coordinates
+            const centerPercentX = item.centerNormX * 100;
+            const centerPercentY = item.centerNormY * 100;
+            const widthPercent = item.normWidth * 100;
+            const heightPercent = item.normHeight * 100;
 
             return (
               <div
@@ -386,11 +355,11 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                 onClick={() => handleFrameClick(art)}
                 className="absolute cursor-pointer transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] z-10"
                 style={{
-                  left: `${left}px`,
-                  top: `${top}px`,
-                  width: `${width}px`,
-                  height: `${height}px`,
-                  transform: item.rotation ? `rotate(${item.rotation}deg)` : undefined,
+                  left: `${centerPercentX}%`,
+                  top: `${centerPercentY}%`,
+                  width: `${widthPercent}%`,
+                  height: `${heightPercent}%`,
+                  transform: `translate(-50%, -50%) ${item.rotation ? `rotate(${item.rotation}deg)` : ''}`,
                 }}
                 title={art.isCompleted ? art.title : 'اثر قفل است'}
               >

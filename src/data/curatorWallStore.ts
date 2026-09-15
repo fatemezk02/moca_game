@@ -118,6 +118,12 @@ export interface CalculatedFrameGeometry {
   y: number;
   width: number;
   height: number;
+  centerX: number;
+  centerY: number;
+  centerNormX: number; // 0..1 relative to CURATOR_VIRTUAL_WIDTH
+  centerNormY: number; // 0..1 relative to CURATOR_VIRTUAL_HEIGHT
+  normWidth: number;   // width / CURATOR_VIRTUAL_WIDTH
+  normHeight: number;  // height / CURATOR_VIRTUAL_HEIGHT
   aspectRatio: number;
 }
 
@@ -152,6 +158,12 @@ export function calculateFittedFrameDimensions(
     y: Math.round(fittedY * 10) / 10,
     width: Math.round(fittedWidth * 10) / 10,
     height: Math.round(fittedHeight * 10) / 10,
+    centerX: Math.round(centerX * 10) / 10,
+    centerY: Math.round(centerY * 10) / 10,
+    centerNormX: centerX / CURATOR_VIRTUAL_WIDTH,
+    centerNormY: centerY / CURATOR_VIRTUAL_HEIGHT,
+    normWidth: fittedWidth / CURATOR_VIRTUAL_WIDTH,
+    normHeight: fittedHeight / CURATOR_VIRTUAL_HEIGHT,
     aspectRatio: safeRatio,
   };
 }
@@ -173,8 +185,12 @@ export interface CuratorFrameConfig {
   y: number;
   width: number;
   height: number;
+  centerX?: number;
+  centerY?: number;
   rotation?: number;
-  // Container-relative normalized coordinates (0..1)
+  // Background-relative normalized coordinates (0..1)
+  centerNormX: number; // centerX / 720
+  centerNormY: number; // centerY / 580
   normX: number; // x / 720
   normY: number; // y / 580
   normWidth: number; // width / 720
@@ -186,31 +202,32 @@ export interface CuratorFrameConfig {
 /**
  * Default salon wall layout matching reference diagram (image.png).
  * Keys are gallery IDs matching the curator exhibition frames.
+ * Configured with responsive percentage-based padding so frames never touch or overlap.
  */
 export const DEFAULT_CURATOR_FRAME_MAP: Record<string, WallFramePosition> = {
-  // Slot 0: Frame A (Top-Left): Tall Portrait frame
-  'gallery-01': { x: 95, y: 60, width: 140, height: 215, rotation: 0 },
+  // Slot 0: Frame A (Top-Left): Tall Portrait frame (Qajar hall)
+  'gallery-01': { x: 87.5, y: 62.5, width: 135, height: 185, rotation: 0 },
 
-  // Slot 1: Frame B (Bottom-Left): Wide Landscape frame
-  'gallery-03': { x: 48, y: 295, width: 188, height: 118, rotation: 0 },
+  // Slot 1: Frame B (Bottom-Left): Portrait frame (Diplomatic album)
+  'gallery-03': { x: 87.5, y: 285.5, width: 125, height: 165, rotation: 0 },
 
-  // Slot 2: Frame C (Top-Center): Portrait frame
-  'gallery-04': { x: 265, y: 30, width: 105, height: 160, rotation: 0 },
+  // Slot 2: Frame C (Top-Center): Portrait frame (Edward Steichen)
+  'gallery-04': { x: 262.5, y: 39.5, width: 105, height: 151, rotation: 0 },
 
-  // Slot 3: Frame D (Center-Middle): Wide prominent Landscape frame
-  'gallery-05': { x: 260, y: 205, width: 195, height: 135, rotation: 0 },
+  // Slot 3: Frame D (Center-Middle): Wide prominent Landscape frame (City rhythm)
+  'gallery-05': { x: 252.5, y: 211.5, width: 175, height: 127, rotation: 0 },
 
-  // Slot 4: Frame E (Bottom-Center): Portrait frame
-  'gallery-06': { x: 265, y: 360, width: 122, height: 175, rotation: 0 },
+  // Slot 4: Frame E (Bottom-Center): Portrait frame (Critical gaze)
+  'gallery-06': { x: 265.0, y: 361.0, width: 120, height: 148, rotation: 0 },
 
-  // Slot 5: Frame F (Top-Right): Landscape frame
-  'gallery-08': { x: 395, y: 70, width: 142, height: 96, rotation: 0 },
+  // Slot 5: Frame F (Top-Right): Landscape frame (Pendulum of time)
+  'gallery-08': { x: 407.5, y: 64.4, width: 135, height: 101.25, rotation: 0 },
 
-  // Slot 6: Frame G (Bottom-Right): Wide Landscape frame
-  'gallery-09': { x: 410, y: 355, width: 192, height: 132, rotation: 0 },
+  // Slot 6: Frame G (Bottom-Right): Wide Landscape frame (Media intersection)
+  'gallery-09': { x: 435.0, y: 345.1, width: 170, height: 119.76, rotation: 0 },
 
-  // Slot 7: Frame H (Mid-Right Extension): Natural space between F & G
-  'gallery-07': { x: 475, y: 205, width: 135, height: 120, rotation: 0 },
+  // Slot 7: Frame H (Mid-Right Extension): Landscape frame (Inside to outside)
+  'gallery-07': { x: 475.0, y: 195.7, width: 130, height: 98.66, rotation: 0 },
 };
 
 /**
@@ -284,6 +301,9 @@ export function getCuratorFrameConfig(
       ? { x: rawX, y: rawY, width: rawWidth, height: rawHeight, aspectRatio: currentRatio }
       : calculateFittedFrameDimensions(rawX, rawY, rawWidth, rawHeight, targetRatio);
 
+    const centerX = fitted.x + fitted.width / 2;
+    const centerY = fitted.y + fitted.height / 2;
+
     return {
       galleryId,
       artworkId: saved.artworkId || `artwork-${galleryId}`,
@@ -292,6 +312,10 @@ export function getCuratorFrameConfig(
       y: fitted.y,
       width: fitted.width,
       height: fitted.height,
+      centerX: Math.round(centerX * 10) / 10,
+      centerY: Math.round(centerY * 10) / 10,
+      centerNormX: centerX / CURATOR_VIRTUAL_WIDTH,
+      centerNormY: centerY / CURATOR_VIRTUAL_HEIGHT,
       rotation: saved.rotation ?? defaultSlot.rotation ?? 0,
       normX: fitted.x / CURATOR_VIRTUAL_WIDTH,
       normY: fitted.y / CURATOR_VIRTUAL_HEIGHT,
@@ -318,6 +342,10 @@ export function getCuratorFrameConfig(
     y: fittedDefault.y,
     width: fittedDefault.width,
     height: fittedDefault.height,
+    centerX: fittedDefault.centerX,
+    centerY: fittedDefault.centerY,
+    centerNormX: fittedDefault.centerNormX,
+    centerNormY: fittedDefault.centerNormY,
     rotation: defaultSlot.rotation ?? 0,
     normX: fittedDefault.x / CURATOR_VIRTUAL_WIDTH,
     normY: fittedDefault.y / CURATOR_VIRTUAL_HEIGHT,
@@ -347,6 +375,8 @@ export function saveCuratorFrameConfig(params: {
   const roundedY = Math.round(params.y * 10) / 10;
   const roundedWidth = Math.max(30, Math.round(params.width * 10) / 10);
   const roundedHeight = Math.max(30, Math.round(params.height * 10) / 10);
+  const centerX = roundedX + roundedWidth / 2;
+  const centerY = roundedY + roundedHeight / 2;
 
   const aspectRatio = roundedWidth / roundedHeight;
 
@@ -358,6 +388,10 @@ export function saveCuratorFrameConfig(params: {
     y: roundedY,
     width: roundedWidth,
     height: roundedHeight,
+    centerX: Math.round(centerX * 10) / 10,
+    centerY: Math.round(centerY * 10) / 10,
+    centerNormX: centerX / CURATOR_VIRTUAL_WIDTH,
+    centerNormY: centerY / CURATOR_VIRTUAL_HEIGHT,
     rotation: params.rotation ?? 0,
     normX: roundedX / CURATOR_VIRTUAL_WIDTH,
     normY: roundedY / CURATOR_VIRTUAL_HEIGHT,

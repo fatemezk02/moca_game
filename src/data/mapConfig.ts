@@ -211,8 +211,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'فلش راهنما به گالری ۰۱',
         x: 240,
         y: 583,
-        rotation: 0,
-        size: 48,
+        rotation: 315,
+        size: 32,
         destination: 'gallery-01',
         visibilityConditions: [],
       },
@@ -300,8 +300,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'بازگشت به نقشه اصلی (گالری ۰۱)',
         x: 424,
         y: 1120,
-        rotation: 180,
-        size: 48,
+        rotation: 270,
+        size: 44,
         destination: 'gallery-00',
         visibilityConditions: [],
       },
@@ -312,8 +312,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'فلش راهنما به گالری ۰۳',
         x: 431,
         y: 216,
-        rotation: 90,
-        size: 48,
+        rotation: 180,
+        size: 44,
         destination: 'gallery-03',
         visibilityConditions: [
           {
@@ -416,8 +416,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'بازگشت به نقشه اصلی (گالری ۰۱)',
         x: 424,
         y: 1120,
-        rotation: 180,
-        size: 48,
+        rotation: 270,
+        size: 44,
         destination: 'gallery-00',
         visibilityConditions: [],
       },
@@ -428,8 +428,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'ورود به گالری ۰۳',
         x: 431,
         y: 216,
-        rotation: 90,
-        size: 48,
+        rotation: 180,
+        size: 44,
         destination: 'gallery-03',
         visibilityConditions: [],
       },
@@ -550,7 +550,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         x: 28,
         y: 645,
         rotation: 270,
-        size: 48,
+        size: 44,
         destination: 'gallery-01',
         visibilityConditions: [],
       },
@@ -562,7 +562,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         x: 532,
         y: 229,
         rotation: 90,
-        size: 48,
+        size: 44,
         destination: 'gallery-04',
         visibilityConditions: [
           {
@@ -653,7 +653,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         x: 462.55,
         y: 640,
         rotation: 90,
-        size: 48,
+        size: 44,
         destination: 'gallery-05',
         visibilityConditions: [
           {
@@ -671,7 +671,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         x: 28,
         y: 645,
         rotation: 270,
-        size: 48,
+        size: 44,
         destination: 'gallery-03',
         visibilityConditions: [],
       },
@@ -787,8 +787,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'فلش راهنما به گالری ۰۶',
         x: 461,
         y: 729.06,
-        rotation: 90,
-        size: 48,
+        rotation: 180,
+        size: 44,
         destination: 'gallery-06',
         visibilityConditions: [
           {
@@ -806,7 +806,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         x: 64,
         y: 227,
         rotation: 270,
-        size: 48,
+        size: 44,
         destination: 'gallery-04',
         visibilityConditions: [],
       },
@@ -955,8 +955,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'بازگشت به گالری ۰۵',
         x: 338,
         y: 28,
-        rotation: 270,
-        size: 48,
+        rotation: 0,
+        size: 44,
         destination: 'gallery-05',
         visibilityConditions: [],
       },
@@ -967,8 +967,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'ورود به گالری ۰۷',
         x: 120,
         y: 282,
-        rotation: 90,
-        size: 48,
+        rotation: 180,
+        size: 44,
         destination: 'gallery-07',
         visibilityConditions: [
           {
@@ -1057,8 +1057,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'بازگشت به گالری ۰۶',
         x: 477,
         y: 68,
-        rotation: 270,
-        size: 48,
+        rotation: 90,
+        size: 44,
         destination: 'gallery-06',
         visibilityConditions: [],
       },
@@ -1069,8 +1069,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'ورود به گالری ۰۸',
         x: 166,
         y: 595,
-        rotation: 180,
-        size: 48,
+        rotation: 270,
+        size: 44,
         destination: 'gallery-08',
         visibilityConditions: [
           {
@@ -1147,8 +1147,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'بازگشت به گالری ۰۷',
         x: 448,
         y: 121,
-        rotation: 180,
-        size: 48,
+        rotation: 0,
+        size: 44,
         destination: 'gallery-07',
         visibilityConditions: [],
       },
@@ -1159,8 +1159,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'ورود به گالری ۰۹',
         x: 228,
         y: 561,
-        rotation: 0,
-        size: 48,
+        rotation: 180,
+        size: 44,
         destination: 'gallery-09',
         visibilityConditions: [
           {
@@ -1304,8 +1304,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'بازگشت به گالری ۰۸',
         x: 49,
         y: 228,
-        rotation: 180,
-        size: 48,
+        rotation: 270,
+        size: 44,
         destination: 'gallery-08',
         visibilityConditions: [],
       },
@@ -1316,8 +1316,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         title: 'بازگشت به سرسرای موزه',
         x: 256,
         y: 794,
-        rotation: 0,
-        size: 48,
+        rotation: 180,
+        size: 44,
         destination: 'gallery-00',
         visibilityConditions: [
           {
@@ -1384,6 +1384,8 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                 } else {
                   combinedArrows[existingIdx] = {
                     ...combinedArrows[existingIdx],
+                    size: defArrow.size,
+                    rotation: defArrow.rotation,
                     destination: defArrow.destination,
                     visibilityConditions: defArrow.visibilityConditions,
                   };
@@ -1510,8 +1512,15 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
           [];
         const res = [...baseArrows];
         for (const da of defArrows) {
-          if (!res.some((a) => a.id === da.id)) {
+          const existingIdx = res.findIndex((a) => a.id === da.id);
+          if (existingIdx === -1) {
             res.push(da);
+          } else {
+            res[existingIdx] = {
+              ...res[existingIdx],
+              size: da.size,
+              rotation: da.rotation,
+            };
           }
         }
         return res;
