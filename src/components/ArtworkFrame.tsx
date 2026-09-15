@@ -7,15 +7,16 @@ export interface ArtworkFrameProps {
   fillContainer?: boolean;
   aspectRatio?: number;
   wallScale?: number;
+  frameWidth?: number;
+  frameHeight?: number;
 }
 
 /**
  * Museum-inspired Decorative Artwork Frame
  * Wraps tightly around the artwork image, preserving its aspect ratio and proportions.
  * Features a refined layered museum moulding, subtle brass/gold inlay, and restrained corner ornaments.
- * When fillContainer is true, fills 100% of the parent dimensions seamlessly.
- * Frame container and inner image container are mathematically bound to the same aspect ratio.
- * Moulding border and padding scale proportionally with wallScale so they never choke small screens.
+ * Frame border and padding scale proportionally with frame size to prevent choking or empty areas.
+ * Mathematical inner aperture strictly preserves the target aspect ratio.
  */
 export const ArtworkFrame: React.FC<ArtworkFrameProps> = ({
   children,
@@ -24,21 +25,33 @@ export const ArtworkFrame: React.FC<ArtworkFrameProps> = ({
   fillContainer = false,
   aspectRatio,
   wallScale = 1,
+  frameWidth,
+  frameHeight,
 }) => {
   const isFull = fillContainer || className.includes('w-full') || className.includes('h-full');
 
-  // Calculate proportional border/moulding padding scaled by wallScale:
   const safeRatio = Math.max(0.2, Math.min(5, aspectRatio || 1));
-  const scale = Math.max(0.2, Math.min(3, wallScale || 1));
-  const baseBorder = Math.max(2, Math.round(7 * scale * 10) / 10);
-  const sqrtR = Math.sqrt(safeRatio);
-  const padX = Math.round(baseBorder * sqrtR * 10) / 10;
-  const padY = Math.round((baseBorder / sqrtR) * 10) / 10;
+  const fw = frameWidth || (140 * (wallScale || 1));
+  const fh = frameHeight || (fw / safeRatio);
+  const minDim = Math.min(fw, fh);
 
-  const filletPadX = Math.max(0.5, Math.round(padX * 0.25 * 10) / 10);
-  const filletPadY = Math.max(0.5, Math.round(padY * 0.25 * 10) / 10);
-  const outerBorderWidth = Math.max(1, Math.round(2 * scale));
-  const cornerSize = Math.max(6, Math.round(12 * scale));
+  // Proportional outer border (scaled to min dimension, min 1px)
+  const outerBorderWidth = Math.max(1, Math.round(minDim * 0.018 * 10) / 10);
+
+  // Proportional mat / moulding padding:
+  // 3.8% of frame width horizontally, 3.8% of frame height vertically.
+  // Because horizontal padding is p * width and vertical padding is p * height,
+  // the inner aperture aspect ratio (fw - 2*padX)/(fh - 2*padY)
+  // strictly equals fw / fh = safeRatio, eliminating any letterboxing or empty space.
+  const padX = Math.max(1.5, Math.round(fw * 0.038 * 10) / 10);
+  const padY = Math.max(1.5, Math.round(fh * 0.038 * 10) / 10);
+
+  // Proportional inner metallic fillet padding (1.2% of width and height)
+  const filletPadX = Math.max(0.8, Math.round(fw * 0.012 * 10) / 10);
+  const filletPadY = Math.max(0.8, Math.round(fh * 0.012 * 10) / 10);
+
+  // Proportional corner ornament size
+  const cornerSize = Math.max(5, Math.min(18, Math.round(minDim * 0.11)));
 
   return (
     <div
@@ -118,11 +131,11 @@ export const ArtworkFrame: React.FC<ArtworkFrameProps> = ({
           boxShadow: 'inset 0 0 0 1px rgba(197, 160, 89, 0.45)',
         }}
       >
-        {/* Inner Sight Edge Border around the Artwork Aperture */}
+        {/* Inner Sight Edge Border around the Artwork Aperture (clean transparent/warm backing, never black) */}
         <div
           className={`relative ${
             isFull ? 'w-full h-full flex' : 'flex'
-          } items-center justify-center border border-[#1c1d1d] overflow-hidden bg-[#121314] box-border`}
+          } items-center justify-center border border-[#1c1d1d] overflow-hidden bg-transparent box-border`}
         >
           {children}
         </div>

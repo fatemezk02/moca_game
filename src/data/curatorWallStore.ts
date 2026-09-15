@@ -138,19 +138,41 @@ export function calculateFittedFrameDimensions(
   baseY: number,
   baseWidth: number,
   baseHeight: number,
-  aspectRatio: number
+  aspectRatio: number,
+  isCenterAnchored = false
 ): CalculatedFrameGeometry {
   const safeRatio = Math.max(0.2, Math.min(5, aspectRatio || 1));
-  const area = Math.max(900, baseWidth * baseHeight);
-
-  // Preserve area while exactly matching target aspect ratio:
-  // width = height * safeRatio => area = height^2 * safeRatio => height = sqrt(area / safeRatio)
-  const fittedHeight = Math.sqrt(area / safeRatio);
-  const fittedWidth = fittedHeight * safeRatio;
+  const safeW = Math.max(20, baseWidth || 100);
+  const safeH = Math.max(20, baseHeight || 100);
 
   // Keep center of the slot intact to maintain wall arrangement
-  const centerX = baseX + baseWidth / 2;
-  const centerY = baseY + baseHeight / 2;
+  const centerX = isCenterAnchored ? baseX : baseX + safeW / 2;
+  const centerY = isCenterAnchored ? baseY : baseY + safeH / 2;
+
+  // Fit safeRatio strictly within the refWidth x refHeight reference box
+  const boxRatio = safeW / safeH;
+  let fittedWidth: number;
+  let fittedHeight: number;
+
+  if (boxRatio > safeRatio) {
+    // Reference box is wider than target artwork ratio -> height is bounded by safeH
+    fittedHeight = safeH;
+    fittedWidth = safeH * safeRatio;
+  } else {
+    // Reference box is taller than target artwork ratio -> width is bounded by safeW
+    fittedWidth = safeW;
+    fittedHeight = safeW / safeRatio;
+  }
+
+  // Prevent frame from extending outside the 580x720 wall boundaries (safe 4px margin)
+  const maxSafeW = Math.max(20, (Math.min(centerX, CURATOR_VIRTUAL_WIDTH - centerX) - 4) * 2);
+  const maxSafeH = Math.max(20, (Math.min(centerY, CURATOR_VIRTUAL_HEIGHT - centerY) - 4) * 2);
+
+  if (fittedWidth > maxSafeW || fittedHeight > maxSafeH) {
+    const scaleFactor = Math.min(maxSafeW / fittedWidth, maxSafeH / fittedHeight);
+    fittedWidth *= scaleFactor;
+    fittedHeight *= scaleFactor;
+  }
 
   const fittedX = centerX - fittedWidth / 2;
   const fittedY = centerY - fittedHeight / 2;

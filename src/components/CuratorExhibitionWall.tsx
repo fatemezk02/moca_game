@@ -227,35 +227,47 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
     const refWidth = liveOverride?.width ?? frameConfig.refWidth ?? frameConfig.width;
     const refHeight = liveOverride?.height ?? frameConfig.refHeight ?? frameConfig.height;
 
-    const normWidth = refWidth / CURATOR_VIRTUAL_WIDTH;
-    const normHeight = refHeight / CURATOR_VIRTUAL_HEIGHT;
-
     // Real ratio of the artwork preserved for aperture fitting
     const realRatio =
+      getArtworkRealAspectRatio(art.galleryId, art.imageUrl) ||
       art.aspectRatio ||
       frameConfig.aspectRatio ||
       refWidth / Math.max(1, refHeight);
+
+    const centerX = centerNormX * CURATOR_VIRTUAL_WIDTH;
+    const centerY = centerNormY * CURATOR_VIRTUAL_HEIGHT;
+
+    // Dynamically calculate fitted frame dimensions: strictly matching artwork aspect ratio,
+    // sized from stored reference dimensions, bounded safely within 580x720 canvas
+    const fitted = calculateFittedFrameDimensions(
+      centerX,
+      centerY,
+      refWidth,
+      refHeight,
+      realRatio,
+      true
+    );
 
     return {
       art,
       index,
       frameConfig,
       realRatio,
-      refWidth,
-      refHeight,
-      centerX: centerNormX * CURATOR_VIRTUAL_WIDTH,
-      centerY: centerNormY * CURATOR_VIRTUAL_HEIGHT,
-      centerNormX,
-      centerNormY,
-      normWidth,
-      normHeight,
+      refWidth: fitted.width,
+      refHeight: fitted.height,
+      centerX: fitted.centerX,
+      centerY: fitted.centerY,
+      centerNormX: fitted.centerNormX,
+      centerNormY: fitted.centerNormY,
+      normWidth: fitted.normWidth,
+      normHeight: fitted.normHeight,
       rotation: frameConfig.rotation ?? 0,
     };
   });
 
   // Compute available space with safe content boundary padding
-  const paddingX = dimensions.width >= 640 ? 24 : 12;
-  const paddingY = dimensions.height >= 640 ? 24 : 12;
+  const paddingX = dimensions.width >= 640 ? 24 : dimensions.width >= 400 ? 12 : 6;
+  const paddingY = dimensions.height >= 640 ? 24 : dimensions.height >= 400 ? 12 : 6;
   const availableWallWidth = Math.max(dimensions.width - paddingX * 2, 80);
   const availableWallHeight = Math.max(dimensions.height - paddingY * 2, 80);
 
@@ -352,11 +364,12 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
           {frameItems.map((item) => {
             const { art, realRatio } = item;
 
-            // Background-relative percentage coordinates
-            const centerPercentX = item.centerNormX * 100;
-            const centerPercentY = item.centerNormY * 100;
-            const widthPercent = item.normWidth * 100;
-            const heightPercent = item.normHeight * 100;
+            // Virtual SVG coordinate system scaled to rendered wall
+            // wallScale = wallWidth / 580
+            const pixelCenterX = item.centerX * wallScale;
+            const pixelCenterY = item.centerY * wallScale;
+            const pixelWidth = item.refWidth * wallScale;
+            const pixelHeight = item.refHeight * wallScale;
 
             return (
               <div
@@ -365,28 +378,30 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                 onClick={() => handleFrameClick(art)}
                 className="absolute cursor-pointer transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] z-10"
                 style={{
-                  left: `${centerPercentX}%`,
-                  top: `${centerPercentY}%`,
-                  width: `${widthPercent}%`,
-                  height: `${heightPercent}%`,
+                  left: `${pixelCenterX}px`,
+                  top: `${pixelCenterY}px`,
+                  width: `${pixelWidth}px`,
+                  height: `${pixelHeight}px`,
                   transform: `translate(-50%, -50%) ${item.rotation ? `rotate(${item.rotation}deg)` : ''}`,
                 }}
                 title={art.isCompleted ? art.title : 'اثر قفل است'}
               >
-                {/* Single unified Artwork Frame: adapts directly to artwork aspect ratio */}
+                {/* Single unified Artwork Frame: strictly matches artwork aspect ratio */}
                 <ArtworkFrame
                   fillContainer
                   aspectRatio={realRatio}
                   wallScale={wallScale}
+                  frameWidth={pixelWidth}
+                  frameHeight={pixelHeight}
                   className="w-full h-full shadow-[0_8px_20px_-4px_rgba(30,27,24,0.22)]"
                 >
                   {art.isCompleted && art.imageUrl ? (
-                    /* Completed Artwork Image: Fits snugly with object-contain without cropping or distortion */
-                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#121314]">
+                    /* Completed Artwork Image: Fits snugly without cropping or distortion, zero black areas */
+                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#faf8f5]">
                       <img
                         src={art.imageUrl}
                         alt={art.title}
-                        className="w-full h-full object-contain select-none pointer-events-none"
+                        className="w-full h-full object-fill select-none pointer-events-none block"
                         loading="lazy"
                         onLoad={(e) => {
                           const img = e.currentTarget;
@@ -410,8 +425,20 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                       }}
                     >
                       <div className="flex flex-col items-center justify-center">
-                        <div className="w-5 h-5 rounded-full bg-[#fef3c7] border border-[#d97706] flex items-center justify-center shadow-xs">
-                          <Lock className="w-3 h-3 text-[#b45309]" />
+                        <div
+                          className="rounded-full bg-[#fef3c7] border border-[#d97706] flex items-center justify-center shadow-xs"
+                          style={{
+                            width: `${Math.max(14, Math.min(26, Math.round(pixelWidth * 0.16)))}px`,
+                            height: `${Math.max(14, Math.min(26, Math.round(pixelWidth * 0.16)))}px`,
+                          }}
+                        >
+                          <Lock
+                            className="text-[#b45309]"
+                            style={{
+                              width: `${Math.max(8, Math.min(15, Math.round(pixelWidth * 0.09)))}px`,
+                              height: `${Math.max(8, Math.min(15, Math.round(pixelWidth * 0.09)))}px`,
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
