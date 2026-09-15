@@ -36,14 +36,14 @@ export const DEFAULT_GALLERY_00_LAMP_POSITION = {
  * Standard known museum gallery lamps on the Master Map SVG (0 0 604.8 844.86)
  */
 export const DEFAULT_GALLERY_LAMPS: Array<{ galleryId: string; title: string; defaultX: number; defaultY: number }> = [
-  { galleryId: 'gallery_02', title: 'چراغ گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 302, defaultY: 85 },
-  { galleryId: 'gallery_03', title: 'چراغ گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 475, defaultY: 335 },
-  { galleryId: 'gallery_04', title: 'چراغ گالری ۰۴ (ثبت دوام ما)', defaultX: 135, defaultY: 335 },
-  { galleryId: 'gallery_05', title: 'چراغ گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 135, defaultY: 550 },
-  { galleryId: 'gallery_06', title: 'چراغ گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 475, defaultY: 550 },
-  { galleryId: 'gallery_07', title: 'چراغ گالری ۰۷ (گذر از برون به درون)', defaultX: 135, defaultY: 700 },
-  { galleryId: 'gallery_08', title: 'چراغ گالری ۰۸ (آونگ زمان)', defaultX: 475, defaultY: 700 },
-  { galleryId: 'gallery_09', title: 'چراغ گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 302, defaultY: 750 },
+  { galleryId: 'gallery_02', title: 'چراغ گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 175, defaultY: 503 },
+  { galleryId: 'gallery_03', title: 'چراغ گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 157, defaultY: 332 },
+  { galleryId: 'gallery_04', title: 'چراغ گالری ۰۴ (ثبت دوام ما)', defaultX: 161, defaultY: 185 },
+  { galleryId: 'gallery_05', title: 'چراغ گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 313, defaultY: 129 },
+  { galleryId: 'gallery_06', title: 'چراغ گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 467, defaultY: 265 },
+  { galleryId: 'gallery_07', title: 'چراغ گالری ۰۷ (گذر از برون به درون)', defaultX: 416, defaultY: 299 },
+  { galleryId: 'gallery_08', title: 'چراغ گالری ۰۸ (آونگ زمان)', defaultX: 428, defaultY: 384 },
+  { galleryId: 'gallery_09', title: 'چراغ گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 444, defaultY: 505 },
   { galleryId: 'gallery_00', title: 'چراغ ورودی (نقشه اصلی)', defaultX: 302.4, defaultY: 77.7 },
 ];
 
@@ -67,8 +67,8 @@ export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
       ],
     },
     lampPosition: {
-      x: 302,
-      y: 85,
+      x: 175,
+      y: 503,
     },
   },
   {
@@ -86,8 +86,8 @@ export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
       ],
     },
     lampPosition: {
-      x: 475,
-      y: 335,
+      x: 157,
+      y: 332,
     },
   },
   {
@@ -105,8 +105,8 @@ export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
       ],
     },
     lampPosition: {
-      x: 135,
-      y: 335,
+      x: 161,
+      y: 185,
     },
   },
 ];
@@ -120,18 +120,20 @@ export function getGalleryAreas(): GalleryAreaConfig[] {
   if (cachedAreas) return cachedAreas;
 
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const combined = [...parsed];
-        for (const def of DEFAULT_GALLERY_AREAS) {
-          if (!combined.some((a) => a.galleryId === def.galleryId)) {
-            combined.push(def);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const combined = [...parsed];
+          for (const def of DEFAULT_GALLERY_AREAS) {
+            if (!combined.some((a) => a.galleryId === def.galleryId)) {
+              combined.push(def);
+            }
           }
+          cachedAreas = combined;
+          return cachedAreas!;
         }
-        cachedAreas = combined;
-        return cachedAreas!;
       }
     }
   } catch (err) {
