@@ -229,6 +229,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     collectionPoints: [
       {
         id: 'artwork-01',
+        starId: 'star-01',
         type: 'collection',
         pointType: 'star',
         galleryId: 'gallery-01',
@@ -241,6 +242,18 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
           { id: 'artwork-01-f2', order: 2, x: 0, y: 0, scale: 1 },
           { id: 'artwork-01-f3', order: 3, x: 0, y: 0, scale: 1 },
         ],
+      },
+      {
+        id: 'star-02',
+        starId: 'star-02',
+        type: 'collection',
+        pointType: 'star',
+        galleryId: 'gallery-01',
+        title: 'Camera Work Magazine',
+        roomSection: 'VAULT PAVILION',
+        x: 317,
+        y: 518,
+        frames: [],
       },
     ],
     iconPoints: [
