@@ -306,7 +306,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
                 left: `${leftPercent}%`,
                 top: `${topPercent}%`,
                 transform: isGuideQuestion
-                  ? 'translate(-50%, -50%) scale(var(--map-point-scale, 1))'
+                  ? 'translate(-50%, -50%) scale(calc(var(--map-point-scale, 1) * 1.13))'
                   : 'translate(-50%, -100%) scale(var(--map-point-scale, 1))',
                 transformOrigin: isGuideQuestion ? 'center center' : 'bottom center',
               }}
