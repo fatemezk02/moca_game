@@ -18,26 +18,51 @@ export const FinalCompletionCardBack: React.FC<FinalCompletionCardBackProps> = (
 }) => {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmitFeedback = (e: React.FormEvent) => {
+  const GOOGLE_SCRIPT_FEEDBACK_URL =
+    'https://script.google.com/macros/s/AKfycbxATDjK2Z5-oeKHeJo9pYVj0OEodnRM75WpMLNmp7p_r3htAICuQoqndiDKid_JIWPP/exec';
+
+  const handleSubmitFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!feedbackText.trim()) return;
+    const textToSend = feedbackText.trim();
+    if (!textToSend || isSubmitting) return;
 
-    // Placeholder: local save for future Google Sheets connection
+    setIsSubmitting(true);
+
     try {
-      const STORAGE_FEEDBACK_KEY = 'museum_game_feedback_list';
-      const existing = JSON.parse(localStorage.getItem(STORAGE_FEEDBACK_KEY) || '[]');
-      existing.push({
-        feedback: feedbackText.trim(),
-        timestamp: new Date().toISOString(),
-      });
-      localStorage.setItem(STORAGE_FEEDBACK_KEY, JSON.stringify(existing));
-    } catch {
-      // ignore
-    }
+      // Local backup save
+      try {
+        const STORAGE_FEEDBACK_KEY = 'museum_game_feedback_list';
+        const existing = JSON.parse(localStorage.getItem(STORAGE_FEEDBACK_KEY) || '[]');
+        existing.push({
+          feedback: textToSend,
+          timestamp: new Date().toISOString(),
+        });
+        localStorage.setItem(STORAGE_FEEDBACK_KEY, JSON.stringify(existing));
+      } catch {
+        // ignore
+      }
 
-    setIsSubmitted(true);
+      // Send POST request with JSON body { "feedback": userFeedbackText }
+      await fetch(GOOGLE_SCRIPT_FEEDBACK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify({
+          feedback: textToSend,
+        }),
+      });
+    } catch (err) {
+      console.error('Feedback submission error:', err);
+    } finally {
+      setIsSubmitting(false);
+      setFeedbackText('');
+      setIsSubmitted(true);
+    }
   };
 
   return (
@@ -216,7 +241,10 @@ export const FinalCompletionCardBack: React.FC<FinalCompletionCardBackProps> = (
                 <button
                   id="close-feedback-modal-btn"
                   type="button"
-                  onClick={() => setIsFeedbackOpen(false)}
+                  onClick={() => {
+                    setIsFeedbackOpen(false);
+                    setIsSubmitted(false);
+                  }}
                   aria-label="بستن"
                   className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white hover:bg-[#ef4444] hover:text-white transition-colors text-[#1e1b18] border border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] flex items-center justify-center cursor-pointer shrink-0"
                 >
@@ -232,17 +260,18 @@ export const FinalCompletionCardBack: React.FC<FinalCompletionCardBackProps> = (
                     value={feedbackText}
                     onChange={(e) => setFeedbackText(e.target.value)}
                     placeholder="نظرات و پیشنهادات خود را بنویسید..."
-                    className="w-full p-3 bg-white border-2 border-[#1e1b18] rounded-xl text-sm font-medium text-[#1e1b18] placeholder:text-[#94a3b8] focus:outline-none focus:border-[#f59e0b] shadow-[2px_2px_0px_#1e1b18] resize-none"
+                    disabled={isSubmitting}
+                    className="w-full p-3 bg-white border-2 border-[#1e1b18] rounded-xl text-sm font-medium text-[#1e1b18] placeholder:text-[#94a3b8] focus:outline-none focus:border-[#f59e0b] shadow-[2px_2px_0px_#1e1b18] resize-none disabled:opacity-60"
                     autoFocus
                   />
                   <button
                     id="submit-game-feedback-btn"
                     type="submit"
-                    disabled={!feedbackText.trim()}
+                    disabled={!feedbackText.trim() || isSubmitting}
                     className="w-full py-2.5 sm:py-3 px-4 bg-[#f59e0b] hover:bg-[#d97706] disabled:opacity-50 disabled:cursor-not-allowed text-[#1e1b18] font-black text-sm sm:text-base border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18]"
                   >
-                    <Send className="w-4 h-4 text-[#1e1b18]" />
-                    <span>ارسال نظر</span>
+                    <Send className={`w-4 h-4 text-[#1e1b18] ${isSubmitting ? 'animate-spin' : ''}`} />
+                    <span>{isSubmitting ? 'در حال ارسال...' : 'ارسال نظر'}</span>
                   </button>
                 </form>
               ) : (
@@ -251,12 +280,15 @@ export const FinalCompletionCardBack: React.FC<FinalCompletionCardBackProps> = (
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <p className="text-sm sm:text-base font-black text-[#15803d] leading-relaxed">
-                    ممنون از اینکه نظر خودت را با ما به اشتراک گذاشتی.
+                    نظر شما ثبت شد، ممنون از همراهی شما
                   </p>
                   <button
                     id="feedback-success-close-btn"
                     type="button"
-                    onClick={() => setIsFeedbackOpen(false)}
+                    onClick={() => {
+                      setIsFeedbackOpen(false);
+                      setIsSubmitted(false);
+                    }}
                     className="mt-2 py-2 px-6 bg-white hover:bg-[#f3f4f6] text-[#1e1b18] font-bold text-sm border-2 border-[#1e1b18] rounded-xl shadow-[2px_2px_0px_#1e1b18] cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
                   >
                     بستن
