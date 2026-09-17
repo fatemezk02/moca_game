@@ -1,4 +1,5 @@
 import React from 'react';
+import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
 
 interface NavigationLightProps {
   /** X position as percentage (0 - 100) within the SVG coordinate space */
@@ -15,6 +16,8 @@ interface NavigationLightProps {
   onNavigate?: () => void;
   /** Flag indicating this lamp is the player location indicator */
   isLocationIndicator?: boolean;
+  /** Visual state indicating this gallery has been completed/unlocked (green light/glow) */
+  isUnlocked?: boolean;
   /** Optional custom CSS classes */
   className?: string;
 }
@@ -57,9 +60,11 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
   label,
   onNavigate,
   isLocationIndicator = true,
+  isUnlocked,
   className = '',
 }) => {
   const displayLabel = formatGalleryLabelFa(galleryId || destinationName, label);
+  const unlocked = isUnlocked ?? (galleryId && galleryId !== 'gallery-00' && galleryId !== 'gallery_00' ? isGalleryPuzzleCompleted(galleryId) : false);
 
   return (
     <div
@@ -87,27 +92,31 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
           isLocationIndicator ? 'cursor-default pointer-events-none' : 'cursor-pointer'
         }`}
       >
-        {/* Outer Gentle Pulsing Glow Halo (Layer 1 - Soft diffuse aura) */}
-        <div
-          className="absolute w-[51px] h-[51px] rounded-full pointer-events-none transition-transform duration-700 animate-pulse"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(245, 197, 66, 0.45) 0%, rgba(245, 175, 40, 0.22) 45%, rgba(245, 158, 11, 0.08) 70%, transparent 90%)',
-            filter: 'blur(2px)',
-            animationDuration: '3s',
-          }}
-        />
+        {/* Outer Gentle Pulsing Glow Halo (Layer 1 - Soft diffuse aura) - only for active non-green lamps */}
+        {!unlocked && (
+          <div
+            className="absolute w-[51px] h-[51px] rounded-full pointer-events-none transition-transform duration-700 animate-pulse"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(245, 197, 66, 0.45) 0%, rgba(245, 175, 40, 0.22) 45%, rgba(245, 158, 11, 0.08) 70%, transparent 90%)',
+              filter: 'blur(2px)',
+              animationDuration: '3s',
+            }}
+          />
+        )}
 
-        {/* Mid Pulsing Halo Ring (Layer 2 - Subtle breathing glow) */}
-        <div
-          className="absolute w-[36.5px] h-[36.5px] rounded-full pointer-events-none transition-all duration-500"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(255, 236, 179, 0.9) 0%, rgba(245, 197, 66, 0.6) 45%, rgba(217, 119, 6, 0.2) 80%, transparent 100%)',
-            boxShadow: '0 0 14px 4px rgba(245, 197, 66, 0.55)',
-            animation: 'lampGlowPulse 2.8s ease-in-out infinite',
-          }}
-        />
+        {/* Mid Pulsing Halo Ring (Layer 2 - Subtle breathing glow) - only for active non-green lamps */}
+        {!unlocked && (
+          <div
+            className="absolute w-[36.5px] h-[36.5px] rounded-full pointer-events-none transition-all duration-500"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(255, 236, 179, 0.9) 0%, rgba(245, 197, 66, 0.6) 45%, rgba(217, 119, 6, 0.2) 80%, transparent 100%)',
+              boxShadow: '0 0 14px 4px rgba(245, 197, 66, 0.55)',
+              animation: 'lampGlowPulse 2.8s ease-in-out infinite',
+            }}
+          />
+        )}
 
         {/* Inner Glowing Lamp / Beacon Fixture */}
         <div className="relative z-10 flex flex-col items-center justify-center">
@@ -125,12 +134,12 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
               {/* Glass Bulb Body - Refined thinner stroke matching collection points */}
               <path
                 d="M12 2C8.13 2 5 5.13 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.13 15.87 2 12 2Z"
-                fill="#fbbf24"
+                fill={unlocked ? '#8ecb88' : '#fbbf24'}
                 stroke="#1e1b18"
                 strokeWidth="1.2"
                 strokeLinejoin="round"
                 strokeLinecap="round"
-                className="transition-colors group-hover:fill-[#f59e0b]"
+                className={unlocked ? 'transition-colors group-hover:fill-[#7ebb76]' : 'transition-colors group-hover:fill-[#f59e0b]'}
               />
 
               {/* Specular Highlight on Glass (Curved glare reflection) */}
@@ -178,8 +187,8 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
             </svg>
           </div>
 
-          {/* Room Code Badge Pill Underneath - Exactly matching SEC labels */}
-          {displayLabel && (
+          {/* Room Code Badge Pill Underneath - Hidden for unlocked (green) lamps */}
+          {!unlocked && displayLabel && (
             <div
               id="player-location-lamp-label"
               className="absolute top-7.5 font-sans-custom text-[10px] font-black px-1.5 py-0.2 rounded-md border-1.5 border-[#1e1b18] whitespace-nowrap transition-all duration-200 pointer-events-none bg-[#ffffff] text-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] opacity-90 group-hover:opacity-100 group-hover:bg-[#fef3c7]"
@@ -203,6 +212,18 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
               transform: scale(1.18);
               opacity: 1;
               box-shadow: 0 0 18px 6px rgba(245, 197, 66, 0.75);
+            }
+          }
+          @keyframes lampGreenGlowPulse {
+            0%, 100% {
+              transform: scale(0.92);
+              opacity: 0.75;
+              box-shadow: 0 0 10px 2px rgba(34, 197, 94, 0.45);
+            }
+            50% {
+              transform: scale(1.18);
+              opacity: 1;
+              box-shadow: 0 0 18px 6px rgba(34, 197, 94, 0.8);
             }
           }
         `}

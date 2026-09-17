@@ -182,7 +182,7 @@ export function calculateSafePanelPosition({
  * simply change IS_DEV_POSITIONING_ENABLED to false or remove this component.
  * ============================================================================
  */
-export const IS_DEV_POSITIONING_ENABLED = false;
+export const IS_DEV_POSITIONING_ENABLED = true;
 
 export interface DevMapPositioningToolProps {
   currentGalleryId: string;
@@ -212,7 +212,6 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
   currentGalleryId,
   activeTab,
 }) => {
-  if (!IS_DEV_POSITIONING_ENABLED) return null;
   // Main toggle for positioning mode
   const [isActive, setIsActive] = useState<boolean>(false);
 

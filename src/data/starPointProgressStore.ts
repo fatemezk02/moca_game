@@ -23,6 +23,7 @@ export interface StarPointProgressItem {
   labelSeen?: boolean;
   discoveryUnlocked: boolean;
   questionCompleted?: boolean;
+  questionFailed?: boolean;
   informationUnlocked?: boolean;
   rewardClaimed?: 'coins' | 'info' | boolean;
   answeredQuestion?: boolean;
@@ -371,6 +372,59 @@ export function recordStarPointAnswer(starPointId: string, selectedOption: numbe
     }
   } catch (err) {
     console.error('Error recording star point answer:', err);
+  }
+}
+
+/**
+ * Checks if a player has previously failed/answered incorrectly to a Star Point question.
+ */
+export function hasStarPointQuestionFailed(starPointId: string): boolean {
+  const progress = getStarPointProgress(starPointId);
+  if (Boolean(progress.questionFailed)) {
+    return true;
+  }
+  const db = getStarPointProgressDb();
+  const extractNum = (s?: string) => {
+    if (!s) return null;
+    const m = s.match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
+  };
+  const targetNum = extractNum(starPointId);
+  if (targetNum !== null) {
+    return Object.entries(db).some(([key, item]) => {
+      if (!item.questionFailed) return false;
+      const keyNum = extractNum(key);
+      return keyNum !== null && keyNum === targetNum;
+    });
+  }
+  return false;
+}
+
+/**
+ * Marks that the player answered incorrectly to the Star Point question.
+ */
+export function markStarPointQuestionFailed(starPointId: string): void {
+  try {
+    const db = getStarPointProgressDb();
+    const existing = getStarPointProgress(starPointId);
+    const updated: StarPointProgressItem = {
+      ...existing,
+      starPointId,
+      firstViewed: true,
+      questionFailed: true,
+    };
+    db[starPointId] = updated;
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(STORAGE_STAR_PROGRESS_KEY, JSON.stringify(db));
+      window.dispatchEvent(
+        new CustomEvent('museum_star_point_progress_updated', {
+          detail: { starPointId, progress: updated },
+        })
+      );
+    }
+  } catch (err) {
+    console.error('Error marking star point question failed:', err);
   }
 }
 

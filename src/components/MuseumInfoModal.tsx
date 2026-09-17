@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Compass, Layers, Smartphone, Sparkles, MapPin, Eye, Trophy, HelpCircle, CheckCircle2 } from 'lucide-react';
+import { X, Compass, Layers, Smartphone, Sparkles, MapPin, Eye } from 'lucide-react';
 
 interface MuseumInfoModalProps {
   isOpen: boolean;
@@ -46,7 +46,7 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
                 راهنمای موزه و نقشه
               </span>
               <h2 className="font-sans-custom text-[20px] font-black text-[#1e1b18]">
-                راهنمای اجرای بازی
+                آرشیو ۰۱ • راهنمای بخش‌ها و علائم
               </h2>
             </div>
             <button
@@ -163,43 +163,21 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
               </div>
             )}
 
-            {/* Game Guide & Objective Box */}
-            <div className="border-2 border-[#1e1b18] rounded-2xl p-4 bg-[#e0f2fe] shadow-[3px_3px_0px_#1e1b18] space-y-3">
-              <div className="flex items-center gap-2 font-sans-custom text-[13px] font-black text-[#0369a1]">
+            {/* Wall Reveal Explanation */}
+            <div className="border-2 border-[#1e1b18] rounded-2xl p-3.5 bg-[#e0f2fe] shadow-[3px_3px_0px_#1e1b18] space-y-2">
+              <div className="flex items-center gap-2 font-sans-custom text-[12px] font-black text-[#1e1b18] uppercase">
                 <Compass className="w-4 h-4 text-[#0284c7]" />
-                <span>هدف و نحوهٔ اجرای بازی</span>
+                <span>سیستم نمایش جهت‌دار دیوارها</span>
               </div>
-              
-              <div className="space-y-2 text-[12px] text-[#1e293b]">
-                <p className="font-bold text-[#0f172a]">
-                  🎯 <strong>کارهایی که باید انجام دهید:</strong>
-                </p>
-                <ul className="space-y-1.5 pr-2 font-medium text-[#334155]">
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-[#0284c7] font-black">۱.</span>
-                    <span>در پلان هر گالری کاوش کنید و روی <strong>نشانگرهای آثار هنری</strong> و <strong>ستاره‌های مخفی</strong> کلیک کنید.</span>
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-[#0284c7] font-black">۲.</span>
-                    <span>به پرسش‌های جذاب هر اثر پاسخ دهید تا <strong>قطعات گمشدهٔ پازل</strong> آن گالری را به دست آورید.</span>
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-[#0284c7] font-black">۳.</span>
-                    <span>با چیدن قطعات و تکمیل پازل، قفل ورود به <strong>گالری‌های بعدی</strong> را باز کنید.</span>
-                  </li>
-                </ul>
-
-                <div className="pt-2 border-t border-[#bae6fd] space-y-1">
-                  <p className="font-bold text-[#0f172a]">
-                    🎁 <strong>جوایز و دستاوردهایی که دریافت می‌کنید:</strong>
-                  </p>
-                  <ul className="space-y-1 pr-2 font-medium text-[#334155] text-[11.5px]">
-                    <li>• <strong>سکه و ستاره:</strong> با هر پاسخ صحیح و کشف ستاره‌های پنهان، امتیاز و سکه دریافت می‌کنید.</li>
-                    <li>• <strong>کلکسیون آثار و دیوار کیوریتور:</strong> تابلوهای تکمیل‌شده به نمایشگاه شخصی شما اضافه می‌شوند.</li>
-                    <li>• <strong>کارت نهایی افتخار:</strong> با اتمام تمامی گالری‌ها، کارت کیوریتور ارشد موزه با نام شما صادر می‌گردد.</li>
-                  </ul>
-                </div>
-              </div>
+              <p className="text-[12px] text-[#334155] font-medium">
+                هر نشانگر روی نقشه دقیقا با دیوار مربوطه در پلان همگام شده است و با کلیک روی آن پنجره اطلاعات به سمت داخل سالن باز می‌شود:
+              </p>
+              <ul className="text-[11px] font-bold space-y-1 text-[#475569] pl-2 border-l-2 border-[#0284c7]">
+                <li>• <strong>دیوار غربی (چپ):</strong> ورود از چپ به راست</li>
+                <li>• <strong>دیوار شرقی (راست):</strong> ورود از راست به چپ</li>
+                <li>• <strong>دیوار شمالی (بالا):</strong> ورود از بالا به پایین</li>
+                <li>• <strong>دیوار جنوبی (پایین):</strong> ورود از پایین به بالا</li>
+              </ul>
             </div>
 
             {/* PWA & Touch interactions */}

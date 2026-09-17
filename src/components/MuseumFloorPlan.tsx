@@ -7,12 +7,13 @@ import { CustomIconRender } from './CustomIconRender';
 import { CollectionPointMarker } from './CollectionPointMarker';
 import { NavigationArrowRender } from './NavigationArrowRender';
 import { Gallery00MapSvg } from './Gallery00MapSvg';
-import { StarPoint } from './StarPoint';
+import { StarPoint, StarLabel } from './StarPoint';
 import { isArrowVisibleToPlayer, markArrowUsed, isArrowUsed } from '../data/arrowConditionsStore';
 import { getCurrentGalleryId, setCurrentGalleryId } from '../data/playerLocationStore';
 import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
 import { getLampPositionForGallery, getAllGalleryLamps, getAllGalleryLocks } from '../data/galleryAreasStore';
 import { isGalleryReached } from '../data/reachedGalleriesStore';
+import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
 import { GalleryLockIndicator } from './GalleryLockIndicator';
 import { normalizeGalleryId } from '../services/content/mappers';
 import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
@@ -54,6 +55,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hasMoved, setHasMoved] = useState(false);
   const [selectedStarPointId, setSelectedStarPointId] = useState<string | null>(null);
+  const [selectedLocationPinId, setSelectedLocationPinId] = useState<string | null>(null);
   const [adminPoints, setAdminPoints] = useState(() => getGalleryPoints('gallery-00'));
   const [adminArrows, setAdminArrows] = useState(() => getGalleryArrows('gallery-00'));
   const [playerGalleryId, setPlayerGalleryId] = useState<string>(() => getCurrentGalleryId());
@@ -103,6 +105,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     window.addEventListener('museum_gallery_reached', handleAreasUpdate);
     window.addEventListener('museum_game_fully_reset', handleAreasUpdate);
     window.addEventListener('museum_player_progress_updated', handleAreasUpdate);
+    window.addEventListener('museum_puzzle_progress_updated', handleAreasUpdate);
+    window.addEventListener('museum_completed_gallery_puzzles_updated', handleAreasUpdate);
 
     return () => {
       window.removeEventListener('museum_player_location_updated', handleLocUpdate);
@@ -112,6 +116,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
       window.removeEventListener('museum_gallery_reached', handleAreasUpdate);
       window.removeEventListener('museum_game_fully_reset', handleAreasUpdate);
       window.removeEventListener('museum_player_progress_updated', handleAreasUpdate);
+      window.removeEventListener('museum_puzzle_progress_updated', handleAreasUpdate);
+      window.removeEventListener('museum_completed_gallery_puzzles_updated', handleAreasUpdate);
     };
   }, []);
 
@@ -196,9 +202,37 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     setIsDragging(false);
   };
 
+  // Helper to resolve standard Location Pin labels
+  const getLocationPinLabel = (point: { id?: string; iconType?: string; title?: string }): string => {
+    const iconType = point.iconType || '';
+    const id = (point.id || '').toLowerCase();
+    const title = (point.title || '').toLowerCase();
+
+    // Location labels:
+    // - Cafe → "کافه"
+    // - Museum Shop → "فروشگاه"
+    // - Sculpture Garden → "باغ مجسمه ها"
+    // - Oil Pool → "حوض روغن"
+    if (iconType === 'preset-location-coffee' || id.includes('cafe') || id.includes('coffee') || title.includes('کافه')) {
+      return 'کافه';
+    }
+    if (iconType === 'preset-location-shop' || id.includes('shop') || title.includes('فروشگاه')) {
+      return 'فروشگاه';
+    }
+    if (iconType === 'preset-location-tree' || id.includes('tree') || id.includes('garden') || title.includes('باغ')) {
+      return 'باغ مجسمه ها';
+    }
+    if (iconType === 'preset-location-frame' || id.includes('frame') || id.includes('oil') || id.includes('pool') || title.includes('روغن')) {
+      return 'حوض روغن';
+    }
+
+    return point.title || '';
+  };
+
   // Handle click on dynamic arrow overlay
   const handleArrowClick = (arrow: AdminArrowPoint, e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
+    setSelectedLocationPinId(null);
     if (!arrow.destination || arrow.destination === 'none') {
       return;
     }
@@ -242,6 +276,14 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   // Handle click on dynamic icon point
   const handleIconPointClick = (iconPoint: AdminIconPoint, e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
+    const isLocationPin = iconPoint.iconType?.startsWith('preset-location-') || iconPoint.type === 'icon';
+    if (isLocationPin && (!iconPoint.destination || iconPoint.destination === 'gallery-00')) {
+      onClearSelection();
+      setSelectedStarPointId(null);
+      setSelectedLocationPinId((prev) => (prev === iconPoint.id ? null : iconPoint.id));
+      return;
+    }
+    setSelectedLocationPinId(null);
     if (!iconPoint.destination || iconPoint.destination === 'gallery-00') {
       // Stay on current view / active tap response
       return;
@@ -288,6 +330,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     ) {
       onClearSelection();
       setSelectedStarPointId(null);
+      setSelectedLocationPinId(null);
     }
   };
 
@@ -390,24 +433,73 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           )}
         </Gallery00MapSvg>
 
-        {/* Dynamic Player Location Lamp Indicator (Resolves to player's current gallery area) */}
-        {(() => {
-          const activeLampPos = getLampPositionForGallery(playerGalleryId);
-          const lampMapX = (activeLampPos.x / 604.8) * 100;
-          const lampMapY = (activeLampPos.y / 844.86) * 100;
+        {/* Gallery Lamp Indicators (Resolves to player's current and reached/unlocked gallery areas - Hidden when Location Points are ON) */}
+        {!areLocationPinsVisible && (() => {
+          const allLamps = getAllGalleryLamps();
+          const canonPlayerId = normalizeGalleryId(playerGalleryId) === 'gallery_01' ? 'gallery_02' : normalizeGalleryId(playerGalleryId);
+
+          const displayedLampsMap = new Map<string, typeof allLamps[0]>();
+
+          allLamps.forEach((lamp) => {
+            const canonId = normalizeGalleryId(lamp.galleryId) === 'gallery_01' ? 'gallery_02' : normalizeGalleryId(lamp.galleryId);
+            
+            // Entrance / lobby lamp is shown when player is at entrance
+            if (canonId === 'gallery_00') {
+              if (canonPlayerId === 'gallery_00') {
+                displayedLampsMap.set(canonId, lamp);
+              }
+              return;
+            }
+
+            // Show lamp for any gallery reached or currently visited by player
+            if (isGalleryReached(lamp.galleryId) || isGalleryReached(canonId) || canonId === canonPlayerId) {
+              if (!displayedLampsMap.has(canonId)) {
+                displayedLampsMap.set(canonId, lamp);
+              }
+            }
+          });
+
+          // Ensure player's current gallery has a lamp if not in map
+          if (canonPlayerId !== 'gallery_00' && !displayedLampsMap.has(canonPlayerId)) {
+            const activeLampPos = getLampPositionForGallery(playerGalleryId);
+            displayedLampsMap.set(canonPlayerId, {
+              id: `lamp-${canonPlayerId}`,
+              galleryId: canonPlayerId,
+              masterMapGalleryId: 'gallery-00',
+              title: `گالری ${canonPlayerId}`,
+              x: activeLampPos.x,
+              y: activeLampPos.y,
+            });
+          }
+
+          const lampsToRender = Array.from(displayedLampsMap.values());
+
           return (
-            <NavigationLight
-              mapX={lampMapX}
-              mapY={lampMapY}
-              galleryId={playerGalleryId}
-              destinationName={playerGalleryId}
-              isLocationIndicator={true}
-            />
+            <>
+              {lampsToRender.map((lamp) => {
+                const lampPos = getLampPositionForGallery(lamp.galleryId);
+                const lampMapX = (lampPos.x / 604.8) * 100;
+                const lampMapY = (lampPos.y / 844.86) * 100;
+                const isCompleted = isGalleryPuzzleCompleted(lamp.galleryId);
+
+                return (
+                  <NavigationLight
+                    key={`lamp-${lamp.galleryId}`}
+                    mapX={lampMapX}
+                    mapY={lampMapY}
+                    galleryId={lamp.galleryId}
+                    destinationName={lamp.galleryId}
+                    isLocationIndicator={true}
+                    isUnlocked={isCompleted}
+                  />
+                );
+              })}
+            </>
           );
         })()}
 
-        {/* Lock Indicators at the configured lock positions of galleries not yet reached by the player */}
-        {getAllGalleryLocks()
+        {/* Lock Indicators at the configured lock positions of galleries not yet reached by the player (Hidden when Location Points are ON) */}
+        {!areLocationPinsVisible && getAllGalleryLocks()
           .filter((lock) => {
             // Entrance / lobby of the map is never a locked future gallery
             if (lock.galleryId === 'gallery_00' || lock.galleryId === 'gallery-00') {
@@ -475,6 +567,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
             const posX = (iconPoint.x / 604.8) * 100;
             const posY = (iconPoint.y / 844.86) * 100;
             const isLocationPin = iconPoint.iconType?.startsWith('preset-location-') || iconPoint.type === 'icon';
+            const locationLabel = getLocationPinLabel(iconPoint);
+            const isLabelOpen = selectedLocationPinId === iconPoint.id;
 
             return (
               <div
@@ -487,8 +581,9 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                     ? 'translate(-50%, -100%) scale(var(--map-point-scale, 1))'
                     : 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
                   transformOrigin: isLocationPin ? 'bottom center' : 'center center',
+                  zIndex: isLabelOpen ? 60 : 30,
                 }}
-                className="absolute z-30 pointer-events-auto"
+                className={`absolute pointer-events-auto ${isLabelOpen ? 'z-[60]' : 'z-30'}`}
               >
                 <div
                   className={`relative ${locationAnimKey > 0 ? 'animate-quick-grow origin-bottom' : ''}`}
@@ -506,12 +601,26 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                   )}
                   <button
                     onClick={(e) => handleIconPointClick(iconPoint, e)}
-                    aria-label={iconPoint.title}
-                    title={iconPoint.title}
+                    aria-label={locationLabel || iconPoint.title}
+                    title={locationLabel || iconPoint.title}
                     className="relative group flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-110 active:scale-95"
                   >
                     <CustomIconRender point={iconPoint} />
                   </button>
+
+                  {/* Reused Star label component directly BELOW the Location Pin */}
+                  {isLocationPin && !!locationLabel && (
+                    <StarLabel
+                      id={iconPoint.id}
+                      labelText={locationLabel}
+                      isOpen={isLabelOpen}
+                      placement="bottom"
+                      leftPercent={posX}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             );
@@ -519,7 +628,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
 
         {/* Clickable Marker Nodes Layer */}
         {collections
-          .filter((col) => !['col-02', 'col-04', 'col-05', 'col-07'].includes(col.id))
+          .filter((col) => !['col-02', 'col-04', 'col-07'].includes(col.id))
           .map((col) => {
           const isSelected = selectedCollection?.id === col.id;
           const isCenterMonolith = col.id === 'col-05';
@@ -544,10 +653,12 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                 isSelected={selectedStarPointId === col.id}
                 onSelect={() => {
                   onClearSelection();
+                  setSelectedLocationPinId(null);
                   setSelectedStarPointId(col.id);
                 }}
                 onOpenDiscoveryModal={(starId) => {
                   onClearSelection();
+                  setSelectedLocationPinId(null);
                   setSelectedStarPointId(null);
                   if (onOpenStarDiscovery) {
                     onOpenStarDiscovery(starId);
@@ -576,6 +687,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
+                  setSelectedLocationPinId(null);
                   onSelectCollection(col);
                 }}
                 aria-label={`Select ${col.roomCode}: ${col.title}`}

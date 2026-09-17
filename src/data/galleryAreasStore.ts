@@ -53,10 +53,10 @@ export const DEFAULT_GALLERY_LAMPS: Array<{ galleryId: string; title: string; de
  */
 export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
   {
-    id: 'area-gallery-01',
-    galleryId: 'gallery-01',
+    id: 'area-gallery-02',
+    galleryId: 'gallery_02',
     masterMapGalleryId: 'gallery-00',
-    title: 'گالری ۰۱ — تالار معماری',
+    title: 'گالری ۰۲ — تالار معماری',
     area: {
       type: 'polygon',
       points: [
@@ -242,9 +242,16 @@ export function getAllGalleryLamps(): GalleryLampItem[] {
   const lamps: GalleryLampItem[] = [];
   const seenGalleries = new Set<string>();
 
+  // Helper to map aliases
+  const getMappedCanon = (id: string) => {
+    const c = normalizeGalleryId(id);
+    if (c === 'gallery_01') return 'gallery_02'; // Map gallery_01 to gallery_02
+    return c;
+  };
+
   // 1. Process known standard museum galleries
   for (const def of DEFAULT_GALLERY_LAMPS) {
-    const canonId = normalizeGalleryId(def.galleryId);
+    const canonId = getMappedCanon(def.galleryId);
     if (seenGalleries.has(canonId)) continue;
     seenGalleries.add(canonId);
 
@@ -262,7 +269,7 @@ export function getAllGalleryLamps(): GalleryLampItem[] {
   // 2. Check if any other gallery area exists that was not in standard list
   const areas = getGalleryAreas();
   for (const area of areas) {
-    const canonId = normalizeGalleryId(area.galleryId);
+    const canonId = getMappedCanon(area.galleryId);
     if (!seenGalleries.has(canonId)) {
       seenGalleries.add(canonId);
       const pos = getLampPositionForGallery(area.galleryId);

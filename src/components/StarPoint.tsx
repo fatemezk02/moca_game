@@ -8,6 +8,110 @@ import {
 import { getStarDiscovery } from '../data/starDiscoveryData';
 import { contentService } from '../services/content/contentService';
 
+export interface StarLabelProps {
+  id: string;
+  labelText: string;
+  isOpen: boolean;
+  placement?: 'side' | 'bottom';
+  isRightSide?: boolean;
+  leftPercent?: number;
+  onClick?: (e: React.MouseEvent) => void;
+}
+
+export const StarLabel: React.FC<StarLabelProps> = ({
+  id,
+  labelText,
+  isOpen,
+  placement = 'side',
+  isRightSide = false,
+  leftPercent = 50,
+  onClick,
+}) => {
+  return (
+    <AnimatePresence>
+      {isOpen && !!labelText && (
+        placement === 'bottom' ? (
+          <motion.div
+            id={`star-label-${id}`}
+            initial={{ opacity: 0, scaleY: 0 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            exit={{ opacity: 0, scaleY: 0 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              transformOrigin: 'top center',
+              zIndex: 70,
+            }}
+            onClick={onClick}
+            className="absolute top-full left-1/2 -translate-x-1/2 z-[70] pointer-events-auto cursor-pointer"
+          >
+            <div className="flex flex-col items-center select-none group">
+              {/* Collection/lamp-style badge container: identical style to star label directly below icon */}
+              <div
+                style={{
+                  maxWidth: 'min(290px, calc(100vw - 32px))',
+                }}
+                className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center justify-center gap-1.5 w-max text-center opacity-90 group-hover:opacity-100"
+              >
+                <span className="break-words leading-snug whitespace-nowrap">{labelText}</span>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            id={`star-label-${id}`}
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            exit={{ opacity: 0, scaleX: 0 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              transformOrigin: isRightSide ? 'right center' : 'left center',
+              zIndex: 70,
+            }}
+            onClick={onClick}
+            className={`absolute top-1/2 -translate-y-1/2 z-[70] pointer-events-auto cursor-pointer ${
+              isRightSide ? 'right-[90%]' : 'left-[90%]'
+            }`}
+          >
+            {isRightSide ? (
+              /* Label projecting to the LEFT */
+              <div className="flex flex-col items-end pr-1 select-none group">
+                {/* Horizontal line in line with the star */}
+                <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -mr-1" />
+
+                {/* Collection/lamp-style badge container: content-based width with dynamic boundary limit */}
+                <div
+                  style={{
+                    maxWidth: `min(290px, calc(${Math.max(15, leftPercent - 2)}vw - 16px))`,
+                  }}
+                  className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
+                >
+                  <span className="break-words leading-snug">{labelText}</span>
+                </div>
+              </div>
+            ) : (
+              /* Label projecting to the RIGHT */
+              <div className="flex flex-col items-start pl-1 select-none group">
+                {/* Horizontal line in line with the star */}
+                <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -ml-1" />
+
+                {/* Collection/lamp-style badge container: content-based width with dynamic boundary limit */}
+                <div
+                  style={{
+                    maxWidth: `min(290px, calc(${Math.max(15, 100 - leftPercent - 2)}vw - 16px))`,
+                  }}
+                  className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
+                >
+                  <span className="break-words leading-snug">{labelText}</span>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )
+      )}
+    </AnimatePresence>
+  );
+};
+
 export interface StarPointProps {
   id: string;
   starId?: string;
@@ -156,59 +260,15 @@ export const StarPoint: React.FC<StarPointProps> = ({
           ★ ────────────────
             ردپای عکاسی را در گذر زمان دنبال کن
           ==================================================================== */}
-      <AnimatePresence>
-        {isLabelOpen && !unlocked && !!labelText && (
-          <motion.div
-            id={`star-label-${id}`}
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            exit={{ opacity: 0, scaleX: 0 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              transformOrigin: isRightSide ? 'right center' : 'left center',
-              zIndex: 70,
-            }}
-            onClick={handleLabelClick}
-            className={`absolute top-1/2 -translate-y-1/2 z-[70] pointer-events-auto cursor-pointer ${
-              isRightSide ? 'right-[90%]' : 'left-[90%]'
-            }`}
-          >
-            {isRightSide ? (
-              /* Label projecting to the LEFT */
-              <div className="flex flex-col items-end pr-1 select-none group">
-                {/* Horizontal line in line with the star */}
-                <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -mr-1" />
-
-                {/* Collection/lamp-style badge container: content-based width with dynamic boundary limit */}
-                <div
-                  style={{
-                    maxWidth: `min(290px, calc(${Math.max(15, leftPercent - 2)}vw - 16px))`,
-                  }}
-                  className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
-                >
-                  <span className="break-words leading-snug">{labelText}</span>
-                </div>
-              </div>
-            ) : (
-              /* Label projecting to the RIGHT */
-              <div className="flex flex-col items-start pl-1 select-none group">
-                {/* Horizontal line in line with the star */}
-                <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -ml-1" />
-
-                {/* Collection/lamp-style badge container: content-based width with dynamic boundary limit */}
-                <div
-                  style={{
-                    maxWidth: `min(290px, calc(${Math.max(15, 100 - leftPercent - 2)}vw - 16px))`,
-                  }}
-                  className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
-                >
-                  <span className="break-words leading-snug">{labelText}</span>
-                </div>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <StarLabel
+        id={id}
+        labelText={labelText}
+        isOpen={isLabelOpen && !unlocked && !!labelText}
+        placement="side"
+        isRightSide={isRightSide}
+        leftPercent={leftPercent}
+        onClick={handleLabelClick}
+      />
     </div>
   );
 };

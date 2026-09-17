@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Coins,
   CheckCircle2,
+  Check,
   AlertCircle,
   RotateCcw,
   ArrowRight,
@@ -20,6 +21,8 @@ import {
   unlockStarPointViaCoins,
   getStarPointProgress,
   getUnlockedInformationStarsCount,
+  hasStarPointQuestionFailed,
+  markStarPointQuestionFailed,
 } from '../data/starPointProgressStore';
 import { contentService } from '../services/content/contentService';
 import { toPersianDigits, formatTwoDigitPersian } from '../services/content/mappers';
@@ -80,8 +83,20 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
 
   const [phase, setPhase] = useState<ModalPhase>('initial_choice');
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [wrongOptionIndex, setWrongOptionIndex] = useState<number | null>(null);
+  const [isAnswering, setIsAnswering] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [artworkImageError, setArtworkImageError] = useState(false);
+  const wrongAnswerTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (wrongAnswerTimerRef.current) {
+        clearTimeout(wrongAnswerTimerRef.current);
+        wrongAnswerTimerRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setArtworkImageError(false);
@@ -178,12 +193,23 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
     if (isOpen) {
       setErrorMessage(null);
       setSelectedOption(null);
+      setWrongOptionIndex(null);
+      setIsAnswering(false);
+      if (wrongAnswerTimerRef.current) {
+        clearTimeout(wrongAnswerTimerRef.current);
+        wrongAnswerTimerRef.current = null;
+      }
 
       const isUnlocked = isStarPointUnlocked(starPointId);
       if (isUnlocked || initialMode === 'direct_info') {
         setPhase('artwork_info');
       } else {
         setPhase('initial_choice');
+      }
+    } else {
+      if (wrongAnswerTimerRef.current) {
+        clearTimeout(wrongAnswerTimerRef.current);
+        wrongAnswerTimerRef.current = null;
       }
     }
   }, [isOpen, starPointId, initialMode]);
@@ -192,6 +218,12 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
   const handleSelectQuestionChoice = () => {
     setErrorMessage(null);
     setSelectedOption(null);
+    setWrongOptionIndex(null);
+    setIsAnswering(false);
+    if (wrongAnswerTimerRef.current) {
+      clearTimeout(wrongAnswerTimerRef.current);
+      wrongAnswerTimerRef.current = null;
+    }
     setPhase('question');
   };
 
@@ -203,19 +235,32 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
 
   // Handle user answering the question
   const handleSelectQuestionOption = (idx: number) => {
+    if (isAnswering || phase !== 'question') return;
+
     setSelectedOption(idx);
     const correctIdx = discoveryData.question.correctIndex;
 
     if (idx === correctIdx) {
+      setIsAnswering(true);
       // Award NET reward coins (correct_reward_coins - informationCost)
       // and unlock information permanently
       unlockStarPointViaQuestion(starPointId, netReward);
       setPhase('correct_answer');
+      setIsAnswering(false);
     } else {
-      // Deduct exactly 3 coins from the player's current coin balance
-      deductCoins(3);
-      // Incorrect answer: 0 coins, remains locked
-      setPhase('incorrect_answer');
+      // No coins deducted on incorrect answer
+      markStarPointQuestionFailed(effectiveStarPointId || starPointId || '');
+      setWrongOptionIndex(idx);
+      setIsAnswering(true);
+
+      if (wrongAnswerTimerRef.current) {
+        clearTimeout(wrongAnswerTimerRef.current);
+      }
+      wrongAnswerTimerRef.current = setTimeout(() => {
+        setWrongOptionIndex(null);
+        setIsAnswering(false);
+        setPhase('incorrect_answer');
+      }, 1200);
     }
   };
 
@@ -388,38 +433,45 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                   )}
                 </div>
 
-                {/* Side-by-side horizontal action buttons */}
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pt-2">
-                  {/* Choice 1: [ سؤال ] (Free, leads to discovery question) */}
-                  <button
-                    id="star-choice-question-btn"
-                    type="button"
-                    onClick={handleSelectQuestionChoice}
-                    className="w-full py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#f0fdf4] border-2 border-[#1e1b18] rounded-xl shadow-[2.5px_2.5px_0px_#1e1b18] text-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-2 group select-none min-h-[48px]"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-[#dcfce7] border border-[#1e1b18] flex items-center justify-center text-[#15803d] shrink-0 group-hover:bg-[#86efac] transition-colors">
-                      <HelpCircle className="w-4 h-4 text-[#1e1b18]" />
-                    </div>
-                    <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
-                      سؤال
-                    </span>
-                  </button>
+                {/* Action buttons (if question was answered incorrectly once, only the coins unlock button is shown) */}
+                {(() => {
+                  const isQuestionFailed = hasStarPointQuestionFailed(effectiveStarPointId || starPointId || '');
+                  return (
+                    <div className={`grid ${isQuestionFailed ? 'grid-cols-1' : 'grid-cols-2'} gap-2.5 sm:gap-3 pt-2`}>
+                      {/* Choice 1: [ سؤال ] (Free, leads to discovery question - Hidden if user already failed this question) */}
+                      {!isQuestionFailed && (
+                        <button
+                          id="star-choice-question-btn"
+                          type="button"
+                          onClick={handleSelectQuestionChoice}
+                          className="w-full py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#f0fdf4] border-2 border-[#1e1b18] rounded-xl shadow-[2.5px_2.5px_0px_#1e1b18] text-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-2 group select-none min-h-[48px]"
+                        >
+                          <div className="w-7 h-7 rounded-lg bg-[#dcfce7] border border-[#1e1b18] flex items-center justify-center text-[#15803d] shrink-0 group-hover:bg-[#86efac] transition-colors">
+                            <HelpCircle className="w-4 h-4 text-[#1e1b18]" />
+                          </div>
+                          <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
+                            سؤال
+                          </span>
+                        </button>
+                      )}
 
-                  {/* Choice 2: [ ۳۰ سکه ] (Cost resolved dynamically, no "اطلاعات بیشتر" label) */}
-                  <button
-                    id="star-choice-more-info-btn"
-                    type="button"
-                    onClick={handleSelectMoreInfoChoice}
-                    className="w-full py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#fefce8] border-2 border-[#1e1b18] rounded-xl shadow-[2.5px_2.5px_0px_#1e1b18] text-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-2 group select-none min-h-[48px]"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-[#fef3c7] border border-[#1e1b18] flex items-center justify-center text-[#d97706] shrink-0 group-hover:bg-[#fbbf24] transition-colors">
-                      <Coins className="w-4 h-4 text-[#1e1b18]" />
+                      {/* Choice 2: [ ۳۰ سکه ] (Cost resolved dynamically, no "اطلاعات بیشتر" label) */}
+                      <button
+                        id="star-choice-more-info-btn"
+                        type="button"
+                        onClick={handleSelectMoreInfoChoice}
+                        className="w-full py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#fefce8] border-2 border-[#1e1b18] rounded-xl shadow-[2.5px_2.5px_0px_#1e1b18] text-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-2 group select-none min-h-[48px]"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-[#fef3c7] border border-[#1e1b18] flex items-center justify-center text-[#d97706] shrink-0 group-hover:bg-[#fbbf24] transition-colors">
+                          <Coins className="w-4 h-4 text-[#1e1b18]" />
+                        </div>
+                        <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
+                          {toPersianDigits(discoveryData.informationCost || 30)} سکه
+                        </span>
+                      </button>
                     </div>
-                    <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
-                      {toPersianDigits(discoveryData.informationCost || 30)} سکه
-                    </span>
-                  </button>
-                </div>
+                  );
+                })()}
               </motion.div>
             )}
 
@@ -530,29 +582,48 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 {/* Options List */}
                 <div className="space-y-2.5">
                   {discoveryData.question.options.map((optText, idx) => {
-                    const isSelected = selectedOption === idx;
+                    const isChosen = selectedOption === idx && wrongOptionIndex === null;
+                    const isWrong = wrongOptionIndex === idx;
+                    const isCorrectAnswer = wrongOptionIndex !== null && idx === discoveryData.question.correctIndex;
+
                     return (
                       <button
                         key={idx}
                         type="button"
+                        disabled={isAnswering}
                         onClick={() => handleSelectQuestionOption(idx)}
-                        className={`w-full text-right p-3 sm:p-3.5 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer group ${
-                          isSelected
+                        className={`w-full text-right p-3 sm:p-3.5 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer group disabled:cursor-not-allowed ${
+                          isWrong
+                            ? 'bg-[#fee2e2] text-[#dc2626] border-[#ef4444] shadow-[2px_2px_0px_#ef4444]'
+                            : isCorrectAnswer
+                            ? 'bg-[#f0fdf4] text-[#15803d] border-[#22c55e] shadow-[2px_2px_0px_#22c55e]'
+                            : isChosen
                             ? 'bg-[#1e1b18] text-[#ffffff] border-[#1e1b18] shadow-[3px_3px_0px_#f59e0b]'
                             : 'bg-[#ffffff] text-[#1e1b18] border-[#1e1b18] hover:bg-[#f8fafc] shadow-[2px_2px_0px_#1e1b18]'
                         }`}
                       >
-                        <span className="text-[12px] sm:text-[13px] font-bold pr-2 leading-relaxed">
-                          {optText}
-                        </span>
+                        <div className="flex items-center gap-2 pr-2 min-w-0 flex-1">
+                          {isCorrectAnswer && (
+                            <div className="w-5 h-5 rounded-full bg-[#dcfce7] border border-[#22c55e] flex items-center justify-center shrink-0">
+                              <Check className="w-3.5 h-3.5 text-[#15803d] stroke-[3]" />
+                            </div>
+                          )}
+                          <span className="text-[12px] sm:text-[13px] font-bold leading-relaxed">
+                            {optText}
+                          </span>
+                        </div>
                         <span
                           className={`font-mono-custom text-[11px] font-black shrink-0 px-2 py-0.5 rounded border ${
-                            isSelected
+                            isWrong
+                              ? 'bg-[#ef4444] text-white border-[#b91c1c]'
+                              : isCorrectAnswer
+                              ? 'bg-[#22c55e] text-white border-[#15803d]'
+                              : isChosen
                               ? 'bg-[#fbbf24] text-[#1e1b18] border-[#fbbf24]'
                               : 'bg-[#f1f5f9] text-[#64748b] border-[#cbd5e1] group-hover:border-[#1e1b18]'
                           }`}
                         >
-                          {idx + 1}
+                          {isCorrectAnswer ? '✓' : idx + 1}
                         </span>
                       </button>
                     );
@@ -679,25 +750,13 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedOption(null);
-                      setPhase('question');
-                    }}
-                    className="w-full py-3 px-4 bg-[#ffffff] hover:bg-[#f8fafc] text-[#1e1b18] font-black text-[13px] border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>تلاش مجدد برای پاسخ به سؤال</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
                       setErrorMessage(null);
                       setPhase('payment_confirm');
                     }}
                     className="w-full py-2.5 px-4 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e1b18] font-black text-[12px] border-2 border-[#1e1b18] rounded-xl shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center gap-1.5 cursor-pointer transition-all"
                   >
                     <BookOpen className="w-3.5 h-3.5" />
-                    <span>دیدن اطلاعات با پرداخت {discoveryData.informationCost || 30} سکه</span>
+                    <span>دریافت اطلاعات با {discoveryData.informationCost || 30} سکه</span>
                   </button>
 
                   <button
