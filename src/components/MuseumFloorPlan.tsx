@@ -384,6 +384,9 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
       >
         {/* Precise Architectural Floor Plan SVG */}
         <Gallery00MapSvg
+          className="w-full h-full pointer-events-auto"
+          width="100%"
+          height="100%"
           style={{ transform: 'scale(1.22)', transformOrigin: 'center' }}
           mapMode={mapMode}
         >

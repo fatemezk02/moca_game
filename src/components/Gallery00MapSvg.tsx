@@ -20,7 +20,9 @@ export const Gallery00MapSvg = forwardRef<SVGSVGElement, Gallery00MapSvgProps>(
         data-name="Layer 1"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 1024 1024"
-        className={className}
+        width="100%"
+        height="100%"
+        className={`w-full h-full ${className}`}
         style={{ overflow: 'visible', ...style }}
         {...rest}
       >
