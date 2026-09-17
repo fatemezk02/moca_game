@@ -196,8 +196,14 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       }).length;
     }
 
-    const isPuzzleCompleted = isGalleryPuzzleCompleted(gallery.id);
-    const isComplete = isUnlocked && (isPuzzleCompleted || (totalStars > 0 && collectedStars >= totalStars));
+    const isPuzzleCompleted = Boolean(
+      isGalleryPuzzleCompleted(gallery.id) ||
+      isGalleryPuzzleCompleted(normalizeGalleryId(gallery.id)) ||
+      isGalleryPuzzleCompleted(gallery.id.replace('-', '_')) ||
+      (gallery.id === 'gallery-02' && (isGalleryPuzzleCompleted('gallery-01') || isGalleryPuzzleCompleted('gallery_01'))) ||
+      (gallery.id === 'gallery-01' && (isGalleryPuzzleCompleted('gallery-02') || isGalleryPuzzleCompleted('gallery_02')))
+    );
+    const isComplete = isPuzzleCompleted || (totalStars > 0 && collectedStars >= totalStars);
 
     return {
       id: gallery.id,
@@ -205,17 +211,18 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       numberPersian: formatTwoDigitPersian(galleryNumInt || 1),
       title,
       subtitle,
-      isUnlocked,
+      isUnlocked: true,
       isComplete,
+      isPuzzleCompleted,
       collectedStars,
       totalStars,
       progressPercent: totalStars > 0 ? Math.min(100, Math.round((collectedStars / totalStars) * 100)) : (isPuzzleCompleted ? 100 : 0),
     };
   });
 
-  const totalUnlockedCount = galleryCards.filter((g) => g.isUnlocked).length;
-  const totalStarsCollected = galleryCards.reduce((sum, g) => sum + (g.isUnlocked ? g.collectedStars : 0), 0);
-  const totalStarsAvailable = galleryCards.reduce((sum, g) => sum + (g.isUnlocked ? g.totalStars : 0), 0);
+  const totalUnlockedCount = galleryCards.length;
+  const totalStarsCollected = galleryCards.reduce((sum, g) => sum + g.collectedStars, 0);
+  const totalStarsAvailable = galleryCards.reduce((sum, g) => sum + g.totalStars, 0);
 
   return (
     <div
@@ -263,59 +270,47 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
             <div
               key={card.id}
               id={`mission-card-${card.id}`}
+              role="button"
+              tabIndex={0}
               onClick={() => {
-                if (card.isUnlocked && onSelectGallery) {
+                if (onSelectGallery) {
                   onSelectGallery(card.id);
                 }
               }}
-              className={`w-full rounded-2xl border-2 transition-all duration-150 flex items-center justify-between px-3.5 sm:px-4 py-3 gap-3 ${
-                card.isUnlocked
-                  ? 'bg-[#ffffff] border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] hover:shadow-[4px_4px_0px_#1e1b18] hover:-translate-y-0.5 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] cursor-pointer'
-                  : 'bg-[#ffffff]/80 border-[#94a3b8]/70 shadow-[1.5px_1.5px_0px_#cbd5e1] cursor-not-allowed opacity-75'
-              }`}
+              onKeyDown={(e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && onSelectGallery) {
+                  e.preventDefault();
+                  onSelectGallery(card.id);
+                }
+              }}
+              className="w-full rounded-2xl border-2 transition-all duration-150 flex items-center justify-between px-3.5 sm:px-4 py-3 gap-3 bg-[#ffffff] border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] hover:shadow-[4px_4px_0px_#1e1b18] hover:-translate-y-0.5 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] cursor-pointer"
             >
               {/* Right Side: Lock/Unlock Medallion + Vertical Divider + Title & Number */}
               <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
-                {/* Lock / Unlocked Status Icon */}
+                {/* Status Icon */}
                 <div
                   className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 flex items-center justify-center shrink-0 ${
                     card.isComplete
-                      ? 'bg-[#fef08a] border-[#1e1b18] text-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]'
-                      : card.isUnlocked
-                      ? 'bg-[#fed7aa] border-[#1e1b18] text-[#ea580c] shadow-[1.5px_1.5px_0px_#1e1b18]'
-                      : 'bg-[#e2e8f0] border-[#94a3b8] text-[#64748b]'
+                      ? 'bg-[#dcfce7] border-[#1e1b18] text-[#15803d] shadow-[1.5px_1.5px_0px_#1e1b18]'
+                      : 'bg-[#fed7aa] border-[#1e1b18] text-[#ea580c] shadow-[1.5px_1.5px_0px_#1e1b18]'
                   }`}
                 >
                   {card.isComplete ? (
-                    <CheckCircle2 className="w-5 h-5 text-[#b45309]" />
-                  ) : card.isUnlocked ? (
-                    <Unlock className="w-5 h-5 text-[#ea580c]" />
+                    <CheckCircle2 className="w-5 h-5 text-[#15803d]" />
                   ) : (
-                    <Lock className="w-5 h-5 text-[#64748b]" />
+                    <Unlock className="w-5 h-5 text-[#ea580c]" />
                   )}
                 </div>
 
                 {/* Vertical Separator Line */}
-                <div
-                  className={`w-[1.5px] sm:w-[2px] h-8 sm:h-9 rounded-full shrink-0 ${
-                    card.isUnlocked ? 'bg-[#1e1b18]/20' : 'bg-[#cbd5e1]'
-                  }`}
-                />
+                <div className="w-[1.5px] sm:w-[2px] h-8 sm:h-9 rounded-full shrink-0 bg-[#1e1b18]/20" />
 
                 {/* Left of Line: Gallery Name & Gallery Number */}
                 <div className="flex flex-col text-right justify-center min-w-0">
-                  <h3
-                    className={`font-sans-custom text-[14px] sm:text-[15.5px] font-black leading-snug truncate ${
-                      card.isUnlocked ? 'text-[#1e1b18]' : 'text-[#64748b]'
-                    }`}
-                  >
+                  <h3 className="font-sans-custom text-[14px] sm:text-[15.5px] font-black leading-snug truncate text-[#1e1b18]">
                     {card.title}
                   </h3>
-                  <span
-                    className={`font-mono-custom text-[11px] sm:text-[12px] mt-0.5 font-bold truncate ${
-                      card.isUnlocked ? 'text-[#64748b]' : 'text-[#94a3b8]'
-                    }`}
-                  >
+                  <span className="font-mono-custom text-[11px] sm:text-[12px] mt-0.5 font-bold truncate text-[#64748b]">
                     {card.subtitle}
                   </span>
                 </div>
@@ -323,27 +318,19 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
 
               {/* Left End: Navigation Arrow / Status */}
               <div className="flex items-center gap-1.5 shrink-0 pr-1">
-                {card.isUnlocked ? (
-                  <div className="flex items-center gap-1.5 text-[#1e1b18]">
-                    {card.isComplete ? (
-                      <span className="hidden sm:inline-block font-sans-custom text-[10.5px] font-black text-[#854d0e] bg-[#fef9c3] px-2 py-0.5 rounded-md border border-[#fde047]">
-                        تکمیل شد
-                      </span>
-                    ) : (
-                      <span className="hidden sm:inline-block font-sans-custom text-[10.5px] font-bold text-[#ea580c] bg-[#ffedd5] px-2 py-0.5 rounded-md border border-[#fed7aa]">
-                        ورود
-                      </span>
-                    )}
-                    <ChevronLeft className="w-5 h-5 text-[#1e1b18]" />
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1 text-[#94a3b8]">
-                    <span className="hidden sm:inline-block font-sans-custom text-[10.5px] font-medium text-[#94a3b8]">
-                      قفل
+                <div className="flex items-center gap-1.5 text-[#1e1b18]">
+                  {card.isComplete ? (
+                    <span className="font-sans-custom text-[10.5px] font-black text-[#15803d] bg-[#dcfce7] px-2 py-0.5 rounded-md border border-[#86efac] flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-[#15803d]" />
+                      تکمیل شد
                     </span>
-                    <ChevronLeft className="w-5 h-5 text-[#cbd5e1]" />
-                  </div>
-                )}
+                  ) : (
+                    <span className="font-sans-custom text-[10.5px] font-bold text-[#ea580c] bg-[#ffedd5] px-2 py-0.5 rounded-md border border-[#fed7aa]">
+                      ورود
+                    </span>
+                  )}
+                  <ChevronLeft className="w-5 h-5 text-[#1e1b18]" />
+                </div>
               </div>
             </div>
           );

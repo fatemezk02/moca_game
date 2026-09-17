@@ -1,13 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { X, Copy, Check, Sparkles, Award } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Sparkles, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
 import { AppLogo } from './AppLogo';
 import { MuseumExplorerBadge } from './MuseumExplorerBadge';
-import {
-  getFinalCardCode,
-  isFinalCardClaimed,
-  generateAndSaveFinalCardCode,
-} from '../data/finalCompletionStore';
 
 interface FinalCompletionCardBackProps {
   onClose: () => void;
@@ -21,33 +16,28 @@ export const FinalCompletionCardBack: React.FC<FinalCompletionCardBackProps> = (
   onFlipBack,
   isFlipped,
 }) => {
-  const [code, setCode] = useState<string | null>(() => getFinalCardCode());
-  const [claimed, setClaimed] = useState<boolean>(() => isFinalCardClaimed());
-  const [copied, setCopied] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  useEffect(() => {
-    if (isFlipped) {
-      const savedCode = getFinalCardCode();
-      if (savedCode) {
-        setCode(savedCode);
-        setClaimed(true);
-      }
+  const handleSubmitFeedback = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!feedbackText.trim()) return;
+
+    // Placeholder: local save for future Google Sheets connection
+    try {
+      const STORAGE_FEEDBACK_KEY = 'museum_game_feedback_list';
+      const existing = JSON.parse(localStorage.getItem(STORAGE_FEEDBACK_KEY) || '[]');
+      existing.push({
+        feedback: feedbackText.trim(),
+        timestamp: new Date().toISOString(),
+      });
+      localStorage.setItem(STORAGE_FEEDBACK_KEY, JSON.stringify(existing));
+    } catch {
+      // ignore
     }
-  }, [isFlipped]);
 
-  const handleClaim = () => {
-    const generated = generateAndSaveFinalCardCode();
-    setCode(generated);
-    setClaimed(true);
-  };
-
-  const handleCopy = () => {
-    if (!code) return;
-    if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(code).catch(() => {});
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setIsSubmitted(true);
   };
 
   return (
@@ -177,68 +167,106 @@ export const FinalCompletionCardBack: React.FC<FinalCompletionCardBackProps> = (
         </motion.div>
       </div>
 
-      {/* BOTTOM SECTION: «دریافت کارت» Button OR 4-Letter Code Display */}
+      {/* BOTTOM SECTION: «نظرسنجی بازی» Button */}
       <div className="relative z-10 pt-2 border-t border-[#e5e7eb]">
-        {!claimed ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={isFlipped ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 1.35, duration: 0.3 }}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={isFlipped ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 1.35, duration: 0.3 }}
+        >
+          <button
+            id="open-game-feedback-btn"
+            type="button"
+            onClick={() => setIsFeedbackOpen(true)}
+            className="w-full py-3 sm:py-3.5 px-4 bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-[#1e1b18] font-black text-base sm:text-lg border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18]"
           >
-            <button
-              id="claim-final-card-btn"
-              type="button"
-              onClick={handleClaim}
-              className="w-full py-3 sm:py-3.5 px-4 bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-[#1e1b18] font-black text-base sm:text-lg border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18]"
-            >
-              <Award className="w-5 h-5 text-[#1e1b18]" />
-              <span>دریافت کارت</span>
-            </button>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col items-center text-center space-y-2"
-          >
-            <span className="text-[11px] sm:text-[12px] font-bold text-[#4a443b]">
-              کد دریافت کارت
-            </span>
+            <MessageSquare className="w-5 h-5 text-[#1e1b18]" />
+            <span>نظرسنجی بازی</span>
+          </button>
+        </motion.div>
+      </div>
 
-            {/* Visual Prominent 4-Letter Monospace Code */}
-            <div className="flex items-center justify-center gap-2">
-              <div
-                id="final-card-generated-code"
-                dir="ltr"
-                className="bg-white border-2 border-[#1e1b18] rounded-xl px-5 py-2 font-mono text-2xl sm:text-3xl font-black text-[#1e1b18] tracking-[0.25em] shadow-[3px_3px_0px_#1e1b18] select-all"
-              >
-                {code}
+      {/* Feedback Modal / Card above the Certificate */}
+      <AnimatePresence>
+        {isFeedbackOpen && (
+          <div
+            id="game-feedback-modal-backdrop"
+            className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-4 bg-[#0e0f0f]/60 backdrop-blur-xs select-none"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsFeedbackOpen(false);
+              }
+            }}
+          >
+            <motion.div
+              id="game-feedback-modal-card"
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-sm sm:max-w-md bg-[#fcfaf7] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] p-4 sm:p-5 text-[#1e1b18] font-sans-custom flex flex-col gap-3 sm:gap-4"
+              dir="rtl"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-2.5">
+                <h3 className="text-base sm:text-lg font-black text-[#1e1b18]">
+                  نظر شما درباره بازی
+                </h3>
+                <button
+                  id="close-feedback-modal-btn"
+                  type="button"
+                  onClick={() => setIsFeedbackOpen(false)}
+                  aria-label="بستن"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white hover:bg-[#ef4444] hover:text-white transition-colors text-[#1e1b18] border border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] flex items-center justify-center cursor-pointer shrink-0"
+                >
+                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
+                </button>
               </div>
 
-              <button
-                id="copy-final-code-btn"
-                type="button"
-                onClick={handleCopy}
-                title="کپی کردن کد"
-                aria-label="کپی کردن کد"
-                className="p-2.5 rounded-xl bg-[#fef3c7] hover:bg-[#fde047] text-[#1e1b18] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer"
-              >
-                {copied ? (
-                  <Check className="w-5 h-5 text-[#15803d]" />
-                ) : (
-                  <Copy className="w-5 h-5 text-[#1e1b18]" />
-                )}
-              </button>
-            </div>
-
-            {/* Instruction Message */}
-            <p className="text-[12px] sm:text-[13px] font-bold text-[#1e1b18] pt-1">
-              میتونی از بخش کیچ استور بلیتت رو دریافت کنی.
-            </p>
-          </motion.div>
+              {!isSubmitted ? (
+                <form onSubmit={handleSubmitFeedback} className="flex flex-col gap-3">
+                  <textarea
+                    id="game-feedback-textarea"
+                    rows={4}
+                    value={feedbackText}
+                    onChange={(e) => setFeedbackText(e.target.value)}
+                    placeholder="نظرات و پیشنهادات خود را بنویسید..."
+                    className="w-full p-3 bg-white border-2 border-[#1e1b18] rounded-xl text-sm font-medium text-[#1e1b18] placeholder:text-[#94a3b8] focus:outline-none focus:border-[#f59e0b] shadow-[2px_2px_0px_#1e1b18] resize-none"
+                    autoFocus
+                  />
+                  <button
+                    id="submit-game-feedback-btn"
+                    type="submit"
+                    disabled={!feedbackText.trim()}
+                    className="w-full py-2.5 sm:py-3 px-4 bg-[#f59e0b] hover:bg-[#d97706] disabled:opacity-50 disabled:cursor-not-allowed text-[#1e1b18] font-black text-sm sm:text-base border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18]"
+                  >
+                    <Send className="w-4 h-4 text-[#1e1b18]" />
+                    <span>ارسال نظر</span>
+                  </button>
+                </form>
+              ) : (
+                <div className="flex flex-col items-center text-center py-4 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-[#dcfce7] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center text-[#15803d]">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <p className="text-sm sm:text-base font-black text-[#15803d] leading-relaxed">
+                    ممنون از اینکه نظر خودت را با ما به اشتراک گذاشتی.
+                  </p>
+                  <button
+                    id="feedback-success-close-btn"
+                    type="button"
+                    onClick={() => setIsFeedbackOpen(false)}
+                    className="mt-2 py-2 px-6 bg-white hover:bg-[#f3f4f6] text-[#1e1b18] font-bold text-sm border-2 border-[#1e1b18] rounded-xl shadow-[2px_2px_0px_#1e1b18] cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
+                  >
+                    بستن
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 };

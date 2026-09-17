@@ -1486,15 +1486,12 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
         <button
           id="btn-toggle-dev-positioning"
           type="button"
+          style={{ display: 'none' }}
           onClick={() => {
             setIsActive((prev) => !prev);
             if (isActive) setSelectedId(null);
           }}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-sans-custom font-medium shadow-2xl transition-all border backdrop-blur-md cursor-pointer ${
-            isActive
-              ? 'bg-amber-500 text-stone-950 border-amber-300 ring-2 ring-amber-400/50 scale-105'
-              : 'bg-stone-900/90 text-amber-300 border-amber-500/40 hover:bg-stone-800 hover:border-amber-400'
-          }`}
+          className="hidden"
           title="تنظیم موقعیت و اندازه (حالت توسعه)"
         >
           <Move className={`w-4 h-4 ${isActive ? 'animate-pulse' : ''}`} />
