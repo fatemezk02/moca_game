@@ -317,6 +317,41 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     }
   };
 
+  // Handle click on navigation light / lamp to enter the gallery
+  const handleLampClick = (galleryId: string) => {
+    if (!galleryId) return;
+    const canon = normalizeGalleryId(galleryId);
+    if (canon === 'gallery_00' || galleryId === 'gallery-00') return;
+
+    let targetGid: any = 'gallery-01';
+    if (canon === 'gallery_01' || canon === 'gallery_02') {
+      targetGid = 'gallery-01';
+    } else if (canon === 'gallery_03') {
+      targetGid = 'gallery-03';
+    } else if (canon === 'gallery_04') {
+      targetGid = 'gallery-04';
+    } else if (canon === 'gallery_05') {
+      targetGid = 'gallery-05';
+    } else if (canon === 'gallery_06') {
+      targetGid = 'gallery-06';
+    } else if (canon === 'gallery_07') {
+      targetGid = 'gallery-07';
+    } else if (canon === 'gallery_08') {
+      targetGid = 'gallery-08';
+    } else if (canon === 'gallery_09') {
+      targetGid = 'gallery-09';
+    } else {
+      targetGid = galleryId.replace('_', '-');
+    }
+
+    setCurrentGalleryId(targetGid);
+    if (onNavigateToGallery) {
+      onNavigateToGallery(targetGid);
+    } else if (targetGid === 'gallery-01') {
+      onNavigateToGallery01?.();
+    }
+  };
+
   // Click on background closes preview unless dragging
   const handleBackgroundClick = (e: React.MouseEvent) => {
     if (hasMoved) return;
@@ -494,6 +529,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                     destinationName={lamp.galleryId}
                     isLocationIndicator={true}
                     isUnlocked={isCompleted}
+                    onNavigate={() => handleLampClick(lamp.galleryId)}
                   />
                 );
               })}

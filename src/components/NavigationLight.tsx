@@ -78,18 +78,20 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
       className={`absolute z-35 pointer-events-auto select-none ${className}`}
     >
       {/* Touch Target Expander (Min 48x48px hit area) */}
-      <div
+      <button
+        type="button"
         id="player-location-lamp-container"
-        role={isLocationIndicator ? 'img' : 'button'}
-        aria-label={isLocationIndicator ? `موقعیت کنونی شما: ${displayLabel}` : `Enter ${destinationName}`}
+        aria-label={onNavigate ? `رفتن به ${displayLabel}` : isLocationIndicator ? `موقعیت کنونی شما: ${displayLabel}` : `Enter ${destinationName}`}
         onClick={(e) => {
           e.stopPropagation();
-          if (!isLocationIndicator && onNavigate) {
+          if (onNavigate) {
             onNavigate();
           }
         }}
-        className={`relative w-16 h-16 -m-4 flex items-center justify-center group focus:outline-none ${
-          isLocationIndicator ? 'cursor-default pointer-events-none' : 'cursor-pointer'
+        className={`relative w-16 h-16 -m-4 flex items-center justify-center group focus:outline-none pointer-events-auto ${
+          onNavigate
+            ? 'cursor-pointer hover:scale-105 active:scale-95 transition-transform'
+            : 'cursor-default'
         }`}
       >
         {/* Outer Gentle Pulsing Glow Halo (Layer 1 - Soft diffuse aura) - only for active non-green lamps */}
@@ -197,7 +199,7 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
             </div>
           )}
         </div>
-      </div>
+      </button>
 
       {/* Embedded Keyframe Style for Lamp Glow Pulse */}
       <style>

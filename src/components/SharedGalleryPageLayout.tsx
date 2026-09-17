@@ -105,6 +105,11 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
       : fallback.num);
 
   const nameFa = galleryNamePersian || galleryRecord?.nameFa?.trim() || fallback.name;
+  const isGallery02 =
+    galleryId === 'gallery-01' ||
+    galleryId === 'gallery-02' ||
+    galleryId === 'gallery_02' ||
+    numFa === '۰۲';
 
   return (
     <div
@@ -191,6 +196,7 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
             aspectRatio: `${mapWidth} / ${mapHeight}`,
             maxWidth: '100%',
             maxHeight: '100%',
+            ...(isGallery02 ? { transform: 'translateX(6%)' } : {}),
             ['--map-point-scale' as any]: dimensions
               ? (dimensions.width / 360).toFixed(4)
               : '1',
