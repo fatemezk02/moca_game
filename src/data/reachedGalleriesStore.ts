@@ -71,13 +71,6 @@ export function getReachedGalleries(): Set<string> {
       const canonActive = normalizeGalleryId(savedActive);
       if (canonActive) {
         reached.add(canonActive);
-        // If saved gallery is further along, mark all preceding galleries reached
-        const seqIdx = CANONICAL_PROGRESSION_SEQUENCE.indexOf(canonActive);
-        if (seqIdx > 0) {
-          for (let i = 0; i <= seqIdx; i++) {
-            reached.add(CANONICAL_PROGRESSION_SEQUENCE[i]);
-          }
-        }
       }
     }
   } catch (err) {
@@ -98,14 +91,6 @@ export function markGalleryReached(rawGalleryId: string): void {
   const current = getReachedGalleries();
   if (!current.has(canon)) {
     current.add(canon);
-
-    // Also mark any preceding galleries in sequence as reached
-    const seqIdx = CANONICAL_PROGRESSION_SEQUENCE.indexOf(canon);
-    if (seqIdx > 0) {
-      for (let i = 0; i <= seqIdx; i++) {
-        current.add(CANONICAL_PROGRESSION_SEQUENCE[i]);
-      }
-    }
 
     if (typeof window !== 'undefined' && window.localStorage) {
       try {
@@ -171,14 +156,7 @@ export function isGalleryReached(rawGalleryId: string): boolean {
     return true;
   }
 
-  // 4. If current location is further in sequence, all earlier galleries are reached
-  const currentIndex = CANONICAL_PROGRESSION_SEQUENCE.indexOf(current);
-  const targetIndex = CANONICAL_PROGRESSION_SEQUENCE.indexOf(canon);
-  if (currentIndex !== -1 && targetIndex !== -1 && currentIndex >= targetIndex) {
-    return true;
-  }
-
-  // 5. Check if the gallery was unlocked via progression satisfaction
+  // 4. Check if the gallery was unlocked via progression satisfaction
   if (
     canon === 'gallery_03' &&
     (isProgressionConditionsSatisfied('gallery-01') ||

@@ -1480,21 +1480,24 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
           ───────────────────────────────────────────────────────────── */}
       <div
         id="dev-positioning-controls-anchor"
-        className="fixed top-3 left-4 z-[9999] flex flex-col gap-2 select-none"
+        className="fixed top-2.5 sm:top-3 left-15 sm:left-18 z-[9999] flex flex-col gap-2 select-none"
         dir="rtl"
       >
         <button
           id="btn-toggle-dev-positioning"
           type="button"
-          style={{ display: 'none' }}
           onClick={() => {
             setIsActive((prev) => !prev);
             if (isActive) setSelectedId(null);
           }}
-          className="hidden"
+          className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border text-[11px] sm:text-xs font-bold font-sans-custom transition-all shadow-md cursor-pointer backdrop-blur-md ${
+            isActive
+              ? 'bg-amber-400 text-stone-950 border-amber-500 shadow-amber-400/25 ring-2 ring-amber-400/50'
+              : 'bg-stone-950/90 text-amber-300 border-amber-500/40 hover:bg-stone-900 hover:border-amber-400'
+          }`}
           title="تنظیم موقعیت و اندازه (حالت توسعه)"
         >
-          <Move className={`w-4 h-4 ${isActive ? 'animate-pulse' : ''}`} />
+          <Move className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'animate-pulse' : ''}`} />
           <span>{isActive ? '✕ بستن تنظیم نقاط' : 'تنظیم نقاط'}</span>
           {isActive && (
             <span className="w-2 h-2 rounded-full bg-stone-950 animate-ping" />

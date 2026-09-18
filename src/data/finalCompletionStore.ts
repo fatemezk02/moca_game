@@ -1,4 +1,4 @@
-import { isGalleryPuzzleCompleted } from './puzzleProgressStore';
+import { isGalleryPuzzleCompleted, getPuzzleProgress } from './puzzleProgressStore';
 
 export const STORAGE_FINAL_COMPLETION_AWARDED = 'museum_final_completion_awarded';
 export const STORAGE_FINAL_CARD_CODE = 'museum_final_card_code';
@@ -131,6 +131,52 @@ export function areAll8GalleryPuzzlesCompleted(): boolean {
       .map((id) => (id === 'gallery-02' ? 'gallery-01' : id))
   );
   return completed.size >= 8;
+}
+
+/**
+ * Calculates authoritative overall game progress (percentage, completed galleries count, etc.)
+ */
+export function getOverallGameProgress(): {
+  completedGalleriesCount: number;
+  totalGalleries: number;
+  percentage: number;
+  isAllComplete: boolean;
+} {
+  const completedCount = ALL_8_GALLERY_IDS.filter((id) =>
+    isGalleryPuzzleCompleted(id)
+  ).length;
+
+  const progressDb = getPuzzleProgress();
+  let collectedPiecesCount = 0;
+  for (const gId of ALL_8_GALLERY_IDS) {
+    const canon = gId === 'gallery-01' ? 'gallery_02' : gId.replace('-', '_');
+    if (isGalleryPuzzleCompleted(gId)) {
+      collectedPiecesCount += 3;
+    } else {
+      const pieces = progressDb[canon]?.collectedPieces;
+      collectedPiecesCount += Array.isArray(pieces) ? pieces.length : 0;
+    }
+  }
+
+  const isAllDone =
+    completedCount >= 8 ||
+    areAll8GalleryPuzzlesCompleted() ||
+    isFinalCompletionAwarded();
+
+  let percentage = 0;
+  if (isAllDone) {
+    percentage = 100;
+  } else {
+    // Total pieces across all 8 galleries is 24 (8 * 3 = 24)
+    percentage = Math.min(99, Math.round((collectedPiecesCount / 24) * 100));
+  }
+
+  return {
+    completedGalleriesCount: isAllDone ? 8 : completedCount,
+    totalGalleries: 8,
+    percentage,
+    isAllComplete: isAllDone,
+  };
 }
 
 /**

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MuseumCollection, MapDisplayMode } from '../types';
-import { NavigationLight } from './NavigationLight';
+import { NavigationLight, formatGalleryLabelFa } from './NavigationLight';
 import { getGalleryPoints, getGalleryArrows } from '../data/mapConfig';
 import { AdminIconPoint, AdminCollectionPoint, AdminArrowPoint } from '../types/admin';
 import { CustomIconRender } from './CustomIconRender';
@@ -12,9 +12,10 @@ import { isArrowVisibleToPlayer, markArrowUsed, isArrowUsed } from '../data/arro
 import { getCurrentGalleryId, setCurrentGalleryId } from '../data/playerLocationStore';
 import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
 import { getLampPositionForGallery, getAllGalleryLamps, getAllGalleryLocks } from '../data/galleryAreasStore';
-import { isGalleryReached } from '../data/reachedGalleriesStore';
+import { isGalleryReached, markGalleryReached } from '../data/reachedGalleriesStore';
 import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
 import { GalleryLockIndicator } from './GalleryLockIndicator';
+import { GalleryLockModal } from './GalleryLockModal';
 import { normalizeGalleryId } from '../services/content/mappers';
 import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
 
@@ -56,12 +57,17 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   const [hasMoved, setHasMoved] = useState(false);
   const [selectedStarPointId, setSelectedStarPointId] = useState<string | null>(null);
   const [selectedLocationPinId, setSelectedLocationPinId] = useState<string | null>(null);
+  const [selectedLockGallery, setSelectedLockGallery] = useState<{ galleryId: string; title: string } | null>(null);
   const [adminPoints, setAdminPoints] = useState(() => getGalleryPoints('gallery-00'));
   const [adminArrows, setAdminArrows] = useState(() => getGalleryArrows('gallery-00'));
   const [playerGalleryId, setPlayerGalleryId] = useState<string>(() => getCurrentGalleryId());
   const [galleryAreasVer, setGalleryAreasVer] = useState(0);
   const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
   const [locationAnimKey, setLocationAnimKey] = useState(0);
+
+  const handleLockClick = (galleryId: string, title?: string) => {
+    setSelectedLockGallery({ galleryId, title: title || formatGalleryLabelFa(galleryId) });
+  };
 
   // Listen to point updates from Admin
   useEffect(() => {
@@ -471,103 +477,141 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           )}
         </Gallery00MapSvg>
 
-        {/* Gallery Lamp Indicators (Resolves to player's current and reached/unlocked gallery areas - Hidden when Location Points are ON) */}
+        {/* Gallery Lamp & Lock Indicators (Hidden when Location Points are ON) */}
         {!areLocationPinsVisible && (() => {
-          const allLamps = getAllGalleryLamps();
-          const canonPlayerId = normalizeGalleryId(playerGalleryId) === 'gallery_01' ? 'gallery_02' : normalizeGalleryId(playerGalleryId);
+          // Standard museum galleries 02 to 09
+          const standardGalleries = [
+            'gallery_02',
+            'gallery_03',
+            'gallery_04',
+            'gallery_05',
+            'gallery_06',
+            'gallery_07',
+            'gallery_08',
+            'gallery_09',
+          ];
 
-          const displayedLampsMap = new Map<string, typeof allLamps[0]>();
-
-          allLamps.forEach((lamp) => {
-            const canonId = normalizeGalleryId(lamp.galleryId) === 'gallery_01' ? 'gallery_02' : normalizeGalleryId(lamp.galleryId);
-            
-            // Entrance / lobby lamp is shown when player is at entrance
-            if (canonId === 'gallery_00') {
-              if (canonPlayerId === 'gallery_00') {
-                displayedLampsMap.set(canonId, lamp);
-              }
-              return;
-            }
-
-            // Show lamp for any gallery reached or currently visited by player
-            if (isGalleryReached(lamp.galleryId) || isGalleryReached(canonId) || canonId === canonPlayerId) {
-              if (!displayedLampsMap.has(canonId)) {
-                displayedLampsMap.set(canonId, lamp);
-              }
-            }
-          });
-
-          // Ensure player's current gallery has a lamp if not in map
-          if (canonPlayerId !== 'gallery_00' && !displayedLampsMap.has(canonPlayerId)) {
-            const activeLampPos = getLampPositionForGallery(playerGalleryId);
-            displayedLampsMap.set(canonPlayerId, {
-              id: `lamp-${canonPlayerId}`,
-              galleryId: canonPlayerId,
-              masterMapGalleryId: 'gallery-00',
-              title: `گالری ${canonPlayerId}`,
-              x: activeLampPos.x,
-              y: activeLampPos.y,
-            });
+          // 1. Determine Current Gallery (the last gallery the user was in from galleries 2 to 9)
+          const rawCurrent = playerGalleryId || getCurrentGalleryId();
+          let canonPlayerId = normalizeGalleryId(rawCurrent);
+          if (canonPlayerId === 'gallery_01') canonPlayerId = 'gallery_02';
+          if (!canonPlayerId || canonPlayerId === 'gallery_00' || !standardGalleries.includes(canonPlayerId)) {
+            const fallback = normalizeGalleryId(getCurrentGalleryId());
+            const normFallback = fallback === 'gallery_01' ? 'gallery_02' : fallback;
+            canonPlayerId = (normFallback && standardGalleries.includes(normFallback)) ? normFallback : 'gallery_02';
           }
 
-          const lampsToRender = Array.from(displayedLampsMap.values());
+          const isCompleted = (gid: string) => {
+            const norm = normalizeGalleryId(gid);
+            if (norm === 'gallery_01' || norm === 'gallery_02') {
+              return (
+                isGalleryPuzzleCompleted('gallery_01') ||
+                isGalleryPuzzleCompleted('gallery_02') ||
+                isGalleryPuzzleCompleted('gallery-01') ||
+                isGalleryPuzzleCompleted('gallery-02')
+              );
+            }
+            return (
+              isGalleryPuzzleCompleted(gid) ||
+              isGalleryPuzzleCompleted(norm) ||
+              isGalleryPuzzleCompleted(norm.replace('_', '-'))
+            );
+          };
+
+          const isReached = (gid: string) => {
+            const norm = normalizeGalleryId(gid);
+            if (norm === 'gallery_00' || norm === 'gallery_01' || norm === 'gallery_02') {
+              return true;
+            }
+            return (
+              isGalleryReached(gid) ||
+              isGalleryReached(norm) ||
+              isGalleryReached(norm.replace('_', '-'))
+            );
+          };
+
+          // Position of the ONE active lit lamp on the current gallery (چراغ روشن)
+          const currentLampPos = getLampPositionForGallery(canonPlayerId);
+          const currentMapX = (currentLampPos.x / 604.8) * 100;
+          const currentMapY = (currentLampPos.y / 844.86) * 100;
+
+          // Other galleries that are completed get green lamps (چراغ سبز)
+          const otherCompletedGalleries = standardGalleries.filter(
+            (gid) => gid !== canonPlayerId && isCompleted(gid)
+          );
+
+          // All gallery locks from store (excluding current gallery and completed galleries)
+          const allLocks = getAllGalleryLocks().filter((lock) => {
+            const canonLockId = normalizeGalleryId(lock.galleryId) === 'gallery_01' ? 'gallery_02' : normalizeGalleryId(lock.galleryId);
+            if (canonLockId === 'gallery_00') return false;
+            // Current gallery has the lit lamp, no lock
+            if (canonLockId === canonPlayerId) return false;
+            // Completed gallery has a green lamp, no lock
+            if (isCompleted(canonLockId)) return false;
+            return true;
+          });
 
           return (
             <>
-              {lampsToRender.map((lamp) => {
-                const lampPos = getLampPositionForGallery(lamp.galleryId);
+              {/* 1. Exactly ONE lit lamp on the current gallery (چراغ روشن) */}
+              <NavigationLight
+                key={`current-lit-lamp-${canonPlayerId}`}
+                mapX={currentMapX}
+                mapY={currentMapY}
+                galleryId={canonPlayerId}
+                destinationName={canonPlayerId}
+                isLocationIndicator={true}
+                isUnlocked={false}
+                onNavigate={() => handleLampClick(canonPlayerId)}
+              />
+
+              {/* 2. Green lights for other completed galleries (چراغ سبز) */}
+              {otherCompletedGalleries.map((gid) => {
+                const lampPos = getLampPositionForGallery(gid);
                 const lampMapX = (lampPos.x / 604.8) * 100;
                 const lampMapY = (lampPos.y / 844.86) * 100;
-                const isCompleted = isGalleryPuzzleCompleted(lamp.galleryId);
-
                 return (
                   <NavigationLight
-                    key={`lamp-${lamp.galleryId}`}
+                    key={`completed-lamp-${gid}`}
                     mapX={lampMapX}
                     mapY={lampMapY}
-                    galleryId={lamp.galleryId}
-                    destinationName={lamp.galleryId}
-                    isLocationIndicator={true}
-                    isUnlocked={isCompleted}
-                    onNavigate={() => handleLampClick(lamp.galleryId)}
+                    galleryId={gid}
+                    destinationName={gid}
+                    isLocationIndicator={false}
+                    isUnlocked={true}
+                    onNavigate={() => handleLampClick(gid)}
+                  />
+                );
+              })}
+
+              {/* 3. Locks for other galleries: open lock if reached, closed lock if unreached */}
+              {allLocks.map((lock) => {
+                const canonLockId = normalizeGalleryId(lock.galleryId) === 'gallery_01' ? 'gallery_02' : normalizeGalleryId(lock.galleryId);
+                const isOpen = isReached(canonLockId);
+                const posX = (lock.x / 604.8) * 100;
+                const posY = (lock.y / 844.86) * 100;
+
+                return (
+                  <GalleryLockIndicator
+                    key={`lock-${lock.id}`}
+                    mapX={posX}
+                    mapY={posY}
+                    galleryId={lock.galleryId}
+                    title={lock.title}
+                    isOpen={isOpen}
+                    onClick={() => {
+                      if (isOpen) {
+                        handleLampClick(lock.galleryId);
+                      } else {
+                        handleLockClick(lock.galleryId, lock.title);
+                      }
+                    }}
                   />
                 );
               })}
             </>
           );
         })()}
-
-        {/* Lock Indicators at the configured lock positions of galleries not yet reached by the player (Hidden when Location Points are ON) */}
-        {!areLocationPinsVisible && getAllGalleryLocks()
-          .filter((lock) => {
-            // Entrance / lobby of the map is never a locked future gallery
-            if (lock.galleryId === 'gallery_00' || lock.galleryId === 'gallery-00') {
-              return false;
-            }
-            // If the player is currently at this gallery, the active lamp is already rendered
-            if (normalizeGalleryId(lock.galleryId) === normalizeGalleryId(playerGalleryId)) {
-              return false;
-            }
-            // If the player has already reached this gallery, do not show a lock
-            if (isGalleryReached(lock.galleryId)) {
-              return false;
-            }
-            // Show lock for future unreached gallery
-            return true;
-          })
-          .map((lock) => {
-            const posX = (lock.x / 604.8) * 100;
-            const posY = (lock.y / 844.86) * 100;
-            return (
-              <GalleryLockIndicator
-                key={`lock-${lock.id}`}
-                mapX={posX}
-                mapY={posY}
-                galleryId={lock.galleryId}
-                title={lock.title}
-              />
-            );
-          })}
 
 
         {/* Dynamic Navigation Arrows Layer (Configured in Admin Editor) */}
@@ -784,6 +828,20 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           );
         })}
       </div>
+
+      {/* Lock Click Popup Modal */}
+      <GalleryLockModal
+        lockGallery={selectedLockGallery}
+        onClose={() => setSelectedLockGallery(null)}
+        onUnlockSuccess={(targetId) => {
+          setSelectedLockGallery(null);
+          handleLampClick(targetId);
+        }}
+        onNavigateToCurrent={(currentGid) => {
+          setSelectedLockGallery(null);
+          handleLampClick(currentGid);
+        }}
+      />
     </div>
   );
 };

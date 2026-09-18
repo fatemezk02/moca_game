@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Lock, Unlock, Star, Sparkles, CheckCircle2, ChevronLeft } from 'lucide-react';
 import { CuratorExhibitionWall } from './CuratorExhibitionWall';
+import { GalleryLockModal } from './GalleryLockModal';
 import { GALLERIES } from '../data/mapConfig';
 import { contentService } from '../services/content/contentService';
 import {
@@ -9,6 +10,7 @@ import {
 } from '../data/starPointProgressStore';
 import { isProgressionConditionsSatisfied } from '../data/galleryProgressionStore';
 import { isGalleryPuzzleCompleted, getPuzzleProgress } from '../data/puzzleProgressStore';
+import { isGalleryReached } from '../data/reachedGalleriesStore';
 import {
   normalizeGalleryId,
   toPersianDigits,
@@ -29,8 +31,12 @@ function isGalleryUnlockedState(galleryId: string): boolean {
   const norm = galleryId.toLowerCase().replace('_', '-');
   if (norm === 'gallery-00' || norm === 'gallery-01' || norm === 'gallery-02') return true;
 
+  if (isGalleryReached(galleryId) || isGalleryReached(norm) || isGalleryReached(norm.replace('-', '_'))) {
+    return true;
+  }
+
   // If the player has already completed this gallery's puzzle or has pieces, it is unlocked
-  if (isGalleryPuzzleCompleted(norm)) return true;
+  if (isGalleryPuzzleCompleted(norm) || isGalleryPuzzleCompleted(norm.replace('-', '_'))) return true;
   const puzzleProgress = getPuzzleProgress();
   if (
     Array.isArray(puzzleProgress[norm]?.collectedPieces) &&
@@ -116,6 +122,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
   onSelectGallery,
 }) => {
   const [version, setVersion] = useState<number>(0);
+  const [selectedLockGallery, setSelectedLockGallery] = useState<{ galleryId: string; title?: string } | null>(null);
 
   const refreshState = useCallback(() => {
     setVersion((v) => v + 1);
@@ -127,6 +134,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
     window.addEventListener('museum_player_progress_updated', refreshState);
     window.addEventListener('museum_puzzle_progress_updated', refreshState);
     window.addEventListener('museum_completed_gallery_puzzles_updated', refreshState);
+    window.addEventListener('museum_gallery_reached', refreshState);
 
     return () => {
       unsub();
@@ -134,6 +142,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       window.removeEventListener('museum_player_progress_updated', refreshState);
       window.removeEventListener('museum_puzzle_progress_updated', refreshState);
       window.removeEventListener('museum_completed_gallery_puzzles_updated', refreshState);
+      window.removeEventListener('museum_gallery_reached', refreshState);
     };
   }, [refreshState]);
 
@@ -211,7 +220,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       numberPersian: formatTwoDigitPersian(galleryNumInt || 1),
       title,
       subtitle,
-      isUnlocked: true,
+      isUnlocked,
       isComplete,
       isPuzzleCompleted,
       collectedStars,
@@ -220,7 +229,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
     };
   });
 
-  const totalUnlockedCount = galleryCards.length;
+  const totalUnlockedCount = galleryCards.filter((g) => g.isUnlocked).length;
   const totalStarsCollected = galleryCards.reduce((sum, g) => sum + g.collectedStars, 0);
   const totalStarsAvailable = galleryCards.reduce((sum, g) => sum + g.totalStars, 0);
 
@@ -266,21 +275,27 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
         className="rounded-3xl border-2 border-[#1e1b18] bg-[#38bdf8]/15 p-3.5 sm:p-5 shadow-[4px_4px_0px_#1e1b18] space-y-3 sm:space-y-3.5"
       >
         {galleryCards.map((card) => {
+          const handleCardClick = () => {
+            if (!card.isUnlocked) {
+              setSelectedLockGallery({ galleryId: card.id, title: card.title });
+              return;
+            }
+            if (onSelectGallery) {
+              onSelectGallery(card.id);
+            }
+          };
+
           return (
             <div
               key={card.id}
               id={`mission-card-${card.id}`}
               role="button"
               tabIndex={0}
-              onClick={() => {
-                if (onSelectGallery) {
-                  onSelectGallery(card.id);
-                }
-              }}
+              onClick={handleCardClick}
               onKeyDown={(e) => {
-                if ((e.key === 'Enter' || e.key === ' ') && onSelectGallery) {
+                if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  onSelectGallery(card.id);
+                  handleCardClick();
                 }
               }}
               className="w-full rounded-2xl border-2 transition-all duration-150 flex items-center justify-between px-3.5 sm:px-4 py-3 gap-3 bg-[#ffffff] border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] hover:shadow-[4px_4px_0px_#1e1b18] hover:-translate-y-0.5 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] cursor-pointer"
@@ -292,13 +307,17 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
                   className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 flex items-center justify-center shrink-0 ${
                     card.isComplete
                       ? 'bg-[#dcfce7] border-[#1e1b18] text-[#15803d] shadow-[1.5px_1.5px_0px_#1e1b18]'
-                      : 'bg-[#fed7aa] border-[#1e1b18] text-[#ea580c] shadow-[1.5px_1.5px_0px_#1e1b18]'
+                      : !card.isUnlocked
+                      ? 'bg-[#fed7aa] border-[#1e1b18] text-[#ea580c] shadow-[1.5px_1.5px_0px_#1e1b18]'
+                      : 'bg-[#e0f2fe] border-[#1e1b18] text-[#0284c7] shadow-[1.5px_1.5px_0px_#1e1b18]'
                   }`}
                 >
                   {card.isComplete ? (
                     <CheckCircle2 className="w-5 h-5 text-[#15803d]" />
+                  ) : !card.isUnlocked ? (
+                    <Lock className="w-5 h-5 text-[#ea580c]" />
                   ) : (
-                    <Unlock className="w-5 h-5 text-[#ea580c]" />
+                    <Unlock className="w-5 h-5 text-[#0284c7]" />
                   )}
                 </div>
 
@@ -324,8 +343,14 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
                       <CheckCircle2 className="w-3 h-3 text-[#15803d]" />
                       تکمیل شد
                     </span>
+                  ) : !card.isUnlocked ? (
+                    <span className="font-sans-custom text-[10.5px] font-bold text-[#ea580c] bg-[#ffedd5] px-2 py-0.5 rounded-md border border-[#fed7aa] flex items-center gap-1">
+                      <Lock className="w-3 h-3 text-[#ea580c]" />
+                      قفل
+                    </span>
                   ) : (
-                    <span className="font-sans-custom text-[10.5px] font-bold text-[#ea580c] bg-[#ffedd5] px-2 py-0.5 rounded-md border border-[#fed7aa]">
+                    <span className="font-sans-custom text-[10.5px] font-bold text-[#0284c7] bg-[#e0f2fe] px-2 py-0.5 rounded-md border border-[#bae6fd] flex items-center gap-1">
+                      <Unlock className="w-3 h-3 text-[#0284c7]" />
                       ورود
                     </span>
                   )}
@@ -336,6 +361,24 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
           );
         })}
       </div>
+
+      {/* Lock Click Popup Modal */}
+      <GalleryLockModal
+        lockGallery={selectedLockGallery}
+        onClose={() => setSelectedLockGallery(null)}
+        onUnlockSuccess={(targetId) => {
+          setSelectedLockGallery(null);
+          if (onSelectGallery) {
+            onSelectGallery(targetId);
+          }
+        }}
+        onNavigateToCurrent={(currentGid) => {
+          setSelectedLockGallery(null);
+          if (onSelectGallery) {
+            onSelectGallery(currentGid);
+          }
+        }}
+      />
     </div>
   );
 };

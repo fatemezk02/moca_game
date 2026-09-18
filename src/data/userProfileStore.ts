@@ -33,3 +33,18 @@ export function saveUserProfile(profile: UserProfile): void {
     console.error('Error saving user profile:', err);
   }
 }
+
+export function clearUserProfile(): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem(STORAGE_USER_PROFILE_KEY);
+      window.dispatchEvent(
+        new CustomEvent('museum_user_profile_updated', {
+          detail: null,
+        })
+      );
+    }
+  } catch (err) {
+    console.error('Error clearing user profile:', err);
+  }
+}

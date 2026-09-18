@@ -6,6 +6,7 @@ import { resetPlayerLocation } from './playerLocationStore';
 import { resetReachedGalleries } from './reachedGalleriesStore';
 import { resetFinalCompletionState } from './finalCompletionStore';
 import { resetCollectionNotificationStore } from './collectionNotificationStore';
+import { clearUserProfile } from './userProfileStore';
 
 /**
  * Full, authoritative game reset.
@@ -13,6 +14,9 @@ import { resetCollectionNotificationStore } from './collectionNotificationStore'
  */
 export function resetEntireGame(): void {
   try {
+    // Clear user profile so user starts from profile creation / welcome page
+    clearUserProfile();
+
     // 1. Reset player location
     resetPlayerLocation();
 
@@ -44,6 +48,7 @@ export function resetEntireGame(): void {
       localStorage.setItem('museum_current_gallery', 'gallery-00');
       localStorage.setItem('museum_player_current_gallery', 'gallery-02');
       localStorage.setItem('currentGalleryId', 'gallery-02');
+      localStorage.removeItem('museum_has_entered_gallery_02');
     }
 
     // 7. Dispatch global reset notification event

@@ -30,7 +30,7 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
     case 'arash':
       return (
         <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
-          <rect width="200" height="200" fill="#dbe896" />
+          <rect width="200" height="200" fill="#d96c60" />
           <path d="M 55,200 L 65,160 L 78,145 L 122,145 L 135,160 L 145,200 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 80,145 L 85,190 C 95,195 105,195 115,190 L 120,145 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4" />
           <path d="M 78,145 L 60,178 L 86,170 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
@@ -70,7 +70,7 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
     case 'niloofar':
       return (
         <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
-          <rect width="200" height="200" fill="#dbe896" />
+          <rect width="200" height="200" fill="#d96c60" />
           <path d="M 46,95 C 40,115 42,138 60,146 C 70,150 82,152 100,152 C 118,152 130,150 140,146 C 158,138 160,115 154,95 C 158,55 145,28 100,28 C 55,28 42,55 46,95 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 50,200 L 60,165 L 82,148 L 118,148 L 140,165 L 150,200 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 80,148 L 84,192 C 94,195 106,195 116,192 L 120,148 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4" />
@@ -102,7 +102,7 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
     case 'sara':
       return (
         <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
-          <rect width="200" height="200" fill="#dbe896" />
+          <rect width="200" height="200" fill="#d96c60" />
           <ellipse cx="100" cy="30" rx="22" ry="20" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4.5" />
           <path d="M 86,44 C 92,41 108,41 114,44 C 114,48 86,48 86,44 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="3" strokeLinejoin="round" />
           <path d="M 90,26 C 94,18 106,18 110,26" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
@@ -139,7 +139,7 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
     case 'kaveh':
       return (
         <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
-          <rect width="200" height="200" fill="#dbe896" />
+          <rect width="200" height="200" fill="#d96c60" />
           <path d="M 50,200 L 60,165 L 78,148 L 122,148 L 140,165 L 150,200 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 78,148 C 78,168 122,168 122,148" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
           <path d="M 85,152 L 85,160" stroke="#1e1b18" strokeWidth="2" strokeLinecap="round" />
@@ -178,7 +178,7 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
     case 'kian':
       return (
         <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
-          <rect width="200" height="200" fill="#dbe896" />
+          <rect width="200" height="200" fill="#d96c60" />
           <path d="M 50,200 L 60,165 L 78,148 L 122,148 L 140,165 L 150,200 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 78,148 C 78,165 122,165 122,148" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
           <path d="M 82,118 L 82,150 C 92,155 108,155 118,150 L 118,118 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />
@@ -209,7 +209,7 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
     default:
       return (
         <svg viewBox="0 0 200 200" className={`${className} select-none`} xmlns="http://www.w3.org/2000/svg">
-          <rect width="200" height="200" fill="#dbe896" />
+          <rect width="200" height="200" fill="#d96c60" />
           <path d="M 44,95 C 32,120 30,150 42,185 C 46,195 56,200 68,200 C 66,175 62,150 64,135 C 64,115 64,100 64,95 C 64,48 76,28 100,28 C 124,28 136,48 136,95 C 136,100 136,115 136,135 C 138,150 134,175 132,200 C 144,200 154,195 158,185 C 170,150 168,120 156,95 C 160,50 145,28 100,28 C 55,28 40,50 44,95 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 50,200 L 60,165 L 78,148 L 122,148 L 140,165 L 150,200 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 80,148 L 100,180 L 120,148" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" strokeLinejoin="round" />

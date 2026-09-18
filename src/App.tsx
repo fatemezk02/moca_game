@@ -47,6 +47,7 @@ import { ProfileModal } from './components/ProfileModal';
 import { FinalCertificateModal } from './components/FinalCertificateModal';
 import { getUserProfile, UserProfile } from './data/userProfileStore';
 import { markCollectionsAsViewed } from './data/collectionNotificationStore';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
   const playerStats = usePlayerStats();
@@ -162,6 +163,28 @@ export default function App() {
   const [activeStarDiscoveryId, setActiveStarDiscoveryId] = useState<string | null>(null);
   const [detailModalCollection, setDetailModalCollection] = useState<MuseumCollection | null>(null);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+
+  // Track if player has entered Gallery 02 for the first time
+  const [hasEnteredGallery02, setHasEnteredGallery02] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('museum_has_entered_gallery_02') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (
+      currentGallery === 'gallery-01' ||
+      (currentGallery as string) === 'gallery-02' ||
+      currentGallery === 'gallery-01-questions'
+    ) {
+      setHasEnteredGallery02(true);
+      try {
+        localStorage.setItem('museum_has_entered_gallery_02', 'true');
+      } catch {}
+    }
+  }, [currentGallery]);
 
   // Automatically mark collections as viewed when active tab is collection
   useEffect(() => {
@@ -303,6 +326,10 @@ export default function App() {
   // Listen for full game reset event
   useEffect(() => {
     const handleGameReset = () => {
+      setUserProfile(null);
+      setHasEnteredGallery02(false);
+      setIsProfileModalOpen(false);
+      setIsFinalCertificateOpen(false);
       setCurrentGallery('gallery-00');
       setSelectedCollection(null);
       setActiveStarDiscoveryId(null);
@@ -543,6 +570,25 @@ export default function App() {
       {/* Compact Player Status Bar */}
       <PlayerStatusBar puzzles={playerStats.completedPuzzles} stars={playerStats.stars} coins={playerStats.coins} />
 
+      {/* Start Game Navigation Hint */}
+      <AnimatePresence>
+        {userProfile && !hasEnteredGallery02 && (
+          <motion.div
+            key="start-game-navigation-hint"
+            initial={{ opacity: 0, x: 45, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, x: -20, filter: 'blur(2px)', transition: { duration: 0.3 } }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
+            className="w-full flex justify-start items-center px-4 pt-1 pb-0.5 z-20 pointer-events-none select-none overflow-hidden"
+            dir="rtl"
+          >
+            <span className="text-[11px] sm:text-xs font-bold text-[#635e59] tracking-tight">
+              به طرف فلش و به سمت نمایشگاه حرکت کن
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main Canvas Area */}
       <main className="flex-1 min-h-0 relative overflow-hidden bg-[#fbf9f9] flex items-center justify-center mb-[calc(64px+env(safe-area-inset-bottom,0px))] sm:mb-[calc(68px+env(safe-area-inset-bottom,0px))]">
         {activeTab === 'map' && (
@@ -712,13 +758,14 @@ export default function App() {
 
   return (
     <>
-      {!userProfile ? (
+      {renderCurrentView()}
+      {!userProfile && (
         <ProfileCreationPage
           onProfileCreated={() => setUserProfile(getUserProfile())}
         />
-      ) : (
+      )}
+      {userProfile && (
         <>
-          {renderCurrentView()}
           {IS_DEV_POSITIONING_ENABLED && !isAdminOpen && !currentGallery.includes('questions') && (
             <DevMapPositioningTool currentGalleryId={currentGallery} activeTab={activeTab} />
           )}

@@ -47,7 +47,8 @@ export function getCurrentGalleryId(): string {
 
 /**
  * Updates the player's current gallery location.
- * Only advances forward to a higher gallery when user triggers progression forward.
+ * Tracks the last gallery the user was in (from galleries 02 to 09).
+ * Preserves current gallery location when user views the map (gallery-00).
  * Dispatches a 'museum_player_location_updated' custom event.
  */
 export function setCurrentGalleryId(galleryId: string): void {
@@ -64,23 +65,18 @@ export function setCurrentGalleryId(galleryId: string): void {
     return;
   }
 
-  const currentGallery = getCurrentGalleryId();
-  const currentRank = getGalleryRank(currentGallery);
-
-  // Only advance to a higher gallery on forward navigation
-  if (newRank > currentRank) {
-    try {
-      localStorage.setItem(PLAYER_GALLERY_STORAGE_KEY, target);
-      localStorage.setItem(ALTERNATIVE_STORAGE_KEY, target);
-      localStorage.setItem('museum_active_gallery', target);
-      window.dispatchEvent(
-        new CustomEvent('museum_player_location_updated', {
-          detail: { currentGalleryId: target },
-        })
-      );
-    } catch (err) {
-      console.error('Failed to persist player currentGalleryId:', err);
-    }
+  // Update to the last gallery the user entered (from 02 to 09)
+  try {
+    localStorage.setItem(PLAYER_GALLERY_STORAGE_KEY, target);
+    localStorage.setItem(ALTERNATIVE_STORAGE_KEY, target);
+    localStorage.setItem('museum_active_gallery', target);
+    window.dispatchEvent(
+      new CustomEvent('museum_player_location_updated', {
+        detail: { currentGalleryId: target },
+      })
+    );
+  } catch (err) {
+    console.error('Failed to persist player currentGalleryId:', err);
   }
 }
 

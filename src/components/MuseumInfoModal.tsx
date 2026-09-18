@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Compass, Layers, Smartphone, Sparkles, MapPin, Eye } from 'lucide-react';
+import { X, Compass, Sparkles } from 'lucide-react';
 
 interface MuseumInfoModalProps {
   isOpen: boolean;
@@ -167,61 +167,16 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
             <div className="border-2 border-[#1e1b18] rounded-2xl p-3.5 bg-[#e0f2fe] shadow-[3px_3px_0px_#1e1b18] space-y-2">
               <div className="flex items-center gap-2 font-sans-custom text-[12px] font-black text-[#1e1b18] uppercase">
                 <Compass className="w-4 h-4 text-[#0284c7]" />
-                <span>سیستم نمایش جهت‌دار دیوارها</span>
+                <span>راهنمای بازی</span>
               </div>
               <p className="text-[12px] text-[#334155] font-medium">
-                هر نشانگر روی نقشه دقیقا با دیوار مربوطه در پلان همگام شده است و با کلیک روی آن پنجره اطلاعات به سمت داخل سالن باز می‌شود:
+                در گالریهای موزه، هشت تصویر گمشده پنهان شدهاند. برای پیدا کردن هر تصویر، باید کشفهای اصلی هر گالری را پیدا کنی و با پاسخ دادن به سؤالها، قطعات آن را آزاد کنی. در طول مسیر، سرنخها، کشفهای اختیاری و تجربههای ویژهای هم وجود دارند که میتوانند تو را بیشتر با داستان آثار آشنا کنند. نقشه را دنبال کن، کشف کن و آلبوم تصاویرت را کامل کن.
               </p>
-              <ul className="text-[11px] font-bold space-y-1 text-[#475569] pl-2 border-l-2 border-[#0284c7]">
-                <li>• <strong>دیوار غربی (چپ):</strong> ورود از چپ به راست</li>
-                <li>• <strong>دیوار شرقی (راست):</strong> ورود از راست به چپ</li>
-                <li>• <strong>دیوار شمالی (بالا):</strong> ورود از بالا به پایین</li>
-                <li>• <strong>دیوار جنوبی (پایین):</strong> ورود از پایین به بالا</li>
+              <ul className="text-[11px] font-bold space-y-1.5 text-[#475569] pl-2 border-l-2 border-[#0284c7]">
+                <li>• <strong>🧩 پازلها:</strong> در هر گالری، سه کشف اصلی وجود دارد. با پیدا کردن هر اثر و پاسخ دادن به سؤال آن، یک قطعه از تصویر گمشده را به دست میآوری. با کامل شدن هر سه قطعه، تصویر نهایی آشکار میشود.</li>
+                <li>• <strong>⭐️ ستارهها:</strong> ستارهها نشاندهندهی کشفهای اختیاری هستند. میتوانی آنها را پیدا کنی، به سؤالهایشان پاسخ بدهی و سکه دریافت کنی یا با پرداخت سکه، اطلاعات بیشتری دربارهی آثار کشف کنی.</li>
+                <li>• <strong>✨ تجربههای ویژه:</strong> در بعضی گالریها تجربههای تعاملی وجود دارد که تو را از تماشای سادهی آثار فراتر میبرد. با امتحان کردن آنها میتوانی بخشی از ایده یا فرایند پشت آثار را به شکل عملی تجربه کنی.</li>
               </ul>
-            </div>
-
-            {/* PWA & Touch interactions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="border-2 border-[#1e1b18] rounded-2xl p-3 bg-[#ffffff] shadow-[2px_2px_0px_#1e1b18]">
-                <div className="flex items-center gap-1.5 font-sans-custom text-[12px] font-black text-[#1e1b18] uppercase mb-1">
-                  <Smartphone className="w-4 h-4 text-[#f59e0b]" />
-                  <span>لمس و بزرگنمایی</span>
-                </div>
-                <p className="text-[11px] text-[#64748b] font-medium">
-                  با دو انگشت یا دکمه‌های کناری نقشه را زوم کنید و با کشیدن صفحه در سالن‌ها کاوش نمایید.
-                </p>
-              </div>
-
-              <div className="border-2 border-[#1e1b18] rounded-2xl p-3 bg-[#ffffff] shadow-[2px_2px_0px_#1e1b18]">
-                <div className="flex items-center gap-1.5 font-sans-custom text-[12px] font-black text-[#1e1b18] uppercase mb-1">
-                  <Eye className="w-4 h-4 text-[#ef4444]" />
-                  <span>پیش‌نمایش تکی</span>
-                </div>
-                <p className="text-[11px] text-[#64748b] font-medium">
-                  انتخاب هر اثر پنجره قبلی را به نرمی می‌بندد و اثر جدید را متمرکز می‌کند.
-                </p>
-              </div>
-            </div>
-
-            {/* Asset Replacement Developer Guide & Admin Link */}
-            <div className="border-2 border-[#1e1b18] rounded-2xl p-3.5 bg-[#fee2e2] shadow-[3px_3px_0px_#1e1b18] text-[12px] text-[#991b1b] space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-black flex items-center gap-1.5 text-[#1e1b18]">
-                  <Sparkles className="w-4 h-4 text-[#ef4444]" />
-                  مدیریت و پیکربندی نقشه
-                </span>
-                {onOpenAdmin && (
-                  <button
-                    onClick={onOpenAdmin}
-                    className="neo-btn px-2.5 py-1 bg-[#ffffff] text-[#1e1b18] hover:bg-[#fef08a] text-[11px] font-black cursor-pointer"
-                  >
-                    پنل ادمین
-                  </button>
-                )}
-              </div>
-              <p className="text-[11px] text-[#7f1d1d] font-medium">
-                پنل مدیریت امکان جابه‌جایی نقاط، فریم‌های آثار و فلش‌های راهنما روی نقشه را به صورت زنده فراهم می‌کند.
-              </p>
             </div>
           </div>
 

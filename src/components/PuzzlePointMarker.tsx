@@ -46,14 +46,14 @@ export const PuzzlePointMarker: React.FC<PuzzlePointMarkerProps> = ({
         <path
           d="M 5 7 
              C 5 5.5, 6.5 4, 8 4 
-             L 11 4 
-             C 11 2.2, 12.5 1, 14 1 
-             C 15.5 1, 17 2.2, 17 4 
+             L 10.8 4 
+             C 10.2 2.2, 11.2 0.3, 14 0.3 
+             C 16.8 0.3, 17.8 2.2, 17.2 4 
              L 20 4 
              C 21.5 4, 23 5.5, 23 7 
-             L 23 10 
-             C 24.8 10, 26 11.5, 26 13 
-             C 26 14.5, 24.8 16, 23 16 
+             L 23 10.8 
+             C 24.8 10.2, 26.8 11.2, 26.8 14 
+             C 26.8 16.8, 24.8 17.8, 23 17.2 
              L 23 20 
              C 23 21.5, 21.5 23, 20 23 
              L 17 23 
@@ -68,8 +68,6 @@ export const PuzzlePointMarker: React.FC<PuzzlePointMarkerProps> = ({
           fill={
             isSelected
               ? '#ef4444'
-              : isCollected
-              ? '#38bdf8'
               : '#60a5fa'
           }
           stroke="#1e1b18"
@@ -81,7 +79,7 @@ export const PuzzlePointMarker: React.FC<PuzzlePointMarkerProps> = ({
 
         {/* Subtle internal emboss line */}
         <path
-          d="M 8 7 L 11 7 M 20 7 L 20 10"
+          d="M 8 7 L 10.8 7 M 20 7 L 20 10.8"
           stroke="#ffffff"
           strokeWidth="0.9"
           strokeOpacity="0.75"
