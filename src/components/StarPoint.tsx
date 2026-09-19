@@ -122,6 +122,7 @@ export interface StarPointProps {
   mapWidth?: number;
   mapHeight?: number;
   isSelected?: boolean;
+  scaleFactor?: number;
   onSelect?: () => void;
   onOpenDiscoveryModal: (starPointId: string) => void;
 }
@@ -152,6 +153,7 @@ export const StarPoint: React.FC<StarPointProps> = ({
   mapWidth = 848,
   mapHeight = 1264,
   isSelected = false,
+  scaleFactor,
   onSelect,
   onOpenDiscoveryModal,
 }) => {
@@ -225,13 +227,20 @@ export const StarPoint: React.FC<StarPointProps> = ({
     onOpenDiscoveryModal(effectiveStarId);
   };
 
+  const isGallery09 = galleryId === 'gallery-09' || galleryId === 'gallery_09';
+  const effectiveScale = scaleFactor !== undefined ? scaleFactor : (isGallery09 ? 1.0815 : 1);
+  const transformStyle =
+    effectiveScale !== 1
+      ? `translate(-50%, -50%) scale(calc(var(--map-point-scale, 1) * ${effectiveScale}))`
+      : 'translate(-50%, -50%) scale(var(--map-point-scale, 1))';
+
   return (
     <div
       id={`star-point-${id}`}
       style={{
         left: `${leftPercent}%`,
         top: `${topPercent}%`,
-        transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+        transform: transformStyle,
         transformOrigin: 'center center',
         zIndex: isLabelOpen || isSelected ? 60 : 30,
       }}

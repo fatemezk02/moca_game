@@ -10,6 +10,9 @@ export interface PuzzlePointProps {
   mapWidth?: number;
   mapHeight?: number;
   isSelected?: boolean;
+  scaleFactor?: number;
+  isBlinking?: boolean;
+  onBlinkEnd?: () => void;
 }
 
 /**
@@ -24,6 +27,9 @@ export const PuzzlePoint: React.FC<PuzzlePointProps> = ({
   mapWidth = 848,
   mapHeight = 1264,
   isSelected = false,
+  scaleFactor,
+  isBlinking = false,
+  onBlinkEnd,
 }) => {
   const [isCollected, setIsCollected] = React.useState<boolean>(() =>
     isPuzzlePointCompleted(puzzlePoint.id, galleryId, puzzlePoint.puzzlePieceId)
@@ -45,16 +51,31 @@ export const PuzzlePoint: React.FC<PuzzlePointProps> = ({
   const leftPercent = (puzzlePoint.x / mapWidth) * 100;
   const topPercent = (puzzlePoint.y / mapHeight) * 100;
 
+  const isGallery09 = galleryId === 'gallery-09' || galleryId === 'gallery_09';
+  const effectiveScale = scaleFactor !== undefined ? scaleFactor : (isGallery09 ? 1.0815 : 1);
+  const transformStyle =
+    effectiveScale !== 1
+      ? `translate(-50%, -50%) scale(calc(var(--map-point-scale, 1) * ${effectiveScale}))`
+      : 'translate(-50%, -50%) scale(var(--map-point-scale, 1))';
+
   return (
     <div
       id={`puzzle-point-${puzzlePoint.id}`}
+      data-puzzle-point-id={puzzlePoint.id}
       style={{
         left: `${leftPercent}%`,
         top: `${topPercent}%`,
-        transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+        transform: transformStyle,
         transformOrigin: 'center center',
       }}
-      className="absolute pointer-events-auto z-25"
+      className={`absolute pointer-events-auto z-25 ${
+        isBlinking ? 'animate-puzzle-blink-twice' : ''
+      }`}
+      onAnimationEnd={(e) => {
+        if (e.animationName === 'puzzle-point-blink-twice') {
+          onBlinkEnd?.();
+        }
+      }}
     >
       <button
         onClick={(e) => onClick(puzzlePoint, e)}

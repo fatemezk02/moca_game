@@ -32,6 +32,7 @@ import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian } from '../services/content/mappers';
 import { GalleryInfoModal } from './GalleryInfoModal';
 import { SharedGalleryPageLayout } from './SharedGalleryPageLayout';
+import { usePuzzleBlinkGuidance } from '../hooks/usePuzzleBlinkGuidance';
 
 interface Gallery06ViewProps {
   onNavigateBack: () => void;
@@ -186,6 +187,12 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
   );
   const iconPoints = points.filter((p): p is AdminIconPoint => p.type === 'icon');
   const puzzlePoints = points.filter((p): p is AdminPuzzlePoint => p.type === 'puzzle');
+
+  const { blinkingPointId, handleBlinkEnd } = usePuzzleBlinkGuidance({
+    galleryId: 'gallery-06',
+    puzzlePoints,
+    activePuzzlePoint,
+  });
 
   // Fallback preset question icon if no icon points exist
   const effectiveIconPoints: AdminIconPoint[] =
@@ -348,6 +355,8 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
           mapHeight={GALLERY_06_MAP_HEIGHT}
           onClick={handlePuzzlePointClick}
           isSelected={activePuzzlePoint?.id === puzzlePoint.id}
+          isBlinking={blinkingPointId === puzzlePoint.id}
+          onBlinkEnd={handleBlinkEnd}
         />
       ))}
 

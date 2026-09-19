@@ -27,6 +27,7 @@ import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian, normalizeGalleryId } from '../services/content/mappers';
 import { GalleryInfoModal } from './GalleryInfoModal';
 import { SharedGalleryPageLayout } from './SharedGalleryPageLayout';
+import { usePuzzleBlinkGuidance } from '../hooks/usePuzzleBlinkGuidance';
 
 interface Gallery09ViewProps {
   onNavigateBack: () => void;
@@ -241,6 +242,12 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
   const iconPoints = points.filter((p): p is AdminIconPoint => p.type === 'icon');
   const puzzlePoints = points.filter((p): p is AdminPuzzlePoint => p.type === 'puzzle');
 
+  const { blinkingPointId, handleBlinkEnd } = usePuzzleBlinkGuidance({
+    galleryId: 'gallery-09',
+    puzzlePoints,
+    activePuzzlePoint,
+  });
+
   // Fallback preset question icon if no icon points exist
   const effectiveIconPoints: AdminIconPoint[] =
     iconPoints.length > 0
@@ -395,8 +402,11 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
           galleryId="gallery-09"
           mapWidth={GALLERY_09_MAP_WIDTH}
           mapHeight={GALLERY_09_MAP_HEIGHT}
+          scaleFactor={1.0815}
           onClick={handlePuzzlePointClick}
           isSelected={activePuzzlePoint?.id === puzzlePoint.id}
+          isBlinking={blinkingPointId === puzzlePoint.id}
+          onBlinkEnd={handleBlinkEnd}
         />
       ))}
 
@@ -414,6 +424,7 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
               galleryId="gallery-09"
               mapWidth={GALLERY_09_MAP_WIDTH}
               mapHeight={GALLERY_09_MAP_HEIGHT}
+              scaleFactor={1.0815}
               isSelected={selectedStarPointId === artwork.id}
               onSelect={() => {
                 setSelectedArtwork(null);

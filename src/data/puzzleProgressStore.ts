@@ -60,22 +60,31 @@ export function isPuzzlePointCompleted(
   if (galleryId) {
     const canonId = toCanonicalGalleryId(galleryId);
     const legacyId = canonId.replace('_', '-');
-    const galleryProgress = progress[canonId] || progress[legacyId] || progress[galleryId];
-    if (galleryProgress) {
-      if (
-        pointId &&
-        Array.isArray(galleryProgress.completedPointIds) &&
-        galleryProgress.completedPointIds.includes(pointId)
-      ) {
-        return true;
+    const checkIds = [canonId, legacyId, galleryId];
+    if (canonId === 'gallery_01' || canonId === 'gallery_02') {
+      checkIds.push('gallery_01', 'gallery-01', 'gallery_02', 'gallery-02');
+    }
+    for (const id of checkIds) {
+      const galleryProgress = progress[id];
+      if (galleryProgress) {
+        if (
+          pointId &&
+          Array.isArray(galleryProgress.completedPointIds) &&
+          galleryProgress.completedPointIds.includes(pointId)
+        ) {
+          return true;
+        }
+        if (
+          puzzlePieceId &&
+          Array.isArray(galleryProgress.collectedPieces) &&
+          galleryProgress.collectedPieces.includes(puzzlePieceId)
+        ) {
+          return true;
+        }
       }
-      if (
-        puzzlePieceId &&
-        Array.isArray(galleryProgress.collectedPieces) &&
-        galleryProgress.collectedPieces.includes(puzzlePieceId)
-      ) {
-        return true;
-      }
+    }
+    if (puzzlePieceId && isPuzzlePieceCollected(galleryId, puzzlePieceId)) {
+      return true;
     }
   } else {
     // Search across all galleries

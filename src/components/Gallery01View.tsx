@@ -32,6 +32,7 @@ import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian } from '../services/content/mappers';
 import { GalleryInfoModal } from './GalleryInfoModal';
 import { SharedGalleryPageLayout } from './SharedGalleryPageLayout';
+import { usePuzzleBlinkGuidance } from '../hooks/usePuzzleBlinkGuidance';
 
 interface Gallery01ViewProps {
   onNavigateBack: () => void;
@@ -199,6 +200,12 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   const iconPoints = points.filter((p) => p.type === 'icon') as AdminIconPoint[];
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
 
+  const { blinkingPointId, handleBlinkEnd } = usePuzzleBlinkGuidance({
+    galleryId: 'gallery_02',
+    puzzlePoints,
+    activePuzzlePoint,
+  });
+
   const handlePuzzlePointClick = (puzzlePoint: AdminPuzzlePoint, e: React.MouseEvent) => {
     e.stopPropagation();
     if (puzzlePoint.isActive !== false) {
@@ -350,6 +357,8 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
           mapHeight={GALLERY_02_MAP_HEIGHT}
           onClick={handlePuzzlePointClick}
           isSelected={activePuzzlePoint?.id === puzzlePoint.id}
+          isBlinking={blinkingPointId === puzzlePoint.id}
+          onBlinkEnd={handleBlinkEnd}
         />
       ))}
 

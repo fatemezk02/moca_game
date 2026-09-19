@@ -28,6 +28,7 @@ import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian, normalizeGalleryId } from '../services/content/mappers';
 import { GalleryInfoModal } from './GalleryInfoModal';
 import { SharedGalleryPageLayout } from './SharedGalleryPageLayout';
+import { usePuzzleBlinkGuidance } from '../hooks/usePuzzleBlinkGuidance';
 
 interface Gallery07ViewProps {
   onNavigateBack: () => void;
@@ -240,6 +241,12 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
   const iconPoints = points.filter((p): p is AdminIconPoint => p.type === 'icon');
   const puzzlePoints = points.filter((p): p is AdminPuzzlePoint => p.type === 'puzzle');
 
+  const { blinkingPointId, handleBlinkEnd } = usePuzzleBlinkGuidance({
+    galleryId: 'gallery-07',
+    puzzlePoints,
+    activePuzzlePoint,
+  });
+
   // Fallback preset question icon if no icon points exist
   const effectiveIconPoints: AdminIconPoint[] =
     iconPoints.length > 0
@@ -414,6 +421,8 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
           mapHeight={GALLERY_07_MAP_HEIGHT}
           onClick={handlePuzzlePointClick}
           isSelected={activePuzzlePoint?.id === puzzlePoint.id}
+          isBlinking={blinkingPointId === puzzlePoint.id}
+          onBlinkEnd={handleBlinkEnd}
         />
       ))}
 

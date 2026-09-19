@@ -29,6 +29,7 @@ import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian } from '../services/content/mappers';
 import { GalleryInfoModal } from './GalleryInfoModal';
 import { SharedGalleryPageLayout } from './SharedGalleryPageLayout';
+import { usePuzzleBlinkGuidance } from '../hooks/usePuzzleBlinkGuidance';
 
 interface Gallery04ViewProps {
   onNavigateBack: () => void;
@@ -194,6 +195,12 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
   const experiencePoints = React.useMemo(() => getExperiencePointsForGallery('gallery-04'), [puzzleUpdateTrigger]);
 
+  const { blinkingPointId, handleBlinkEnd } = usePuzzleBlinkGuidance({
+    galleryId: 'gallery-04',
+    puzzlePoints,
+    activePuzzlePoint,
+  });
+
   // Ensure central question/info entry point is present at ~center (x: 249, y: 426)
   const effectiveIconPoints = iconPoints.some(
     (p) => p.destination === 'gallery-04' || p.id === 'icon-g04-info'
@@ -335,6 +342,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
           mapHeight={GALLERY_04_MAP_HEIGHT}
           onClick={handlePuzzlePointClick}
           isSelected={activePuzzlePoint?.id === puzzlePoint.id}
+          isBlinking={blinkingPointId === puzzlePoint.id}
+          onBlinkEnd={handleBlinkEnd}
         />
       ))}
 
