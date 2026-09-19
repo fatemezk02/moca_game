@@ -44,23 +44,23 @@ export const PuzzlePointMarker: React.FC<PuzzlePointMarkerProps> = ({
       >
         {/* Puzzle piece custom geometric vector path */}
         <path
-          d="M 5 7 
-             C 5 5.5, 6.5 4, 8 4 
+          d="M 5 5.5 
+             C 5 4.75, 5.75 4, 6.5 4 
              L 10.8 4 
              C 10.2 2.2, 11.2 0.3, 14 0.3 
              C 16.8 0.3, 17.8 2.2, 17.2 4 
-             L 20 4 
-             C 21.5 4, 23 5.5, 23 7 
+             L 21.5 4 
+             C 22.25 4, 23 4.75, 23 5.5 
              L 23 10.8 
              C 24.8 10.2, 26.8 11.2, 26.8 14 
              C 26.8 16.8, 24.8 17.8, 23 17.2 
-             L 23 20 
-             C 23 21.5, 21.5 23, 20 23 
+             L 23 21.5 
+             C 23 22.25, 22.25 23, 21.5 23 
              L 17 23 
              C 17 21.2, 15.5 20, 14 20 
              C 12.5 20, 11 21.2, 11 23 
-             L 8 23 
-             C 6.5 23, 5 21.5, 5 20 
+             L 6.5 23 
+             C 5.75 23, 5 22.25, 5 21.5 
              L 5 17 
              C 6.8 17, 8 15.5, 8 14 
              C 8 12.5, 6.8 11, 5 11 
@@ -79,7 +79,7 @@ export const PuzzlePointMarker: React.FC<PuzzlePointMarkerProps> = ({
 
         {/* Subtle internal emboss line */}
         <path
-          d="M 8 7 L 10.8 7 M 20 7 L 20 10.8"
+          d="M 6.5 5.5 L 10.8 5.5 M 21.5 5.5 L 21.5 10.8"
           stroke="#ffffff"
           strokeWidth="0.9"
           strokeOpacity="0.75"
