@@ -338,6 +338,20 @@ export function evaluateArrowConditions(
  * Note: Navigation arrows (both next gallery and return arrows) remain permanently visible once unlocked/received.
  */
 export function isArrowVisibleToPlayer(arrow: AdminArrowPoint): boolean {
+  // If this is the arrow on the main map pointing to Gallery 01/02, hide it permanently once the user has entered Gallery 02
+  if (arrow.id === 'arrow-g00-to-g01' || arrow.galleryId === 'gallery-00') {
+    if (isArrowUsed(arrow.id) || isArrowUsed('arrow-g00-to-g01')) {
+      return false;
+    }
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        if (localStorage.getItem('museum_has_entered_gallery_02') === 'true') {
+          return false;
+        }
+      } catch {}
+    }
+  }
+
   // Check progression rules for game progression arrows
   const progressionRule = getProgressionRuleForArrow(arrow.id);
   if (progressionRule && progressionRule.requiredPuzzlePiecesCount > 0) {

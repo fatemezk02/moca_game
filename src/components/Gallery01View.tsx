@@ -58,6 +58,10 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   // Current Gallery ID for this page is gallery_02
   useEffect(() => {
     setCurrentGalleryId('gallery_02');
+    markArrowUsed('arrow-g00-to-g01');
+    try {
+      localStorage.setItem('museum_has_entered_gallery_02', 'true');
+    } catch {}
   }, []);
 
   const [points, setPoints] = useState<AdminMapPoint[]>(() => getGalleryPoints('gallery-01'));

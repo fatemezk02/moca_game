@@ -47,6 +47,7 @@ import { ProfileModal } from './components/ProfileModal';
 import { FinalCertificateModal } from './components/FinalCertificateModal';
 import { getUserProfile, UserProfile } from './data/userProfileStore';
 import { markCollectionsAsViewed } from './data/collectionNotificationStore';
+import { markArrowUsed } from './data/arrowConditionsStore';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -180,6 +181,7 @@ export default function App() {
       currentGallery === 'gallery-01-questions'
     ) {
       setHasEnteredGallery02(true);
+      markArrowUsed('arrow-g00-to-g01');
       try {
         localStorage.setItem('museum_has_entered_gallery_02', 'true');
       } catch {}

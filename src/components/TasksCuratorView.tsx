@@ -179,7 +179,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
 
     const isUnlocked = isGalleryUnlockedState(gallery.id);
 
-    // Calculate stars for this gallery
+    // Calculate stars for this gallery from active stars loaded from sheets / content service
     const galleryStars = allStars.filter((s) => {
       if (!s.galleryId) return false;
       const sCanon = normalizeGalleryId(s.galleryId);
@@ -191,8 +191,8 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       return false;
     });
 
-    // Fallback default star count if empty from sheets
-    const totalStars = galleryStars.length > 0 ? galleryStars.length : (gallery.id === 'gallery-03' ? 4 : gallery.id === 'gallery-01' ? 2 : 4);
+    // Exact count of active stars for this gallery
+    const totalStars = galleryStars.length;
 
     let collectedStars = 0;
     if (galleryStars.length > 0) {
