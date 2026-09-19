@@ -38,8 +38,8 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
   };
 
   return (
-    <div className={`fixed inset-0 text-[#1e1b18] z-50 flex flex-col items-center font-sans-custom overflow-y-auto ${step === 'guide' ? 'bg-[#fbf9f9]/80 backdrop-blur-md justify-between p-4 sm:p-6 pb-5 sm:pb-6' : 'bg-[#b5b3b3]/85 backdrop-blur-md justify-start pt-[14px] px-4 pb-6 sm:px-6'}`} dir="rtl">
-      <div className={`w-full max-w-md flex flex-col ${step === 'guide' ? 'h-full flex-1 justify-between' : 'gap-5 mt-0 shrink-0'}`}>
+    <div className={`fixed inset-0 text-[#1e1b18] z-50 flex flex-col items-center font-sans-custom overflow-y-auto ${step === 'guide' ? 'bg-[#fbf9f9]/80 backdrop-blur-md justify-between p-4 sm:p-6 pb-5 sm:pb-6' : 'bg-[#dedcd9]/85 backdrop-blur-md justify-between pt-[14px] px-4 pb-[4vh] sm:px-6'}`} dir="rtl">
+      <div className={`w-full max-w-md flex flex-col ${step === 'guide' ? 'h-full flex-1 justify-between' : 'h-full flex-1 justify-between gap-4 mt-0'}`}>
         
         {step === 'profile' ? (
           <>
@@ -56,55 +56,57 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
               </h1>
             </div>
 
-            <form onSubmit={handleProfileSubmit} className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="user-name" className="text-sm font-bold text-[#1e1b18]">
-                  نام شما
-                </label>
-                <input
-                  id="user-name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="نام خود را وارد کنید"
-                  className="w-full h-12 px-4 rounded-xl border-2 border-[#1e1b18] bg-white text-[#1e1b18] font-bold outline-none focus:ring-4 focus:ring-[#d96c60]/30 focus:border-[#d96c60] transition-all placeholder:font-normal placeholder:text-[#635d57]"
-                  maxLength={20}
-                  autoComplete="off"
-                />
-              </div>
+            <form onSubmit={handleProfileSubmit} className="flex-1 flex flex-col justify-between gap-5">
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="user-name" className="text-sm font-bold text-[#1e1b18] mr-[5%]">
+                    نام شما
+                  </label>
+                  <input
+                    id="user-name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="نام خود را وارد کنید"
+                    className="w-full h-12 px-4 rounded-xl border-2 border-[#1e1b18] bg-white text-[#1e1b18] font-bold outline-none focus:ring-4 focus:ring-[#fafafa] focus:border-[#fafafa] transition-all placeholder:font-normal placeholder:text-[#635d57]"
+                    maxLength={20}
+                    autoComplete="off"
+                  />
+                </div>
 
-              <div className="flex flex-col gap-3">
-                <label className="text-sm font-bold text-[#1e1b18] text-center">
-                  آواتار خود را انتخاب کنید
-                </label>
-                
-                <div className="grid grid-cols-3 gap-3.5 sm:gap-4 justify-items-center py-1">
-                  {AVATAR_OPTIONS.map((avatar) => {
-                    const isSelected = selectedAvatarId === avatar.id;
-                    return (
-                      <button
-                        key={avatar.id}
-                        type="button"
-                        onClick={() => setSelectedAvatarId(avatar.id)}
-                        className={`flex items-center justify-center p-1 rounded-full transition-all cursor-pointer ${
-                          isSelected 
-                            ? 'scale-110 ring-4 ring-[#d96c60] ring-offset-2 ring-offset-[#b5b3b3]' 
-                            : 'opacity-85 hover:opacity-100 hover:scale-105'
-                        }`}
-                      >
-                        <ProfileAvatar avatarId={avatar.id} size="lg" className="pointer-events-none" />
-                      </button>
-                    );
-                  })}
+                <div className="flex flex-col gap-3">
+                  <label className="text-sm font-bold text-[#1e1b18] text-center">
+                    آواتار خود را انتخاب کنید
+                  </label>
+                  
+                  <div className="w-[85%] mx-auto grid grid-cols-3 gap-3.5 sm:gap-4 justify-items-center py-1">
+                    {AVATAR_OPTIONS.map((avatar) => {
+                      const isSelected = selectedAvatarId === avatar.id;
+                      return (
+                        <button
+                          key={avatar.id}
+                          type="button"
+                          onClick={() => setSelectedAvatarId(avatar.id)}
+                          className={`flex items-center justify-center p-1 rounded-full transition-all cursor-pointer ${
+                            isSelected 
+                              ? 'scale-110 ring-4 ring-[#fafafa] ring-offset-2 ring-offset-[#dedcd9]' 
+                              : 'opacity-85 hover:opacity-100 hover:scale-105'
+                          }`}
+                        >
+                          <ProfileAvatar avatarId={avatar.id} size="lg" className="pointer-events-none" />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={!isFormValid}
-                className={`mt-2 w-full h-13 rounded-xl border-2 border-[#1e1b18] font-black text-base sm:text-lg transition-all ${
+                className={`mt-auto w-full h-13 rounded-xl border-2 border-[#1e1b18] font-black text-base sm:text-lg transition-all ${
                   isFormValid
-                    ? 'bg-[#d9d8d4] text-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] hover:bg-[#e4e2de] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[2px_2px_0px_#1e1b18] active:translate-y-[3px] active:translate-x-[3px] active:shadow-none cursor-pointer'
+                    ? 'bg-[#fafafa] text-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] hover:bg-[#ededed] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[2px_2px_0px_#1e1b18] active:translate-y-[3px] active:translate-x-[3px] active:shadow-none cursor-pointer'
                     : 'bg-[#b8b5ae] text-[#423f3a] border-[#1e1b18] shadow-none cursor-not-allowed opacity-80'
                 }`}
               >
@@ -132,17 +134,25 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
               </div>
             </div>
 
-            {/* 3. Centered Guide Text Boxes Area */}
-            <div className="w-full py-2 my-auto flex flex-col justify-center">
+            {/* 3. Centered Guide Text Boxes Area (Swipeable & Draggable) */}
+            <div className="w-full py-2 my-auto flex flex-col justify-center select-none">
               <AnimatePresence mode="wait">
                 {guideSlide === 0 ? (
                   <motion.div
                     key="slide-0"
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.25}
+                    onDragEnd={(_, info) => {
+                      if (info.offset.x < -30 || info.velocity.x < -100) {
+                        setGuideSlide(1);
+                      }
+                    }}
                     initial={{ opacity: 0, x: -15 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 15 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-3.5 w-full"
+                    className="space-y-3.5 w-full cursor-grab active:cursor-grabbing touch-pan-y"
                   >
                     <div className="border-2 border-[#1e1b18] rounded-2xl p-4 bg-[#e0f2fe] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col items-start">
                       <div className="flex items-center gap-2 font-black text-xs text-[#0369a1] mb-2">
@@ -167,11 +177,19 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
                 ) : (
                   <motion.div
                     key="slide-1"
-                    initial={{ opacity: 0, x: -15 }}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.25}
+                    onDragEnd={(_, info) => {
+                      if (info.offset.x > 30 || info.velocity.x > 100) {
+                        setGuideSlide(0);
+                      }
+                    }}
+                    initial={{ opacity: 0, x: 15 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 15 }}
+                    exit={{ opacity: 0, x: -15 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-2.5 w-full"
+                    className="space-y-2.5 w-full cursor-grab active:cursor-grabbing touch-pan-y"
                   >
                     <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#fef3c7] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
                       <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#fbbf24] flex items-center justify-center shrink-0">
