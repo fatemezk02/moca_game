@@ -451,35 +451,54 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
         </div>
       )}
 
-      {/* Completed Large Artwork Lightbox */}
+      {/* Completed Artwork Preview Modal */}
       {selectedArtwork && (
         <div
           id="artwork-detail-overlay"
-          className="fixed inset-0 z-50 bg-[#1e1b18]/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 select-none cursor-pointer animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-[#1e1b18]/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 select-none"
           onClick={() => setSelectedArtwork(null)}
         >
           <div
-            className="relative max-w-full max-h-[90vh] flex items-center justify-center p-2 sm:p-4 select-none cursor-default"
+            className="bg-[#ffffff] border-[2.5px] border-[#1e1b18] max-w-md w-full p-5 sm:p-6 rounded-3xl shadow-[6px_6px_0px_#1e1b18] relative select-none animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={() => setSelectedArtwork(null)}
-              aria-label="بستن"
-              className="absolute -top-3 -left-3 sm:-top-4 sm:-left-4 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#ffffff] hover:bg-[#fee2e2] text-[#1e1b18] border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center cursor-pointer transition-transform active:scale-95"
+              className="absolute top-4 left-4 w-8 h-8 rounded-full bg-[#fee2e2] hover:bg-[#ef4444] hover:text-white transition-all text-[#1e1b18] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center cursor-pointer"
             >
-              <X className="w-5 h-5 stroke-[2.5]" />
+              <X className="w-4 h-4 stroke-[2.5]" />
             </button>
 
-            {/* Large Framed Artwork View */}
-            <div className="flex items-center justify-center">
-              <ArtworkFrame className="shadow-2xl">
-                <img
-                  src={selectedArtwork.imageUrl}
-                  alt={selectedArtwork.title}
-                  className="max-h-[75vh] max-w-[85vw] sm:max-h-[82vh] sm:max-w-[82vw] w-auto h-auto object-contain rounded-[2px] select-none pointer-events-none"
-                />
-              </ArtworkFrame>
+            {/* Modal Content */}
+            <div className="flex flex-col items-center text-center space-y-3 pt-1">
+              <span className="font-sans-custom text-[11px] text-[#ea580c] font-black tracking-wider uppercase flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-[#f59e0b]" />
+                {selectedArtwork.galleryNameFa}
+              </span>
+
+              {/* Framed Image */}
+              <div className="my-2">
+                <ArtworkFrame className="shadow-2xl">
+                  <img
+                    src={selectedArtwork.imageUrl}
+                    alt={selectedArtwork.title}
+                    className="max-h-[220px] sm:max-h-[260px] w-auto object-contain"
+                  />
+                </ArtworkFrame>
+              </div>
+
+              {/* Title & Info */}
+              <div>
+                <h3 className="font-sans-custom text-[18px] sm:text-[20px] font-black text-[#1e1b18]">
+                  {selectedArtwork.title}
+                </h3>
+                {selectedArtwork.description && (
+                  <p className="text-[12.5px] text-[#475569] font-sans-custom leading-relaxed mt-1.5 line-clamp-3">
+                    {selectedArtwork.description}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
