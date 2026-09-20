@@ -58,7 +58,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
               </span>
             )}
           </div>
-          <span className="font-sans-custom text-[11px] font-bold">مجموعه‌ها</span>
+          <span className="font-sans-custom text-[11px] font-bold">گنجینه</span>
         </button>
 
         {/* TASKS TAB */}
@@ -72,7 +72,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
           }`}
         >
           <ClipboardList className="w-5 h-5 mb-0.5" />
-          <span className="font-sans-custom text-[11px] font-bold">وظایف</span>
+          <span className="font-sans-custom text-[11px] font-bold">مراحل</span>
         </button>
       </div>
     </nav>

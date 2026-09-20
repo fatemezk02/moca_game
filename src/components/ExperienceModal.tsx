@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { ExperienceContent } from '../services/content/types';
 import { ExperienceIcon } from './ExperienceIcon';
+import { markExperienceDiscovered } from '../data/experienceProgressStore';
 
 export interface ExperienceModalProps {
   isOpen: boolean;
@@ -22,7 +23,13 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({
   useEffect(() => {
     setImageLoaded(false);
     setImageError(false);
-  }, [experience?.id, experience?.imageUrl]);
+    if (isOpen && experience?.id) {
+      markExperienceDiscovered(experience.id);
+      if (experience.experienceId) {
+        markExperienceDiscovered(experience.experienceId);
+      }
+    }
+  }, [isOpen, experience?.id, experience?.experienceId, experience?.imageUrl]);
 
   // Handle ESC key to dismiss
   useEffect(() => {

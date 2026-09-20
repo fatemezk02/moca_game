@@ -1,6 +1,7 @@
 import { resetPuzzleProgress } from './puzzleProgressStore';
 import { resetAllQuestionsProgress } from './questionProgressStore';
 import { resetStarPointProgress } from './starPointProgressStore';
+import { resetExperienceProgress } from './experienceProgressStore';
 import { resetUsedArrows, resetAnsweredQuestions } from './arrowConditionsStore';
 import { resetPlayerLocation } from './playerLocationStore';
 import { resetReachedGalleries } from './reachedGalleriesStore';
@@ -28,6 +29,9 @@ export function resetEntireGame(): void {
 
     // 4. Reset star points discovery records
     resetStarPointProgress();
+
+    // 4.1 Reset experience progress records
+    resetExperienceProgress();
 
     // 5. Reset arrows usage & conditions
     resetUsedArrows();

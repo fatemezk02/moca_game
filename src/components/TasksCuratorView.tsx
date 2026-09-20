@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Lock, Unlock, Star, Sparkles, CheckCircle2, ChevronLeft } from 'lucide-react';
+import { Lock, Unlock, Star, CheckCircle2, ChevronLeft } from 'lucide-react';
 import { CuratorExhibitionWall } from './CuratorExhibitionWall';
 import { GalleryLockModal } from './GalleryLockModal';
 import { GALLERIES } from '../data/mapConfig';
@@ -241,14 +241,8 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       {/* Page Header */}
       <div className="border-b-2 border-[#1e1b18] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-[#ea580c]" />
-            <span className="font-sans-custom text-[11px] text-[#ea580c] font-black tracking-wider uppercase">
-              پیشرفت مأموریت‌های موزه
-            </span>
-          </div>
-          <h1 className="font-sans-custom text-[20px] sm:text-[22px] font-black text-[#1e1b18] tracking-tight mt-0.5">
-            تالارها و مأموریت‌ها
+          <h1 className="font-sans-custom text-[20px] sm:text-[22px] font-black text-[#1e1b18] tracking-tight">
+            مراحل و گالری ها
           </h1>
         </div>
 

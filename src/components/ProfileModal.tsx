@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Puzzle, Landmark, Sparkles, RotateCcw, AlertTriangle } from 'lucide-react';
+import { X, Puzzle, Landmark, Sparkles, RotateCcw, AlertTriangle, Star } from 'lucide-react';
 import { ProfileAvatar } from './ProfileAvatar';
 import { getUserProfile, saveUserProfile, UserProfile } from '../data/userProfileStore';
 import { AVATAR_OPTIONS } from '../data/avatarConfig';
@@ -12,6 +12,13 @@ import {
 import { resetEntireGame } from '../data/gameReset';
 import { FinalCompletionCardBack } from './FinalCompletionCardBack';
 import { toPersianDigits } from '../services/content/mappers';
+import { contentService } from '../services/content/contentService';
+import {
+  isStarPointUnlocked,
+  isStarPointInformationUnlocked,
+  getUnlockedInformationStarsCount,
+} from '../data/starPointProgressStore';
+import { getDiscoveredExperiencesCount } from '../data/experienceProgressStore';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -31,7 +38,15 @@ const REQUIRED_GALLERIES = [
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [stats, setStats] = useState({ completedPuzzles: 0, galleries: 0, percentage: 0 });
+  const [stats, setStats] = useState({
+    completedPuzzles: 0,
+    totalPuzzles: 8,
+    stars: 0,
+    totalStars: 8,
+    experiences: 0,
+    totalExperiences: 6,
+    percentage: 0,
+  });
   const [showCertificate, setShowCertificate] = useState(false);
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
   const [showConfirmResetModal, setShowConfirmResetModal] = useState(false);
@@ -44,9 +59,32 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       
       const updateStats = () => {
         const overall = getOverallGameProgress();
+        const allStars = contentService.getStars().filter((s) => s.active !== false);
+        let collectedStars = 0;
+        if (allStars.length > 0) {
+          collectedStars = allStars.filter((star) => {
+            return (
+              isStarPointUnlocked(star.id) ||
+              (star.starId && isStarPointUnlocked(star.starId)) ||
+              isStarPointInformationUnlocked(star.id)
+            );
+          }).length;
+        } else {
+          collectedStars = getUnlockedInformationStarsCount();
+        }
+        const totalStarsCount = allStars.length > 0 ? allStars.length : 8;
+
+        const allExperiences = contentService.getExperiences().filter((e) => e.active !== false);
+        const totalExperiencesCount = allExperiences.length > 0 ? allExperiences.length : 6;
+        const discoveredExpCount = getDiscoveredExperiencesCount(allExperiences);
+
         setStats({
           completedPuzzles: overall.completedGalleriesCount,
-          galleries: overall.completedGalleriesCount,
+          totalPuzzles: 8,
+          stars: collectedStars,
+          totalStars: totalStarsCount,
+          experiences: discoveredExpCount,
+          totalExperiences: totalExperiencesCount,
           percentage: overall.percentage,
         });
       };
@@ -57,6 +95,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       window.addEventListener('museum_puzzle_progress_updated', handleUpdate);
       window.addEventListener('museum_player_progress_updated', handleUpdate);
       window.addEventListener('museum_completed_gallery_puzzles_updated', handleUpdate);
+      window.addEventListener('museum_star_point_progress_updated', handleUpdate);
+      window.addEventListener('museum_experience_progress_updated', handleUpdate);
       window.addEventListener('museum_final_completion_awarded', handleUpdate);
       window.addEventListener('museum_game_fully_reset', handleUpdate);
       
@@ -64,6 +104,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
         window.removeEventListener('museum_puzzle_progress_updated', handleUpdate);
         window.removeEventListener('museum_player_progress_updated', handleUpdate);
         window.removeEventListener('museum_completed_gallery_puzzles_updated', handleUpdate);
+        window.removeEventListener('museum_star_point_progress_updated', handleUpdate);
+        window.removeEventListener('museum_experience_progress_updated', handleUpdate);
         window.removeEventListener('museum_final_completion_awarded', handleUpdate);
         window.removeEventListener('museum_game_fully_reset', handleUpdate);
       };
@@ -124,13 +166,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
               </button>
             </div>
             <h2 className="text-2xl font-black text-[#1e1b18] mt-0.5">{profile.name}</h2>
-            <button
-              type="button"
-              onClick={() => setIsEditingAvatar(!isEditingAvatar)}
-              className="text-xs font-bold text-[#d97706] hover:underline cursor-pointer"
-            >
-              {isEditingAvatar ? 'بستن آواتارها' : 'تغییر آواتار'}
-            </button>
 
             {isEditingAvatar && (
               <div className="w-full bg-[#f3f4f6] border-2 border-[#1e1b18] rounded-2xl p-4 mt-2 shadow-[2.5px_2.5px_0px_#1e1b18] z-20">
@@ -165,25 +200,36 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
             )}
           </div>
 
-          <div className="flex items-center justify-center gap-6 mt-6 mb-6">
-            <div className="flex flex-col items-center gap-2" title={`${stats.completedPuzzles} پازل تکمیل شده`}>
-              <div className="w-14 h-14 rounded-2xl bg-[#ede9fe] border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] flex items-center justify-center">
+          <div className="flex items-center justify-center gap-3.5 sm:gap-5 mt-6 mb-6">
+            <div className="flex flex-col items-center gap-2" title={`${stats.completedPuzzles} از ${stats.totalPuzzles} پازل تکمیل شده`}>
+              <div className="w-14 h-14 rounded-2xl bg-[#ede9fe] border-2 border-[#1e1b18] flex items-center justify-center">
                 <Puzzle className="w-7 h-7 text-[#8b5cf6] fill-[#8b5cf6]/20 stroke-[2]" />
               </div>
-              <div className="text-center bg-white px-3 py-1 rounded-full border-2 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]">
-                <span className="block font-black text-[15px] text-[#1e1b18] leading-none pt-0.5">
-                  {toPersianDigits(stats.completedPuzzles)} پازل
+              <div className="text-center bg-white px-2.5 py-1 rounded-full border-2 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]">
+                <span className="block font-black text-[13.5px] sm:text-[14px] text-[#1e1b18] leading-none pt-0.5 whitespace-nowrap" dir="ltr">
+                  {toPersianDigits(stats.completedPuzzles)} / {toPersianDigits(stats.totalPuzzles)}
                 </span>
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-2" title={`${stats.galleries} گالری تکمیل شده`}>
-              <div className="w-14 h-14 rounded-2xl bg-[#fef3c7] border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] flex items-center justify-center">
-                <Landmark className="w-7 h-7 text-[#d97706] fill-[#d97706]/20 stroke-[2]" />
+            <div className="flex flex-col items-center gap-2" title={`${stats.stars} از ${stats.totalStars} ستاره کشف شده`}>
+              <div className="w-14 h-14 rounded-2xl bg-[#fef9c3] border-2 border-[#1e1b18] flex items-center justify-center">
+                <Star className="w-7 h-7 text-[#f59e0b] fill-[#f59e0b]/20 stroke-[2]" />
               </div>
-              <div className="text-center bg-white px-3 py-1 rounded-full border-2 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]">
-                <span className="block font-black text-[15px] text-[#1e1b18] leading-none pt-0.5">
-                  {toPersianDigits(stats.galleries)} گالری
+              <div className="text-center bg-white px-2.5 py-1 rounded-full border-2 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]">
+                <span className="block font-black text-[13.5px] sm:text-[14px] text-[#1e1b18] leading-none pt-0.5 whitespace-nowrap" dir="ltr">
+                  {toPersianDigits(stats.stars)} / {toPersianDigits(stats.totalStars)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-2" title={`${stats.experiences} از ${stats.totalExperiences} تجربه کشف شده`}>
+              <div className="w-14 h-14 rounded-2xl bg-[#e0f2fe] border-2 border-[#1e1b18] flex items-center justify-center">
+                <Sparkles className="w-7 h-7 text-[#0284c7] fill-[#0284c7]/20 stroke-[2]" />
+              </div>
+              <div className="text-center bg-white px-2.5 py-1 rounded-full border-2 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18]">
+                <span className="block font-black text-[13.5px] sm:text-[14px] text-[#1e1b18] leading-none pt-0.5 whitespace-nowrap" dir="ltr">
+                  {toPersianDigits(stats.experiences)} / {toPersianDigits(stats.totalExperiences)}
                 </span>
               </div>
             </div>
@@ -191,17 +237,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
 
           <div className="flex flex-col gap-3 mt-2 bg-white p-4 rounded-2xl border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18]">
             <div className="flex justify-between items-end mb-1 px-1">
-              <span className="font-bold text-sm text-[#4a443b]">پیشرفت بازی</span>
-              <div className="flex items-center gap-2">
-                {isAllComplete && (
-                  <span className="text-[11px] font-black text-[#15803d] bg-[#dcfce7] px-2 py-0.5 rounded-md border border-[#16a34a]">
-                    تکمیل ۱۰۰٪
-                  </span>
-                )}
-                <span className="font-black text-[#f59e0b] text-xl leading-none">
-                  {toPersianDigits(stats.percentage)}٪
-                </span>
-              </div>
+              <span className="font-bold text-sm text-[#4a443b]">پیشرفت</span>
+              <span className="font-black text-[#f59e0b] text-xl leading-none">
+                {toPersianDigits(stats.percentage)}٪
+              </span>
             </div>
             
             <div className="w-full bg-[#f3f4f6] h-5 rounded-full border-2 border-[#1e1b18] overflow-hidden">
