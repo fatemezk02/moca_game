@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Puzzle, Coins, Star } from 'lucide-react';
 import { getOverallGameProgress } from '../data/finalCompletionStore';
 import { toPersianDigits } from '../services/content/mappers';
+import { contentService } from '../services/content/contentService';
 
 export interface PlayerStatusBarProps {
   puzzles?: number;
+  totalPuzzles?: number;
   stars?: number;
+  totalStars?: number;
   coins?: number;
   className?: string;
   showProgressBar?: boolean;
@@ -19,12 +22,18 @@ export interface PlayerStatusBarProps {
  */
 export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
   puzzles,
+  totalPuzzles: propTotalPuzzles,
   stars,
+  totalStars: propTotalStars,
   coins = 0,
   className = '',
   showProgressBar = true,
 }) => {
   const [progress, setProgress] = useState(() => getOverallGameProgress());
+  const [totalStarsCount, setTotalStarsCount] = useState<number>(() => {
+    const allStars = contentService.getStars().filter((s) => s.active !== false);
+    return allStars.length > 0 ? allStars.length : 8;
+  });
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -46,8 +55,17 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    return contentService.subscribe(() => {
+      const allStars = contentService.getStars().filter((s) => s.active !== false);
+      setTotalStarsCount(allStars.length > 0 ? allStars.length : 8);
+    });
+  }, []);
+
   const displayPuzzles = puzzles ?? 0;
+  const totalPuzzles = propTotalPuzzles ?? 8;
   const displayStars = stars ?? 0;
+  const totalStars = propTotalStars ?? totalStarsCount;
 
   return (
     <div
@@ -62,7 +80,7 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
           <div
             id="hud-game-progress-bar"
             className="flex items-center cursor-default group"
-            title={`پیشرفت کلی بازی: ${progress.percentage}٪ (${progress.completedGalleriesCount} از ${progress.totalGalleries} تالار)`}
+            title={`پیشرفت کلی بازی: ${toPersianDigits(progress.percentage)}٪ (${toPersianDigits(progress.completedGalleriesCount)} از ${toPersianDigits(progress.totalGalleries)} تالار)`}
           >
             {/* Medallion / Trophy Icon */}
             <div className="relative z-10 w-[34px] h-[34px] sm:w-[36px] sm:h-[36px] rounded-full border-2 border-[#1e1b18] bg-[#fef3c7] flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e1b18] shrink-0">
@@ -101,38 +119,38 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
 
       {/* Right Side: Badges grouped together with separated icon medallion and number capsule */}
       <div className="flex items-center gap-2 sm:gap-2.5 pointer-events-auto" dir="ltr">
-        {/* Stars Badge: Circular Star Medallion + Separate Number Capsule */}
+        {/* Stars Badge: Circular Star Medallion + Separate Number Capsule showing acquired / total */}
         <div
           id="player-stars-badge"
           className="relative flex items-center cursor-default group"
-          title={`ستاره‌های کسب شده: ${displayStars} ستاره`}
+          title={`ستاره‌های کسب شده: ${toPersianDigits(displayStars)} از ${toPersianDigits(totalStars)} ستاره`}
         >
           {/* Star Icon Medallion */}
           <div className="relative z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-[#1e1b18] bg-[#fef3c7] flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e1b18] shrink-0">
             <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1e1b18] fill-[#f59e0b] stroke-[1.5]" />
           </div>
           {/* Value Capsule */}
-          <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[36px] sm:min-w-[40px] flex items-center justify-center">
+          <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 sm:pr-2.5 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[44px] sm:min-w-[48px] flex items-center justify-center">
             <span className="font-mono-custom text-xs sm:text-[13px] font-black text-[#1e1b18] leading-none select-none">
-              {displayStars}
+              {toPersianDigits(displayStars)}/{toPersianDigits(totalStars)}
             </span>
           </div>
         </div>
 
-        {/* Puzzles Badge: Circular Puzzle Medallion + Separate Number Capsule */}
+        {/* Puzzles Badge: Circular Puzzle Medallion + Separate Number Capsule showing completed / total */}
         <div
           id="player-puzzles-badge"
           className="relative flex items-center cursor-default group"
-          title={`پازل‌های تکمیل شده: ${displayPuzzles} پازل`}
+          title={`پازل‌های تکمیل شده: ${toPersianDigits(displayPuzzles)} از ${toPersianDigits(totalPuzzles)} پازل`}
         >
           {/* Puzzle Icon Medallion */}
           <div className="relative z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-[#1e1b18] bg-[#ede9fe] flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e1b18] shrink-0">
             <Puzzle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1e1b18] fill-[#8b5cf6] stroke-[2]" />
           </div>
           {/* Value Capsule */}
-          <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[36px] sm:min-w-[40px] flex items-center justify-center">
+          <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 sm:pr-2.5 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[44px] sm:min-w-[48px] flex items-center justify-center">
             <span className="font-mono-custom text-xs sm:text-[13px] font-black text-[#1e1b18] leading-none select-none">
-              {displayPuzzles}
+              {toPersianDigits(displayPuzzles)}/{toPersianDigits(totalPuzzles)}
             </span>
           </div>
         </div>
@@ -141,7 +159,7 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
         <div
           id="player-coins-badge"
           className="relative flex items-center cursor-default group"
-          title={`پاداش: ${coins} سکه`}
+          title={`پاداش: ${toPersianDigits(coins)} سکه`}
         >
           {/* Coin Icon Medallion */}
           <div className="relative z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-[#1e1b18] bg-[#fed7aa] flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e1b18] shrink-0">
@@ -150,7 +168,7 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
           {/* Value Capsule */}
           <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[36px] sm:min-w-[40px] flex items-center justify-center">
             <span className="font-mono-custom text-xs sm:text-[13px] font-black text-[#1e1b18] leading-none select-none">
-              {coins}
+              {toPersianDigits(coins)}
             </span>
           </div>
         </div>

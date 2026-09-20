@@ -71,7 +71,7 @@ export const PuzzlePointMarker: React.FC<PuzzlePointMarkerProps> = ({
               : '#a78bfa'
           }
           stroke="#1e1b18"
-          strokeWidth="1.6"
+          strokeWidth="1.47"
           strokeLinejoin="round"
           strokeLinecap="round"
           className="transition-colors group-hover:fill-[#c4b5fd]"

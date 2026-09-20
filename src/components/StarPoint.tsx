@@ -259,6 +259,7 @@ export const StarPoint: React.FC<StarPointProps> = ({
         <CollectionPointMarker
           pointType="star"
           isSelected={isSelected || isLabelOpen}
+          isUnlocked={unlocked}
           showPulse={false}
         />
       </button>

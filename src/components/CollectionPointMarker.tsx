@@ -6,6 +6,7 @@ interface CollectionPointMarkerProps {
   isSelected?: boolean;
   className?: string;
   showPulse?: boolean;
+  isUnlocked?: boolean;
 }
 
 export const CollectionPointMarker: React.FC<CollectionPointMarkerProps> = ({
@@ -13,6 +14,7 @@ export const CollectionPointMarker: React.FC<CollectionPointMarkerProps> = ({
   isSelected = false,
   className = '',
   showPulse = true,
+  isUnlocked = true,
 }) => {
   const isStar = pointType === 'star';
   const rawId = useId();
@@ -68,28 +70,32 @@ export const CollectionPointMarker: React.FC<CollectionPointMarkerProps> = ({
               </linearGradient>
             </defs>
 
-            {/* Static Star Body: 1.4px outline (~20% thinner), rounded vertices, gold fill (red when selected) */}
+            {/* Static Star Body: 1.4px outline (~20% thinner), rounded vertices, gold fill when unlocked, pastel amber (#fef3c7) when locked */}
             <path
               d="M 11.29 3.43 Q 12 2 12.71 3.43 L 14.74 7.54 Q 15.09 8.26 15.88 8.38 L 20.42 9.04 Q 22 9.27 20.85 10.39 L 17.57 13.58 Q 17 14.14 17.14 14.93 L 17.91 19.44 Q 18.18 21.02 16.76 20.27 L 12.71 18.14 Q 12 17.77 11.29 18.14 L 7.24 20.27 Q 5.82 21.02 6.09 19.44 L 6.86 14.93 Q 7 14.14 6.43 13.58 L 3.15 10.39 Q 2 9.27 3.58 9.04 L 8.12 8.38 Q 8.91 8.26 9.26 7.54 Z"
-              fill={isSelected ? '#ef4444' : '#fbbf24'}
+              fill={isSelected ? '#ef4444' : isUnlocked ? '#fbbf24' : '#fef3c7'}
               stroke="#1e1b18"
               strokeWidth="1.4"
               strokeLinejoin="round"
               strokeLinecap="round"
-              className="transition-colors group-hover:fill-[#f59e0b]"
+              className={`transition-colors ${
+                isUnlocked ? 'group-hover:fill-[#f59e0b]' : 'group-hover:fill-[#fde68a]'
+              }`}
             />
 
-            {/* Clipped Shine Layer: Moving diagonal light streak across the star */}
-            <g clipPath={`url(#star-clip-${uniqueId})`} className="pointer-events-none">
-              <rect
-                x="0"
-                y="-18"
-                width="10"
-                height="60"
-                fill={`url(#sheen-grad-${uniqueId})`}
-                className="star-shine-streak"
-              />
-            </g>
+            {/* Clipped Shine Layer: Moving diagonal light streak across the star ONLY when unlocked */}
+            {isUnlocked && (
+              <g clipPath={`url(#star-clip-${uniqueId})`} className="pointer-events-none">
+                <rect
+                  x="0"
+                  y="-18"
+                  width="10"
+                  height="60"
+                  fill={`url(#sheen-grad-${uniqueId})`}
+                  className="star-shine-streak"
+                />
+              </g>
+            )}
           </svg>
         </div>
       ) : (

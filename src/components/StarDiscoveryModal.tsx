@@ -623,7 +623,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                               : 'bg-[#f1f5f9] text-[#64748b] border-[#cbd5e1] group-hover:border-[#1e1b18]'
                           }`}
                         >
-                          {isCorrectAnswer ? '✓' : idx + 1}
+                          {isCorrectAnswer ? '✓' : toPersianDigits(idx + 1)}
                         </span>
                       </button>
                     );

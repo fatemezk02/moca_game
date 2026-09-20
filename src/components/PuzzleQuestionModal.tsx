@@ -467,7 +467,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                                 )}
                               </div>
                               <span
-                                className={`font-mono-custom text-[11px] font-black shrink-0 px-1.5 py-0.5 rounded border ${
+                                className={`font-mono-custom text-[11px] font-black shrink-0 px-2 py-0.5 rounded border ${
                                   isWrong
                                     ? 'bg-[#ef4444] text-white border-[#b91c1c]'
                                     : isChosen
@@ -475,7 +475,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                                     : 'bg-[#f1f5f9] text-[#64748b] border-[#cbd5e1] group-hover:border-[#1e1b18]'
                                 }`}
                               >
-                                [{String.fromCharCode(65 + idx)}]
+                                {toPersianDigits(idx + 1)}
                               </span>
                             </button>
                           );
