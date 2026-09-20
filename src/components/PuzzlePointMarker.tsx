@@ -42,28 +42,28 @@ export const PuzzlePointMarker: React.FC<PuzzlePointMarkerProps> = ({
             : 'drop-shadow(2px 2px 0px #1e1b18)',
         }}
       >
-        {/* Puzzle piece custom geometric vector path with 10% taller protrusions */}
+        {/* Puzzle piece custom geometric vector path with 12% taller protrusions and 10% narrower socket mouths */}
         <path
           d="M 5 5.5 
              C 5 4.75, 5.75 4, 6.5 4 
              L 10.8 4 
-             C 10.2 2.0, 11.2 -0.1, 14 -0.1 
-             C 16.8 -0.1, 17.8 2.0, 17.2 4 
+             C 10.2 2.0, 11.2 -0.15, 14 -0.15 
+             C 16.8 -0.15, 17.8 2.0, 17.2 4 
              L 21.5 4 
              C 22.25 4, 23 4.75, 23 5.5 
              L 23 10.8 
-             C 25.0 10.2, 27.2 11.2, 27.2 14 
-             C 27.2 16.8, 25.0 17.8, 23 17.2 
+             C 25.0 10.2, 27.3 11.2, 27.3 14 
+             C 27.3 16.8, 25.0 17.8, 23 17.2 
              L 23 21.5 
              C 23 22.25, 22.25 23, 21.5 23 
-             L 17 23 
-             C 17 21.0, 15.5 19.7, 14 19.7 
-             C 12.5 19.7, 11 21.0, 11 23 
+             L 16.7 23 
+             C 16.7 21.0, 15.5 19.65, 14 19.65 
+             C 12.5 19.65, 11.3 21.0, 11.3 23 
              L 6.5 23 
              C 5.75 23, 5 22.25, 5 21.5 
-             L 5 17 
-             C 7.0 17, 8.3 15.5, 8.3 14 
-             C 8.3 12.5, 7.0 11, 5 11 
+             L 5 16.7 
+             C 7.0 16.7, 8.35 15.5, 8.35 14 
+             C 8.35 12.5, 7.0 11.3, 5 11.3 
              Z"
           fill={
             isSelected
