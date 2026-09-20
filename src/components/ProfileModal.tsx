@@ -212,20 +212,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
             </div>
           </div>
 
-          {/* Small Reset Game Button below game progress, positioned at left (justify-end in RTL) with no divider */}
-          <div className="flex justify-end mt-2">
-            <button
-              id="profile-reset-game-btn"
-              type="button"
-              onClick={() => setShowConfirmResetModal(true)}
-              title="شروع مجدد بازی و بازنشانی تمام پیشرفت‌ها"
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#fca5a5] bg-[#fff5f5] hover:bg-[#fee2e2] text-[#991b1b] text-[11px] font-bold shadow-xs active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
-            >
-              <RotateCcw className="w-3 h-3 shrink-0" />
-              <span>ریست بازی</span>
-            </button>
-          </div>
-
           {isAllComplete && (
             <button
               type="button"
@@ -237,6 +223,20 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
               <span>مشاهده گواهی‌نامه نهایی موزه 🏆</span>
             </button>
           )}
+
+          {/* Small Reset Game Button positioned at the bottom of the modal */}
+          <div className="flex justify-end mt-2">
+            <button
+              id="profile-reset-game-btn"
+              type="button"
+              onClick={() => setShowConfirmResetModal(true)}
+              title="شروع مجدد بازی و بازنشانی تمام پیشرفت‌ها"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#fca5a5] bg-[#fff5f5] hover:bg-[#fee2e2] text-[#991b1b] text-[11px] font-bold shadow-xs active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
+            >
+              <RotateCcw className="w-3 h-3 shrink-0" />
+              <span>شروع دوباره</span>
+            </button>
+          </div>
         </div>
       )}
 
