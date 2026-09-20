@@ -39,6 +39,8 @@ export interface GoogleSheetsSourceConfig {
     galleries: string;
     /** Published CSV link for the 'Experiences' tab */
     experiences: string;
+    /** Published CSV link for the 'Location' / 'Locations' tab */
+    locations?: string;
   };
 
   /**
@@ -49,7 +51,7 @@ export interface GoogleSheetsSourceConfig {
   spreadsheetId?: string;
 
   /**
-   * Tab names in your Google Spreadsheet (default: Questions, Stars, Artworks, Galleries, Experiences)
+   * Tab names in your Google Spreadsheet (default: Questions, Stars, Artworks, Galleries, Experiences, Location)
    */
   tabNames?: {
     questions: string;
@@ -57,6 +59,7 @@ export interface GoogleSheetsSourceConfig {
     artworks: string;
     galleries: string;
     experiences: string;
+    locations?: string;
   };
 
   /**
@@ -75,6 +78,7 @@ export const CONTENT_SOURCE_CONFIG: GoogleSheetsSourceConfig = {
     artworks: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=1588976816&single=true&output=csv',  // e.g. "https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=456...&single=true&output=csv"
     galleries: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=1983886582&single=true&output=csv', // Published CSV link for the 'Galleries' tab
     experiences: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=145470513&single=true&output=csv', // Published CSV link for the 'Experiences' tab
+    locations: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=2007606590&single=true&output=csv', // Published CSV link for the 'Location' tab
   },
 
   // Optional: If you want to use the Spreadsheet ID directly, paste it here:
@@ -86,6 +90,7 @@ export const CONTENT_SOURCE_CONFIG: GoogleSheetsSourceConfig = {
     artworks: 'Artworks',
     galleries: 'Galleries',
     experiences: 'Experiences',
+    locations: 'Location',
   },
 
   fetchTimeoutMs: 10000,

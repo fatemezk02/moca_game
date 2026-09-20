@@ -73,14 +73,23 @@ export function mapStarContentToDiscoveryItem(
       ? star.id
       : `star-q-${(star.id || '').replace(/^star[-_]?/i, '').padStart(2, '0')}`);
 
-  // Find fallback definition in DEFAULT_STAR_DISCOVERIES for field hydration
-  const extractNum = (s?: string): number | null => {
+  // Helper: Extract deterministic star number from ID without misinterpreting gallery numbers (e.g. col-g09-01)
+  const extractStarNum = (s?: string): number | null => {
     if (!s) return null;
-    const m = s.match(/\d+/);
-    return m ? parseInt(m[0], 10) : null;
+    const clean = s.trim();
+    if (clean === 'col-g09-01') return 20;
+    if (clean === 'col-g09-02') return 21;
+    if (clean === 'col-g09-03') return 22;
+    if (clean === 'col-g09-04') return 23;
+    if (clean === 'artwork-01' || clean === 'col-01') return 1;
+    if (clean === 'artwork-g03-star') return 3;
+    const starMatch = clean.match(/^star(?:-q)?[-_]?0*(\d+)$/i);
+    if (starMatch && starMatch[1]) return parseInt(starMatch[1], 10);
+    if (/^\d+$/.test(clean)) return parseInt(clean, 10);
+    return null;
   };
 
-  const num = extractNum(star.starId || star.id) ?? extractNum(star.starNumber) ?? extractNum(starPointId);
+  const num = extractStarNum(star.starId || star.id) ?? extractStarNum(star.starNumber) ?? extractStarNum(starPointId);
   const formattedNumKey = num !== null ? `star-${String(num).padStart(2, '0')}` : null;
 
   const fallback: StarDiscoveryItem | undefined =
@@ -1494,6 +1503,202 @@ export const DEFAULT_STAR_DISCOVERIES: Record<string, StarDiscoveryItem> = {
       textEn: 'Art is no longer merely to be seen, but an environment to be lived and experienced.',
     },
   },
+  'col-g09-01': {
+    id: 'col-g09-01',
+    starId: 'star-20',
+    galleryId: 'gallery-09',
+    questionId: 'star-q-20',
+    labelTextFa: 'ستاره کشف ۲۰',
+    titleFa: 'تابلوی دام',
+    introFa: 'عکاسی پیوندی ناگسستنی میان ثبت یک لحظه منجمد و تداوم تاریخ برقرار می‌سازد.',
+    discoveryCost: 30,
+    informationCost: 30,
+    discoveryQuestion: {
+      question: 'چگونه انجماد لحظه در عکس می‌تواند حس تداوم تاریخی ایجاد کند؟',
+      textFa: 'چگونه انجماد لحظه در عکس می‌تواند حس تداوم تاریخی ایجاد کند؟',
+      options: [
+        'با تبدیل یک آنِ گذرا به مدرکی ماندگار برای تامل نسل‌های آینده.',
+        'با پاک کردن تمام شواهد گذشته.',
+        'صرفاً از طریق چرخش زاویه دید لنز.',
+      ],
+      correctAnswer: 'با تبدیل یک آنِ گذرا به مدرکی ماندگار برای تامل نسل‌های آینده.',
+      correctIndex: 0,
+      correctReward: 50,
+      wrongReward: 0,
+      explanation: 'ثبت یک فریم واحد، لحظه‌ای زودگذر را در بستر ابدیت تثبیت می‌کند.',
+    },
+    question: {
+      question: 'چگونه انجماد لحظه در عکس می‌تواند حس تداوم تاریخی ایجاد کند؟',
+      textFa: 'چگونه انجماد لحظه در عکس می‌تواند حس تداوم تاریخی ایجاد کند؟',
+      options: [
+        'با تبدیل یک آنِ گذرا به مدرکی ماندگار برای تامل نسل‌های آینده.',
+        'با پاک کردن تمام شواهد گذشته.',
+        'صرفاً از طریق چرخش زاویه دید لنز.',
+      ],
+      correctAnswer: 'با تبدیل یک آنِ گذرا به مدرکی ماندگار برای تامل نسل‌های آینده.',
+      correctIndex: 0,
+      correctReward: 50,
+      wrongReward: 0,
+      explanation: 'ثبت یک فریم واحد، لحظه‌ای زودگذر را در بستر ابدیت تثبیت می‌کند.',
+    },
+    discoveryArtwork: {
+      image: 'https://www.olo.pics/images/2026/09/05/1931-016.webp',
+      textFa: 'انجماد لحظه و دیرندگی زمان در تصویر عکاسانه.',
+      textEn: 'Freezing time and historic continuity in photography.',
+    },
+    information: {
+      image: 'https://www.olo.pics/images/2026/09/05/1931-016.webp',
+      textFa: 'عکس آیینه‌ای است که گذشته را در پیش چشم حال زنده نگه می‌دارد.',
+      textEn: 'Freezing time and historic continuity in photography.',
+    },
+  },
+  'col-g09-02': {
+    id: 'col-g09-02',
+    starId: 'star-21',
+    galleryId: 'gallery-09',
+    questionId: 'star-q-21',
+    labelTextFa: 'ستاره کشف ۲۱',
+    titleFa: 'سوپ داگر',
+    introFa: 'فرسایش سطح و متریال تصویر، تجسم مادی گذر زمان است.',
+    discoveryCost: 30,
+    informationCost: 30,
+    discoveryQuestion: {
+      question: 'توجه به بافت فیزیکی و شیمیایی عکس چه رویکردی را در ادراک اثر تقویت می‌کند؟',
+      textFa: 'توجه به بافت فیزیکی و شیمیایی عکس چه رویکردی را در ادراک اثر تقویت می‌کند؟',
+      options: [
+        'رویکرد مادیت‌محور که عکس را به عنوان شیئی با سرگذشت زیسته و تاریخی معرفی می‌کند.',
+        'نادیده گرفتن کامل محتوای اثر.',
+        'تبدیل تصویر به نقاشی رنگ روغن.',
+      ],
+      correctAnswer: 'رویکرد مادیت‌محور که عکس را به عنوان شیئی با سرگذشت زیسته و تاریخی معرفی می‌کند.',
+      correctIndex: 0,
+      correctReward: 50,
+      wrongReward: 0,
+      explanation: 'مادیت اثر عکاسانه، ردپای فیزیکی تماس زمان با تصویر را بازنمایی می‌نماید.',
+    },
+    question: {
+      question: 'توجه به بافت فیزیکی و شیمیایی عکس چه رویکردی را در ادراک اثر تقویت می‌کند؟',
+      textFa: 'توجه به بافت فیزیکی و شیمیایی عکس چه رویکردی را در ادراک اثر تقویت می‌کند؟',
+      options: [
+        'رویکرد مادیت‌محور که عکس را به عنوان شیئی با سرگذشت زیسته و تاریخی معرفی می‌کند.',
+        'نادیده گرفتن کامل محتوای اثر.',
+        'تبدیل تصویر به نقاشی رنگ روغن.',
+      ],
+      correctAnswer: 'رویکرد مادیت‌محور که عکس را به عنوان شیئی با سرگذشت زیسته و تاریخی معرفی می‌کند.',
+      correctIndex: 0,
+      correctReward: 50,
+      wrongReward: 0,
+      explanation: 'مادیت اثر عکاسانه، ردپای فیزیکی تماس زمان با تصویر را بازنمایی می‌نماید.',
+    },
+    discoveryArtwork: {
+      image: 'https://www.olo.pics/images/2026/09/05/1931-016.webp',
+      textFa: 'مادیت، فرسایش و کهنگی به عنوان شاهدان تاریخی گذر زمان.',
+      textEn: 'Material degradation and traces of time.',
+    },
+    information: {
+      image: 'https://www.olo.pics/images/2026/09/05/1931-016.webp',
+      textFa: 'هر خط، فرسایش و تغییر رنگ در متریال تصویر، کلمه‌ای از سرگذشت زمان است.',
+      textEn: 'Material degradation and traces of time.',
+    },
+  },
+  'col-g09-03': {
+    id: 'col-g09-03',
+    starId: 'star-22',
+    galleryId: 'gallery-09',
+    questionId: 'star-q-22',
+    labelTextFa: 'فقط یک عکس؟',
+    titleFa: 'عکس‌ها و اچینگ‌ها',
+    introFa: 'وقتی عکس و حکاکی کنار هم قرار می‌گیرند، تصویر دیگر فقط یک عکس است؟',
+    discoveryCost: 30,
+    informationCost: 40,
+    discoveryQuestion: {
+      question: 'در این اثر، عکس و اچینگ چگونه با یکدیگر کار می‌کنند؟',
+      textFa: 'در این اثر، عکس و اچینگ چگونه با یکدیگر کار می‌کنند؟',
+      options: [
+        'یکی جایگزین دیگری می‌شود.',
+        'هر دو رسانه در کنار هم قرار می‌گیرند و معنای تصویر را گسترش می‌دهند.',
+        'عکس فقط برای ثبت اچینگ استفاده شده است.',
+      ],
+      correctAnswer: 'هر دو رسانه در کنار هم قرار می‌گیرند و معنای تصویر را گسترش می‌دهند.',
+      correctIndex: 1,
+      correctReward: 50,
+      wrongReward: 0,
+      explanation: 'عکس و اچینگ دو زبان تصویری متفاوت دارند که در این اثر همدیگر را کامل می‌کنند.',
+    },
+    question: {
+      question: 'در این اثر، عکس و اچینگ چگونه با یکدیگر کار می‌کنند؟',
+      textFa: 'در این اثر، عکس و اچینگ چگونه با یکدیگر کار می‌کنند؟',
+      options: [
+        'یکی جایگزین دیگری می‌شود.',
+        'هر دو رسانه در کنار هم قرار می‌گیرند و معنای تصویر را گسترش می‌دهند.',
+        'عکس فقط برای ثبت اچینگ استفاده شده است.',
+      ],
+      correctAnswer: 'هر دو رسانه در کنار هم قرار می‌گیرند و معنای تصویر را گسترش می‌دهند.',
+      correctIndex: 1,
+      correctReward: 50,
+      wrongReward: 0,
+      explanation: 'عکس و اچینگ دو زبان تصویری متفاوت دارند که در این اثر همدیگر را کامل می‌کنند.',
+    },
+    discoveryArtwork: {
+      image: 'https://www.olo.pics/images/2026/09/05/1931-016.webp',
+      textFa: 'عکس و اچینگ دو زبان تصویری متفاوت دارند.عکاسی با ثبت، قاب‌بندی و واقعیتِ پیش روی دوربین سروکار دارد؛ اچینگ با خط، سطح و ردّ دست.وقتی این دو در کنار هم قرار می‌گیرند، مخاطب فقط به موضوع تصویر نگاه نمی‌کند؛ بلکه متوجه می‌شود تصویر چگونه ساخته شده و هر رسانه چه چیزی به تجربهٔ دیدن اضافه می‌کند.اچینگ (Etching) یک روش چاپ هنری است. هنرمند روی یک صفحهٔ فلزی (معمولاً مس) با ماده‌ای اسیدی شیار ایجاد می‌کند. بعد داخل این شیارها جوهر می‌ماند و صفحه روی کاغذ فشرده می‌شود؛ در نتیجه خطوط روی کاغذ چاپ می‌شوند.',
+      textEn: 'Photography and etching juxtaposition.',
+    },
+    information: {
+      image: 'https://www.olo.pics/images/2026/09/05/1931-016.webp',
+      textFa: 'عکس و اچینگ دو زبان تصویری متفاوت دارند.عکاسی با ثبت، قاب‌بندی و واقعیتِ پیش روی دوربین سروکار دارد؛ اچینگ با خط، سطح و ردّ دست.وقتی این دو در کنار هم قرار می‌گیرند، مخاطب فقط به موضوع تصویر نگاه نمی‌کند؛ بلکه متوجه می‌شود تصویر چگونه ساخته شده و هر رسانه چه چیزی به تجربهٔ دیدن اضافه می‌کند.اچینگ (Etching) یک روش چاپ هنری است. هنرمند روی یک صفحهٔ فلزی (معمولاً مس) با ماده‌ای اسیدی شیار ایجاد می‌کند. بعد داخل این شیارها جوهر می‌ماند و صفحه روی کاغذ فشرده می‌شود؛ در نتیجه خطوط روی کاغذ چاپ می‌شوند.',
+      textEn: 'Photography and etching juxtaposition.',
+    },
+  },
+  'col-g09-04': {
+    id: 'col-g09-04',
+    starId: 'star-23',
+    galleryId: 'gallery-09',
+    questionId: 'star-q-23',
+    labelTextFa: 'تصویری برای ثبت شدن',
+    titleFa: 'سگ سه پا',
+    introFa: 'اگر تصویر برای دوربین ساخته شده باشد، هنوز هم فقط یک ثبت است؟',
+    discoveryCost: 30,
+    informationCost: 40,
+    discoveryQuestion: {
+      question: 'در این اثر، عکس چه چیزی را ثبت می‌کند؟',
+      textFa: 'در این اثر، عکس چه چیزی را ثبت می‌کند؟',
+      options: [
+        'نتیجهٔ یک موقعیت و ایده‌ای که برای ساختن تصویر شکل گرفته است.',
+        'یک اتفاق کاملاً تصادفی.',
+        'تصویری که هنرمند هیچ نقشی در شکل‌گیری آن نداشته است.',
+      ],
+      correctAnswer: 'نتیجهٔ یک موقعیت و ایده‌ای که برای ساختن تصویر شکل گرفته است.',
+      correctIndex: 0,
+      correctReward: 50,
+      wrongReward: 0,
+      explanation: 'در آثار ویگمن، موقعیت، بدن و ایده می‌توانند پیش از حضور دوربین شکل بگیرند.',
+    },
+    question: {
+      question: 'در این اثر، عکس چه چیزی را ثبت می‌کند؟',
+      textFa: 'در این اثر، عکس چه چیزی را ثبت می‌کند؟',
+      options: [
+        'نتیجهٔ یک موقعیت و ایده‌ای که برای ساختن تصویر شکل گرفته است.',
+        'یک اتفاق کاملاً تصادفی.',
+        'تصویری که هنرمند هیچ نقشی در شکل‌گیری آن نداشته است.',
+      ],
+      correctAnswer: 'نتیجهٔ یک موقعیت و ایده‌ای که برای ساختن تصویر شکل گرفته است.',
+      correctIndex: 0,
+      correctReward: 50,
+      wrongReward: 0,
+      explanation: 'در آثار ویگمن، موقعیت، بدن و ایده می‌توانند پیش از حضور دوربین شکل بگیرند.',
+    },
+    discoveryArtwork: {
+      image: 'https://www.olo.pics/images/2026/09/05/1931-016.webp',
+      textFa: 'در آثار ویگمن، موقعیت، بدن و ایده می‌توانند پیش از حضور دوربین شکل بگیرند.دوربین در پایان این فرایند حضور پیدا می‌کند و نتیجه را ثبت می‌کند.در اینجا عکس دیگر فقط شاهد یک اتفاق نیست؛ می‌تواند نتیجهٔ یک موقعیت ساخته‌شده و بخشی از یک فرایند هنری باشد.مرز میان «ثبت کردن» و «ساختن» دوباره جابه‌جا می‌شود.',
+      textEn: 'William Wegman — Three-legged dog staging and capture.',
+    },
+    information: {
+      image: 'https://www.olo.pics/images/2026/09/05/1931-016.webp',
+      textFa: 'در آثار ویگمن، موقعیت، بدن و ایده می‌توانند پیش از حضور دوربین شکل بگیرند.دوربین در پایان این فرایند حضور پیدا می‌کند و نتیجه را ثبت می‌کند.در اینجا عکس دیگر فقط شاهد یک اتفاق نیست؛ می‌تواند نتیجهٔ یک موقعیت ساخته‌شده و بخشی از یک فرایند هنری باشد.مرز میان «ثبت کردن» و «ساختن» دوباره جابه‌جا می‌شود.',
+      textEn: 'William Wegman — Three-legged dog staging and capture.',
+    },
+  },
 };
 
 /**
@@ -1519,14 +1724,23 @@ export function getStarDiscovery(
   }
 
   // Robust Direct Fallback from DEFAULT_STAR_DISCOVERIES:
-  // Check exact starId, starPointId, or numeric mapping
-  const extractNum = (s?: string): number | null => {
+  // Check exact starId, starPointId, or deterministic star number mapping
+  const extractStarNum = (s?: string): number | null => {
     if (!s) return null;
-    const m = s.match(/\d+/);
-    return m ? parseInt(m[0], 10) : null;
+    const clean = s.trim();
+    if (clean === 'col-g09-01') return 20;
+    if (clean === 'col-g09-02') return 21;
+    if (clean === 'col-g09-03') return 22;
+    if (clean === 'col-g09-04') return 23;
+    if (clean === 'artwork-01' || clean === 'col-01') return 1;
+    if (clean === 'artwork-g03-star') return 3;
+    const starMatch = clean.match(/^star(?:-q)?[-_]?0*(\d+)$/i);
+    if (starMatch && starMatch[1]) return parseInt(starMatch[1], 10);
+    if (/^\d+$/.test(clean)) return parseInt(clean, 10);
+    return null;
   };
 
-  const num = extractNum(starId) ?? extractNum(starPointId);
+  const num = extractStarNum(starId) ?? extractStarNum(starPointId);
   const formattedKey = num !== null ? `star-${String(num).padStart(2, '0')}` : null;
 
   const fallback =
@@ -1535,8 +1749,7 @@ export function getStarDiscovery(
     (formattedKey && DEFAULT_STAR_DISCOVERIES[formattedKey]) ||
     (starPointId === 'artwork-01' ? DEFAULT_STAR_DISCOVERIES['star-01'] : null) ||
     (starPointId === 'artwork-g03-star' ? DEFAULT_STAR_DISCOVERIES['star-03'] : null) ||
-    (galleryId === 'gallery-01' || galleryId === 'gallery_01' ? DEFAULT_STAR_DISCOVERIES['star-01'] : null) ||
-    DEFAULT_STAR_DISCOVERIES['star-01'];
+    (galleryId === 'gallery-01' || galleryId === 'gallery_01' ? DEFAULT_STAR_DISCOVERIES['star-01'] : null);
 
   if (fallback) {
     return {

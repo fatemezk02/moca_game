@@ -79,10 +79,16 @@ function isGalleryUnlockedState(galleryId: string): boolean {
     );
   }
   if (norm === 'gallery-08') {
-    return isGalleryUnlockedState('gallery-07');
+    return (
+      isGalleryUnlockedState('gallery-07') &&
+      (isProgressionConditionsSatisfied('gallery-07') || isGalleryPuzzleCompleted('gallery-07'))
+    );
   }
   if (norm === 'gallery-09') {
-    return isGalleryUnlockedState('gallery-08');
+    return (
+      isGalleryUnlockedState('gallery-08') &&
+      (isProgressionConditionsSatisfied('gallery-08') || isGalleryPuzzleCompleted('gallery-08'))
+    );
   }
 
   return false;

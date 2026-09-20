@@ -133,6 +133,20 @@ export interface GalleryContent {
 }
 
 /**
+ * Strongly typed representation of a Location Point entity
+ * Loaded from Google Sheets 'Location' / 'Locations' tab
+ */
+export interface LocationContent {
+  id: string;
+  locationId: string;
+  name: string;
+  title?: string;
+  description: string;
+  active: boolean;
+  rawFields?: Record<string, string>;
+}
+
+/**
  * Full bundled content payload stored in cache and memory
  */
 export interface GameContentData {
@@ -141,6 +155,7 @@ export interface GameContentData {
   artworks: ArtworkContent[];
   galleries: GalleryContent[];
   experiences?: ExperienceContent[];
+  locations?: LocationContent[];
   metadata: {
     loadedAt: number;
     source: ContentSourceType;
@@ -164,6 +179,7 @@ export interface ContentServiceStatus {
     artworks: number;
     galleries: number;
     experiences?: number;
+    locations?: number;
   };
 }
 
@@ -180,6 +196,7 @@ export interface GameContentSummary {
     artworks: number;
     galleries: number;
     experiences?: number;
+    locations?: number;
   };
   hasLocalCache: boolean;
 }
@@ -196,6 +213,8 @@ export interface GameContentDebug {
   getExperiences: () => ExperienceContent[];
   getExperiencesForGallery: (galleryId: string) => ExperienceContent[];
   getExperienceById: (id: string) => ExperienceContent | null;
+  getLocations: () => LocationContent[];
+  getLocationById: (locationId: string) => LocationContent | null;
   getGalleryById: (id: string) => GalleryContent | null;
   getArtworkById: (id: string) => ArtworkContent | null;
   getGalleryPuzzleArtwork: (galleryId: string) => ArtworkContent | null;

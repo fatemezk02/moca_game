@@ -13,6 +13,7 @@ import {
   GameContentData,
   GameContentDebug,
   GameContentSummary,
+  LocationContent,
   QuestionContent,
   StarContent,
 } from './types';
@@ -44,6 +45,8 @@ class ContentService {
       stars: 0,
       artworks: 0,
       galleries: 0,
+      experiences: 0,
+      locations: 0,
     },
   };
 
@@ -66,6 +69,7 @@ class ContentService {
             artworks: cached.artworks.length,
             galleries: (cached.galleries || []).length,
             experiences: (cached.experiences || []).length,
+            locations: (cached.locations || []).length,
           },
         };
       }
@@ -136,6 +140,7 @@ class ContentService {
             artworks: data.artworks.length,
             galleries: (data.galleries || []).length,
             experiences: (data.experiences || []).length,
+            locations: (data.locations || []).length,
           },
         };
         registerContentDebugAPI(this);
@@ -164,6 +169,7 @@ class ContentService {
             artworks: fallback.artworks.length,
             galleries: (fallback.galleries || []).length,
             experiences: (fallback.experiences || []).length,
+            locations: (fallback.locations || []).length,
           },
         };
         registerContentDebugAPI(this);
@@ -188,7 +194,7 @@ class ContentService {
     if (isOnline && isConfigured) {
       try {
         console.info(`[ContentService] Fetching latest content via ${this.provider.name}...`);
-        const { questions, stars, artworks, galleries, experiences } = await this.provider.fetchAll();
+        const { questions, stars, artworks, galleries, experiences, locations } = await this.provider.fetchAll();
 
         const networkData: GameContentData = {
           questions,
@@ -196,6 +202,7 @@ class ContentService {
           artworks,
           galleries,
           experiences: experiences || [],
+          locations: locations || [],
           metadata: {
             loadedAt: Date.now(),
             source: 'network',
@@ -491,8 +498,15 @@ class ContentService {
     // Helper: Extract integer numeric value from ID or starNumber
     const extractNumeric = (s?: string): number | null => {
       if (!s) return null;
-      if (/^\d+$/.test(s.trim())) return parseInt(s.trim(), 10);
-      const m = s.match(/(?:star|artwork|col|point)?[-_]?(\d+)/i);
+      const clean = s.trim();
+      if (/^\d+$/.test(clean)) return parseInt(clean, 10);
+      if (clean === 'col-g09-01') return 20;
+      if (clean === 'col-g09-02') return 21;
+      if (clean === 'col-g09-03') return 22;
+      if (clean === 'col-g09-04') return 23;
+      if (clean === 'artwork-01' || clean === 'col-01') return 1;
+      if (clean === 'artwork-g03-star') return 3;
+      const m = clean.match(/(?:star|artwork|point)?[-_]?0*(\d+)$/i);
       if (m && m[1]) return parseInt(m[1], 10);
       return null;
     };
@@ -584,12 +598,20 @@ class ContentService {
           });
         }
 
-        // Try explicit alias match (e.g. artwork-01 -> 1, artwork-g03-star -> 3)
+        // Try explicit alias match (e.g. artwork-01 -> 1, artwork-g03-star -> 3, col-g09-01 -> 20)
         if (!matchedStar) {
           if (pId.toLowerCase() === 'artwork-01' || pId.toLowerCase() === 'col-01') {
             matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 1);
           } else if (pId.toLowerCase() === 'artwork-g03-star') {
             matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 3);
+          } else if (pId.toLowerCase() === 'col-g09-01') {
+            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 20);
+          } else if (pId.toLowerCase() === 'col-g09-02') {
+            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 21);
+          } else if (pId.toLowerCase() === 'col-g09-03') {
+            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 22);
+          } else if (pId.toLowerCase() === 'col-g09-04') {
+            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 23);
           }
         }
 
@@ -1000,6 +1022,327 @@ class ContentService {
   }
 
   /**
+   * Get all loaded Location points
+   */
+  getLocations(): LocationContent[] {
+    const data = this.ensureDataLoaded();
+    return data.locations || [];
+  }
+
+  /**
+   * Helper to normalize keys for flexible matching
+   */
+  private normalizeLocationKey(val: string): string {
+    return (val || '')
+      .toLowerCase()
+      .replace(/[\s_\-–—:\/\\()\[\]]/g, '')
+      .replace(/[۰-۹]/g, (d) => String(['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'].indexOf(d)));
+  }
+
+  /**
+   * Helper to resolve common aliases for location IDs
+   */
+  private getLocationIdAliases(rawId: string): string[] {
+    const clean = this.normalizeLocationKey(rawId);
+    const aliases: string[] = [clean, rawId.toLowerCase().trim()];
+
+    // Location_10: Cafe
+    if (
+      clean === 'location10' ||
+      clean === 'location_10' ||
+      clean.includes('cafe') ||
+      clean.includes('coffee') ||
+      clean.includes('کافه')
+    ) {
+      aliases.push(
+        'location_10',
+        'location10',
+        'Location_10',
+        'icon-g00-cafe',
+        'cafe',
+        'coffee',
+        'g00-cafe',
+        'preset-location-coffee',
+        'کافه',
+        'کافهموزه',
+        'کافه موزه'
+      );
+    }
+
+    // Location_11: Library
+    if (
+      clean === 'location11' ||
+      clean === 'location_11' ||
+      clean.includes('library') ||
+      clean.includes('کتابخانه') ||
+      clean.includes('کتاب')
+    ) {
+      aliases.push(
+        'location_11',
+        'location11',
+        'Location_11',
+        'icon-g00-library',
+        'library',
+        'g00-library',
+        'preset-location-library',
+        'کتابخانه',
+        'کتابخانه تخصصی'
+      );
+    }
+
+    // Location_12: Cinema
+    if (
+      clean === 'location12' ||
+      clean === 'location_12' ||
+      clean.includes('cinema') ||
+      clean.includes('cinematheque') ||
+      clean.includes('سینما')
+    ) {
+      aliases.push(
+        'location_12',
+        'location12',
+        'Location_12',
+        'icon-g00-cinema',
+        'cinema',
+        'cinematheque',
+        'g00-cinema',
+        'preset-location-cinema',
+        'سینما',
+        'سینماتک'
+      );
+    }
+
+    // Location_13: Garden / Tree
+    if (
+      clean === 'location13' ||
+      clean === 'location_13' ||
+      clean.includes('tree') ||
+      clean.includes('garden') ||
+      clean.includes('باغ')
+    ) {
+      aliases.push(
+        'location_13',
+        'location13',
+        'Location_13',
+        'icon-g00-tree',
+        'tree',
+        'garden',
+        'g00-tree',
+        'preset-location-tree',
+        'باغ',
+        'باغموزه',
+        'باغ موزه',
+        'باغمجسمهها',
+        'باغ مجسمه ها'
+      );
+    }
+
+    // Location_14: Shop
+    if (
+      clean === 'location14' ||
+      clean === 'location_14' ||
+      clean.includes('shop') ||
+      clean.includes('store') ||
+      clean.includes('فروشگاه')
+    ) {
+      aliases.push(
+        'location_14',
+        'location14',
+        'Location_14',
+        'icon-g00-shop',
+        'shop',
+        'store',
+        'g00-shop',
+        'preset-location-shop',
+        'فروشگاه',
+        'فروشگاهموزه',
+        'فروشگاه موزه'
+      );
+    }
+
+    // Location_15: Entrance
+    if (
+      clean === 'location15' ||
+      clean === 'location_15' ||
+      clean.includes('entrance') ||
+      clean.includes('door') ||
+      clean.includes('ورود')
+    ) {
+      aliases.push(
+        'location_15',
+        'location15',
+        'Location_15',
+        'icon-g00-entrance',
+        'entrance',
+        'door',
+        'g00-entrance',
+        'preset-location-entrance',
+        'ورودی',
+        'دربورودی',
+        'درب ورودی'
+      );
+    }
+
+    // Location_16: Frame / Oil pool
+    if (
+      clean === 'location16' ||
+      clean === 'location_16' ||
+      clean.includes('frame') ||
+      clean.includes('oil') ||
+      clean.includes('pool') ||
+      clean.includes('روغن') ||
+      clean.includes('حوض')
+    ) {
+      aliases.push(
+        'location_16',
+        'location16',
+        'Location_16',
+        'icon-g00-frame',
+        'frame',
+        'oil',
+        'oil-pool',
+        'g00-frame',
+        'preset-location-frame',
+        'حوضروغن',
+        'حوض روغن',
+        'حوض'
+      );
+    }
+
+    // Location_17: WC / Restroom
+    if (
+      clean === 'location17' ||
+      clean === 'location_17' ||
+      clean.includes('wc') ||
+      clean.includes('restroom') ||
+      clean.includes('toilet') ||
+      clean.includes('دستشویی') ||
+      clean.includes('بهداشتی')
+    ) {
+      aliases.push(
+        'location_17',
+        'location17',
+        'Location_17',
+        'icon-g00-wc',
+        'wc',
+        'restroom',
+        'toilet',
+        'g00-wc',
+        'preset-location-wc',
+        'دستشویی',
+        'سرویسبهداشتی',
+        'سرویس بهداشتی'
+      );
+    }
+
+    // Gallery aliases (Location_1 to Location_9)
+    for (let i = 1; i <= 9; i++) {
+      const gNum = String(i);
+      const gPadded = `0${i}`;
+      if (
+        clean === `location${gNum}` ||
+        clean === `location_${gNum}` ||
+        clean === `location${gPadded}` ||
+        clean === `location_${gPadded}` ||
+        clean === `icong00gallery${gNum}` ||
+        clean === `gallery${gNum}` ||
+        clean === `gallery${gPadded}` ||
+        clean === `g${gNum}` ||
+        clean === `g${gPadded}` ||
+        clean === gNum ||
+        clean === gPadded ||
+        clean === `presetlocationgallery${gNum}` ||
+        clean === `گالری${gNum}` ||
+        clean === `گالری${gPadded}`
+      ) {
+        aliases.push(
+          `Location_${gNum}`,
+          `location_${gNum}`,
+          `location${gNum}`,
+          `icon-g00-gallery-${gNum}`,
+          `gallery-${gPadded}`,
+          `gallery-${gNum}`,
+          `gallery_${gPadded}`,
+          `gallery_${gNum}`,
+          `g${gPadded}`,
+          `g${gNum}`,
+          gNum,
+          gPadded,
+          `preset-location-gallery-${gNum}`,
+          `گالری ${gPadded}`,
+          `گالری ${gNum}`,
+          `گالری ۰${gNum}`
+        );
+      }
+    }
+
+    return aliases;
+  }
+
+  /**
+   * Get a location by its Location_id / id or iconType alias
+   * Only returns active locations with content (name or description)
+   */
+  getLocationById(locationIdOrType: string): LocationContent | null {
+    if (!locationIdOrType) return null;
+    const cleanQuery = locationIdOrType.trim().toLowerCase();
+    const normQuery = this.normalizeLocationKey(cleanQuery);
+    const allLocations = this.getLocations();
+
+    // 1. Exact or normalized direct match on id or locationId
+    const exactMatch = allLocations.find(
+      (loc) =>
+        loc.active !== false &&
+        (loc.locationId?.toLowerCase().trim() === cleanQuery ||
+          loc.id?.toLowerCase().trim() === cleanQuery ||
+          this.normalizeLocationKey(loc.locationId) === normQuery ||
+          this.normalizeLocationKey(loc.id) === normQuery)
+    );
+    if (exactMatch && (exactMatch.name || exactMatch.description)) {
+      return exactMatch;
+    }
+
+    // 2. Alias matching
+    const queryAliases = this.getLocationIdAliases(cleanQuery);
+    const aliasMatch = allLocations.find((loc) => {
+      if (loc.active === false) return false;
+      if (!loc.name && !loc.description) return false;
+
+      const locId = (loc.locationId || loc.id || '').toLowerCase().trim();
+      const normLocId = this.normalizeLocationKey(locId);
+
+      if (queryAliases.includes(locId) || queryAliases.includes(normLocId)) {
+        return true;
+      }
+
+      const locAliases = this.getLocationIdAliases(locId);
+      if (locAliases.includes(cleanQuery) || locAliases.includes(normQuery)) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (aliasMatch) return aliasMatch;
+
+    // 3. Match by name / title
+    const nameMatch = allLocations.find(
+      (loc) =>
+        loc.active !== false &&
+        loc.name &&
+        (loc.name.trim().toLowerCase() === cleanQuery ||
+          this.normalizeLocationKey(loc.name) === normQuery ||
+          cleanQuery.includes(loc.name.trim().toLowerCase()) ||
+          normQuery.includes(this.normalizeLocationKey(loc.name)))
+    );
+    if (nameMatch && (nameMatch.name || nameMatch.description)) {
+      return nameMatch;
+    }
+
+    return null;
+  }
+
+  /**
    * Alias for backward compatibility
    */
   getDebugSummary(): GameContentSummary {
@@ -1033,6 +1376,8 @@ export function registerContentDebugAPI(service: ContentService = contentService
     getExperiences: () => service.getExperiences(),
     getExperiencesForGallery: (galleryId: string) => service.getExperiencesForGallery(galleryId),
     getExperienceById: (id: string) => service.getExperienceById(id),
+    getLocations: () => service.getLocations(),
+    getLocationById: (locationId: string) => service.getLocationById(locationId),
     getGalleryById: (id: string) => service.getGalleryById(id),
     getArtworkById: (id: string) => service.getArtworkById(id),
     getGalleryPuzzleArtwork: (galleryId: string) => service.getGalleryPuzzleArtwork(galleryId),

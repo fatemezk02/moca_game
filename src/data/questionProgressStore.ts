@@ -4,6 +4,8 @@
  */
 
 import { getCompletedGalleryPuzzles } from './puzzleProgressStore';
+import { getUnlockedInformationStarsCount } from './starPointProgressStore';
+import { contentService } from '../services/content/contentService';
 
 export interface GalleryQuestionProgress {
   completed: boolean;
@@ -135,7 +137,15 @@ export function getPlayerStats(): PlayerStats {
     }
   }
 
-  const stars = totalAnsweredQuestions;
+  // Real-time unlocked stars count across all galleries
+  let stars = 0;
+  try {
+    const activeStars = contentService.getStars().filter((s) => s.active !== false);
+    stars = getUnlockedInformationStarsCount(activeStars.length > 0 ? activeStars : undefined);
+  } catch {
+    stars = getUnlockedInformationStarsCount();
+  }
+
   const earnedCoins = completedArtworksCount * 50;
   const bonusCoins = getBonusCoins();
   const spentCoins = getSpentCoins();

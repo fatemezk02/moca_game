@@ -5,6 +5,7 @@ import {
   mapRowToArtwork,
   mapRowToExperience,
   mapRowToGallery,
+  mapRowToLocation,
   mapRowToQuestion,
   mapRowToStar,
 } from './mappers';
@@ -12,6 +13,7 @@ import {
   ArtworkContent,
   ExperienceContent,
   GalleryContent,
+  LocationContent,
   QuestionContent,
   StarContent,
 } from './types';
@@ -27,7 +29,7 @@ export class GoogleSheetsContentProvider implements IContentProvider {
   /**
    * Resolves the fetch URL for a specific tab
    */
-  private getTabUrl(tabKey: 'questions' | 'stars' | 'artworks' | 'galleries' | 'experiences'): string {
+  private getTabUrl(tabKey: 'questions' | 'stars' | 'artworks' | 'galleries' | 'experiences' | 'locations'): string {
     const directUrl = CONTENT_SOURCE_CONFIG.sheetUrls[tabKey]?.trim();
     if (directUrl) return directUrl;
 
@@ -43,7 +45,9 @@ export class GoogleSheetsContentProvider implements IContentProvider {
           ? 'Artworks'
           : tabKey === 'galleries'
           ? 'Galleries'
-          : 'Experiences');
+          : tabKey === 'experiences'
+          ? 'Experiences'
+          : 'Location');
       return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(
         tabName
       )}`;
@@ -157,6 +161,25 @@ export class GoogleSheetsContentProvider implements IContentProvider {
   }
 
   /**
+   * Fetch and parse Locations
+   */
+  async fetchLocations(): Promise<LocationContent[]> {
+    const url = this.getTabUrl('locations');
+    if (!url) return [];
+
+    try {
+      const text = await this.fetchText(url, 'Location');
+      const rawRows = parseSheetResponse(text);
+      return rawRows
+        .map((row, idx) => mapRowToLocation(row, idx))
+        .filter((loc) => Boolean(loc.locationId && (loc.name || loc.description)));
+    } catch (err: any) {
+      console.warn('[GoogleSheetsContentProvider] Failed to load Location tab:', err?.message || err);
+      return [];
+    }
+  }
+
+  /**
    * Fetch all datasets in parallel
    */
   async fetchAll(): Promise<{
@@ -165,14 +188,16 @@ export class GoogleSheetsContentProvider implements IContentProvider {
     artworks: ArtworkContent[];
     galleries: GalleryContent[];
     experiences: ExperienceContent[];
+    locations: LocationContent[];
   }> {
-    const [questionsResult, starsResult, artworksResult, galleriesResult, experiencesResult] =
+    const [questionsResult, starsResult, artworksResult, galleriesResult, experiencesResult, locationsResult] =
       await Promise.allSettled([
         this.fetchQuestions(),
         this.fetchStars(),
         this.fetchArtworks(),
         this.fetchGalleries(),
         this.fetchExperiences(),
+        this.fetchLocations(),
       ]);
 
     const errors: string[] = [];
@@ -205,6 +230,15 @@ export class GoogleSheetsContentProvider implements IContentProvider {
       );
     }
 
+    const locations = locationsResult.status === 'fulfilled' ? locationsResult.value : [];
+    if (locationsResult.status === 'rejected') {
+      console.warn(
+        `[GoogleSheetsContentProvider] Locations tab fetch error: ${
+          locationsResult.reason?.message || locationsResult.reason
+        }`
+      );
+    }
+
     // If all core sources failed, throw combined error
     if (
       errors.length === 4 &&
@@ -216,7 +250,7 @@ export class GoogleSheetsContentProvider implements IContentProvider {
       throw new Error(`Failed to fetch all Google Sheets tabs:\n${errors.join('\n')}`);
     }
 
-    return { questions, stars, artworks, galleries, experiences };
+    return { questions, stars, artworks, galleries, experiences, locations };
   }
 
   /**
@@ -229,6 +263,7 @@ export class GoogleSheetsContentProvider implements IContentProvider {
       CONTENT_SOURCE_CONFIG.sheetUrls.artworks?.trim() ||
       CONTENT_SOURCE_CONFIG.sheetUrls.galleries?.trim() ||
       CONTENT_SOURCE_CONFIG.sheetUrls.experiences?.trim() ||
+      CONTENT_SOURCE_CONFIG.sheetUrls.locations?.trim() ||
       CONTENT_SOURCE_CONFIG.spreadsheetId?.trim()
     );
   }

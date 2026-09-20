@@ -94,6 +94,89 @@ export const CustomIconRender: React.FC<CustomIconRenderProps> = ({
         />
       );
 
+    case 'preset-location-wc':
+      return (
+        <LocationPointMarker
+          iconType="wc"
+          size={point.width || 32}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+
+    case 'preset-location-library':
+      return (
+        <LocationPointMarker
+          iconType="library"
+          size={point.width || 32}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+
+    case 'preset-location-entrance':
+      return (
+        <LocationPointMarker
+          iconType="entrance"
+          size={point.width || 32}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+
+    case 'preset-location-cinema':
+      return (
+        <LocationPointMarker
+          iconType="cinema"
+          size={point.width || 32}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+
+    case 'preset-location-gallery':
+    case 'preset-location-gallery-1':
+    case 'preset-location-gallery-2':
+    case 'preset-location-gallery-3':
+    case 'preset-location-gallery-4':
+    case 'preset-location-gallery-5':
+    case 'preset-location-gallery-6':
+    case 'preset-location-gallery-7':
+    case 'preset-location-gallery-8':
+    case 'preset-location-gallery-9': {
+      let gNum: number | string = point.galleryNumber || 1;
+      if (point.iconType.startsWith('preset-location-gallery-')) {
+        const parsed = parseInt(point.iconType.replace('preset-location-gallery-', ''), 10);
+        if (!isNaN(parsed)) {
+          gNum = parsed;
+        }
+      }
+      const isGallery7 =
+        gNum === 7 ||
+        point.iconType === 'preset-location-gallery-7' ||
+        point.id === 'icon-g00-gallery-7' ||
+        point.id === 'icon-g00-to-g07';
+      const baseSize = point.width || 32;
+      const finalSize = isGallery7
+        ? (baseSize <= 26 ? baseSize : Math.round(baseSize * 0.8))
+        : baseSize;
+
+      return (
+        <LocationPointMarker
+          iconType="gallery"
+          galleryNumber={gNum}
+          size={finalSize}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+    }
+
     case 'preset-question':
       return (
         <GuidePaperMarker

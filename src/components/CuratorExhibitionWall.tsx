@@ -1,7 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArtworkFrame } from './ArtworkFrame';
 import { contentService } from '../services/content/contentService';
-import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
+import {
+  isGalleryPuzzleCompleted,
+  getCollectedPiecesForGallery,
+  isPuzzlePieceCollected,
+} from '../data/puzzleProgressStore';
+import {
+  getGalleryPuzzleConfig,
+  GalleryPuzzleConfig,
+} from '../data/galleryPuzzleConfig';
+import { JigsawPieceGraphic } from './JigsawPieceGraphic';
+import { toPersianDigits } from '../services/content/mappers';
 import { GALLERIES } from '../data/mapConfig';
 import { MapPin, X, Eye, Lock, Sparkles, Award } from 'lucide-react';
 import {
@@ -32,6 +42,9 @@ export interface ExhibitionArtwork {
   isCompleted: boolean;
   aspectRatio: number; // width / height
   description?: string;
+  collectedPieces: string[];
+  totalPieces: number;
+  puzzleConfig: GalleryPuzzleConfig;
 }
 
 interface CuratorExhibitionWallProps {
@@ -97,7 +110,12 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
     const list: ExhibitionArtwork[] = validGalleries.map((g, idx) => {
       const puzzleArtwork = contentService.getGalleryPuzzleArtwork(g.id);
       const dynamicSrc = contentService.getGalleryPuzzleArtworkSrc(g.id);
-      const completed = isGalleryPuzzleCompleted(g.id);
+      const puzzleConfig = getGalleryPuzzleConfig(g.id);
+      const collectedPieces = getCollectedPiecesForGallery(g.id);
+      const totalPieces = puzzleConfig?.totalPieces || 3;
+      const completed =
+        isGalleryPuzzleCompleted(g.id) ||
+        (collectedPieces.length >= totalPieces && collectedPieces.length > 0);
 
       const title = puzzleArtwork?.title || g.nameFa;
       const imageUrl = dynamicSrc || puzzleArtwork?.imageUrl || '';
@@ -124,6 +142,9 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
         isCompleted: completed,
         aspectRatio,
         description: puzzleArtwork?.description,
+        collectedPieces,
+        totalPieces,
+        puzzleConfig,
       };
     });
 
@@ -166,6 +187,9 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
 
     window.addEventListener('storage', handleUpdate);
     window.addEventListener('gallery_questions_artwork_updated', handleUpdate);
+    window.addEventListener('museum_puzzle_progress_updated', handleUpdate);
+    window.addEventListener('museum_player_progress_updated', handleUpdate);
+    window.addEventListener('museum_completed_gallery_puzzles_updated', handleUpdate);
     window.addEventListener('museum_progress_reset', handleUpdate);
     window.addEventListener('curator_wall_config_updated', handleCuratorConfigUpdate);
     window.addEventListener('artwork_aspect_ratio_updated', handleAspectRatioUpdate);
@@ -175,6 +199,9 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
     return () => {
       window.removeEventListener('storage', handleUpdate);
       window.removeEventListener('gallery_questions_artwork_updated', handleUpdate);
+      window.removeEventListener('museum_puzzle_progress_updated', handleUpdate);
+      window.removeEventListener('museum_player_progress_updated', handleUpdate);
+      window.removeEventListener('museum_completed_gallery_puzzles_updated', handleUpdate);
       window.removeEventListener('museum_progress_reset', handleUpdate);
       window.removeEventListener('curator_wall_config_updated', handleCuratorConfigUpdate);
       window.removeEventListener('artwork_aspect_ratio_updated', handleAspectRatioUpdate);
@@ -294,7 +321,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
       return;
     }
 
-    if (art.isCompleted) {
+    if (art.isCompleted || art.collectedPieces.length > 0) {
       setSelectedArtwork(art);
       setLockedHint(null);
     } else {
@@ -367,6 +394,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
             {artworks.map((art) => {
               const realRatio =
                 getArtworkRealAspectRatio(art.galleryId, art.imageUrl) || art.aspectRatio || 1;
+              const hasPartialPieces = !art.isCompleted && art.collectedPieces.length > 0;
 
               return (
                 <div
@@ -374,11 +402,18 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                   id={`wall-frame-item-${art.galleryId}`}
                   onClick={() => handleFrameClick(art)}
                   className="group relative flex flex-col items-center bg-[#ffffff]/95 hover:bg-[#ffffff] rounded-2xl border-2 border-[#1e1b18] p-2 sm:p-3 shadow-[3px_3px_0px_#1e1b18] hover:shadow-[4px_4px_0px_#1e1b18] transition-all cursor-pointer select-none active:translate-x-[1px] active:translate-y-[1px]"
-                  title={art.isCompleted ? art.title : 'اثر قفل است'}
+                  title={
+                    art.isCompleted
+                      ? art.title
+                      : hasPartialPieces
+                      ? `${art.title} (ناقص: ${toPersianDigits(art.collectedPieces.length)} از ${toPersianDigits(art.totalPieces)})`
+                      : 'اثر قفل است'
+                  }
                 >
                   {/* Inner Frame Container maintaining clean fitting and exact aspect ratio */}
                   <div className="relative w-full flex items-center justify-center p-2 min-h-[140px] sm:min-h-[180px] bg-[#f8f6f0] rounded-xl border border-[#e5e1d3] overflow-hidden">
                     {art.isCompleted && art.imageUrl ? (
+                      /* Fully completed artwork state */
                       <div className="relative max-w-full max-h-[160px] sm:max-h-[210px] flex items-center justify-center">
                         <ArtworkFrame
                           aspectRatio={realRatio}
@@ -403,8 +438,65 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                           />
                         </ArtworkFrame>
                       </div>
+                    ) : hasPartialPieces && art.imageUrl ? (
+                      /* Incomplete / Partially collected artwork state */
+                      <div className="relative max-w-full max-h-[160px] sm:max-h-[210px] flex items-center justify-center">
+                        <ArtworkFrame
+                          aspectRatio={realRatio}
+                          wallScale={0.85}
+                          className="shadow-md max-h-[160px] sm:max-h-[210px]"
+                        >
+                          <div
+                            className="relative bg-[#1c1917] overflow-hidden rounded-[2px] select-none pointer-events-none block max-h-[140px] sm:max-h-[190px] max-w-full"
+                            style={{
+                              width: realRatio >= 1 ? '112px' : `${Math.max(40, Math.round(112 * realRatio))}px`,
+                              height: realRatio >= 1 ? `${Math.max(40, Math.round(112 / realRatio))}px` : '112px',
+                              aspectRatio: `${realRatio}`,
+                            }}
+                          >
+                            <svg viewBox="0 0 1000 1000" className="w-full h-full">
+                              {/* Background template silhouette */}
+                              <rect width="1000" height="1000" fill="#292524" />
+
+                              {/* Uncollected piece silhouettes & dashed seams */}
+                              {art.puzzleConfig.pieces.map((p) => (
+                                <path
+                                  key={`slot-${p.id}`}
+                                  d={p.svgPath}
+                                  fill="#1c1917"
+                                  stroke="#57534e"
+                                  strokeWidth="2.5"
+                                  strokeDasharray="8 6"
+                                  strokeOpacity="0.75"
+                                />
+                              ))}
+
+                              {/* Collected puzzle pieces rendered with the artwork image */}
+                              {art.puzzleConfig.pieces.map((p) => {
+                                const isCollected =
+                                  art.collectedPieces.includes(p.id) ||
+                                  isPuzzlePieceCollected(art.galleryId, p.id);
+                                if (!isCollected) return null;
+                                return (
+                                  <JigsawPieceGraphic
+                                    key={p.id}
+                                    piece={p}
+                                    artworkSrc={art.imageUrl}
+                                    mode="assembled"
+                                  />
+                                );
+                              })}
+                            </svg>
+
+                            {/* Piece counter badge on incomplete artwork */}
+                            <div className="absolute bottom-1 right-1 bg-[#1e1b18]/90 text-[#fde047] border border-[#d97706]/70 rounded-md px-1.5 py-0.5 text-[9px] font-sans-custom font-black shadow-xs pointer-events-none">
+                              {toPersianDigits(art.collectedPieces.length)}/{toPersianDigits(art.totalPieces)}
+                            </div>
+                          </div>
+                        </ArtworkFrame>
+                      </div>
                     ) : (
-                      /* Incomplete / Locked state */
+                      /* Completely Locked state (0 pieces collected) */
                       <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center space-y-2 select-none">
                         <div className="w-10 h-10 rounded-full bg-[#fef3c7] border-2 border-[#1e1b18] flex items-center justify-center shadow-[2px_2px_0px_#1e1b18]">
                           <Lock className="w-4 h-4 text-[#b45309]" />
@@ -422,7 +514,11 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                       {art.galleryNameFa}
                     </span>
                     <span className="text-[12px] sm:text-[13px] font-sans-custom font-bold text-[#1e1b18] mt-0.5 line-clamp-1">
-                      {art.isCompleted ? art.title : 'هنوز کشف نشده'}
+                      {art.isCompleted
+                        ? art.title
+                        : hasPartialPieces
+                        ? `${art.title} (${toPersianDigits(art.collectedPieces.length)} از ${toPersianDigits(art.totalPieces)} قطعه)`
+                        : 'هنوز کشف نشده'}
                     </span>
                   </div>
                 </div>
@@ -451,7 +547,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
         </div>
       )}
 
-      {/* Completed Artwork Preview Modal */}
+      {/* Completed or Partially Assembled Artwork Preview Modal */}
       {selectedArtwork && (
         <div
           id="artwork-detail-overlay"
@@ -475,16 +571,65 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
               <span className="font-sans-custom text-[11px] text-[#ea580c] font-black tracking-wider uppercase flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-[#f59e0b]" />
                 {selectedArtwork.galleryNameFa}
+                {!selectedArtwork.isCompleted && selectedArtwork.collectedPieces.length > 0 && (
+                  <span className="mr-1 text-[10px] text-[#d97706] font-bold bg-[#fef3c7] px-2 py-0.5 rounded-full border border-[#f59e0b]/40">
+                    ({toPersianDigits(selectedArtwork.collectedPieces.length)} از {toPersianDigits(selectedArtwork.totalPieces)} قطعه)
+                  </span>
+                )}
               </span>
 
-              {/* Framed Image */}
+              {/* Framed Image (Full or Incomplete Jigsaw) */}
               <div className="my-2">
                 <ArtworkFrame className="shadow-2xl">
-                  <img
-                    src={selectedArtwork.imageUrl}
-                    alt={selectedArtwork.title}
-                    className="max-h-[220px] sm:max-h-[260px] w-auto object-contain"
-                  />
+                  {selectedArtwork.isCompleted ? (
+                    <img
+                      src={selectedArtwork.imageUrl}
+                      alt={selectedArtwork.title}
+                      className="max-h-[220px] sm:max-h-[260px] w-auto object-contain"
+                    />
+                  ) : (
+                    <div
+                      className="relative bg-[#1c1917] overflow-hidden rounded-[2px] max-h-[220px] sm:max-h-[260px] max-w-full"
+                      style={{
+                        width: (getArtworkRealAspectRatio(selectedArtwork.galleryId, selectedArtwork.imageUrl) || selectedArtwork.aspectRatio || 1) >= 1
+                          ? '220px'
+                          : `${Math.max(80, Math.round(220 * (getArtworkRealAspectRatio(selectedArtwork.galleryId, selectedArtwork.imageUrl) || selectedArtwork.aspectRatio || 1)))}px`,
+                        height: (getArtworkRealAspectRatio(selectedArtwork.galleryId, selectedArtwork.imageUrl) || selectedArtwork.aspectRatio || 1) >= 1
+                          ? `${Math.max(80, Math.round(220 / (getArtworkRealAspectRatio(selectedArtwork.galleryId, selectedArtwork.imageUrl) || selectedArtwork.aspectRatio || 1)))}px`
+                          : '220px',
+                        aspectRatio: `${getArtworkRealAspectRatio(selectedArtwork.galleryId, selectedArtwork.imageUrl) || selectedArtwork.aspectRatio || 1}`,
+                      }}
+                    >
+                      <svg viewBox="0 0 1000 1000" className="w-full h-full">
+                        <rect width="1000" height="1000" fill="#292524" />
+                        {selectedArtwork.puzzleConfig.pieces.map((p) => (
+                          <path
+                            key={`modal-slot-${p.id}`}
+                            d={p.svgPath}
+                            fill="#1c1917"
+                            stroke="#57534e"
+                            strokeWidth="2.5"
+                            strokeDasharray="8 6"
+                            strokeOpacity="0.75"
+                          />
+                        ))}
+                        {selectedArtwork.puzzleConfig.pieces.map((p) => {
+                          const isCollected =
+                            selectedArtwork.collectedPieces.includes(p.id) ||
+                            isPuzzlePieceCollected(selectedArtwork.galleryId, p.id);
+                          if (!isCollected) return null;
+                          return (
+                            <JigsawPieceGraphic
+                              key={p.id}
+                              piece={p}
+                              artworkSrc={selectedArtwork.imageUrl}
+                              mode="assembled"
+                            />
+                          );
+                        })}
+                      </svg>
+                    </div>
+                  )}
                 </ArtworkFrame>
               </div>
 

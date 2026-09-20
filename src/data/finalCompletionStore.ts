@@ -1,8 +1,10 @@
+import confetti from 'canvas-confetti';
 import { isGalleryPuzzleCompleted, getPuzzleProgress } from './puzzleProgressStore';
 
 export const STORAGE_FINAL_COMPLETION_AWARDED = 'museum_final_completion_awarded';
 export const STORAGE_FINAL_CARD_CODE = 'museum_final_card_code';
 export const STORAGE_FINAL_CARD_CLAIMED = 'museum_final_card_claimed';
+export const STORAGE_EXPLORER_CONFETTI_SHOWN = 'museum_explorer_confetti_shown';
 
 /**
  * List of the prerequisite 7 gallery IDs before Gallery 09
@@ -34,6 +36,109 @@ export const ALL_8_GALLERY_IDS = [
 // In-session tracking to avoid duplicate auto-transition sequences
 let certificateSequenceTimer: NodeJS.Timeout | null = null;
 let hasCertificateSequenceTriggeredInSession = false;
+let hasExplorerConfettiTriggeredInSession = false;
+
+/**
+ * Checks if the confetti for the Museum Explorer card has already fired in this session/game.
+ */
+export function hasExplorerCardConfettiTriggered(): boolean {
+  if (hasExplorerConfettiTriggeredInSession) return true;
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem(STORAGE_EXPLORER_CONFETTI_SHOWN) === 'true';
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+}
+
+/**
+ * Marks that the confetti for the Museum Explorer card has been fired.
+ */
+export function markExplorerCardConfettiTriggered(): void {
+  hasExplorerConfettiTriggeredInSession = true;
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(STORAGE_EXPLORER_CONFETTI_SHOWN, 'true');
+    }
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Triggers celebratory confetti falling in from BOTH the LEFT and RIGHT sides of the screen.
+ * Triggers ONLY ONCE per game/session when the Museum Explorer card is first awarded/displayed.
+ */
+export function triggerMuseumExplorerConfetti(): void {
+  if (typeof window === 'undefined') return;
+  if (hasExplorerCardConfettiTriggered()) return;
+
+  markExplorerCardConfettiTriggered();
+
+  try {
+    const colors = [
+      '#d97706',
+      '#f59e0b',
+      '#fde047',
+      '#991b1b',
+      '#38bdf8',
+      '#22c55e',
+      '#ffffff',
+    ];
+
+    // Left cannon pointing toward center
+    confetti({
+      particleCount: 45,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0, y: 0.65 },
+      colors,
+      zIndex: 9999,
+      disableForReducedMotion: true,
+    });
+
+    // Right cannon pointing toward center
+    confetti({
+      particleCount: 45,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1, y: 0.65 },
+      colors,
+      zIndex: 9999,
+      disableForReducedMotion: true,
+    });
+
+    // Smooth follow-up burst after 180ms
+    setTimeout(() => {
+      try {
+        confetti({
+          particleCount: 30,
+          angle: 55,
+          spread: 60,
+          origin: { x: 0.02, y: 0.7 },
+          colors,
+          zIndex: 9999,
+          disableForReducedMotion: true,
+        });
+        confetti({
+          particleCount: 30,
+          angle: 125,
+          spread: 60,
+          origin: { x: 0.98, y: 0.7 },
+          colors,
+          zIndex: 9999,
+          disableForReducedMotion: true,
+        });
+      } catch {
+        // safe fallback
+      }
+    }, 180);
+  } catch {
+    // safe fallback in case of iframe restrictions
+  }
+}
 
 /**
  * Opens the independent final certificate modal.
@@ -310,6 +415,7 @@ export function generateAndSaveFinalCardCode(): string {
  */
 export function resetFinalCompletionState(): void {
   hasCertificateSequenceTriggeredInSession = false;
+  hasExplorerConfettiTriggeredInSession = false;
   if (certificateSequenceTimer) {
     clearTimeout(certificateSequenceTimer);
     certificateSequenceTimer = null;
@@ -319,6 +425,7 @@ export function resetFinalCompletionState(): void {
       localStorage.removeItem(STORAGE_FINAL_COMPLETION_AWARDED);
       localStorage.removeItem(STORAGE_FINAL_CARD_CODE);
       localStorage.removeItem(STORAGE_FINAL_CARD_CLAIMED);
+      localStorage.removeItem(STORAGE_EXPLORER_CONFETTI_SHOWN);
     }
   } catch (err) {
     console.error('Error resetting final completion state:', err);

@@ -156,7 +156,13 @@ export function isGalleryReached(rawGalleryId: string): boolean {
     return true;
   }
 
-  // 4. Check if the gallery was unlocked via progression satisfaction
+  // 4. Check if this gallery itself has completed puzzle
+  const dashId = canon.replace('_', '-');
+  if (isGalleryPuzzleCompleted(dashId) || isGalleryPuzzleCompleted(canon)) {
+    return true;
+  }
+
+  // 5. Check if the gallery was unlocked via progression satisfaction from predecessor
   if (
     canon === 'gallery_03' &&
     (isProgressionConditionsSatisfied('gallery-01') ||
@@ -166,13 +172,22 @@ export function isGalleryReached(rawGalleryId: string): boolean {
   ) {
     return true;
   }
-  if (canon === 'gallery_04' && isProgressionConditionsSatisfied('gallery-03')) {
+  if (canon === 'gallery_04' && (isProgressionConditionsSatisfied('gallery-03') || isGalleryPuzzleCompleted('gallery-03'))) {
     return true;
   }
-  if (canon === 'gallery_05' && isProgressionConditionsSatisfied('gallery-04')) {
+  if (canon === 'gallery_05' && (isProgressionConditionsSatisfied('gallery-04') || isGalleryPuzzleCompleted('gallery-04'))) {
     return true;
   }
-  if (canon === 'gallery_06' && isProgressionConditionsSatisfied('gallery-05')) {
+  if (canon === 'gallery_06' && (isProgressionConditionsSatisfied('gallery-05') || isGalleryPuzzleCompleted('gallery-05'))) {
+    return true;
+  }
+  if (canon === 'gallery_07' && (isProgressionConditionsSatisfied('gallery-06') || isGalleryPuzzleCompleted('gallery-06'))) {
+    return true;
+  }
+  if (canon === 'gallery_08' && (isProgressionConditionsSatisfied('gallery-07') || isGalleryPuzzleCompleted('gallery-07'))) {
+    return true;
+  }
+  if (canon === 'gallery_09' && (isProgressionConditionsSatisfied('gallery-08') || isGalleryPuzzleCompleted('gallery-08'))) {
     return true;
   }
 
@@ -187,6 +202,11 @@ export function resetReachedGalleries(): void {
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
       localStorage.removeItem(STORAGE_REACHED_GALLERIES_KEY);
+      localStorage.setItem('museum_active_gallery', 'gallery-00');
+      localStorage.setItem('museum_current_gallery', 'gallery-00');
+      localStorage.setItem('museum_player_current_gallery', 'gallery-02');
+      localStorage.setItem('currentGalleryId', 'gallery-02');
+      localStorage.removeItem('museum_has_entered_gallery_02');
     } catch (err) {
       console.warn('Failed to clear reached galleries from localStorage:', err);
     }

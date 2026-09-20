@@ -3,6 +3,8 @@ import { ArrowLeft, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BottomNavBar } from './BottomNavBar';
 import { PlayerStatusBar } from './PlayerStatusBar';
+import { GalleryFloatingActions } from './GalleryFloatingActions';
+import { GalleryInfoModal } from './GalleryInfoModal';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
 import { contentService } from '../services/content/contentService';
@@ -25,6 +27,8 @@ export interface SharedGalleryPageLayoutProps {
   mapHeight?: number;
   children?: React.ReactNode;
   modals?: React.ReactNode;
+  onOpenGuide?: () => void;
+  onTriggerNextPuzzle?: () => void;
 }
 
 const GALLERY_METADATA_MAP: Record<string, { num: string; name: string }> = {
@@ -69,11 +73,42 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
   mapHeight = 1264,
   children,
   modals,
+  onOpenGuide,
+  onTriggerNextPuzzle,
 }) => {
   const playerStats = usePlayerStats();
   const galleryRecord = contentService.getGalleryById(galleryId);
   const { containerRef, dimensions } = useFitMapDimensions(mapWidth, mapHeight);
   const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
+
+  // Internal fallback state for Gallery Guide modal
+  const [isInternalGuideOpen, setIsInternalGuideOpen] = useState<boolean>(false);
+
+  const handleOpenGuide = () => {
+    if (onOpenGuide) {
+      onOpenGuide();
+    } else {
+      setIsInternalGuideOpen(true);
+    }
+  };
+
+  const handleTriggerNextPuzzle = () => {
+    if (onTriggerNextPuzzle) {
+      onTriggerNextPuzzle();
+    } else {
+      window.dispatchEvent(
+        new CustomEvent('museum_trigger_next_puzzle_blink', {
+          detail: { galleryId },
+        })
+      );
+    }
+  };
+
+  // Exclude Gallery 01 Master Map (main-map, gallery-00)
+  const isMasterMap =
+    galleryId === 'gallery-00' ||
+    galleryId === 'gallery_00' ||
+    galleryId === 'main-map';
 
   // 5-second interval state for alternating between gallery name and gallery number
   const [showGalleryName, setShowGalleryName] = useState<boolean>(true);
@@ -110,6 +145,11 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
     galleryId === 'gallery-02' ||
     galleryId === 'gallery_02' ||
     numFa === '۰۲';
+
+  const isGallery06 =
+    galleryId === 'gallery-06' ||
+    galleryId === 'gallery_06' ||
+    numFa === '۰۶';
 
   return (
     <div
@@ -197,6 +237,7 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
             maxWidth: '100%',
             maxHeight: '100%',
             ...(isGallery02 ? { transform: 'translateX(6%)' } : {}),
+            ...(isGallery06 ? { transform: 'translateX(-5.5%)' } : {}),
             ['--map-point-scale' as any]: dimensions
               ? (dimensions.width / 360).toFixed(4)
               : '1',
@@ -215,6 +256,15 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
           </div>
         </div>
       </main>
+
+      {/* Bottom Left Floating Action Button (Gallery 02 through Gallery 09) */}
+      {!isMasterMap && (
+        <GalleryFloatingActions
+          galleryId={galleryId}
+          onOpenGuide={handleOpenGuide}
+          onTriggerNextPuzzle={handleTriggerNextPuzzle}
+        />
+      )}
 
       {/* Bottom Right Floating Controls */}
       <div
@@ -251,6 +301,15 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
 
       {/* Modals & Popups */}
       {modals}
+
+      {/* Fallback Gallery Info Modal if not handled in parent view */}
+      {isInternalGuideOpen && (
+        <GalleryInfoModal
+          galleryId={galleryId}
+          isOpen={isInternalGuideOpen}
+          onClose={() => setIsInternalGuideOpen(false)}
+        />
+      )}
     </div>
   );
 };

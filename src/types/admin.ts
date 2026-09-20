@@ -47,8 +47,23 @@ export interface AdminIconPoint {
     | 'preset-location-coffee'
     | 'preset-location-shop'
     | 'preset-location-frame'
-    | 'preset-location-tree';
+    | 'preset-location-tree'
+    | 'preset-location-wc'
+    | 'preset-location-library'
+    | 'preset-location-entrance'
+    | 'preset-location-cinema'
+    | 'preset-location-gallery'
+    | 'preset-location-gallery-1'
+    | 'preset-location-gallery-2'
+    | 'preset-location-gallery-3'
+    | 'preset-location-gallery-4'
+    | 'preset-location-gallery-5'
+    | 'preset-location-gallery-6'
+    | 'preset-location-gallery-7'
+    | 'preset-location-gallery-8'
+    | 'preset-location-gallery-9';
   iconData?: string; // SVG raw string or base64 data URL
+  galleryNumber?: number | string;
   width: number;
   height: number;
   destination:
@@ -69,6 +84,7 @@ export interface AdminIconPoint {
     | 'curator'
     | (string & {});
   destinationParams?: string;
+  locationId?: string;
   hiddenInAdminPreview?: boolean;
 }
 

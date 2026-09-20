@@ -11,6 +11,7 @@ import {
   StarContent,
   ExperienceContent,
   ExperienceIconType,
+  LocationContent,
 } from './types';
 
 /**
@@ -1109,6 +1110,93 @@ export function mapRowToExperience(row: Record<string, string>, index: number): 
     descriptionFa,
     imageUrl: imageUrl || undefined,
     iconId,
+    active,
+    rawFields: row,
+  };
+}
+
+/**
+  * Maps a spreadsheet row to a strongly typed LocationContent object.
+  *
+  * Supported column header aliases:
+  * - Location_id / location_id / locationid / id / شناسه لوکیشن / کد لوکیشن / شناسه
+  * - name / title / title_fa / name_fa / عنوان / نام / نام لوکیشن / نام نقطه / نام مکان
+  * - description / desc / description_fa / توضیحات / شرح / متن / متن لوکیشن
+  * - active / is_active / فعال / وضعیت
+  */
+export function mapRowToLocation(row: Record<string, string>, index: number): LocationContent {
+  const rawId = getValueByAliases(row, [
+    'location_id',
+    'locationid',
+    'location',
+    'id',
+    'point_id',
+    'pointid',
+    'شناسه لوکیشن',
+    'کد لوکیشن',
+    'شناسه مکان',
+    'کد مکان',
+    'شناسه',
+  ]);
+  const locationId = rawId ? rawId.trim() : `location_${index + 1}`;
+
+  const name =
+    getValueByAliases(row, [
+      'name',
+      'name_fa',
+      'namefa',
+      'نام',
+      'نام لوکیشن',
+      'نام مکان',
+    ]) ||
+    getValueByAliases(row, [
+      'title',
+      'title_fa',
+      'titlefa',
+      'عنوان',
+      'عنوان لوکیشن',
+    ]);
+
+  const title = getValueByAliases(row, [
+    'title',
+    'title_fa',
+    'titlefa',
+    'عنوان',
+    'عنوان لوکیشن',
+    'موضوع',
+    'دسته‌بندی',
+    'دسته',
+  ]);
+
+  const description = getValueByAliases(row, [
+    'description',
+    'description_fa',
+    'descriptionfa',
+    'desc',
+    'details',
+    'توضیحات',
+    'شرح',
+    'متن',
+    'توضیح',
+    'متن لوکیشن',
+  ]);
+
+  const activeRaw = getValueByAliases(row, ['active', 'فعال', 'is_active', 'status', 'وضعیت']);
+  const active =
+    activeRaw === ''
+      ? Boolean(name || description)
+      : (activeRaw || '').toLowerCase() === 'true' ||
+        (activeRaw || '').toLowerCase() === '1' ||
+        activeRaw === 'بله' ||
+        activeRaw === 'فعال' ||
+        (activeRaw || '').toLowerCase() === 'yes';
+
+  return {
+    id: locationId,
+    locationId,
+    name: name.trim(),
+    title: title.trim() || undefined,
+    description: description.trim(),
     active,
     rawFields: row,
   };

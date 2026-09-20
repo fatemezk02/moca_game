@@ -1,6 +1,6 @@
 import { GameContentData } from './types';
 
-const CACHE_STORAGE_KEY = 'museum_game_content_cache_v1';
+const CACHE_STORAGE_KEY = 'museum_game_content_cache_v3';
 
 /**
  * Manages local persistence for loaded game content.
@@ -22,10 +22,16 @@ export const contentCache = {
         Array.isArray(parsed.stars) &&
         Array.isArray(parsed.artworks)
       ) {
+        // If cached locations is empty or missing, invalidate cache so fresh data is fetched
+        if (!Array.isArray(parsed.locations) || parsed.locations.length === 0) {
+          return null;
+        }
+
         return {
           ...parsed,
           galleries: Array.isArray(parsed.galleries) ? parsed.galleries : [],
           experiences: Array.isArray(parsed.experiences) ? parsed.experiences : [],
+          locations: Array.isArray(parsed.locations) ? parsed.locations : [],
           metadata: {
             ...parsed.metadata,
             source: 'cache',

@@ -200,7 +200,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
         wrongAnswerTimerRef.current = null;
       }
 
-      const isUnlocked = isStarPointUnlocked(starPointId);
+      const isUnlocked = isStarPointUnlocked(effectiveStarPointId);
       if (isUnlocked || initialMode === 'direct_info') {
         setPhase('artwork_info');
       } else {
@@ -212,7 +212,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
         wrongAnswerTimerRef.current = null;
       }
     }
-  }, [isOpen, starPointId, initialMode]);
+  }, [isOpen, effectiveStarPointId, initialMode]);
 
   // Handle choice 1: [ سؤال ] (Discovery Question - Free)
   const handleSelectQuestionChoice = () => {
@@ -244,12 +244,12 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
       setIsAnswering(true);
       // Award NET reward coins (correct_reward_coins - informationCost)
       // and unlock information permanently
-      unlockStarPointViaQuestion(starPointId, netReward);
+      unlockStarPointViaQuestion(effectiveStarPointId, netReward);
       setPhase('correct_answer');
       setIsAnswering(false);
     } else {
       // No coins deducted on incorrect answer
-      markStarPointQuestionFailed(effectiveStarPointId || starPointId || '');
+      markStarPointQuestionFailed(effectiveStarPointId);
       setWrongOptionIndex(idx);
       setIsAnswering(true);
 
@@ -274,7 +274,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
       return;
     }
 
-    const success = unlockStarPointViaCoins(starPointId, cost);
+    const success = unlockStarPointViaCoins(effectiveStarPointId, cost);
     if (success) {
       setPhase('artwork_info');
     } else {
@@ -558,12 +558,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-4"
               >
-                <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-2">
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#d97706]">
-                    <HelpCircle className="w-3.5 h-3.5" />
-                    <span>سؤال کشف اثر (رایگان)</span>
-                  </div>
-
+                <div className="flex items-center justify-end border-b border-[#e2e8f0] pb-2">
                   <button
                     type="button"
                     onClick={() => setPhase('initial_choice')}

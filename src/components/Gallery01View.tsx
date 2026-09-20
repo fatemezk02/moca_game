@@ -200,7 +200,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   const iconPoints = points.filter((p) => p.type === 'icon') as AdminIconPoint[];
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
 
-  const { blinkingPointId, handleBlinkEnd } = usePuzzleBlinkGuidance({
+  const { blinkingPointId, handleBlinkEnd, triggerNextPuzzleBlink } = usePuzzleBlinkGuidance({
     galleryId: 'gallery_02',
     puzzlePoints,
     activePuzzlePoint,
@@ -213,23 +213,9 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
     }
   };
 
-  const effectiveIconPoints = iconPoints.some((p) => p.destination === 'gallery-01-questions')
-    ? iconPoints
-    : [
-        ...iconPoints,
-        {
-          id: 'icon-g01-questions',
-          type: 'icon' as const,
-          galleryId: 'gallery_02',
-          title: 'Gallery 02 Questions & Quiz',
-          x: 203,
-          y: 395,
-          iconType: 'preset-question' as const,
-          width: 48,
-          height: 34,
-          destination: 'gallery-01-questions' as const,
-        },
-      ];
+  const effectiveIconPoints = iconPoints.filter(
+    (p) => p.destination !== 'gallery-01-questions' && p.id !== 'icon-g01-questions'
+  );
 
   const modalsContent = (
     <>
@@ -269,6 +255,8 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
+      onOpenGuide={() => setActiveGalleryInfoId('gallery_02')}
+      onTriggerNextPuzzle={triggerNextPuzzleBlink}
       mapWidth={GALLERY_02_MAP_WIDTH}
       mapHeight={GALLERY_02_MAP_HEIGHT}
       mapSvg={
@@ -318,13 +306,13 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
                 top: `${topPercent}%`,
                 transform: isGuideQuestion
                   ? 'translate(-50%, -50%) scale(calc(var(--map-point-scale, 1) * 1.13))'
-                  : 'translate(-50%, -100%) scale(var(--map-point-scale, 1))',
-                transformOrigin: isGuideQuestion ? 'center center' : 'bottom center',
+                  : 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                transformOrigin: 'center center',
               }}
               className="absolute pointer-events-auto z-20"
             >
               <div
-                className={isGuideQuestion ? 'relative' : 'relative animate-quick-grow origin-bottom'}
+                className={isGuideQuestion ? 'relative' : 'relative animate-quick-grow origin-center'}
                 style={!isGuideQuestion ? { animationDelay: `${idx * 0.08}s` } : undefined}
               >
                 {!isGuideQuestion && (

@@ -17,6 +17,83 @@ export type PuzzleProgressDatabase = Record<string, GalleryPuzzleProgress>;
 const STORAGE_PUZZLE_PROGRESS_KEY = 'museum_puzzle_progress';
 const STORAGE_COMPLETED_GALLERIES_KEY = 'museum_completed_gallery_puzzles';
 const STORAGE_COMPLETED_PUZZLE_POINTS_KEY = 'museum_completed_puzzle_points';
+const STORAGE_PUZZLE_WRONG_ATTEMPTS_KEY = 'museum_puzzle_wrong_attempts';
+
+/**
+ * Returns the number of incorrect attempts recorded for a specific puzzle ID / point ID.
+ */
+export function getPuzzleIncorrectAttempts(puzzleId: string): number {
+  if (!puzzleId) return 0;
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(STORAGE_PUZZLE_WRONG_ATTEMPTS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          return typeof parsed[puzzleId] === 'number' ? parsed[puzzleId] : 0;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error reading puzzle incorrect attempts:', err);
+  }
+  return 0;
+}
+
+/**
+ * Records an incorrect answer attempt for a specific puzzle point/puzzle ID.
+ * Returns the updated total number of incorrect attempts for this specific puzzle.
+ */
+export function recordPuzzleIncorrectAttempt(puzzleId: string): number {
+  if (!puzzleId) return 0;
+  try {
+    let attemptsDb: Record<string, number> = {};
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(STORAGE_PUZZLE_WRONG_ATTEMPTS_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            attemptsDb = parsed;
+          }
+        } catch {}
+      }
+      const newCount = (attemptsDb[puzzleId] || 0) + 1;
+      attemptsDb[puzzleId] = newCount;
+      localStorage.setItem(STORAGE_PUZZLE_WRONG_ATTEMPTS_KEY, JSON.stringify(attemptsDb));
+      return newCount;
+    }
+  } catch (err) {
+    console.error('Error recording puzzle incorrect attempt:', err);
+  }
+  return 1;
+}
+
+/**
+ * Resets incorrect attempts for a specific puzzle or all puzzles.
+ */
+export function resetPuzzleIncorrectAttempts(puzzleId?: string): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      if (puzzleId) {
+        const raw = localStorage.getItem(STORAGE_PUZZLE_WRONG_ATTEMPTS_KEY);
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') {
+              delete parsed[puzzleId];
+              localStorage.setItem(STORAGE_PUZZLE_WRONG_ATTEMPTS_KEY, JSON.stringify(parsed));
+            }
+          } catch {}
+        }
+      } else {
+        localStorage.removeItem(STORAGE_PUZZLE_WRONG_ATTEMPTS_KEY);
+      }
+    }
+  } catch (err) {
+    console.error('Error resetting puzzle incorrect attempts:', err);
+  }
+}
 
 /**
  * Returns list of all completed puzzle point IDs from persistent storage
@@ -640,6 +717,7 @@ export function resetPuzzleProgress(galleryId?: string): void {
         localStorage.removeItem(STORAGE_COMPLETED_GALLERIES_KEY);
         localStorage.removeItem('completedGalleryPuzzles');
         localStorage.removeItem(STORAGE_COMPLETED_PUZZLE_POINTS_KEY);
+        localStorage.removeItem(STORAGE_PUZZLE_WRONG_ATTEMPTS_KEY);
       } else {
         const uniqueCanonId = normalizeCanonicalGallery(galleryId);
         const completed = getCompletedGalleryPuzzles().filter((id) => id !== uniqueCanonId);

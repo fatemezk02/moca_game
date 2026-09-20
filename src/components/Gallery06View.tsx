@@ -188,30 +188,15 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
   const iconPoints = points.filter((p): p is AdminIconPoint => p.type === 'icon');
   const puzzlePoints = points.filter((p): p is AdminPuzzlePoint => p.type === 'puzzle');
 
-  const { blinkingPointId, handleBlinkEnd } = usePuzzleBlinkGuidance({
+  const { blinkingPointId, handleBlinkEnd, triggerNextPuzzleBlink } = usePuzzleBlinkGuidance({
     galleryId: 'gallery-06',
     puzzlePoints,
     activePuzzlePoint,
   });
 
-  // Fallback preset question icon if no icon points exist
-  const effectiveIconPoints: AdminIconPoint[] =
-    iconPoints.length > 0
-      ? iconPoints
-      : [
-          {
-            id: 'icon-g06-info-fallback',
-            type: 'icon',
-            galleryId: 'gallery-06',
-            title: 'اطلاعات گالری ۰۶',
-            x: 325,
-            y: 460,
-            iconType: 'preset-question',
-            width: 48,
-            height: 34,
-            destination: 'gallery-06',
-          },
-        ];
+  const effectiveIconPoints: AdminIconPoint[] = iconPoints.filter(
+    (p) => p.destination !== 'gallery-06' && p.id !== 'icon-g06-info' && p.id !== 'icon-g06-info-fallback'
+  );
 
   // Filter arrows based on completion condition engine
   const visibleArrows = arrows.filter((arrow) => isArrowVisibleToPlayer(arrow));
@@ -264,6 +249,8 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
+      onOpenGuide={() => setActiveGalleryInfoId('gallery-06')}
+      onTriggerNextPuzzle={triggerNextPuzzleBlink}
       mapWidth={GALLERY_06_MAP_WIDTH}
       mapHeight={GALLERY_06_MAP_HEIGHT}
       mapSvg={
@@ -314,15 +301,13 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
               style={{
                 left: `${leftPercent}%`,
                 top: `${topPercent}%`,
-                transform: isGuideQuestion
-                  ? 'translate(-50%, -50%) scale(var(--map-point-scale, 1))'
-                  : 'translate(-50%, -100%) scale(var(--map-point-scale, 1))',
-                transformOrigin: isGuideQuestion ? 'center center' : 'bottom center',
+                transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                transformOrigin: 'center center',
               }}
               className="absolute pointer-events-auto z-20"
             >
               <div
-                className={isGuideQuestion ? 'relative' : 'relative animate-quick-grow origin-bottom'}
+                className={isGuideQuestion ? 'relative' : 'relative animate-quick-grow origin-center'}
                 style={!isGuideQuestion ? { animationDelay: `${idx * 0.08}s` } : undefined}
               >
                 {!isGuideQuestion && (

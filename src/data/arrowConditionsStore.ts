@@ -7,6 +7,8 @@ import {
 } from './puzzleProgressStore';
 import { isGalleryQuestionsCompleted, getQuestionProgress } from './questionProgressStore';
 import { getProgressionRuleForArrow } from './galleryProgressionStore';
+import { isGalleryReached } from './reachedGalleriesStore';
+import { normalizeGalleryId } from '../services/content/mappers';
 
 /**
  * ============================================================================
@@ -20,6 +22,47 @@ import { getProgressionRuleForArrow } from './galleryProgressionStore';
 
 const STORAGE_USED_ARROWS_KEY = 'museum_used_arrows';
 const STORAGE_ANSWERED_QUESTIONS_KEY = 'museum_answered_questions';
+
+/**
+ * Returns the progression index of a gallery (0 for lobby, 1 for gallery-01/02, 2 for gallery-03, etc.)
+ */
+function getGalleryProgressionOrder(galleryId?: string): number | null {
+  if (!galleryId) return null;
+  const canon = normalizeGalleryId(galleryId);
+  if (canon === 'gallery_00') return 0;
+  if (canon === 'gallery_01' || canon === 'gallery_02') return 1;
+  if (canon === 'gallery_03') return 2;
+  if (canon === 'gallery_04') return 3;
+  if (canon === 'gallery_05') return 4;
+  if (canon === 'gallery_06') return 5;
+  if (canon === 'gallery_07') return 6;
+  if (canon === 'gallery_08') return 7;
+  if (canon === 'gallery_09') return 8;
+
+  const m = canon.match(/\d+/);
+  return m ? parseInt(m[0], 10) : null;
+}
+
+/**
+ * Checks whether an arrow is pointing to a previous/preceding gallery in progression
+ */
+export function isPreviousGalleryArrow(arrow: AdminArrowPoint): boolean {
+  if (!arrow.destination || arrow.destination === 'none') return false;
+
+  const sourceOrder = getGalleryProgressionOrder(arrow.galleryId);
+  const destOrder = getGalleryProgressionOrder(arrow.destination);
+
+  if (sourceOrder !== null && destOrder !== null) {
+    return destOrder < sourceOrder;
+  }
+
+  if (arrow.title?.includes('بازگشت') || arrow.id.includes('-to-g0')) {
+    const destCanon = normalizeGalleryId(arrow.destination);
+    return destCanon.startsWith('gallery_');
+  }
+
+  return false;
+}
 
 /**
  * Normalizes question ID for robust matching across formats
@@ -349,6 +392,16 @@ export function isArrowVisibleToPlayer(arrow: AdminArrowPoint): boolean {
           return false;
         }
       } catch {}
+    }
+  }
+
+  // Backwards/Previous gallery navigation arrow: MUST only be visible if the previous gallery is unlocked
+  if (isPreviousGalleryArrow(arrow)) {
+    const dest = arrow.destination;
+    if (dest && dest !== 'none') {
+      if (!isGalleryReached(dest)) {
+        return false;
+      }
     }
   }
 

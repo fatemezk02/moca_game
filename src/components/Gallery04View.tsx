@@ -195,32 +195,15 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
   const experiencePoints = React.useMemo(() => getExperiencePointsForGallery('gallery-04'), [puzzleUpdateTrigger]);
 
-  const { blinkingPointId, handleBlinkEnd } = usePuzzleBlinkGuidance({
+  const { blinkingPointId, handleBlinkEnd, triggerNextPuzzleBlink } = usePuzzleBlinkGuidance({
     galleryId: 'gallery-04',
     puzzlePoints,
     activePuzzlePoint,
   });
 
-  // Ensure central question/info entry point is present at ~center (x: 249, y: 426)
-  const effectiveIconPoints = iconPoints.some(
-    (p) => p.destination === 'gallery-04' || p.id === 'icon-g04-info'
-  )
-    ? iconPoints
-    : [
-        ...iconPoints,
-        {
-          id: 'icon-g04-info',
-          type: 'icon' as const,
-          galleryId: 'gallery-04',
-          title: 'اطلاعات گالری ۰۴',
-          x: 244,
-          y: 387,
-          iconType: 'preset-question' as const,
-          width: 48,
-          height: 34,
-          destination: 'gallery-04' as const,
-        },
-      ];
+  const effectiveIconPoints = iconPoints.filter(
+    (p) => p.destination !== 'gallery-04' && p.id !== 'icon-g04-info'
+  );
 
   const modalsContent = (
     <>
@@ -269,6 +252,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
+      onOpenGuide={() => setActiveGalleryInfoId('gallery-04')}
+      onTriggerNextPuzzle={triggerNextPuzzleBlink}
       mapWidth={GALLERY_04_MAP_WIDTH}
       mapHeight={GALLERY_04_MAP_HEIGHT}
       mapSvg={

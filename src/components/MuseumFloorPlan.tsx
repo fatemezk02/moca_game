@@ -16,8 +16,11 @@ import { isGalleryReached, markGalleryReached } from '../data/reachedGalleriesSt
 import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
 import { GalleryLockIndicator } from './GalleryLockIndicator';
 import { GalleryLockModal } from './GalleryLockModal';
-import { normalizeGalleryId } from '../services/content/mappers';
+import { normalizeGalleryId, formatTwoDigitPersian } from '../services/content/mappers';
 import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
+import { LocationInfoModal } from './LocationInfoModal';
+import { contentService } from '../services/content/contentService';
+import { LocationContent } from '../services/content/types';
 
 interface MuseumFloorPlanProps {
   collections: MuseumCollection[];
@@ -58,6 +61,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   const [selectedStarPointId, setSelectedStarPointId] = useState<string | null>(null);
   const [selectedLocationPinId, setSelectedLocationPinId] = useState<string | null>(null);
   const [selectedLockGallery, setSelectedLockGallery] = useState<{ galleryId: string; title: string } | null>(null);
+  const [selectedLocationModalData, setSelectedLocationModalData] = useState<LocationContent | null>(null);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState<boolean>(false);
   const [adminPoints, setAdminPoints] = useState(() => getGalleryPoints('gallery-00'));
   const [adminArrows, setAdminArrows] = useState(() => getGalleryArrows('gallery-00'));
   const [playerGalleryId, setPlayerGalleryId] = useState<string>(() => getCurrentGalleryId());
@@ -210,6 +215,14 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
 
   // Helper to resolve standard Location Pin labels
   const getLocationPinLabel = (point: { id?: string; iconType?: string; title?: string }): string => {
+    // Check if dynamic content from Location table exists
+    const locData =
+      (point.id ? contentService.getLocationById(point.id) : null) ||
+      (point.iconType ? contentService.getLocationById(point.iconType) : null);
+    if (locData?.name?.trim()) {
+      return locData.name.trim();
+    }
+
     const iconType = point.iconType || '';
     const id = (point.id || '').toLowerCase();
     const title = (point.title || '').toLowerCase();
@@ -231,8 +244,34 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     if (iconType === 'preset-location-frame' || id.includes('frame') || id.includes('oil') || id.includes('pool') || title.includes('روغن')) {
       return 'حوض روغن';
     }
+    if (iconType === 'preset-location-wc' || id.includes('wc') || title.includes('دسشویی') || title.includes('دستشویی') || title.includes('بهداشتی')) {
+      return 'سرویس بهداشتی (WC)';
+    }
+    if (iconType === 'preset-location-library' || id.includes('library') || title.includes('کتابخانه')) {
+      return 'کتابخانه تخصصی';
+    }
+    if (iconType === 'preset-location-entrance' || id.includes('entrance') || title.includes('ورود') || title.includes('ورودی')) {
+      return 'درب ورودی';
+    }
+    if (iconType === 'preset-location-cinema' || id.includes('cinema') || title.includes('سینما')) {
+      return 'سینماتک';
+    }
+    if (iconType.startsWith('preset-location-gallery-')) {
+      const num = parseInt(iconType.replace('preset-location-gallery-', ''), 10);
+      return !isNaN(num) ? `گالری ${formatTwoDigitPersian(num)}` : 'گالری';
+    }
+    if (iconType === 'preset-location-gallery') {
+      return point.title || 'گالری';
+    }
 
     return point.title || '';
+  };
+
+  // Close location info popup and reset selection
+  const handleCloseLocationModal = () => {
+    setIsLocationModalOpen(false);
+    setSelectedLocationModalData(null);
+    setSelectedLocationPinId(null);
   };
 
   // Handle click on dynamic arrow overlay
@@ -283,10 +322,54 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   const handleIconPointClick = (iconPoint: AdminIconPoint, e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     const isLocationPin = iconPoint.iconType?.startsWith('preset-location-') || iconPoint.type === 'icon';
-    if (isLocationPin && (!iconPoint.destination || iconPoint.destination === 'gallery-00')) {
+    if (isLocationPin) {
       onClearSelection();
       setSelectedStarPointId(null);
-      setSelectedLocationPinId((prev) => (prev === iconPoint.id ? null : iconPoint.id));
+
+      const targetLocId = iconPoint.locationId || iconPoint.id;
+      console.log('[LOCATION TAP] location id:', targetLocId);
+
+      // SECOND CONSECUTIVE TAP ON THE SAME LOCATION POINT:
+      if (selectedLocationPinId === iconPoint.id) {
+        console.log('[LOCATION TAP] second consecutive tap:', targetLocId);
+        // Query Location table from ContentService
+        const locData =
+          (iconPoint.locationId ? contentService.getLocationById(iconPoint.locationId) : null) ||
+          contentService.getLocationById(iconPoint.id) ||
+          contentService.getLocationById(iconPoint.iconType || '') ||
+          contentService.getLocationById(iconPoint.title || '');
+
+        console.log('[LOCATION DATA] matched row:', locData);
+        console.log('[LOCATION DATA] active:', locData?.active);
+
+        if (locData && locData.active !== false && (locData.name || locData.description)) {
+          console.log('[LOCATION MODAL] opening:', locData.name);
+          setSelectedLocationModalData(locData);
+          setIsLocationModalOpen(true);
+          return;
+        }
+
+        // If no matching active row exists in the Location table, keep existing Location Point behavior
+        if (iconPoint.destination && iconPoint.destination !== 'gallery-00') {
+          setSelectedLocationPinId(null);
+          handleLampClick(iconPoint.destination);
+          return;
+        }
+        if (iconPoint.iconType?.startsWith('preset-location-gallery-')) {
+          const num = parseInt(iconPoint.iconType.replace('preset-location-gallery-', ''), 10);
+          if (!isNaN(num) && num >= 1 && num <= 9) {
+            setSelectedLocationPinId(null);
+            handleLampClick(`gallery-0${num}`);
+            return;
+          }
+        }
+        setSelectedLocationPinId(null);
+      } else {
+        // FIRST TAP ON THIS LOCATION POINT:
+        console.log('[LOCATION TAP] first tap:', targetLocId);
+        // Keep existing behavior, do not open popup, preserve label/feedback
+        setSelectedLocationPinId(iconPoint.id);
+      }
       return;
     }
     setSelectedLocationPinId(null);
@@ -643,71 +726,115 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
         })}
 
         {/* Custom Icon & Location Points Layer (Coordinates relative to 604.8 x 844.86 SVG map) */}
-        {areLocationPinsVisible && adminPoints
-          .filter((p): p is AdminIconPoint => p.type === 'icon')
-          .filter((p) => p.id !== 'icon-g00-to-g01') // Entrance to g01 is rendered by NavigationLight
-          .map((iconPoint, idx) => {
-            const posX = (iconPoint.x / 604.8) * 100;
-            const posY = (iconPoint.y / 844.86) * 100;
-            const isLocationPin = iconPoint.iconType?.startsWith('preset-location-') || iconPoint.type === 'icon';
-            const locationLabel = getLocationPinLabel(iconPoint);
-            const isLabelOpen = selectedLocationPinId === iconPoint.id;
+        {areLocationPinsVisible && (() => {
+          const cafePt = adminPoints.find((p) => p.id === 'icon-g00-cafe');
+          const cafeSize = cafePt?.width || 32;
 
-            return (
-              <div
-                key={`${iconPoint.id}-${locationAnimKey}`}
-                id={`icon-point-${iconPoint.id}`}
-                style={{
-                  left: `${posX}%`,
-                  top: `${posY}%`,
-                  transform: isLocationPin
-                    ? 'translate(-50%, -100%) scale(var(--map-point-scale, 1))'
-                    : 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
-                  transformOrigin: isLocationPin ? 'bottom center' : 'center center',
-                  zIndex: isLabelOpen ? 60 : 30,
-                }}
-                className={`absolute pointer-events-auto ${isLabelOpen ? 'z-[60]' : 'z-30'}`}
-              >
-                <div
-                  className={`relative ${locationAnimKey > 0 ? 'animate-quick-grow origin-bottom' : ''}`}
-                  style={{
-                    animationDelay: locationAnimKey > 0 ? `${idx * 0.08}s` : undefined,
-                  }}
-                >
-                  {locationAnimKey > 0 && (
-                    <span
-                      className="absolute inset-0 rounded-full border-2 border-[#f59e0b] animate-location-burst-ring pointer-events-none"
-                      style={{
-                        animationDelay: `${idx * 0.08}s`,
-                      }}
-                    />
-                  )}
-                  <button
-                    onClick={(e) => handleIconPointClick(iconPoint, e)}
-                    aria-label={locationLabel || iconPoint.title}
-                    title={locationLabel || iconPoint.title}
-                    className="relative group flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-110 active:scale-95"
-                  >
-                    <CustomIconRender point={iconPoint} />
-                  </button>
+          const rawIcons = adminPoints
+            .filter((p): p is AdminIconPoint => p.type === 'icon')
+            .filter((p) => p.id !== 'icon-g00-to-g01'); // Entrance to g01 is rendered by NavigationLight
 
-                  {/* Reused Star label component directly BELOW the Location Pin */}
-                  {isLocationPin && !!locationLabel && (
-                    <StarLabel
-                      id={iconPoint.id}
-                      labelText={locationLabel}
-                      isOpen={isLabelOpen}
-                      placement="bottom"
-                      leftPercent={posX}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
+          const isGalleryLocation = (p: AdminIconPoint) =>
+            Boolean(
+              p.iconType?.startsWith('preset-location-gallery') ||
+              (p.galleryNumber !== undefined && p.galleryNumber !== null)
             );
-          })}
+
+          const getGalleryNum = (p: AdminIconPoint): number => {
+            if (typeof p.galleryNumber === 'number') return p.galleryNumber;
+            if (p.galleryNumber) {
+              const parsed = parseInt(String(p.galleryNumber), 10);
+              if (!isNaN(parsed)) return parsed;
+            }
+            if (p.iconType?.startsWith('preset-location-gallery-')) {
+              const parsed = parseInt(p.iconType.replace('preset-location-gallery-', ''), 10);
+              if (!isNaN(parsed)) return parsed;
+            }
+            return 999;
+          };
+
+          const galleryIcons = rawIcons
+            .filter(isGalleryLocation)
+            .sort((a, b) => getGalleryNum(a) - getGalleryNum(b));
+          const otherIcons = rawIcons.filter((p) => !isGalleryLocation(p));
+          const orderedIcons = [...galleryIcons, ...otherIcons];
+
+          return orderedIcons.map((iconPoint) => {
+              const posX = (iconPoint.x / 604.8) * 100;
+              const posY = (iconPoint.y / 844.86) * 100;
+              const isLocationPin = iconPoint.iconType?.startsWith('preset-location-') || iconPoint.type === 'icon';
+              const locationLabel = getLocationPinLabel(iconPoint);
+              const isLabelOpen = selectedLocationPinId === iconPoint.id;
+              const isGallery = isGalleryLocation(iconPoint);
+              const otherIdx = isGallery ? -1 : otherIcons.indexOf(iconPoint);
+              const animDelay = isGallery ? 0 : Number((otherIdx * 0.08).toFixed(2));
+
+              return (
+                <div
+                  key={`${iconPoint.id}-${locationAnimKey}`}
+                  id={`icon-point-${iconPoint.id}`}
+                  style={{
+                    left: `${posX}%`,
+                    top: `${posY}%`,
+                    transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                    transformOrigin: 'center center',
+                    zIndex: isLabelOpen ? 60 : 30,
+                  }}
+                  className={`absolute pointer-events-auto ${isLabelOpen ? 'z-[60]' : 'z-30'}`}
+                >
+                  <div
+                    className={`relative ${
+                      locationAnimKey > 0
+                        ? isGallery
+                          ? 'animate-gallery-pulse origin-center'
+                          : 'animate-quick-grow origin-center'
+                        : ''
+                    }`}
+                    style={{
+                      animationDelay: locationAnimKey > 0 ? `${animDelay}s` : undefined,
+                    }}
+                  >
+                    {locationAnimKey > 0 && !isGallery && (
+                      <span
+                        className="absolute inset-0 rounded-full border-2 border-[#f59e0b] animate-location-burst-ring pointer-events-none"
+                        style={{
+                          animationDelay: `${animDelay}s`,
+                        }}
+                      />
+                    )}
+                    <button
+                      onClick={(e) => handleIconPointClick(iconPoint, e)}
+                      aria-label={locationLabel || iconPoint.title}
+                      title={locationLabel || iconPoint.title}
+                      className="relative group flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-110 active:scale-95"
+                    >
+                      <CustomIconRender
+                        point={
+                          isLocationPin
+                            ? { ...iconPoint, width: cafeSize, height: cafeSize }
+                            : iconPoint
+                        }
+                      />
+                    </button>
+
+                    {/* Reused Star label component directly BELOW the Location Pin */}
+                    {isLocationPin && !!locationLabel && (
+                      <StarLabel
+                        id={iconPoint.id}
+                        labelText={locationLabel}
+                        isOpen={isLabelOpen}
+                        placement="bottom"
+                        leftPercent={posX}
+                        onClick={(e) => {
+                          handleIconPointClick(iconPoint, e);
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              );
+            });
+        })()}
 
         {/* Clickable Marker Nodes Layer */}
         {collections
@@ -841,6 +968,13 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           setSelectedLockGallery(null);
           handleLampClick(currentGid);
         }}
+      />
+
+      {/* Location Point Info Popup Modal */}
+      <LocationInfoModal
+        isOpen={isLocationModalOpen}
+        onClose={handleCloseLocationModal}
+        location={selectedLocationModalData}
       />
     </div>
   );

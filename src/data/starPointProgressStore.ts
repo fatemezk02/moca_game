@@ -68,20 +68,118 @@ export function getStarPointProgressDb(): StarPointProgressDatabase {
 }
 
 /**
+ * Resolves a stable, deterministic list of equivalent storage keys for a star/point ID.
+ * Prevents unintentional cross-matching (e.g. col-g09-01 matching star-09 or col-g09-02).
+ */
+export function getEquivalentStarKeys(id?: string): string[] {
+  if (!id) return [];
+  const clean = id.trim();
+  const keys = new Set<string>([clean]);
+
+  // Gallery 09 specific mappings
+  if (clean === 'col-g09-01' || clean === 'star-20' || clean === '20') {
+    keys.add('col-g09-01');
+    keys.add('star-20');
+    keys.add('20');
+    return Array.from(keys);
+  }
+  if (clean === 'col-g09-02' || clean === 'star-21' || clean === '21') {
+    keys.add('col-g09-02');
+    keys.add('star-21');
+    keys.add('21');
+    return Array.from(keys);
+  }
+  if (clean === 'col-g09-03' || clean === 'star-22' || clean === '22') {
+    keys.add('col-g09-03');
+    keys.add('star-22');
+    keys.add('22');
+    return Array.from(keys);
+  }
+  if (clean === 'col-g09-04' || clean === 'star-23' || clean === '23') {
+    keys.add('col-g09-04');
+    keys.add('star-23');
+    keys.add('23');
+    return Array.from(keys);
+  }
+  if (clean === 'star-24' || clean === '24') {
+    keys.add('star-24');
+    keys.add('24');
+    return Array.from(keys);
+  }
+  if (clean === 'star-25' || clean === '25') {
+    keys.add('star-25');
+    keys.add('25');
+    return Array.from(keys);
+  }
+
+  // Gallery 01 / 03 known point-to-star aliases
+  if (clean === 'artwork-01' || clean === 'col-01' || clean === 'star-01' || clean === '1') {
+    keys.add('artwork-01');
+    keys.add('col-01');
+    keys.add('star-01');
+    keys.add('1');
+    return Array.from(keys);
+  }
+  if (clean === 'artwork-g03-star' || clean === 'star-03' || clean === '3') {
+    keys.add('artwork-g03-star');
+    keys.add('star-03');
+    keys.add('3');
+    return Array.from(keys);
+  }
+
+  // Standard star-XX or star-q-XX or pure number
+  const starMatch = clean.match(/^star(?:-q)?[-_]?0*(\d+)$/i);
+  if (starMatch && starMatch[1]) {
+    const num = parseInt(starMatch[1], 10);
+    keys.add(`star-${String(num).padStart(2, '0')}`);
+    keys.add(`star-${num}`);
+    keys.add(String(num));
+    return Array.from(keys);
+  }
+
+  if (/^\d+$/.test(clean)) {
+    const num = parseInt(clean, 10);
+    keys.add(`star-${String(num).padStart(2, '0')}`);
+    keys.add(`star-${num}`);
+    keys.add(String(num));
+    return Array.from(keys);
+  }
+
+  return Array.from(keys);
+}
+
+/**
  * Retrieves progress for a specific Star Point ID.
  */
 export function getStarPointProgress(starPointId: string): StarPointProgressItem {
-  const db = getStarPointProgressDb();
-  return (
-    db[starPointId] || {
+  if (!starPointId) {
+    return {
       firstViewed: false,
       discoveryUnlocked: false,
       questionCompleted: false,
       informationUnlocked: false,
       rewardClaimed: false,
       labelSeen: false,
+    };
+  }
+  const db = getStarPointProgressDb();
+  if (db[starPointId]) return db[starPointId];
+
+  const equivalentKeys = getEquivalentStarKeys(starPointId);
+  for (const key of equivalentKeys) {
+    if (db[key]) {
+      return db[key];
     }
-  );
+  }
+
+  return {
+    firstViewed: false,
+    discoveryUnlocked: false,
+    questionCompleted: false,
+    informationUnlocked: false,
+    rewardClaimed: false,
+    labelSeen: false,
+  };
 }
 
 /**
@@ -89,50 +187,18 @@ export function getStarPointProgress(starPointId: string): StarPointProgressItem
  * When unlocked, clicking the star bypasses labels/questions and opens artwork info directly.
  */
 export function isStarPointUnlocked(starPointId: string): boolean {
+  if (!starPointId) return false;
   const progress = getStarPointProgress(starPointId);
-  if (Boolean(progress.discoveryUnlocked || progress.informationUnlocked)) {
-    return true;
-  }
-  const db = getStarPointProgressDb();
-  const extractNum = (s?: string) => {
-    if (!s) return null;
-    const m = s.match(/\d+/);
-    return m ? parseInt(m[0], 10) : null;
-  };
-  const targetNum = extractNum(starPointId);
-  if (targetNum !== null) {
-    return Object.entries(db).some(([key, item]) => {
-      if (!item.discoveryUnlocked && !item.informationUnlocked) return false;
-      const keyNum = extractNum(key);
-      return keyNum !== null && keyNum === targetNum;
-    });
-  }
-  return false;
+  return Boolean(progress.discoveryUnlocked || progress.informationUnlocked);
 }
 
 /**
  * Checks if a Star Point's INFORMATION has been specifically unlocked.
  */
 export function isStarPointInformationUnlocked(starPointId: string): boolean {
+  if (!starPointId) return false;
   const progress = getStarPointProgress(starPointId);
-  if (Boolean(progress.informationUnlocked)) {
-    return true;
-  }
-  const db = getStarPointProgressDb();
-  const extractNum = (s?: string) => {
-    if (!s) return null;
-    const m = s.match(/\d+/);
-    return m ? parseInt(m[0], 10) : null;
-  };
-  const targetNum = extractNum(starPointId);
-  if (targetNum !== null) {
-    return Object.entries(db).some(([key, item]) => {
-      if (!item.informationUnlocked) return false;
-      const keyNum = extractNum(key);
-      return keyNum !== null && keyNum === targetNum;
-    });
-  }
-  return false;
+  return Boolean(progress.informationUnlocked);
 }
 
 /**
@@ -147,41 +213,30 @@ export function getUnlockedInformationStarsCount(allActiveStars?: Array<{ id: st
 
   if (allActiveStars && allActiveStars.length > 0) {
     let unlockedCount = 0;
-    const extractNum = (s?: string) => {
-      if (!s) return null;
-      const m = s.match(/\d+/);
-      return m ? parseInt(m[0], 10) : null;
-    };
-
     for (const star of allActiveStars) {
       const starId = star.id;
-      const altId = star.starId || '';
-
-      // Direct check in db
-      if (db[starId]?.informationUnlocked || (altId && db[altId]?.informationUnlocked)) {
-        unlockedCount++;
-        continue;
-      }
-
-      // Check numeric/alias match in db
-      const starNum = extractNum(starId) ?? (altId ? extractNum(altId) : null);
-      const foundMatch = Object.entries(db).some(([key, item]) => {
-        if (!item.informationUnlocked) return false;
-        if (key === starId || key === altId) return true;
-        const keyNum = extractNum(key);
-        if (keyNum !== null && starNum !== null && keyNum === starNum) return true;
-        return false;
-      });
-
-      if (foundMatch) {
+      const altId = star.starId;
+      if (
+        isStarPointInformationUnlocked(starId) ||
+        (altId && isStarPointInformationUnlocked(altId)) ||
+        isStarPointUnlocked(starId) ||
+        (altId && isStarPointUnlocked(altId))
+      ) {
         unlockedCount++;
       }
     }
     return unlockedCount;
   }
 
-  // Fallback: count distinct entries in db with informationUnlocked === true
-  return Object.values(db).filter((item) => Boolean(item.informationUnlocked)).length;
+  // Fallback: count distinct unique stars in db with informationUnlocked === true or discoveryUnlocked === true
+  const unlockedKeys = new Set<string>();
+  for (const [key, item] of Object.entries(db)) {
+    if (item.informationUnlocked || item.discoveryUnlocked || item.questionCompleted) {
+      const canonicalKey = getEquivalentStarKeys(key)[0] || key;
+      unlockedKeys.add(canonicalKey);
+    }
+  }
+  return unlockedKeys.size;
 }
 
 /**
@@ -205,14 +260,17 @@ export function hasStarPointBeenViewed(starPointId: string): boolean {
 export function markStarPointFirstViewed(starPointId: string): void {
   try {
     const db = getStarPointProgressDb();
-    const existing = db[starPointId] || { firstViewed: false, discoveryUnlocked: false };
+    const existing = getStarPointProgress(starPointId);
     const updated: StarPointProgressItem = {
       ...existing,
       starPointId,
       firstViewed: true,
       labelSeen: true,
     };
-    db[starPointId] = updated;
+    const keys = getEquivalentStarKeys(starPointId);
+    for (const k of keys) {
+      db[k] = { ...updated, starPointId: k };
+    }
 
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem(STORAGE_STAR_PROGRESS_KEY, JSON.stringify(db));
@@ -256,7 +314,11 @@ export function unlockStarPointViaQuestion(starPointId: string, rewardCoins: num
       unlockedVia: 'question',
       unlockedAt: new Date().toISOString(),
     };
-    db[starPointId] = updated;
+    
+    const keys = getEquivalentStarKeys(starPointId);
+    for (const k of keys) {
+      db[k] = { ...updated, starPointId: k };
+    }
 
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem(STORAGE_STAR_PROGRESS_KEY, JSON.stringify(db));
@@ -295,7 +357,11 @@ export function unlockStarPointViaCoins(starPointId: string, cost: number = 30):
       unlockedVia: 'coins',
       unlockedAt: new Date().toISOString(),
     };
-    db[starPointId] = updated;
+    
+    const keys = getEquivalentStarKeys(starPointId);
+    for (const k of keys) {
+      db[k] = { ...updated, starPointId: k };
+    }
 
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem(STORAGE_STAR_PROGRESS_KEY, JSON.stringify(db));
@@ -333,7 +399,11 @@ export function unlockStarPointDiscovery(
       rewardClaimed: rewardType,
       unlockedAt: new Date().toISOString(),
     };
-    db[starPointId] = updated;
+    
+    const keys = getEquivalentStarKeys(starPointId);
+    for (const k of keys) {
+      db[k] = { ...updated, starPointId: k };
+    }
 
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem(STORAGE_STAR_PROGRESS_KEY, JSON.stringify(db));
@@ -360,7 +430,11 @@ export function recordStarPointAnswer(starPointId: string, selectedOption: numbe
       answeredQuestion: true,
       selectedOption,
     };
-    db[starPointId] = updated;
+    
+    const keys = getEquivalentStarKeys(starPointId);
+    for (const k of keys) {
+      db[k] = { ...updated, starPointId: k };
+    }
 
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem(STORAGE_STAR_PROGRESS_KEY, JSON.stringify(db));
@@ -379,25 +453,9 @@ export function recordStarPointAnswer(starPointId: string, selectedOption: numbe
  * Checks if a player has previously failed/answered incorrectly to a Star Point question.
  */
 export function hasStarPointQuestionFailed(starPointId: string): boolean {
+  if (!starPointId) return false;
   const progress = getStarPointProgress(starPointId);
-  if (Boolean(progress.questionFailed)) {
-    return true;
-  }
-  const db = getStarPointProgressDb();
-  const extractNum = (s?: string) => {
-    if (!s) return null;
-    const m = s.match(/\d+/);
-    return m ? parseInt(m[0], 10) : null;
-  };
-  const targetNum = extractNum(starPointId);
-  if (targetNum !== null) {
-    return Object.entries(db).some(([key, item]) => {
-      if (!item.questionFailed) return false;
-      const keyNum = extractNum(key);
-      return keyNum !== null && keyNum === targetNum;
-    });
-  }
-  return false;
+  return Boolean(progress.questionFailed);
 }
 
 /**
@@ -413,7 +471,11 @@ export function markStarPointQuestionFailed(starPointId: string): void {
       firstViewed: true,
       questionFailed: true,
     };
-    db[starPointId] = updated;
+    
+    const keys = getEquivalentStarKeys(starPointId);
+    for (const k of keys) {
+      db[k] = { ...updated, starPointId: k };
+    }
 
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem(STORAGE_STAR_PROGRESS_KEY, JSON.stringify(db));

@@ -103,6 +103,43 @@ export function usePuzzleBlinkGuidance({
     );
   }, [galleryId, puzzlePoints]);
 
+  // Method to trigger the two-blink animation on the next incomplete puzzle point
+  const triggerNextPuzzleBlink = useCallback(() => {
+    const nextIncomplete = getFirstIncompletePoint();
+    if (!nextIncomplete) return null;
+
+    if (fallbackEndTimerRef.current) {
+      clearTimeout(fallbackEndTimerRef.current);
+      fallbackEndTimerRef.current = null;
+    }
+
+    // Momentarily clear to ensure re-triggering the CSS blink animation if called again
+    setBlinkingPointId(null);
+    requestAnimationFrame(() => {
+      setBlinkingPointId(nextIncomplete.id);
+      fallbackEndTimerRef.current = setTimeout(() => {
+        setBlinkingPointId((curr) => (curr === nextIncomplete.id ? null : curr));
+        fallbackEndTimerRef.current = null;
+      }, 1550);
+    });
+
+    return nextIncomplete.id;
+  }, [getFirstIncompletePoint]);
+
+  // Listen to window trigger event for next puzzle blink guidance
+  useEffect(() => {
+    const handleCustomTrigger = (e: any) => {
+      const targetGallery = e?.detail?.galleryId;
+      if (!targetGallery || targetGallery === galleryId) {
+        triggerNextPuzzleBlink();
+      }
+    };
+    window.addEventListener('museum_trigger_next_puzzle_blink', handleCustomTrigger);
+    return () => {
+      window.removeEventListener('museum_trigger_next_puzzle_blink', handleCustomTrigger);
+    };
+  }, [galleryId, triggerNextPuzzleBlink]);
+
   // Listen to puzzle progress events to detect if the currently open modal's puzzle was completed
   useEffect(() => {
     const handleProgressUpdate = (e: any) => {
@@ -306,5 +343,6 @@ export function usePuzzleBlinkGuidance({
   return {
     blinkingPointId,
     handleBlinkEnd,
+    triggerNextPuzzleBlink,
   };
 }

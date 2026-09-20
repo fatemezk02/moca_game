@@ -159,6 +159,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'icon',
         galleryId: 'gallery-00',
         title: 'کافه موزه (Museum Café)',
+        locationId: 'Location_10',
         x: 425,
         y: 550,
         iconType: 'preset-location-coffee',
@@ -171,6 +172,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'icon',
         galleryId: 'gallery-00',
         title: 'قاب معرفی آثار (Exhibition Frame)',
+        locationId: 'Location_16',
         x: 308,
         y: 667,
         iconType: 'preset-location-frame',
@@ -183,6 +185,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'icon',
         galleryId: 'gallery-00',
         title: 'فروشگاه موزه (Museum Shop)',
+        locationId: 'Location_14',
         x: 186,
         y: 620,
         iconType: 'preset-location-shop',
@@ -195,12 +198,191 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'icon',
         galleryId: 'gallery-00',
         title: 'باغ موزه (Museum Garden)',
+        locationId: 'Location_13',
         x: 310,
         y: 349,
         iconType: 'preset-location-tree',
         width: 32,
         height: 32,
         destination: 'gallery-00',
+      },
+      {
+        id: 'icon-g00-entrance',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'درب ورودی موزه (Entrance)',
+        locationId: 'Location_15',
+        x: 302,
+        y: 80,
+        iconType: 'preset-location-entrance',
+        width: 32,
+        height: 32,
+        destination: 'gallery-00',
+      },
+      {
+        id: 'icon-g00-wc',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'سرویس بهداشتی (WC)',
+        locationId: 'Location_17',
+        x: 245,
+        y: 110,
+        iconType: 'preset-location-wc',
+        width: 32,
+        height: 32,
+        destination: 'gallery-00',
+      },
+      {
+        id: 'icon-g00-library',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'کتابخانه تخصصی (Library)',
+        locationId: 'Location_11',
+        x: 360,
+        y: 110,
+        iconType: 'preset-location-library',
+        width: 32,
+        height: 32,
+        destination: 'gallery-00',
+      },
+      {
+        id: 'icon-g00-cinema',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'سینماتک موزه (Cinema)',
+        locationId: 'Location_12',
+        x: 440,
+        y: 140,
+        iconType: 'preset-location-cinema',
+        width: 32,
+        height: 32,
+        destination: 'gallery-00',
+      },
+      {
+        id: 'icon-g00-gallery-1',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'گالری ۰۱',
+        locationId: 'Location_1',
+        x: 220,
+        y: 520,
+        iconType: 'preset-location-gallery-1',
+        galleryNumber: 1,
+        width: 32,
+        height: 32,
+        destination: 'gallery-01',
+      },
+      {
+        id: 'icon-g00-gallery-2',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'گالری ۰۲',
+        locationId: 'Location_2',
+        x: 175,
+        y: 503,
+        iconType: 'preset-location-gallery-2',
+        galleryNumber: 2,
+        width: 32,
+        height: 32,
+        destination: 'gallery-02',
+      },
+      {
+        id: 'icon-g00-gallery-3',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'گالری ۰۳',
+        locationId: 'Location_3',
+        x: 157,
+        y: 332,
+        iconType: 'preset-location-gallery-3',
+        galleryNumber: 3,
+        width: 32,
+        height: 32,
+        destination: 'gallery-03',
+      },
+      {
+        id: 'icon-g00-gallery-4',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'گالری ۰۴',
+        locationId: 'Location_4',
+        x: 161,
+        y: 185,
+        iconType: 'preset-location-gallery-4',
+        galleryNumber: 4,
+        width: 32,
+        height: 32,
+        destination: 'gallery-04',
+      },
+      {
+        id: 'icon-g00-gallery-5',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'گالری ۰۵',
+        locationId: 'Location_5',
+        x: 313,
+        y: 129,
+        iconType: 'preset-location-gallery-5',
+        galleryNumber: 5,
+        width: 32,
+        height: 32,
+        destination: 'gallery-05',
+      },
+      {
+        id: 'icon-g00-gallery-6',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'گالری ۰۶',
+        locationId: 'Location_6',
+        x: 467,
+        y: 265,
+        iconType: 'preset-location-gallery-6',
+        galleryNumber: 6,
+        width: 32,
+        height: 32,
+        destination: 'gallery-06',
+      },
+      {
+        id: 'icon-g00-gallery-7',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'گالری ۰۷',
+        locationId: 'Location_7',
+        x: 416,
+        y: 299,
+        iconType: 'preset-location-gallery-7',
+        galleryNumber: 7,
+        width: 26,
+        height: 26,
+        destination: 'gallery-07',
+      },
+      {
+        id: 'icon-g00-gallery-8',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'گالری ۰۸',
+        locationId: 'Location_8',
+        x: 428,
+        y: 384,
+        iconType: 'preset-location-gallery-8',
+        galleryNumber: 8,
+        width: 32,
+        height: 32,
+        destination: 'gallery-08',
+      },
+      {
+        id: 'icon-g00-gallery-9',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'گالری ۰۹',
+        locationId: 'Location_9',
+        x: 444,
+        y: 505,
+        iconType: 'preset-location-gallery-9',
+        galleryNumber: 9,
+        width: 32,
+        height: 32,
+        destination: 'gallery-09',
       },
     ],
     arrows: [
@@ -256,20 +438,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [],
       },
     ],
-    iconPoints: [
-      {
-        id: 'icon-g01-questions',
-        type: 'icon',
-        galleryId: 'gallery-01',
-        title: 'Gallery 01 Questions & Quiz',
-        x: 203,
-        y: 395,
-        iconType: 'preset-question',
-        width: 28,
-        height: 36,
-        destination: 'gallery-01-questions',
-      },
-    ],
+    iconPoints: [],
     puzzlePoints: [
       {
         id: 'puzzle-point-01',
@@ -372,20 +541,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [],
       },
     ],
-    iconPoints: [
-      {
-        id: 'icon-g01-questions',
-        type: 'icon',
-        galleryId: 'gallery-02',
-        title: 'Gallery 02 Questions & Quiz',
-        x: 203,
-        y: 395,
-        iconType: 'preset-question',
-        width: 28,
-        height: 36,
-        destination: 'gallery-01-questions',
-      },
-    ],
+    iconPoints: [],
     puzzlePoints: [
       {
         id: 'puzzle-point-01',
@@ -505,20 +661,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         ],
       },
     ],
-    iconPoints: [
-      {
-        id: 'icon-g03-questions',
-        type: 'icon',
-        galleryId: 'gallery-03',
-        title: 'Gallery 03 Questions & Quiz',
-        x: 240,
-        y: 374,
-        iconType: 'preset-question',
-        width: 48,
-        height: 34,
-        destination: 'gallery-03-questions',
-      },
-    ],
+    iconPoints: [],
     puzzlePoints: [
       {
         id: 'puzzle-g03-point-01',
@@ -608,20 +751,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [],
       },
     ],
-    iconPoints: [
-      {
-        id: 'icon-g04-info',
-        type: 'icon',
-        galleryId: 'gallery-04',
-        title: 'اطلاعات گالری ۰۴',
-        x: 244,
-        y: 387,
-        iconType: 'preset-question',
-        width: 48,
-        height: 34,
-        destination: 'gallery-04',
-      },
-    ],
+    iconPoints: [],
     puzzlePoints: [
       {
         id: 'puzzle-g04-point-01',
@@ -743,20 +873,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [],
       },
     ],
-    iconPoints: [
-      {
-        id: 'icon-g05-info',
-        type: 'icon',
-        galleryId: 'gallery-05',
-        title: 'اطلاعات گالری ۰۵',
-        x: 215,
-        y: 242,
-        iconType: 'preset-question',
-        width: 48,
-        height: 34,
-        destination: 'gallery-05',
-      },
-    ],
+    iconPoints: [],
     puzzlePoints: [
       {
         id: 'puzzle-g05-point-01',
@@ -911,20 +1028,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [],
       },
     ],
-    iconPoints: [
-      {
-        id: 'icon-g06-info',
-        type: 'icon',
-        galleryId: 'gallery-06',
-        title: 'اطلاعات گالری ۰۶',
-        x: 325,
-        y: 460,
-        iconType: 'preset-question',
-        width: 48,
-        height: 34,
-        destination: 'gallery-06',
-      },
-    ],
+    iconPoints: [],
     puzzlePoints: [
       {
         id: 'puzzle-g06-point-01',
@@ -1013,20 +1117,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [],
       },
     ],
-    iconPoints: [
-      {
-        id: 'icon-g07-info',
-        type: 'icon',
-        galleryId: 'gallery-07',
-        title: 'اطلاعات گالری ۰۷',
-        x: 308,
-        y: 67,
-        iconType: 'preset-question',
-        width: 48,
-        height: 34,
-        destination: 'gallery-07',
-      },
-    ],
+    iconPoints: [],
     puzzlePoints: [
       {
         id: 'puzzle-g07-point-01',
@@ -1103,20 +1194,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     width: 501.5,
     height: 642.18,
     collectionPoints: [],
-    iconPoints: [
-      {
-        id: 'icon-g08-info',
-        type: 'icon',
-        galleryId: 'gallery-08',
-        title: 'اطلاعات گالری ۰۸',
-        x: 226,
-        y: 229,
-        iconType: 'preset-question',
-        width: 48,
-        height: 34,
-        destination: 'gallery-08',
-      },
-    ],
+    iconPoints: [],
     puzzlePoints: [
       {
         id: 'puzzle-g08-point-01',
@@ -1260,20 +1338,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [],
       },
     ],
-    iconPoints: [
-      {
-        id: 'icon-g09-info',
-        type: 'icon',
-        galleryId: 'gallery-09',
-        title: 'اطلاعات گالری ۰۹',
-        x: 251,
-        y: 220,
-        iconType: 'preset-question',
-        width: 48,
-        height: 34,
-        destination: 'gallery-09',
-      },
-    ],
+    iconPoints: [],
     puzzlePoints: [
       {
         id: 'puzzle-g09-point-01',
@@ -1373,8 +1438,19 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
               const savedIcons = (parsed[key].iconPoints || []).filter((i: any) => i.id !== 'icon-3527');
               const combinedIcons = [...savedIcons];
               for (const defIcon of defaultIcons) {
-                if (defIcon.id !== 'icon-3527' && !combinedIcons.some((i) => i.id === defIcon.id)) {
-                  combinedIcons.push(defIcon);
+                if (defIcon.id !== 'icon-3527') {
+                  const existingIdx = combinedIcons.findIndex((i: any) => i.id === defIcon.id);
+                  if (existingIdx === -1) {
+                    combinedIcons.push(defIcon);
+                  } else {
+                    combinedIcons[existingIdx] = {
+                      ...defIcon,
+                      ...combinedIcons[existingIdx],
+                      iconType: defIcon.iconType,
+                      galleryNumber: defIcon.galleryNumber,
+                      title: combinedIcons[existingIdx].title || defIcon.title,
+                    };
+                  }
                 }
               }
 
@@ -1488,29 +1564,25 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
             const targetWidth = cafePt?.width || 32;
             const targetHeight = cafePt?.height || 32;
             let list = [...rawList];
-            if (!list.some((ip) => ip.id === 'icon-g00-shop')) {
-              const defaultShop = DEFAULT_MAP_DATABASE['gallery-00']?.iconPoints?.find((ip) => ip.id === 'icon-g00-shop');
-              if (defaultShop) {
-                list.push({ ...defaultShop, width: targetWidth, height: targetHeight });
+
+            const defaultIcons = DEFAULT_MAP_DATABASE['gallery-00']?.iconPoints || [];
+            for (const defIcon of defaultIcons) {
+              const existingIdx = list.findIndex((ip) => ip.id === defIcon.id);
+              const isG7 = defIcon.iconType === 'preset-location-gallery-7' || defIcon.id === 'icon-g00-gallery-7';
+              const iconW = isG7 ? Math.round(targetWidth * 0.8) : targetWidth;
+              const iconH = isG7 ? Math.round(targetHeight * 0.8) : targetHeight;
+              if (existingIdx === -1) {
+                list.push({ ...defIcon, width: iconW, height: iconH });
+              } else {
+                if (defIcon.iconType?.startsWith('preset-location-') || defIcon.locationId) {
+                  list[existingIdx] = {
+                    ...list[existingIdx],
+                    locationId: list[existingIdx].locationId || defIcon.locationId,
+                    width: isG7 ? iconW : (list[existingIdx].width || iconW),
+                    height: isG7 ? iconH : (list[existingIdx].height || iconH),
+                  };
+                }
               }
-            } else {
-              list = list.map((ip) => (ip.id === 'icon-g00-shop' ? { ...ip, width: targetWidth, height: targetHeight } : ip));
-            }
-            if (!list.some((ip) => ip.id === 'icon-g00-frame')) {
-              const defaultFrame = DEFAULT_MAP_DATABASE['gallery-00']?.iconPoints?.find((ip) => ip.id === 'icon-g00-frame');
-              if (defaultFrame) {
-                list.push({ ...defaultFrame, width: targetWidth, height: targetHeight });
-              }
-            } else {
-              list = list.map((ip) => (ip.id === 'icon-g00-frame' ? { ...ip, width: targetWidth, height: targetHeight } : ip));
-            }
-            if (!list.some((ip) => ip.id === 'icon-g00-tree')) {
-              const defaultTree = DEFAULT_MAP_DATABASE['gallery-00']?.iconPoints?.find((ip) => ip.id === 'icon-g00-tree');
-              if (defaultTree) {
-                list.push({ ...defaultTree, width: targetWidth, height: targetHeight });
-              }
-            } else {
-              list = list.map((ip) => (ip.id === 'icon-g00-tree' ? { ...ip, width: targetWidth, height: targetHeight } : ip));
             }
             return list;
           })()

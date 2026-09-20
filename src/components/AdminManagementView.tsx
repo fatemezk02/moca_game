@@ -47,6 +47,9 @@ import {
   Navigation,
   Puzzle,
   Trees,
+  BookOpen,
+  Film,
+  DoorOpen,
 } from 'lucide-react';
 
 interface AdminManagementViewProps {
@@ -1263,6 +1266,92 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
                           onClick={() =>
                             handleUpdatePoint({
                               ...selectedPoint,
+                              iconType: 'preset-location-wc',
+                            })
+                          }
+                          className={`p-2 border text-center flex items-center justify-center gap-1.5 cursor-pointer font-bold ${
+                            (selectedPoint as AdminIconPoint).iconType === 'preset-location-wc'
+                              ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                              : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                          }`}
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-blue-600" />
+                          <span>پین لوکیشن (سرویس بهداشتی WC)</span>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
+                              iconType: 'preset-location-library',
+                            })
+                          }
+                          className={`p-2 border text-center flex items-center justify-center gap-1.5 cursor-pointer font-bold ${
+                            (selectedPoint as AdminIconPoint).iconType === 'preset-location-library'
+                              ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                              : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                          }`}
+                        >
+                          <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+                          <span>پین لوکیشن (کتابخانه)</span>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
+                              iconType: 'preset-location-entrance',
+                            })
+                          }
+                          className={`p-2 border text-center flex items-center justify-center gap-1.5 cursor-pointer font-bold ${
+                            (selectedPoint as AdminIconPoint).iconType === 'preset-location-entrance'
+                              ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                              : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                          }`}
+                        >
+                          <LogIn className="w-3.5 h-3.5 text-teal-600" />
+                          <span>پین لوکیشن (درب ورود)</span>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
+                              iconType: 'preset-location-cinema',
+                            })
+                          }
+                          className={`p-2 border text-center flex items-center justify-center gap-1.5 cursor-pointer font-bold ${
+                            (selectedPoint as AdminIconPoint).iconType === 'preset-location-cinema'
+                              ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                              : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                          }`}
+                        >
+                          <Film className="w-3.5 h-3.5 text-purple-600" />
+                          <span>پین لوکیشن (سینما)</span>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
+                              iconType: 'preset-location-gallery',
+                              galleryNumber: (selectedPoint as AdminIconPoint).galleryNumber || 1,
+                            })
+                          }
+                          className={`p-2 border text-center flex items-center justify-center gap-1.5 cursor-pointer font-bold ${
+                            (selectedPoint as AdminIconPoint).iconType?.startsWith('preset-location-gallery')
+                              ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                              : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                          }`}
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-[#c5a059]" />
+                          <span>پین فریم گالری (۱ تا ۹)</span>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleUpdatePoint({
+                              ...selectedPoint,
                               iconType: 'upload',
                             })
                           }
@@ -1277,6 +1366,40 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
                         </button>
                       </div>
                     </div>
+
+                    {/* Gallery Number Selector if type is gallery frame */}
+                    {(selectedPoint as AdminIconPoint).iconType?.startsWith('preset-location-gallery') && (
+                      <div className="p-3 bg-[#faf9f6] border border-[#0e0f0f]/20 space-y-2">
+                        <label className="block text-[11px] font-bold font-mono-custom text-[#747878] uppercase">
+                          شماره گالری روی فریم (۱ تا ۹)
+                        </label>
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                            <button
+                              key={num}
+                              type="button"
+                              onClick={() => {
+                                handleUpdatePoint({
+                                  ...selectedPoint,
+                                  iconType: `preset-location-gallery-${num}` as any,
+                                  galleryNumber: num,
+                                  title: `گالری ۰${num}`,
+                                  destination: `gallery-0${num}` as any,
+                                });
+                              }}
+                              className={`p-1.5 border text-center font-bold text-sm cursor-pointer ${
+                                ((selectedPoint as AdminIconPoint).galleryNumber || 1) === num ||
+                                (selectedPoint as AdminIconPoint).iconType === `preset-location-gallery-${num}`
+                                  ? 'bg-[#0e0f0f] text-white border-[#0e0f0f]'
+                                  : 'bg-white hover:bg-[#eae7e7] border-[#0e0f0f]/30 text-[#0e0f0f]'
+                              }`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Upload Custom Icon if type is upload */}
                     {(selectedPoint as AdminIconPoint).iconType === 'upload' && (

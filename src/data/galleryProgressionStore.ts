@@ -80,6 +80,50 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
       'gallery05-piece-03',
     ],
   },
+  'gallery-06': {
+    galleryId: 'gallery-06',
+    targetGalleryId: 'gallery-07',
+    arrowId: 'arrow-g06-to-g07',
+    requiredPuzzlePiecesCount: 3,
+    requiredPuzzlePieceIds: [
+      'gallery06-piece-01',
+      'gallery06-piece-02',
+      'gallery06-piece-03',
+    ],
+  },
+  'gallery-07': {
+    galleryId: 'gallery-07',
+    targetGalleryId: 'gallery-08',
+    arrowId: 'arrow-g07-to-g08',
+    requiredPuzzlePiecesCount: 3,
+    requiredPuzzlePieceIds: [
+      'gallery07-piece-01',
+      'gallery07-piece-02',
+      'gallery07-piece-03',
+    ],
+  },
+  'gallery-08': {
+    galleryId: 'gallery-08',
+    targetGalleryId: 'gallery-09',
+    arrowId: 'arrow-g08-to-g09',
+    requiredPuzzlePiecesCount: 3,
+    requiredPuzzlePieceIds: [
+      'gallery08-piece-01',
+      'gallery08-piece-02',
+      'gallery08-piece-03',
+    ],
+  },
+  'gallery-09': {
+    galleryId: 'gallery-09',
+    targetGalleryId: 'gallery-00',
+    arrowId: 'arrow-g09-to-g00',
+    requiredPuzzlePiecesCount: 3,
+    requiredPuzzlePieceIds: [
+      'gallery09-piece-01',
+      'gallery09-piece-02',
+      'gallery09-piece-03',
+    ],
+  },
 };
 
 /**
@@ -95,7 +139,8 @@ export function getProgressionRuleForArrow(arrowId: string): GalleryProgressionR
  */
 export function getProgressionRuleForGallery(galleryId: string): GalleryProgressionRule | undefined {
   if (!galleryId) return undefined;
-  return GALLERY_PROGRESSION_RULES[galleryId];
+  const norm = galleryId.toLowerCase().replace('_', '-');
+  return GALLERY_PROGRESSION_RULES[norm] || GALLERY_PROGRESSION_RULES[galleryId];
 }
 
 /**
@@ -107,30 +152,39 @@ export function getProgressionRuleForGallery(galleryId: string): GalleryProgress
  * - Gallery 03 -> Requires all 3 puzzle pieces collected (piece1 && piece2 && piece3)
  */
 export function isProgressionConditionsSatisfied(galleryId: string): boolean {
-  const rule = getProgressionRuleForGallery(galleryId) ||
-    (galleryId === 'gallery-02' || galleryId === 'gallery_02' ? getProgressionRuleForGallery('gallery-01') : undefined);
-  if (!rule) return true;
+  const norm = galleryId.toLowerCase().replace('_', '-');
+  const rule =
+    getProgressionRuleForGallery(norm) ||
+    getProgressionRuleForGallery(galleryId) ||
+    (norm === 'gallery-02' ? getProgressionRuleForGallery('gallery-01') : undefined);
+
+  if (!rule) {
+    return isGalleryPuzzleCompleted(galleryId) || isGalleryPuzzleCompleted(norm);
+  }
 
   if (rule.requiredPuzzlePiecesCount === 0) {
     return true;
   }
 
   // If gallery puzzle is already marked completed, progression is satisfied
-  if (isGalleryPuzzleCompleted(rule.galleryId) || isGalleryPuzzleCompleted(galleryId)) {
+  if (isGalleryPuzzleCompleted(rule.galleryId) || isGalleryPuzzleCompleted(galleryId) || isGalleryPuzzleCompleted(norm)) {
     return true;
   }
 
   // Check if all required puzzle pieces have been collected
   if (rule.requiredPuzzlePieceIds && rule.requiredPuzzlePieceIds.length > 0) {
-    const allPiecesCollected = rule.requiredPuzzlePieceIds.every((pieceId) =>
-      isPuzzlePieceCollected(rule.galleryId, pieceId) || isPuzzlePieceCollected(galleryId, pieceId)
+    const allPiecesCollected = rule.requiredPuzzlePieceIds.every(
+      (pieceId) =>
+        isPuzzlePieceCollected(rule.galleryId, pieceId) ||
+        isPuzzlePieceCollected(galleryId, pieceId) ||
+        isPuzzlePieceCollected(norm, pieceId)
     );
     if (!allPiecesCollected) {
       return false;
     }
   }
 
-  return isGalleryPuzzleCompleted(rule.galleryId) || isGalleryPuzzleCompleted(galleryId);
+  return isGalleryPuzzleCompleted(rule.galleryId) || isGalleryPuzzleCompleted(galleryId) || isGalleryPuzzleCompleted(norm);
 }
 
 /**

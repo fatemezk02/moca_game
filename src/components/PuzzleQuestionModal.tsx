@@ -23,10 +23,13 @@ import {
   markGalleryPuzzleCompleted,
   isPuzzlePointCompleted,
   markPuzzlePointCompleted,
+  recordPuzzleIncorrectAttempt,
 } from '../data/puzzleProgressStore';
+import { deductCoins } from '../data/questionProgressStore';
 import { markQuestionAnswered } from '../data/arrowConditionsStore';
 import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian, normalizeGalleryId, toPersianDigits } from '../services/content/mappers';
+import { usePlayerStats } from '../hooks/usePlayerStats';
 import { JigsawPieceGraphic } from './JigsawPieceGraphic';
 import { ArtworkFrame } from './ArtworkFrame';
 import {
@@ -172,8 +175,12 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
 
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [wrongOptionIndex, setWrongOptionIndex] = useState<number | null>(null);
+  const [floatingPenalty, setFloatingPenalty] = useState<number | null>(null);
   const [isAnswering, setIsAnswering] = useState<boolean>(false);
   const [assembledPiecesCount, setAssembledPiecesCount] = useState<number>(0);
+
+  const playerStats = usePlayerStats();
+  const hasZeroCoins = playerStats.coins <= 0;
 
   // Get live collected pieces list
   const [collectedPieces, setCollectedPieces] = useState<string[]>(() =>
@@ -216,11 +223,40 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
     const isCorrect = correctIdx === -1 || index === correctIdx;
 
     if (!isCorrect) {
-      // No coins deducted on incorrect answer
+      const effectivePuzzleId =
+        puzzlePoint.id ||
+        puzzlePoint.questionId ||
+        puzzlePoint.puzzlePieceId ||
+        `${canonicalGalleryId}_puzzle_${puzzleNumber}`;
+
+      const alreadyDone = isPuzzlePointCompleted(
+        puzzlePoint.id,
+        canonicalGalleryId,
+        puzzlePoint.puzzlePieceId
+      );
+
+      let penalty = 0;
+      if (!alreadyDone) {
+        const attemptNum = recordPuzzleIncorrectAttempt(effectivePuzzleId);
+        if (attemptNum === 1) {
+          penalty = 5;
+        } else if (attemptNum === 2) {
+          penalty = 10;
+        } else {
+          penalty = 0;
+        }
+
+        if (penalty > 0) {
+          deductCoins(penalty);
+          setFloatingPenalty(penalty);
+        }
+      }
+
       setWrongOptionIndex(index);
       setIsAnswering(true);
       setTimeout(() => {
         setWrongOptionIndex(null);
+        setFloatingPenalty(null);
         setIsAnswering(false);
       }, 900);
       return;
@@ -357,7 +393,21 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                   exit={{ opacity: 0, y: -8 }}
                   className="space-y-4"
                 >
-                  {!questionData ? (
+                  {hasZeroCoins ? (
+                    <div className="space-y-3 p-5 sm:p-6 bg-[#fffbeb] border-2 border-[#f59e0b] rounded-2xl text-center shadow-[2px_2px_0px_#1e1b18] my-auto">
+                      <div className="w-12 h-12 mx-auto rounded-full bg-[#fef3c7] border-2 border-[#d97706] flex items-center justify-center text-2xl select-none">
+                        🪙
+                      </div>
+                      <div className="space-y-2 text-center">
+                        <h4 className="font-sans-custom text-[14px] sm:text-[15px] font-black text-[#92400e] leading-snug">
+                          برای پاسخ‌گویی به بیش از ۵ سکه احتیاج داری
+                        </h4>
+                        <p className="font-sans-custom text-[12px] sm:text-[13px] font-bold text-[#b45309] leading-relaxed">
+                          برای جمع کردن سکه به سوالات اثار ستاره دار سر بزن
+                        </p>
+                      </div>
+                    </div>
+                  ) : !questionData ? (
                     <div className="space-y-3 p-5 bg-[#f8fafc] border-2 border-dashed border-[#cbd5e1] rounded-xl text-center">
                       <div className="w-10 h-10 mx-auto rounded-full bg-[#f1f5f9] border border-[#cbd5e1] flex items-center justify-center">
                         <HelpCircle className="w-5 h-5 text-[#64748b]" />
@@ -430,8 +480,32 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                         <motion.div
                           initial={{ opacity: 0, y: -4 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="p-2.5 bg-[#fef2f2] border-2 border-[#f87171] rounded-xl text-center"
+                          className="relative p-2.5 bg-[#fef2f2] border-2 border-[#f87171] rounded-xl text-center flex flex-col items-center justify-center"
                         >
+                          {floatingPenalty !== null && floatingPenalty > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 8, scale: 0.8 }}
+                              animate={{
+                                opacity: [0, 1, 1, 0],
+                                y: [8, -4, -14, -24],
+                                scale: [0.8, 1.1, 1.05, 0.95],
+                              }}
+                              transition={{
+                                duration: 0.9,
+                                times: [0, 0.2, 0.7, 1],
+                                ease: 'easeOut',
+                              }}
+                              className="absolute -top-3.5 z-30 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fee2e2] border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] text-[#dc2626] select-none pointer-events-none"
+                            >
+                              <span
+                                className="font-mono-custom text-[13px] sm:text-[14px] font-black text-[#dc2626] flex items-center gap-1"
+                                dir="ltr"
+                              >
+                                <span>−{toPersianDigits(floatingPenalty)}</span>
+                                <span className="text-[13px]">🪙</span>
+                              </span>
+                            </motion.div>
+                          )}
                           <p className="text-[12px] font-bold text-[#dc2626]">
                             پاسخ نادرست بود. لطفاً دوباره تلاش کنید!
                           </p>
@@ -752,12 +826,9 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                   {/* Congratulatory Celebration Banner */}
                   <div className="bg-[#dcfce7] border-2 border-[#1e1b18] px-4 py-2 rounded-xl shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center gap-2 text-[13px] font-black text-[#15803d]">
                     <Sparkles className="w-4 h-4 text-[#15803d]" />
-                    <span>شاهکار پازل تکمیل گردید! 🎉</span>
+                    <span>دمت گرم این پازل رو تکمیل کردی 🎉</span>
                   </div>
 
-                  <p className="text-[12px] font-medium text-[#64748b] leading-relaxed">
-                    تمام قطعات پازل {puzzleConfig.galleryNameFa} با موفقیت سرهم شده و تصویر شاهکار کامل گردید.
-                  </p>
 
                   {(areAll8GalleryPuzzlesCompleted() || isFinalCompletionAwarded()) && (
                     <button

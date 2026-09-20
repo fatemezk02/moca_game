@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FinalCompletionCardBack } from './FinalCompletionCardBack';
+import { triggerMuseumExplorerConfetti } from '../data/finalCompletionStore';
 
 export interface FinalCertificateModalProps {
   isOpen: boolean;
@@ -16,6 +17,15 @@ export const FinalCertificateModal: React.FC<FinalCertificateModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        triggerMuseumExplorerConfetti();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {

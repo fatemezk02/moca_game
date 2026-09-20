@@ -435,11 +435,16 @@ export function getGalleryPuzzleConfig(galleryId?: string): GalleryPuzzleConfig 
     return GALLERY_PUZZLE_REGISTRY[canonId];
   }
 
+  const rawDigits = canonId.replace(/[^0-9]/g, '');
+  const digitsFa = rawDigits
+    ? rawDigits.padStart(2, '0').replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d, 10)])
+    : '';
+
   // Extensible default configuration for other galleries
   return {
     galleryId: canonId,
-    galleryNameFa: `گالری ${canonId}`,
-    galleryNameEn: `Gallery ${canonId}`,
+    galleryNameFa: digitsFa ? `گالری ${digitsFa}` : `گالری ${canonId}`,
+    galleryNameEn: `Gallery ${rawDigits ? rawDigits.padStart(2, '0') : canonId}`,
     totalPieces: 3,
     aspectRatio: '1/1',
     artworkWidth: 1000,
