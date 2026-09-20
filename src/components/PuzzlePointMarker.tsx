@@ -68,13 +68,13 @@ export const PuzzlePointMarker: React.FC<PuzzlePointMarkerProps> = ({
           fill={
             isSelected
               ? '#ef4444'
-              : '#9d75fc'
+              : '#D369FF'
           }
           stroke="#1e1b18"
           strokeWidth="1.6"
           strokeLinejoin="round"
           strokeLinecap="round"
-          className="transition-colors group-hover:fill-[#c4b5fd]"
+          className="transition-colors group-hover:fill-[#e29aff]"
         />
 
         {/* Subtle internal emboss line */}
