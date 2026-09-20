@@ -323,7 +323,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                 title={`پیشرفت پازل: ${toPersianDigits(collectedPieces.length)} از ${toPersianDigits(totalPieces)} قطعه`}
                 className="bg-[#ffffff] text-[#1e1b18] border-[1.5px] border-[#1e1b18] rounded-full px-2.5 py-0.5 shadow-[1px_1px_0px_#1e1b18] flex items-center gap-1 font-mono-custom text-[11px] font-bold"
               >
-                <span className="w-2 h-2 rounded-full bg-[#c084fc] inline-block"></span>
+                <span className="w-2 h-2 rounded-full bg-[#a78bfa] inline-block"></span>
                 <span>🧩</span>
                 <span dir="ltr">
                   {toPersianDigits(collectedPieces.length)}/{toPersianDigits(totalPieces)}
