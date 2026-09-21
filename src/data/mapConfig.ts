@@ -418,8 +418,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-01',
         title: 'North Apse Monolith',
         roomSection: 'NORTH ROTUNDA',
-        x: 137,
-        y: 211,
+        x: 317,
+        y: 518,
         frames: [
           { id: 'artwork-01-f1', order: 1, x: 0, y: 0, scale: 1 },
           { id: 'artwork-01-f2', order: 2, x: 0, y: 0, scale: 1 },
@@ -434,8 +434,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-01',
         title: 'Camera Work Magazine',
         roomSection: 'VAULT PAVILION',
-        x: 317,
-        y: 518,
+        x: 137,
+        y: 211,
         frames: [],
       },
     ],
@@ -525,8 +525,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-02',
         title: 'North Apse Monolith',
         roomSection: 'NORTH ROTUNDA',
-        x: 137,
-        y: 211,
+        x: 317,
+        y: 518,
         frames: [],
       },
       {
@@ -537,8 +537,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-02',
         title: 'Camera Work Magazine',
         roomSection: 'VAULT PAVILION',
-        x: 317,
-        y: 518,
+        x: 137,
+        y: 211,
         frames: [],
       },
     ],
@@ -1410,7 +1410,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
   },
 };
 
-const STORAGE_MAP_CONFIG_KEY = 'museum_map_config_v5';
+const STORAGE_MAP_CONFIG_KEY = 'museum_map_config_v6';
 
 /**
  * In-memory working database with live persistent synchronization
@@ -1497,6 +1497,10 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                   combinedCollections.push(defCol);
                 } else if (defCol.pointType === 'star') {
                   combinedCollections[existingIdx].pointType = 'star';
+                  if ((key === 'gallery-01' || key === 'gallery-02' || key === 'gallery_01' || key === 'gallery_02') && (defCol.id === 'artwork-01' || defCol.id === 'star-02')) {
+                    combinedCollections[existingIdx].x = defCol.x;
+                    combinedCollections[existingIdx].y = defCol.y;
+                  }
                 }
               }
 

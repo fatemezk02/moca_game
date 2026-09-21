@@ -63,9 +63,9 @@ export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
           className="relative z-10 w-full max-w-md bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] text-right overflow-hidden flex flex-col"
         >
           {/* Top Header Bar */}
-          <div className="bg-[#fef3c7] border-b-2 border-[#1e1b18] px-4 py-2.5 flex items-center justify-between shrink-0">
+          <div className="bg-[#fee2e2] border-b-2 border-[#1e1b18] px-4 py-2.5 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#f59e0b] border-[1.5px] border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center text-[#1e1b18]">
+              <div className="w-6 h-6 rounded-full bg-[#ef4444] border-[1.5px] border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center text-[#1e1b18]">
                 <Lock className="w-3.5 h-3.5 text-[#1e1b18]" />
               </div>
               <div className="text-right">
@@ -95,13 +95,14 @@ export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
                   onClose();
                   onUnlockSuccess(targetId);
                 }}
-                className="flex-1 py-3.5 px-2 sm:px-3 bg-[#fee2e2] hover:bg-[#fecaca] border-2 border-[#1e1b18] rounded-xl shadow-[2.5px_2.5px_0px_#1e1b18] text-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-2 group select-none min-h-[48px]"
+                className="flex-1 py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#fef2f2] border-2 border-[#1e1b18] rounded-xl shadow-[2.5px_2.5px_0px_#1e1b18] text-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-2 group select-none min-h-[48px]"
               >
-                <div className="w-7 h-7 rounded-lg bg-[#ffffff] border border-[#1e1b18] flex items-center justify-center text-[#dc2626] shrink-0 group-hover:bg-[#f87171] transition-colors">
+                <div className="w-7 h-7 rounded-lg bg-[#fee2e2] border border-[#1e1b18] flex items-center justify-center text-[#dc2626] shrink-0 group-hover:bg-[#fecaca] transition-colors">
                   <Coins className="w-4 h-4 text-[#1e1b18]" />
                 </div>
-                <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
-                  پرداخت ۲۵ سکه
+                <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap flex items-center justify-center gap-1">
+                  <span dir="ltr">-۲۵</span>
+                  <span>سکه</span>
                 </span>
               </button>
 
@@ -110,9 +111,9 @@ export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
                   onClose();
                   onNavigateToCurrent(currentGid);
                 }}
-                className="flex-1 py-3.5 px-2 sm:px-3 bg-[#e0f2fe] hover:bg-[#bae6fd] text-[#1e1b18] font-black text-[13px] sm:text-[14px] rounded-xl border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] transition-all flex items-center justify-center gap-2 group cursor-pointer min-h-[48px] select-none"
+                className="flex-1 py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#f0f9ff] text-[#1e1b18] font-black text-[13px] sm:text-[14px] rounded-xl border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] transition-all flex items-center justify-center gap-2 group cursor-pointer min-h-[48px] select-none"
               >
-                <div className="w-7 h-7 rounded-lg bg-[#ffffff] border border-[#1e1b18] flex items-center justify-center text-[#0284c7] shrink-0 group-hover:bg-[#38bdf8] transition-colors">
+                <div className="w-7 h-7 rounded-lg bg-[#e0f2fe] border border-[#1e1b18] flex items-center justify-center text-[#0284c7] shrink-0 group-hover:bg-[#bae6fd] transition-colors">
                   <Compass className="w-4 h-4 text-[#1e1b18]" />
                 </div>
                 <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">

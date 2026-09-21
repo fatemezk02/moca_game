@@ -79,12 +79,12 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
     { id: string; starId: string; title: string; defaultX: number; defaultY: number }[]
   > = {
     'gallery-01': [
-      { id: 'artwork-01', starId: 'star-01', title: 'کالوتایپ — فاکس تالبوت', defaultX: 137, defaultY: 211 },
-      { id: 'star-02', starId: 'star-02', title: 'مجله‌های Camera Work', defaultX: 317, defaultY: 518 },
+      { id: 'artwork-01', starId: 'star-01', title: 'کالوتایپ — فاکس تالبوت', defaultX: 317, defaultY: 518 },
+      { id: 'star-02', starId: 'star-02', title: 'مجله‌های Camera Work', defaultX: 137, defaultY: 211 },
     ],
     'gallery-02': [
-      { id: 'artwork-01', starId: 'star-01', title: 'North Apse Monolith', defaultX: 137, defaultY: 211 },
-      { id: 'star-02', starId: 'star-02', title: 'مجله‌های Camera Work', defaultX: 317, defaultY: 518 },
+      { id: 'artwork-01', starId: 'star-01', title: 'North Apse Monolith', defaultX: 317, defaultY: 518 },
+      { id: 'star-02', starId: 'star-02', title: 'مجله‌های Camera Work', defaultX: 137, defaultY: 211 },
     ],
     'gallery-03': [
       { id: 'artwork-g03-star', starId: 'star-03', title: 'در جست‌وجوی فن و فضیلت', defaultX: 363, defaultY: 446 },

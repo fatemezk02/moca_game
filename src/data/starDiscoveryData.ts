@@ -143,14 +143,17 @@ export function mapStarContentToDiscoveryItem(
   if (!resolvedImageUrl && fallback) {
     resolvedImageUrl = fallback.information?.image || fallback.discoveryArtwork?.image || '';
   }
+  // If stars have no image in Google Sheets, remain empty
   if (
     !resolvedImageUrl &&
     (star.id === 'star-01' ||
       starPointId === 'artwork-01' ||
+      star.id === 'star-02' ||
+      starPointId === 'star-02' ||
       star.galleryId === 'gallery-01' ||
       star.galleryId === 'gallery_01')
   ) {
-    resolvedImageUrl = GALLERY_01_ARTWORK_SRC;
+    resolvedImageUrl = '';
   }
 
   const rawTextFa = (star.artworkTextFa || '').trim();
@@ -249,12 +252,12 @@ export const DEFAULT_STAR_DISCOVERIES: Record<string, StarDiscoveryItem> = {
       explanation: 'ویلیام هنری فاکس تالبوت در سال ۱۸۴۱ روش کالوتایپ را به ثبت رساند.',
     },
     discoveryArtwork: {
-      image: GALLERY_01_ARTWORK_SRC,
+      image: '',
       textFa: 'کالوتایپ روشی بود که ویلیام هنری فاکس تالبوت در سال ۱۸۴۱ به ثبت رساند.',
       textEn: 'Invented and patented by William Henry Fox Talbot in 1841.',
     },
     information: {
-      image: GALLERY_01_ARTWORK_SRC,
+      image: '',
       textFa: 'کالوتایپ روشی بود که ویلیام هنری فاکس تالبوت در سال ۱۸۴۱ به ثبت رساند.',
       textEn: 'Invented and patented by William Henry Fox Talbot in 1841.',
     },
@@ -302,12 +305,12 @@ export const DEFAULT_STAR_DISCOVERIES: Record<string, StarDiscoveryItem> = {
       explanation: 'مجله Camera Work نقش کلیدی در معرفی عکاسی به‌عنوان هنر داشت.',
     },
     discoveryArtwork: {
-      image: GALLERY_01_ARTWORK_SRC,
+      image: '',
       textFa: 'مجله Camera Work به یکی از ابزارهای مهم برای دفاع از عکاسی به‌عنوان یک هنر مستقل تبدیل شد.',
       textEn: 'Camera Work magazine was published by Alfred Stieglitz from 1903 to 1917.',
     },
     information: {
-      image: GALLERY_01_ARTWORK_SRC,
+      image: '',
       textFa: 'مجله Camera Work به یکی از ابزارهای مهم برای دفاع از عکاسی به‌عنوان یک هنر مستقل تبدیل شد.',
       textEn: 'Camera Work magazine was published by Alfred Stieglitz from 1903 to 1917.',
     },
