@@ -325,6 +325,7 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
           galleryId="gallery-04"
           mapWidth={GALLERY_04_MAP_WIDTH}
           mapHeight={GALLERY_04_MAP_HEIGHT}
+          scaleFactor={1.12}
           onClick={handlePuzzlePointClick}
           isSelected={activePuzzlePoint?.id === puzzlePoint.id}
           isBlinking={blinkingPointId === puzzlePoint.id}
@@ -375,6 +376,7 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
               galleryId="gallery-04"
               mapWidth={GALLERY_04_MAP_WIDTH}
               mapHeight={GALLERY_04_MAP_HEIGHT}
+              scaleFactor={1.12}
               isSelected={selectedStarPointId === artwork.id}
               onSelect={() => {
                 setSelectedArtwork(null);

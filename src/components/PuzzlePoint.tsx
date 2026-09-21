@@ -53,7 +53,17 @@ export const PuzzlePoint: React.FC<PuzzlePointProps> = ({
 
   const isGallery09 = galleryId === 'gallery-09' || galleryId === 'gallery_09';
   const isGallery02 = galleryId === 'gallery-02' || galleryId === 'gallery_02';
-  const defaultScale = isGallery09 ? 1.2978 : (isGallery02 ? 1.05 : 1);
+  const isGallery04 = galleryId === 'gallery-04' || galleryId === 'gallery_04';
+  const isGallery06 = galleryId === 'gallery-06' || galleryId === 'gallery_06';
+  const defaultScale = isGallery09
+    ? 1.2978
+    : isGallery02
+    ? 1.05
+    : isGallery04
+    ? 1.12
+    : isGallery06
+    ? 1.11
+    : 1;
   const effectiveScale = scaleFactor !== undefined ? scaleFactor : defaultScale;
   const transformStyle =
     effectiveScale !== 1
