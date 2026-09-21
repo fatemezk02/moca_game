@@ -339,7 +339,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
                 className="px-4 py-2 rounded-xl border-2 border-[#1e1b18] bg-[#ef4444] hover:bg-[#dc2626] text-[#ffffff] text-xs font-black shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>تایید و ریست بازی</span>
+                <span>تایید و شروع دوباره</span>
               </button>
             </div>
           </div>
