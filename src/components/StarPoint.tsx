@@ -228,7 +228,9 @@ export const StarPoint: React.FC<StarPointProps> = ({
   };
 
   const isGallery09 = galleryId === 'gallery-09' || galleryId === 'gallery_09';
-  const effectiveScale = scaleFactor !== undefined ? scaleFactor : (isGallery09 ? 1.0815 : 1);
+  const isGallery02 = galleryId === 'gallery-02' || galleryId === 'gallery_02';
+  const defaultScale = isGallery09 ? 1.2978 : (isGallery02 ? 1.05 : 1);
+  const effectiveScale = scaleFactor !== undefined ? scaleFactor : defaultScale;
   const transformStyle =
     effectiveScale !== 1
       ? `translate(-50%, -50%) scale(calc(var(--map-point-scale, 1) * ${effectiveScale}))`
