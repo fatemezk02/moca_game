@@ -3,7 +3,7 @@ import { normalizeGalleryId } from '../services/content/mappers';
 
 const STORAGE_KEY = 'museum_gallery_areas_config';
 export const STORAGE_GALLERY_LAMPS_KEY = 'museum_gallery_lamps_config_v4';
-export const STORAGE_GALLERY_LOCKS_KEY = 'museum_gallery_locks_config';
+export const STORAGE_GALLERY_LOCKS_KEY = 'museum_gallery_locks_config_v4';
 
 export interface GalleryLampItem {
   id: string;
@@ -416,14 +416,14 @@ export function createNewGalleryArea(galleryId: string, title?: string): Gallery
  * Standard known museum gallery locks on the Master Map SVG (0 0 604.8 844.86)
  */
 export const DEFAULT_GALLERY_LOCKS: Array<{ galleryId: string; title: string; defaultX: number; defaultY: number }> = [
-  { galleryId: 'gallery_02', title: 'قفل گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 302, defaultY: 85 },
-  { galleryId: 'gallery_03', title: 'قفل گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 475, defaultY: 335 },
-  { galleryId: 'gallery_04', title: 'قفل گالری ۰۴ (ثبت دوام ما)', defaultX: 135, defaultY: 335 },
-  { galleryId: 'gallery_05', title: 'قفل گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 135, defaultY: 550 },
-  { galleryId: 'gallery_06', title: 'قفل گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 475, defaultY: 550 },
-  { galleryId: 'gallery_07', title: 'قفل گالری ۰۷ (گذر از برون به درون)', defaultX: 135, defaultY: 700 },
-  { galleryId: 'gallery_08', title: 'قفل گالری ۰۸ (آونگ زمان)', defaultX: 475, defaultY: 700 },
-  { galleryId: 'gallery_09', title: 'قفل گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 302, defaultY: 750 },
+  { galleryId: 'gallery_02', title: 'قفل گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 175, defaultY: 502 },
+  { galleryId: 'gallery_03', title: 'قفل گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 157, defaultY: 336 },
+  { galleryId: 'gallery_04', title: 'قفل گالری ۰۴ (ثبت دوام ما)', defaultX: 161, defaultY: 185 },
+  { galleryId: 'gallery_05', title: 'قفل گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 312, defaultY: 148 },
+  { galleryId: 'gallery_06', title: 'قفل گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 467, defaultY: 268 },
+  { galleryId: 'gallery_07', title: 'قفل گالری ۰۷ (گذر از برون به درون)', defaultX: 376, defaultY: 253 },
+  { galleryId: 'gallery_08', title: 'قفل گالری ۰۸ (آونگ زمان)', defaultX: 422, defaultY: 381 },
+  { galleryId: 'gallery_09', title: 'قفل گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 453, defaultY: 501 },
 ];
 
 /**
@@ -508,7 +508,15 @@ export function getLockPositionForGallery(galleryId: string): { x: number; y: nu
   if (canonId === 'gallery_03' && saved['gallery-03']) return saved['gallery-03'];
   if (canonId === 'gallery_04' && saved['gallery-04']) return saved['gallery-04'];
 
-  // 2. Fallback to lamp position of this gallery
+  // 2. Default lock positions
+  const def = DEFAULT_GALLERY_LOCKS.find(
+    (l) => normalizeGalleryId(l.galleryId) === canonId || l.galleryId === galleryId
+  );
+  if (def) {
+    return { x: def.defaultX, y: def.defaultY };
+  }
+
+  // 3. Fallback to lamp position of this gallery
   return getLampPositionForGallery(galleryId);
 }
 
