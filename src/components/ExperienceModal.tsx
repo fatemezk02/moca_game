@@ -18,11 +18,13 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({
 }) => {
   const [imageLoaded, setImageLoaded] = useState<boolean>(false);
   const [imageError, setImageError] = useState<boolean>(false);
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
 
   // Reset image state when experience changes
   useEffect(() => {
     setImageLoaded(false);
     setImageError(false);
+    setAspectRatio(null);
     if (isOpen && experience?.id) {
       markExperienceDiscovered(experience.id);
       if (experience.experienceId) {
@@ -119,7 +121,12 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({
                 id="experience-modal-image-wrapper"
                 className="w-full flex items-center justify-center overflow-hidden shrink-0"
               >
-                <div className="relative border-2 border-[#1e1b18] rounded-xl overflow-hidden shadow-[2px_2px_0px_#1e1b18] bg-[#f8fafc] p-1 flex items-center justify-center w-full">
+                <div
+                  className={`relative border-2 border-[#1e1b18] rounded-xl overflow-hidden shadow-[2px_2px_0px_#1e1b18] bg-[#f8fafc] p-1 inline-flex items-center justify-center max-w-full max-h-[35vh] sm:max-h-[40vh] mx-auto ${
+                    imageLoaded ? 'w-fit' : 'w-full'
+                  }`}
+                  style={aspectRatio ? { aspectRatio: `${aspectRatio}` } : undefined}
+                >
                   {!imageLoaded && (
                     <div className="w-full py-8 flex flex-col items-center justify-center gap-2 bg-[#f8fafc] animate-pulse">
                       <ImageIcon className="w-6 h-6 text-[#a8a29e]" />
@@ -132,9 +139,15 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({
                     src={rawImageUrl}
                     alt={titleText}
                     referrerPolicy="no-referrer"
-                    onLoad={() => setImageLoaded(true)}
+                    onLoad={(e) => {
+                      setImageLoaded(true);
+                      const { naturalWidth, naturalHeight } = e.currentTarget;
+                      if (naturalWidth && naturalHeight) {
+                        setAspectRatio(naturalWidth / naturalHeight);
+                      }
+                    }}
                     onError={() => setImageError(true)}
-                    className={`max-w-full max-h-[35vh] sm:max-h-[40vh] w-auto h-auto object-contain rounded-lg block mx-auto transition-opacity duration-300 ${
+                    className={`max-w-full max-h-[35vh] sm:max-h-[40vh] w-full h-full object-contain rounded-lg block mx-auto transition-opacity duration-300 ${
                       imageLoaded ? 'opacity-100' : 'absolute inset-0 opacity-0 pointer-events-none'
                     }`}
                   />
