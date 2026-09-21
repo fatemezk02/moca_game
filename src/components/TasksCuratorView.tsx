@@ -218,7 +218,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       (gallery.id === 'gallery-02' && (isGalleryPuzzleCompleted('gallery-01') || isGalleryPuzzleCompleted('gallery_01'))) ||
       (gallery.id === 'gallery-01' && (isGalleryPuzzleCompleted('gallery-02') || isGalleryPuzzleCompleted('gallery_02')))
     );
-    const isComplete = isPuzzleCompleted || (totalStars > 0 && collectedStars >= totalStars);
+    const isComplete = isPuzzleCompleted;
 
     return {
       id: gallery.id,
