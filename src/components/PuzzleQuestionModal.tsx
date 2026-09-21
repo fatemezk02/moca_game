@@ -426,22 +426,6 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                     </div>
                   ) : (
                     <>
-                      <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-2 gap-2">
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#0284c7] shrink-0">
-                          <HelpCircle className="w-3.5 h-3.5 text-[#0284c7]" />
-                          <span>سؤال پازل</span>
-                        </div>
-
-                        {/* Blue Box containing the requested single-line informational text */}
-                        <div
-                          id="puzzle-modal-blue-box"
-                          className="bg-[#f0f9ff] border border-[#38bdf8] px-2.5 py-1 rounded-md text-[11px] sm:text-[12px] font-bold text-[#0369a1] font-sans-custom whitespace-nowrap overflow-hidden text-ellipsis shadow-xs"
-                          title={blueInformationalText}
-                        >
-                          {blueInformationalText}
-                        </div>
-                      </div>
-
                       {/* Question Artwork Image from Artworks dataset (Questions.artwork_id -> Artworks.artwork_id -> Artworks.image_url) */}
                       {questionArtworkUrl && !questionImgError && (
                         <div className="w-full flex items-center justify-center py-1">

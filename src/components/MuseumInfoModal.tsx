@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Compass, Sparkles } from 'lucide-react';
+import { X, Compass, Sparkles, Puzzle, Star, Coins, Eye, Trophy } from 'lucide-react';
 
 interface MuseumInfoModalProps {
   isOpen: boolean;
@@ -59,124 +59,111 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
 
           {/* Body */}
           <div className="space-y-4 text-[13px] text-[#334155] leading-relaxed max-h-[60vh] overflow-y-auto pr-1">
-            {/* Gallery Sector Quick Navigation */}
-            {onNavigateToGallery && (
-              <div className="border-2 border-[#1e1b18] rounded-2xl p-3.5 bg-[#fef3c7] shadow-[3px_3px_0px_#1e1b18] space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-sans-custom text-[12px] font-black text-[#1e1b18] uppercase flex items-center gap-1.5">
-                    <Compass className="w-4 h-4 text-[#d97706]" />
-                    <span>دسترسی سریع به گالری‌ها</span>
-                  </span>
+            {/* Game Guide Boxes (Matching Initial Walkthrough) */}
+            <div className="space-y-3 pt-1">
+              {/* Box 1: Story and Goal */}
+              <div className="border-2 border-[#1e1b18] rounded-2xl p-4 bg-[#e0f2fe] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col items-start">
+                <div className="flex items-center gap-2 font-black text-xs text-[#0369a1] mb-2">
+                  <Compass className="w-4 h-4 text-[#0284c7] shrink-0" />
+                  <span>داستان و هدف بازی</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2.5 pt-1">
-                  <button
-                    onClick={() => {
-                      onNavigateToGallery('gallery-00');
-                      onClose();
-                    }}
-                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
-                  >
-                    <span className="block font-black text-[12px]">گالری ۰۰</span>
-                    <span className="text-[10px] text-[#64748b]">آرشیو اصلی</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onNavigateToGallery('gallery-01');
-                      onClose();
-                    }}
-                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
-                  >
-                    <span className="block font-black text-[12px]">گالری ۰۱</span>
-                    <span className="text-[10px] text-[#64748b]">معماری</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onNavigateToGallery('gallery-03');
-                      onClose();
-                    }}
-                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
-                  >
-                    <span className="block font-black text-[12px]">گالری ۰۳</span>
-                    <span className="text-[10px] text-[#64748b]">هنر مدرن</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onNavigateToGallery('gallery-04');
-                      onClose();
-                    }}
-                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
-                  >
-                    <span className="block font-black text-[12px]">گالری ۰۴</span>
-                    <span className="text-[10px] text-[#64748b]">ثبت دوام ما</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onNavigateToGallery('gallery-05');
-                      onClose();
-                    }}
-                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
-                  >
-                    <span className="block font-black text-[12px]">گالری ۰۵</span>
-                    <span className="text-[10px] text-[#64748b]">ضرب آهنگ شهر</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onNavigateToGallery('gallery-06');
-                      onClose();
-                    }}
-                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
-                  >
-                    <span className="block font-black text-[12px]">گالری ۰۶</span>
-                    <span className="text-[10px] text-[#64748b]">در کشاکش تماشا</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onNavigateToGallery('gallery-07');
-                      onClose();
-                    }}
-                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
-                  >
-                    <span className="block font-black text-[12px]">گالری ۰۷</span>
-                    <span className="text-[10px] text-[#64748b]">گذر از برون به درون</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onNavigateToGallery('gallery-08');
-                      onClose();
-                    }}
-                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
-                  >
-                    <span className="block font-black text-[12px]">گالری ۰۸</span>
-                    <span className="text-[10px] text-[#64748b]">آونگ زمان</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      onNavigateToGallery('gallery-09');
-                      onClose();
-                    }}
-                    className="neo-btn p-2 bg-[#ffffff] hover:bg-[#fed7aa] text-center cursor-pointer text-[#1e1b18]"
-                  >
-                    <span className="block font-black text-[12px]">گالری ۰۹</span>
-                    <span className="text-[10px] text-[#64748b]">تلاقی رسانه‌ها</span>
-                  </button>
-                </div>
+                <p className="text-xs sm:text-[13px] text-[#1e293b] leading-relaxed font-medium text-right">
+                  در این سفر تاریخی ۸ اثر مربوط به ۸ برحه زمانی مهم در عکاسی را پیدا می کنی تا از این طریق با داستان پرپیچ و خم پیدایش هویت عکاسی از زمان ابداع تا عصر حاضر آشنا شوی.
+                </p>
               </div>
-            )}
 
-            {/* Wall Reveal Explanation */}
-            <div className="border-2 border-[#1e1b18] rounded-2xl p-3.5 bg-[#e0f2fe] shadow-[3px_3px_0px_#1e1b18] space-y-2">
-              <div className="flex items-center gap-2 font-sans-custom text-[12px] font-black text-[#1e1b18] uppercase">
-                <Compass className="w-4 h-4 text-[#0284c7]" />
-                <span>راهنمای بازی</span>
+              {/* Box 2: How to Play */}
+              <div className="border-2 border-[#1e1b18] rounded-2xl p-3.5 bg-[#ffffff] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col items-start">
+                <div className="flex items-center gap-2 font-black text-xs text-[#1e1b18] mb-1.5">
+                  <Sparkles className="w-4 h-4 text-[#f59e0b] shrink-0" />
+                  <span>چگونه بازی کنیم؟</span>
+                </div>
+                <ul className="text-[11px] sm:text-xs text-[#475569] leading-relaxed font-medium text-right space-y-1 w-full list-none">
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-[#f59e0b] font-bold shrink-0">•</span>
+                    <span>در هر گالری تکه های پازل رو جمع کن</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-[#f59e0b] font-bold shrink-0">•</span>
+                    <span>اطلاعات جالب رو کشف کن یا با تجربه های تعاملی آشنا شو</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-[#f59e0b] font-bold shrink-0">•</span>
+                    <span>و با استفاده از فلش های راهنما به گالری بعدی برو تا به زمان حال برسی</span>
+                  </li>
+                </ul>
               </div>
-              <p className="text-[12px] text-[#334155] font-medium">
-                در گالریهای موزه، هشت تصویر گمشده پنهان شدهاند. برای پیدا کردن هر تصویر، باید کشفهای اصلی هر گالری را پیدا کنی و با پاسخ دادن به سؤالها، قطعات آن را آزاد کنی. در طول مسیر، سرنخها، کشفهای اختیاری و تجربههای ویژهای هم وجود دارند که میتوانند تو را بیشتر با داستان آثار آشنا کنند. نقشه را دنبال کن، کشف کن و آلبوم تصاویرت را کامل کن.
-              </p>
-              <ul className="text-[11px] font-bold space-y-1.5 text-[#475569] pl-2 border-l-2 border-[#0284c7]">
-                <li>• <strong>🧩 پازلها:</strong> در هر گالری، سه کشف اصلی وجود دارد. با پیدا کردن هر اثر و پاسخ دادن به سؤال آن، یک قطعه از تصویر گمشده را به دست میآوری. با کامل شدن هر سه قطعه، تصویر نهایی آشکار میشود.</li>
-                <li>• <strong>⭐️ ستارهها:</strong> ستارهها نشاندهندهی کشفهای اختیاری هستند. میتوانی آنها را پیدا کنی، به سؤالهایشان پاسخ بدهی و سکه دریافت کنی یا با پرداخت سکه، اطلاعات بیشتری دربارهی آثار کشف کنی.</li>
-                <li>• <strong>✨ تجربههای ویژه:</strong> در بعضی گالریها تجربههای تعاملی وجود دارد که تو را از تماشای سادهی آثار فراتر میبرد. با امتحان کردن آنها میتوانی بخشی از ایده یا فرایند پشت آثار را به شکل عملی تجربه کنی.</li>
-              </ul>
+
+              {/* Box 3: Elements Guide (Puzzles, Stars, Coins, Experience, End of Visit) */}
+              <div className="border-2 border-[#1e1b18] rounded-2xl p-3 sm:p-3.5 bg-[#ffffff] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col gap-2.5">
+                <div className="flex items-center text-right gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#c084fc] flex items-center justify-center shrink-0">
+                    <Puzzle className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#1e1b18] block">پازل‌ها</span>
+                    <p className="text-[11px] text-[#581c87] font-medium leading-tight">
+                      در هر گالری به محدوده پازل‌ها برو. سوالات پازل تو را با هویت عکاسی در هر دوره آشنا می‌کنند.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-[#e2e8f0] w-full" />
+
+                <div className="flex items-center text-right gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#34d399] flex items-center justify-center shrink-0">
+                    <Star className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#1e1b18] block">ستاره‌ها</span>
+                    <p className="text-[11px] text-[#064e3b] font-medium leading-tight">
+                      با رفتن به محدوده نقاط ستاره می‌تونی با سکه یا پاسخ به سوال اطلاعات اضافه و جالب کشف کنی.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-[#e2e8f0] w-full" />
+
+                <div className="flex items-center text-right gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#facc15] flex items-center justify-center shrink-0">
+                    <Coins className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#1e1b18] block">سکه‌ها</span>
+                    <p className="text-[11px] text-[#713f12] font-medium leading-tight">
+                      سکه‌ها بخشی از پاداش پاسخ به سوالات ستاره یا تجربه هستند و می‌تونی با اون‌ها قفل گالری یا اطلاعات رو باز کنی.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-[#e2e8f0] w-full" />
+
+                <div className="flex items-center text-right gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#38bdf8] flex items-center justify-center shrink-0">
+                    <Eye className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#1e1b18] block">تجربه</span>
+                    <p className="text-[11px] text-[#0369a1] font-medium leading-tight">
+                      این نقاط حاوی اطلاعات جالب یا محتوای چندرسانه‌ای درباره ابزارهای تجربه تعاملی در موزه هستن.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-[#e2e8f0] w-full" />
+
+                <div className="flex items-center text-right gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#fb923c] flex items-center justify-center shrink-0">
+                    <Trophy className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#1e1b18] block">پایان بازدید</span>
+                    <p className="text-[11px] text-[#7c2d12] font-medium leading-tight">
+                      گواهی‌نامه کشف تاریخ عکاسی را به همراه یک جایزه از طرف موزه دریافت می‌کنی.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

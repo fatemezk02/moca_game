@@ -465,8 +465,9 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                         <div className="w-7 h-7 rounded-lg bg-[#fef3c7] border border-[#1e1b18] flex items-center justify-center text-[#d97706] shrink-0 group-hover:bg-[#fbbf24] transition-colors">
                           <Coins className="w-4 h-4 text-[#1e1b18]" />
                         </div>
-                        <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
-                          {toPersianDigits(discoveryData.informationCost || 30)} سکه
+                        <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap flex items-center justify-center gap-1">
+                          <span dir="ltr">-{toPersianDigits(discoveryData.informationCost || 30)}</span>
+                          <span>سکه</span>
                         </span>
                       </button>
                     </div>
@@ -486,6 +487,20 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-4 my-auto text-center"
               >
+                <div className="flex items-center justify-end border-b border-[#e2e8f0] pb-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setErrorMessage(null);
+                      setPhase('initial_choice');
+                    }}
+                    className="text-[11px] font-bold text-[#64748b] hover:text-[#1e1b18] flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>بازگشت</span>
+                    <ArrowRight className="w-3 h-3 rtl:rotate-180" />
+                  </button>
+                </div>
+
                 <div className="w-14 h-14 mx-auto rounded-2xl bg-[#fef3c7] border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center">
                   <Coins className="w-7 h-7 text-[#d97706]" />
                 </div>
@@ -494,9 +509,6 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                   <h3 className="font-sans-custom text-[16px] font-black text-[#1e1b18]">
                     اطلاعات بیشتر اثر
                   </h3>
-                  <p className="text-[12px] font-medium text-[#64748b] mt-1">
-                    با پرداخت هزینه، مشخصات کامل و تصویر اثر هنری بازگشایی می‌شود.
-                  </p>
                 </div>
 
                 {/* Cost Box */}
@@ -530,18 +542,6 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                     className="w-full py-3 px-4 bg-[#fbbf24] hover:bg-[#f59e0b] active:bg-[#d97706] text-[#1e1b18] font-black text-[14px] border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1.5px_1.5px_0px_#1e1b18]"
                   >
                     <span>پرداخت {toPersianDigits(discoveryData.informationCost || 30)} سکه و دیدن اطلاعات</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setErrorMessage(null);
-                      setPhase('initial_choice');
-                    }}
-                    className="w-full py-2 text-[12px] font-bold text-[#64748b] hover:text-[#1e1b18] cursor-pointer flex items-center justify-center gap-1"
-                  >
-                    <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
-                    <span>بازگشت به انتخاب گزینه‌ها</span>
                   </button>
                 </div>
               </motion.div>

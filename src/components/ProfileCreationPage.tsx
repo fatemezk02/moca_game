@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Puzzle, Star, Coins, Trophy, Compass, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Puzzle, Star, Coins, Trophy, Compass, ChevronLeft, ChevronRight, Sparkles, Eye } from 'lucide-react';
 import { AVATAR_OPTIONS } from '../data/avatarConfig';
 import { ProfileAvatar } from './ProfileAvatar';
 import { saveUserProfile } from '../data/userProfileStore';
@@ -208,56 +208,78 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
                     setGuideSlide(0);
                   }
                 }}
-                className={`col-start-1 row-start-1 w-full space-y-2.5 px-2 py-1.5 cursor-grab active:cursor-grabbing touch-pan-y self-center ${
+                className={`col-start-1 row-start-1 w-full px-2 py-1.5 cursor-grab active:cursor-grabbing touch-pan-y self-center ${
                   guideSlide === 1 ? 'pointer-events-auto' : 'pointer-events-none'
                 }`}
                 aria-hidden={guideSlide !== 1}
               >
-                <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#f3e8ff] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
-                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#c084fc] flex items-center justify-center shrink-0">
-                    <Puzzle className="w-4 h-4 text-[#1e1b18]" />
+                <div className="border-2 border-[#1e1b18] rounded-2xl p-3 sm:p-3.5 bg-[#ffffff] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col gap-2.5">
+                  <div className="flex items-center text-right gap-2.5">
+                    <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#c084fc] flex items-center justify-center shrink-0">
+                      <Puzzle className="w-4 h-4 text-[#1e1b18]" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-black text-[#1e1b18] block">پازل‌ها</span>
+                      <p className="text-[11px] text-[#581c87] font-medium leading-tight">
+                        در هر گالری به محدوده پازل‌ها برو. سوالات پازل تو را با هویت عکاسی در هر دوره آشنا می‌کنند.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs font-black text-[#1e1b18] block">پازل‌ها</span>
-                    <p className="text-[11px] text-[#581c87] font-medium leading-tight">
-                      ۳ کشف اصلی در هر سالن. با پاسخ به سؤال هر اثر، ۱ قطعه از تصویر گمشده را به دست می‌آوری.
-                    </p>
-                  </div>
-                </div>
 
-                <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#ecfdf5] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
-                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#34d399] flex items-center justify-center shrink-0">
-                    <Star className="w-4 h-4 text-[#1e1b18] fill-[#1e1b18]" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-black text-[#1e1b18] block">ستاره‌ها</span>
-                    <p className="text-[11px] text-[#064e3b] font-medium leading-tight">
-                      کشف‌های اختیاری در سالن‌ها برای کسب سکه یا دسترسی به اطلاعات جذاب‌تر درباره آثار.
-                    </p>
-                  </div>
-                </div>
+                  <div className="h-[1px] bg-[#e2e8f0] w-full" />
 
-                <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#fef9c3] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
-                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#facc15] flex items-center justify-center shrink-0">
-                    <Coins className="w-4 h-4 text-[#1e1b18]" />
+                  <div className="flex items-center text-right gap-2.5">
+                    <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#34d399] flex items-center justify-center shrink-0">
+                      <Star className="w-4 h-4 text-[#1e1b18]" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-black text-[#1e1b18] block">ستاره‌ها</span>
+                      <p className="text-[11px] text-[#064e3b] font-medium leading-tight">
+                        با رفتن به محدوده نقاط ستاره می‌تونی با سکه یا پاسخ به سوال اطلاعات اضافه و جالب کشف کنی.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs font-black text-[#1e1b18] block">سکه‌ها</span>
-                    <p className="text-[11px] text-[#713f12] font-medium leading-tight">
-                      پاداش پاسخ‌های صحیح که می‌توانی برای خرید سرنخ‌ها و باز کردن بخش‌های ویژه خرج کنی.
-                    </p>
-                  </div>
-                </div>
 
-                <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#ffedd5] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
-                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#fb923c] flex items-center justify-center shrink-0">
-                    <Trophy className="w-4 h-4 text-[#1e1b18]" />
+                  <div className="h-[1px] bg-[#e2e8f0] w-full" />
+
+                  <div className="flex items-center text-right gap-2.5">
+                    <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#facc15] flex items-center justify-center shrink-0">
+                      <Coins className="w-4 h-4 text-[#1e1b18]" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-black text-[#1e1b18] block">سکه‌ها</span>
+                      <p className="text-[11px] text-[#713f12] font-medium leading-tight">
+                        سکه‌ها بخشی از پاداش پاسخ به سوالات ستاره یا تجربه هستند و می‌تونی با اون‌ها قفل گالری یا اطلاعات رو باز کنی.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs font-black text-[#1e1b18] block">جایزه نهایی</span>
-                    <p className="text-[11px] text-[#7c2d12] font-medium leading-tight">
-                      با باز کردن هر ۸ تصویر، گواهی‌نامه اختصاصی و کارت افتخاری پایان موزه برایت باز می‌شود!
-                    </p>
+
+                  <div className="h-[1px] bg-[#e2e8f0] w-full" />
+
+                  <div className="flex items-center text-right gap-2.5">
+                    <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#38bdf8] flex items-center justify-center shrink-0">
+                      <Eye className="w-4 h-4 text-[#1e1b18]" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-black text-[#1e1b18] block">تجربه</span>
+                      <p className="text-[11px] text-[#0369a1] font-medium leading-tight">
+                        این نقاط حاوی اطلاعات جالب یا محتوای چندرسانه‌ای درباره ابزارهای تجربه تعاملی در موزه هستن.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="h-[1px] bg-[#e2e8f0] w-full" />
+
+                  <div className="flex items-center text-right gap-2.5">
+                    <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#fb923c] flex items-center justify-center shrink-0">
+                      <Trophy className="w-4 h-4 text-[#1e1b18]" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-black text-[#1e1b18] block">پایان بازدید</span>
+                      <p className="text-[11px] text-[#7c2d12] font-medium leading-tight">
+                        گواهی‌نامه کشف تاریخ عکاسی را به همراه یک جایزه از طرف موزه دریافت می‌کنی.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
