@@ -232,6 +232,9 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     // - Museum Shop → "فروشگاه"
     // - Sculpture Garden → "باغ مجسمه ها"
     // - Oil Pool → "حوض روغن"
+    if (id === 'icon-g00-entrance-to-g01' || id === 'icon-g00-to-g01' || title.includes('Entrance to Gallery 01') || title.includes('ورودی گالری ۰۱')) {
+      return 'ورودی گالری ۰۱';
+    }
     if (iconType === 'preset-location-coffee' || id.includes('cafe') || id.includes('coffee') || title.includes('کافه')) {
       return 'کافه';
     }
@@ -242,7 +245,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
       return 'باغ مجسمه ها';
     }
     if (iconType === 'preset-location-frame' || id.includes('frame') || id.includes('oil') || id.includes('pool') || title.includes('روغن')) {
-      return 'حوض روغن';
+      return 'قاب معرفی آثار';
     }
     if (iconType === 'preset-location-wc' || id.includes('wc') || title.includes('دسشویی') || title.includes('دستشویی') || title.includes('بهداشتی')) {
       return 'سرویس بهداشتی (WC)';

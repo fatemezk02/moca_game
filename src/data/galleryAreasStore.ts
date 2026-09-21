@@ -2,7 +2,7 @@ import { GalleryAreaConfig } from '../types/galleryArea';
 import { normalizeGalleryId } from '../services/content/mappers';
 
 const STORAGE_KEY = 'museum_gallery_areas_config';
-export const STORAGE_GALLERY_LAMPS_KEY = 'museum_gallery_lamps_config';
+export const STORAGE_GALLERY_LAMPS_KEY = 'museum_gallery_lamps_config_v4';
 export const STORAGE_GALLERY_LOCKS_KEY = 'museum_gallery_locks_config';
 
 export interface GalleryLampItem {
@@ -28,23 +28,24 @@ export interface GalleryLockItem {
  * Matches the original coordinates: mapX = 50.0% (302.4px), mapY = 9.2% (77.7px)
  */
 export const DEFAULT_GALLERY_00_LAMP_POSITION = {
-  x: 302.4,
-  y: 77.7,
+  x: 512,
+  y: 94,
 };
 
 /**
  * Standard known museum gallery lamps on the Master Map SVG (0 0 604.8 844.86)
  */
 export const DEFAULT_GALLERY_LAMPS: Array<{ galleryId: string; title: string; defaultX: number; defaultY: number }> = [
-  { galleryId: 'gallery_02', title: 'چراغ گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 175, defaultY: 503 },
-  { galleryId: 'gallery_03', title: 'چراغ گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 157, defaultY: 332 },
-  { galleryId: 'gallery_04', title: 'چراغ گالری ۰۴ (ثبت دوام ما)', defaultX: 161, defaultY: 185 },
-  { galleryId: 'gallery_05', title: 'چراغ گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 313, defaultY: 129 },
-  { galleryId: 'gallery_06', title: 'چراغ گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 467, defaultY: 265 },
-  { galleryId: 'gallery_07', title: 'چراغ گالری ۰۷ (گذر از برون به درون)', defaultX: 416, defaultY: 299 },
-  { galleryId: 'gallery_08', title: 'چراغ گالری ۰۸ (آونگ زمان)', defaultX: 428, defaultY: 384 },
-  { galleryId: 'gallery_09', title: 'چراغ گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 444, defaultY: 505 },
-  { galleryId: 'gallery_00', title: 'چراغ ورودی (نقشه اصلی)', defaultX: 302.4, defaultY: 77.7 },
+  { galleryId: 'gallery_01', title: 'چراغ گالری ۰۱', defaultX: 309, defaultY: 734 },
+  { galleryId: 'gallery_02', title: 'چراغ گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 165, defaultY: 480 },
+  { galleryId: 'gallery_03', title: 'چراغ گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 162, defaultY: 326 },
+  { galleryId: 'gallery_04', title: 'چراغ گالری ۰۴ (ثبت دوام ما)', defaultX: 162, defaultY: 172 },
+  { galleryId: 'gallery_05', title: 'چراغ گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 313, defaultY: 124 },
+  { galleryId: 'gallery_06', title: 'چراغ گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 466, defaultY: 254 },
+  { galleryId: 'gallery_07', title: 'چراغ گالری ۰۷ (گذر از برون به درون)', defaultX: 418, defaultY: 283 },
+  { galleryId: 'gallery_08', title: 'چراغ گالری ۰۸ (آونگ زمان)', defaultX: 427, defaultY: 382 },
+  { galleryId: 'gallery_09', title: 'چراغ گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 463, defaultY: 481 },
+  { galleryId: 'gallery_00', title: 'چراغ ورودی (نقشه اصلی)', defaultX: 512, defaultY: 94 },
 ];
 
 /**
@@ -67,8 +68,8 @@ export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
       ],
     },
     lampPosition: {
-      x: 175,
-      y: 503,
+      x: 165,
+      y: 480,
     },
   },
   {
@@ -86,8 +87,8 @@ export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
       ],
     },
     lampPosition: {
-      x: 157,
-      y: 332,
+      x: 162,
+      y: 326,
     },
   },
   {
@@ -105,8 +106,8 @@ export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
       ],
     },
     lampPosition: {
-      x: 161,
-      y: 185,
+      x: 162,
+      y: 172,
     },
   },
 ];

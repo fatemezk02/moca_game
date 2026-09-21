@@ -43,10 +43,10 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
             <div>
               <span className="font-sans-custom text-[11px] text-[#ea580c] font-black tracking-wider uppercase flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-[#f59e0b]" />
-                راهنمای موزه و نقشه
+                راهنمای بخش ها و علائم
               </span>
               <h2 className="font-sans-custom text-[20px] font-black text-[#1e1b18]">
-                آرشیو ۰۱ • راهنمای بخش‌ها و علائم
+                راهنمای بازی
               </h2>
             </div>
             <button
