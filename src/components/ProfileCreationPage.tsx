@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Puzzle, Star, Coins, Trophy, Compass, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { AVATAR_OPTIONS } from '../data/avatarConfig';
 import { ProfileAvatar } from './ProfileAvatar';
@@ -134,113 +134,133 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
               </div>
             </div>
 
-            {/* 3. Centered Guide Text Boxes Area (Swipeable & Draggable) */}
-            <div className="w-full py-2 my-auto flex flex-col justify-center select-none">
-              <AnimatePresence mode="wait">
-                {guideSlide === 0 ? (
-                  <motion.div
-                    key="slide-0"
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.25}
-                    onDragEnd={(_, info) => {
-                      if (info.offset.x < -30 || info.velocity.x < -100) {
-                        setGuideSlide(1);
-                      }
-                    }}
-                    initial={{ opacity: 0, x: -15 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 15 }}
-                    transition={{ duration: 0.2 }}
-                    className="space-y-3.5 w-full cursor-grab active:cursor-grabbing touch-pan-y"
-                  >
-                    <div className="border-2 border-[#1e1b18] rounded-2xl p-4 bg-[#e0f2fe] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col items-start">
-                      <div className="flex items-center gap-2 font-black text-xs text-[#0369a1] mb-2">
-                        <Compass className="w-4 h-4 text-[#0284c7] shrink-0" />
-                        <span>داستان و هدف بازی</span>
-                      </div>
-                      <p className="text-xs sm:text-[13px] text-[#1e293b] leading-relaxed font-medium text-right">
-                        در گالری‌های موزه، <strong className="text-[#0369a1] font-black">۸ تصویر گمشده</strong> از تاریخ عکاسی پنهان شده‌اند. برای پیدا کردن هر تصویر، باید کشف‌های اصلی هر گالری را پیدا کنی و با پاسخ دادن به سؤال‌ها، قطعات آن را آزاد کنی.
-                      </p>
-                    </div>
+            {/* 3. Centered Guide Text Boxes Area (Horizontal Slider) */}
+            <div
+              className="w-full my-auto overflow-hidden relative select-none grid grid-cols-1 grid-rows-1 isolate"
+              style={{
+                padding: '6px 8px',
+                margin: '-6px -8px',
+                width: 'calc(100% + 16px)',
+              }}
+            >
+              {/* Guide Page 1 */}
+              <motion.div
+                key="guide-slide-0"
+                initial={false}
+                animate={{ x: guideSlide === 0 ? '0%' : '125%' }}
+                transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+                drag={guideSlide === 0 ? 'x' : false}
+                dragSnapToOrigin
+                dragElastic={0.2}
+                onDragEnd={(_, info) => {
+                  if (Math.abs(info.offset.x) > 30 || Math.abs(info.velocity.x) > 100) {
+                    setGuideSlide(1);
+                  }
+                }}
+                className={`col-start-1 row-start-1 w-full space-y-3.5 px-2 py-1.5 cursor-grab active:cursor-grabbing touch-pan-y self-center ${
+                  guideSlide === 0 ? 'pointer-events-auto' : 'pointer-events-none'
+                }`}
+                aria-hidden={guideSlide !== 0}
+              >
+                <div className="border-2 border-[#1e1b18] rounded-2xl p-4 bg-[#e0f2fe] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col items-start">
+                  <div className="flex items-center gap-2 font-black text-xs text-[#0369a1] mb-2">
+                    <Compass className="w-4 h-4 text-[#0284c7] shrink-0" />
+                    <span>داستان و هدف بازی</span>
+                  </div>
+                  <p className="text-xs sm:text-[13px] text-[#1e293b] leading-relaxed font-medium text-right">
+                    در این سفر تاریخی ۸ اثر مربوط به ۸ برحه زمانی مهم در عکاسی را پیدا می کنی تا از این طریق با داستان  پرپیچ و خم  پیدایش هویت عکاسی از زمان ابداع تا عصر حاضر آشنا شوی.
+                  </p>
+                </div>
 
-                    <div className="border-2 border-[#1e1b18] rounded-2xl p-3.5 bg-[#ffffff] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col items-start">
-                      <div className="flex items-center gap-2 font-black text-xs text-[#1e1b18] mb-1.5">
-                        <Sparkles className="w-4 h-4 text-[#f59e0b] shrink-0" />
-                        <span>چگونه بازی کنیم؟</span>
-                      </div>
-                      <p className="text-[11px] sm:text-xs text-[#475569] leading-relaxed font-medium text-right">
-                        نقشه را دنبال کن، به نشانه‌های روی زمین و دیوارها سر بزن، معماها را حل کن و آلبوم تصاویر گمشده‌ات را کامل کن!
-                      </p>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="slide-1"
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.25}
-                    onDragEnd={(_, info) => {
-                      if (info.offset.x > 30 || info.velocity.x > 100) {
-                        setGuideSlide(0);
-                      }
-                    }}
-                    initial={{ opacity: 0, x: 15 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -15 }}
-                    transition={{ duration: 0.2 }}
-                    className="space-y-2.5 w-full cursor-grab active:cursor-grabbing touch-pan-y"
-                  >
-                    <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#fef3c7] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
-                      <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#fbbf24] flex items-center justify-center shrink-0">
-                        <Puzzle className="w-4 h-4 text-[#1e1b18]" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-black text-[#1e1b18] block">پازل‌ها</span>
-                        <p className="text-[11px] text-[#451a03] font-medium leading-tight">
-                          ۳ کشف اصلی در هر سالن. با پاسخ به سؤال هر اثر، ۱ قطعه از تصویر گمشده را به دست می‌آوری.
-                        </p>
-                      </div>
-                    </div>
+                <div className="border-2 border-[#1e1b18] rounded-2xl p-3.5 bg-[#ffffff] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col items-start">
+                  <div className="flex items-center gap-2 font-black text-xs text-[#1e1b18] mb-1.5">
+                    <Sparkles className="w-4 h-4 text-[#f59e0b] shrink-0" />
+                    <span>چگونه بازی کنیم؟</span>
+                  </div>
+                  <ul className="text-[11px] sm:text-xs text-[#475569] leading-relaxed font-medium text-right space-y-1 w-full list-none">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-[#f59e0b] font-bold shrink-0">•</span>
+                      <span>در هر گالری تکه های پازل رو جمع کن</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-[#f59e0b] font-bold shrink-0">•</span>
+                      <span>اطلاعات جالب رو کشف کن یا با تجربه های تعاملی آشنا شو</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-[#f59e0b] font-bold shrink-0">•</span>
+                      <span>و با استفاده از فلش های راهنما به گالری بعدی برو تا به زمان حال برسی</span>
+                    </li>
+                  </ul>
+                </div>
+              </motion.div>
 
-                    <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#ecfdf5] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
-                      <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#34d399] flex items-center justify-center shrink-0">
-                        <Star className="w-4 h-4 text-[#1e1b18] fill-[#1e1b18]" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-black text-[#1e1b18] block">ستاره‌ها</span>
-                        <p className="text-[11px] text-[#064e3b] font-medium leading-tight">
-                          کشف‌های اختیاری در سالن‌ها برای کسب سکه یا دسترسی به اطلاعات جذاب‌تر درباره آثار.
-                        </p>
-                      </div>
-                    </div>
+              {/* Guide Page 2 */}
+              <motion.div
+                key="guide-slide-1"
+                initial={false}
+                animate={{ x: guideSlide === 0 ? '-125%' : '0%' }}
+                transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+                drag={guideSlide === 1 ? 'x' : false}
+                dragSnapToOrigin
+                dragElastic={0.2}
+                onDragEnd={(_, info) => {
+                  if (Math.abs(info.offset.x) > 30 || Math.abs(info.velocity.x) > 100) {
+                    setGuideSlide(0);
+                  }
+                }}
+                className={`col-start-1 row-start-1 w-full space-y-2.5 px-2 py-1.5 cursor-grab active:cursor-grabbing touch-pan-y self-center ${
+                  guideSlide === 1 ? 'pointer-events-auto' : 'pointer-events-none'
+                }`}
+                aria-hidden={guideSlide !== 1}
+              >
+                <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#f3e8ff] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#c084fc] flex items-center justify-center shrink-0">
+                    <Puzzle className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#1e1b18] block">پازل‌ها</span>
+                    <p className="text-[11px] text-[#581c87] font-medium leading-tight">
+                      ۳ کشف اصلی در هر سالن. با پاسخ به سؤال هر اثر، ۱ قطعه از تصویر گمشده را به دست می‌آوری.
+                    </p>
+                  </div>
+                </div>
 
-                    <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#fef9c3] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
-                      <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#facc15] flex items-center justify-center shrink-0">
-                        <Coins className="w-4 h-4 text-[#1e1b18]" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-black text-[#1e1b18] block">سکه‌ها</span>
-                        <p className="text-[11px] text-[#713f12] font-medium leading-tight">
-                          پاداش پاسخ‌های صحیح که می‌توانی برای خرید سرنخ‌ها و باز کردن بخش‌های ویژه خرج کنی.
-                        </p>
-                      </div>
-                    </div>
+                <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#ecfdf5] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#34d399] flex items-center justify-center shrink-0">
+                    <Star className="w-4 h-4 text-[#1e1b18] fill-[#1e1b18]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#1e1b18] block">ستاره‌ها</span>
+                    <p className="text-[11px] text-[#064e3b] font-medium leading-tight">
+                      کشف‌های اختیاری در سالن‌ها برای کسب سکه یا دسترسی به اطلاعات جذاب‌تر درباره آثار.
+                    </p>
+                  </div>
+                </div>
 
-                    <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#ffedd5] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
-                      <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#fb923c] flex items-center justify-center shrink-0">
-                        <Trophy className="w-4 h-4 text-[#1e1b18]" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-black text-[#1e1b18] block">جایزه نهایی</span>
-                        <p className="text-[11px] text-[#7c2d12] font-medium leading-tight">
-                          با باز کردن هر ۸ تصویر، گواهی‌نامه اختصاصی و کارت افتخاری پایان موزه برایت باز می‌شود!
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#fef9c3] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#facc15] flex items-center justify-center shrink-0">
+                    <Coins className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#1e1b18] block">سکه‌ها</span>
+                    <p className="text-[11px] text-[#713f12] font-medium leading-tight">
+                      پاداش پاسخ‌های صحیح که می‌توانی برای خرید سرنخ‌ها و باز کردن بخش‌های ویژه خرج کنی.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-2 border-[#1e1b18] rounded-xl p-2.5 bg-[#ffedd5] shadow-[2px_2px_0px_#1e1b18] flex items-center text-right gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border-2 border-[#1e1b18] bg-[#fb923c] flex items-center justify-center shrink-0">
+                    <Trophy className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#1e1b18] block">جایزه نهایی</span>
+                    <p className="text-[11px] text-[#7c2d12] font-medium leading-tight">
+                      با باز کردن هر ۸ تصویر، گواهی‌نامه اختصاصی و کارت افتخاری پایان موزه برایت باز می‌شود!
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             </div>
 
             {/* Bottom Group: Pagination Dots & Action Button */}
