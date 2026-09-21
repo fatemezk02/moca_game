@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sparkles, RotateCw, BookOpen } from 'lucide-react';
+import { X, Sparkles, RotateCw, Compass, Eye, Puzzle, Star } from 'lucide-react';
 import { contentService, formatTwoDigitPersian } from '../services/content';
 
 export interface GalleryInfoModalProps {
@@ -354,12 +354,12 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
 
                 {/* Centered Guide Title */}
                 <div className="flex items-center justify-center gap-1.5 text-center">
-                  <BookOpen className="w-4 h-4 text-[#ea580c] shrink-0" />
+                  <Compass className="w-4 h-4 text-[#ea580c] shrink-0" />
                   <h2
                     id="gallery-info-back-title"
                     className="font-sans-custom text-[18px] sm:text-[21px] font-black text-[#1e1b18] text-center"
                   >
-                    راهنمای بازی
+                    انواع ایستگاه‌ها
                   </h2>
                 </div>
 
@@ -375,68 +375,61 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
                 </button>
               </div>
 
-              {/* CENTER: Concise Game Rules for Puzzle and Star */}
+              {/* CENTER: Stations Guide */}
               <div
                 id="gallery-info-back-body"
-                className="flex-1 flex flex-col justify-around py-3 sm:py-4 px-2 sm:px-4 space-y-3"
+                className="flex-1 flex flex-col justify-evenly py-2 sm:py-4 px-1"
               >
-                {/* A) PUZZLE SECTION */}
+                {/* Row 1: Puzzle */}
                 <div
                   id="gallery-info-rule-puzzle"
-                  className="text-center flex flex-col items-center"
+                  className="flex items-center text-right gap-3 sm:gap-3.5"
                 >
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <svg
-                      viewBox="0 0 28 28"
-                      className="w-5 h-5 sm:w-6 sm:h-6 overflow-visible shrink-0"
-                      style={{ filter: 'drop-shadow(1.5px 1.5px 0px #1e1b18)' }}
-                    >
-                      <path
-                        d="M 5 5.5 C 5 4.75, 5.75 4, 6.5 4 L 11 4 C 11 2.2, 12.5 1, 14 1 C 15.5 1, 17 2.2, 17 4 L 21.5 4 C 22.25 4, 23 4.75, 23 5.5 L 23 10 C 24.8 10, 26 11.5, 26 13 C 26 14.5, 24.8 16, 23 16 L 23 21.5 C 23 22.25, 22.25 23, 21.5 23 L 17 23 C 17 21.2, 15.5 20, 14 20 C 12.5 20, 11 21.2, 11 23 L 6.5 23 C 5.75 23, 5 22.25, 5 21.5 L 5 17 C 6.8 17, 8 15.5, 8 14 C 8 12.5, 6.8 11, 5 11 Z"
-                        fill="#38bdf8"
-                        stroke="#1e1b18"
-                        strokeWidth="2"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <h3 className="font-sans-custom text-[15px] sm:text-[16.5px] font-black text-[#1e1b18]">
-                      پازل
-                    </h3>
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border-2 border-[#1e1b18] bg-[#c084fc] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center shrink-0">
+                    <Puzzle className="w-4 h-4 sm:w-5 sm:h-5 text-[#1e1b18]" />
                   </div>
-                  <p className="font-sans-custom text-[12px] sm:text-[13.5px] text-[#334155] leading-relaxed max-w-sm text-center">
-                    پازل‌ها را با پاسخ درست به سؤال‌ها تکمیل کن. هر پاسخ درست یک تکه از اثر گالری را به تو می‌دهد. با کامل شدن همه تکه‌ها، اثر گالری کامل می‌شود.
-                  </p>
+                  <div className="flex-1">
+                    <span className="text-xs sm:text-[13px] font-black text-[#1e1b18] block mb-0.5">پازل‌ها</span>
+                    <p className="text-[11.5px] sm:text-[13px] text-[#581c87] font-medium leading-relaxed">
+                      در هر گالری به محدوده پازل‌ها برو. سوالات پازل تو را با هویت عکاسی در هر دوره آشنا می‌کنند.
+                    </p>
+                  </div>
                 </div>
 
-                {/* Subtle Divider */}
-                <div className="w-20 h-[1.5px] bg-[#e2e8f0] mx-auto rounded-full" />
+                <div className="h-[1px] bg-[#e2e8f0] w-full" />
 
-                {/* B) STAR SECTION */}
+                {/* Row 2: Star */}
                 <div
                   id="gallery-info-rule-star"
-                  className="text-center flex flex-col items-center"
+                  className="flex items-center text-right gap-3 sm:gap-3.5"
                 >
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="w-5 h-5 sm:w-6 sm:h-6 overflow-visible shrink-0"
-                      style={{ filter: 'drop-shadow(1.5px 1.5px 0px #1e1b18)' }}
-                    >
-                      <path
-                        d="M 11.29 3.43 Q 12 2 12.71 3.43 L 14.74 7.54 Q 15.09 8.26 15.88 8.38 L 20.42 9.04 Q 22 9.27 20.85 10.39 L 17.57 13.58 Q 17 14.14 17.14 14.93 L 17.91 19.44 Q 18.18 21.02 16.76 20.27 L 12.71 18.14 Q 12 17.77 11.29 18.14 L 7.24 20.27 Q 5.82 21.02 6.09 19.44 L 6.86 14.93 Q 7 14.14 6.43 13.58 L 3.15 10.39 Q 2 9.27 3.58 9.04 L 8.12 8.38 Q 8.91 8.26 9.26 7.54 Z"
-                        fill="#fbbf24"
-                        stroke="#1e1b18"
-                        strokeWidth="2"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <h3 className="font-sans-custom text-[15px] sm:text-[16.5px] font-black text-[#1e1b18]">
-                      ستاره
-                    </h3>
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border-2 border-[#1e1b18] bg-[#34d399] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center shrink-0">
+                    <Star className="w-4 h-4 sm:w-5 sm:h-5 text-[#1e1b18]" />
                   </div>
-                  <p className="font-sans-custom text-[12px] sm:text-[13.5px] text-[#334155] leading-relaxed max-w-sm text-center">
-                    با ستاره‌ها اطلاعات بیشتری درباره آثار و موضوعات گالری پیدا کن. برای باز کردن اطلاعات می‌توانی به سؤال ستاره پاسخ درست بدهی یا هزینه اطلاعات را پرداخت کنی.
-                  </p>
+                  <div className="flex-1">
+                    <span className="text-xs sm:text-[13px] font-black text-[#1e1b18] block mb-0.5">ستاره‌ها</span>
+                    <p className="text-[11.5px] sm:text-[13px] text-[#064e3b] font-medium leading-relaxed">
+                      با رفتن به محدوده نقاط ستاره می‌تونی با سکه یا پاسخ به سوال اطلاعات اضافه و جالب کشف کنی.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-[#e2e8f0] w-full" />
+
+                {/* Row 3: Experience */}
+                <div
+                  id="gallery-info-rule-experience"
+                  className="flex items-center text-right gap-3 sm:gap-3.5"
+                >
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border-2 border-[#1e1b18] bg-[#38bdf8] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center shrink-0">
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-[#1e1b18]" />
+                  </div>
+                  <div className="flex-1">
+                    <span className="text-xs sm:text-[13px] font-black text-[#1e1b18] block mb-0.5">تجربه</span>
+                    <p className="text-[11.5px] sm:text-[13px] text-[#0369a1] font-medium leading-relaxed">
+                      این نقاط حاوی اطلاعات جالب یا محتوای چندرسانه‌ای درباره ابزارهای تجربه تعاملی در موزه هستن.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
