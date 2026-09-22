@@ -156,7 +156,7 @@ export const DEFAULT_PUZZLE_QUESTIONS: Record<string, PuzzleQuestionItem> = {
   },
   'gallery04-puzzle-q01': {
     id: 'gallery04-puzzle-q01',
-    galleryId: 'gallery_04',
+    galleryId: 'gallery_03',
     title: 'ثبت دوام ما — پرسش پازل ۱',
     question: 'این پرتره چه حسی را بیشتر به بیننده منتقل می‌کند؟',
     options: [
@@ -172,7 +172,7 @@ export const DEFAULT_PUZZLE_QUESTIONS: Record<string, PuzzleQuestionItem> = {
   },
   'gallery04-puzzle-q02': {
     id: 'gallery04-puzzle-q02',
-    galleryId: 'gallery_04',
+    galleryId: 'gallery_03',
     title: 'ثبت دوام ما — پرسش پازل ۲',
     question: 'ادوارد استایکن با تاریک کردن پس‌زمینه چه تاثیری در عکس ایجاد کرده است؟',
     options: [
@@ -188,7 +188,7 @@ export const DEFAULT_PUZZLE_QUESTIONS: Record<string, PuzzleQuestionItem> = {
   },
   'gallery04-puzzle-q03': {
     id: 'gallery04-puzzle-q03',
-    galleryId: 'gallery_04',
+    galleryId: 'gallery_03',
     title: 'ثبت دوام ما — پرسش پازل ۳ (قطعه نهایی)',
     question: 'چرا این پرتره را اثری مدرن در زمان خود می‌دانستند؟',
     options: [
@@ -204,7 +204,7 @@ export const DEFAULT_PUZZLE_QUESTIONS: Record<string, PuzzleQuestionItem> = {
   },
   'gallery05-puzzle-q01': {
     id: 'gallery05-puzzle-q01',
-    galleryId: 'gallery_05',
+    galleryId: 'gallery_04',
     title: 'ضرب آهنگ شهر — پرسش پازل ۱',
     question: 'به این عکس نگاه کن. آدم‌ها در بخش‌های مختلف کشتی قرار گرفته‌اند و پله‌ها، نرده‌ها و عرشه، فاصله‌ی میان آن‌ها را به چشم می‌آورند. استیگلیتز در این صحنه، فقط سفر با یک کشتی را ثبت نکرده؛ بلکه تصویری از تفاوت شرایط و جایگاه اجتماعی آدم‌ها را هم به ما نشان می‌دهد. این عکس چه چیزی را درباره‌ی جهان مدرن نشان می‌دهد؟',
     options: [
@@ -219,7 +219,7 @@ export const DEFAULT_PUZZLE_QUESTIONS: Record<string, PuzzleQuestionItem> = {
   },
   'gallery05-puzzle-q02': {
     id: 'gallery05-puzzle-q02',
-    galleryId: 'gallery_05',
+    galleryId: 'gallery_04',
     title: 'ضرب آهنگ شهر — پرسش پازل ۲',
     question: 'لوییس هاین دوربینش را به محیط‌های کار برد؛ به کارخانه‌ها و مکان‌هایی که زندگی بسیاری از مردم در آن‌ها می‌گذشت. در این عکس، کارگر در میان سازه‌ی عظیم صنعتی دیده می‌شود. این نوع عکاسی چه امکان تازه‌ای ایجاد کرد؟',
     options: [
@@ -234,9 +234,9 @@ export const DEFAULT_PUZZLE_QUESTIONS: Record<string, PuzzleQuestionItem> = {
   },
   'gallery05-puzzle-q03': {
     id: 'gallery05-puzzle-q03',
-    galleryId: 'gallery_05',
+    galleryId: 'gallery_04',
     title: 'ضرب آهنگ شهر — پرسش پازل ۳ (قطعه نهایی)',
-    question: 'گنته این تصویر را پس از زلزله و آتش‌سوزی بزرگ سان‌فرانسیسکو ثبت کرد. خیابان و ساختمان‌ها در این عکس، فقط یک منظره‌ی شهری نیستند؛ تصویری از لحظه‌ای هستند که شهر دچار تغییر و بحران شده است. عکاسی در چنین موقعیتی چه نقشی پیدا می‌کند؟',
+    question: 'گنته این تصویر را پس از ززلزله و آتش‌سوزی بزرگ سان‌فرانسیسکو ثبت کرد. خیابان و ساختمان‌ها در این عکس، فقط یک منظره‌ی شهری نیستند؛ تصویری از لحظه‌ای هستند که شهر دچار تغییر و بحران شده است. عکاسی در چنین موقعیتی چه نقشی پیدا می‌کند؟',
     options: [
       'فقط ثبت منظره‌ای از شهر برای زیبایی.',
       'ثبت اتفاقی که دیگر هیچ ارتباطی با آینده‌ی شهر ندارد.',
@@ -339,7 +339,7 @@ export const DEFAULT_PUZZLE_QUESTIONS: Record<string, PuzzleQuestionItem> = {
   },
   'gallery07-puzzle-q01': {
     id: 'gallery07-puzzle-q01',
-    galleryId: 'gallery_07',
+    galleryId: 'gallery_06',
     title: 'گذر از برون به درون — پرسش پازل ۱',
     question: 'مفهوم «گذر از برون به درون» در عکاسی معاصر عمدتاً به کدام جنبه از تجربه بصری اشاره دارد؟',
     options: [
@@ -354,7 +354,7 @@ export const DEFAULT_PUZZLE_QUESTIONS: Record<string, PuzzleQuestionItem> = {
   },
   'gallery07-puzzle-q02': {
     id: 'gallery07-puzzle-q02',
-    galleryId: 'gallery_07',
+    galleryId: 'gallery_06',
     title: 'گذر از برون به درون — پرسش پازل ۲',
     question: 'چگونه نور و تاریکی در این گالری به عنوان ابزار بیانی به کار گرفته شده‌اند؟',
     options: [
@@ -369,7 +369,7 @@ export const DEFAULT_PUZZLE_QUESTIONS: Record<string, PuzzleQuestionItem> = {
   },
   'gallery07-puzzle-q03': {
     id: 'gallery07-puzzle-q03',
-    galleryId: 'gallery_07',
+    galleryId: 'gallery_06',
     title: 'گذر از برون به درون — پرسش پازل ۳ (قطعه نهایی)',
     question: 'پیوند میان حافظه جمعی و نگاه فردی در آثار این گالری چگونه متجلی می‌شود؟',
     options: [

@@ -44,6 +44,24 @@ function getGalleryProgressionOrder(galleryId?: string): number | null {
 }
 
 /**
+ * Maps arrow destination string to its canonical gallery ID (gallery_01 .. gallery_08)
+ */
+export function mapDestinationToCanonicalGallery(destination?: string): string {
+  if (!destination || destination === 'none') return '';
+  const lower = destination.toLowerCase().trim();
+  if (lower === 'gallery-00' || lower === 'gallery_00' || lower === 'g00') return 'gallery_00';
+  if (lower === 'gallery-01' || lower === 'gallery_01' || lower === 'g01') return 'gallery_01';
+  if (lower === 'gallery-02' || lower === 'gallery_02' || lower === 'gallery-03' || lower === 'gallery_03_view') return 'gallery_02';
+  if (lower === 'gallery-04') return 'gallery_03';
+  if (lower === 'gallery-05') return 'gallery_04';
+  if (lower === 'gallery-06') return 'gallery_05';
+  if (lower === 'gallery-07') return 'gallery_06';
+  if (lower === 'gallery-08') return 'gallery_07';
+  if (lower === 'gallery-09') return 'gallery_08';
+  return normalizeGalleryId(destination);
+}
+
+/**
  * Checks whether an arrow is pointing to a previous/preceding gallery in progression
  */
 export function isPreviousGalleryArrow(arrow: AdminArrowPoint): boolean {
@@ -399,7 +417,8 @@ export function isArrowVisibleToPlayer(arrow: AdminArrowPoint): boolean {
   if (isPreviousGalleryArrow(arrow)) {
     const dest = arrow.destination;
     if (dest && dest !== 'none') {
-      if (!isGalleryReached(dest)) {
+      const destCanon = mapDestinationToCanonicalGallery(dest);
+      if (!isGalleryReached(destCanon)) {
         return false;
       }
     }

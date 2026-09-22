@@ -582,90 +582,33 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           const normCurrent = normalizeGalleryId(rawCurrent);
 
           let canonPlayerId = 'gallery_01';
-          if (
-            normCurrent === 'gallery_01' ||
-            normCurrent === 'gallery_02' ||
-            rawCurrent === 'gallery-01' ||
-            rawCurrent === 'gallery-02'
-          ) {
+          if (rawCurrent === 'gallery-00' || normCurrent === 'gallery_00') {
+            canonPlayerId = 'gallery_00';
+          } else if (rawCurrent === 'gallery-01' || rawCurrent === 'gallery_01' || normCurrent === 'gallery_01') {
             canonPlayerId = 'gallery_01';
-          } else if (normCurrent === 'gallery_03' || rawCurrent === 'gallery-03') {
+          } else if (rawCurrent === 'gallery-03' || rawCurrent === 'gallery-02' || rawCurrent === 'gallery_02' || normCurrent === 'gallery_02') {
             canonPlayerId = 'gallery_02';
-          } else if (normCurrent === 'gallery_04' || rawCurrent === 'gallery-04') {
+          } else if (rawCurrent === 'gallery-04' || rawCurrent === 'gallery_03' || normCurrent === 'gallery_03') {
             canonPlayerId = 'gallery_03';
-          } else if (normCurrent === 'gallery_05' || rawCurrent === 'gallery-05') {
+          } else if (rawCurrent === 'gallery-05' || rawCurrent === 'gallery_04' || normCurrent === 'gallery_04') {
             canonPlayerId = 'gallery_04';
-          } else if (normCurrent === 'gallery_06' || rawCurrent === 'gallery-06') {
+          } else if (rawCurrent === 'gallery-06' || rawCurrent === 'gallery_05' || normCurrent === 'gallery_05') {
             canonPlayerId = 'gallery_05';
-          } else if (normCurrent === 'gallery_07' || rawCurrent === 'gallery-07') {
+          } else if (rawCurrent === 'gallery-07' || rawCurrent === 'gallery_06' || normCurrent === 'gallery_06') {
             canonPlayerId = 'gallery_06';
-          } else if (normCurrent === 'gallery_08' || rawCurrent === 'gallery-08') {
+          } else if (rawCurrent === 'gallery-08' || rawCurrent === 'gallery_07' || normCurrent === 'gallery_07') {
             canonPlayerId = 'gallery_07';
-          } else if (normCurrent === 'gallery_09' || rawCurrent === 'gallery-09') {
+          } else if (rawCurrent === 'gallery-09' || rawCurrent === 'gallery_08' || normCurrent === 'gallery_08' || normCurrent === 'gallery_09') {
             canonPlayerId = 'gallery_08';
           }
 
           const isCompleted = (gid: string) => {
-            if (gid === 'gallery_01') {
-              return isGalleryPuzzleCompleted('gallery_01') || isGalleryPuzzleCompleted('gallery-01');
-            }
-            if (gid === 'gallery_02') {
-              return (
-                isGalleryPuzzleCompleted('gallery_02') ||
-                isGalleryPuzzleCompleted('gallery-02') ||
-                isGalleryPuzzleCompleted('gallery_03') ||
-                isGalleryPuzzleCompleted('gallery-03')
-              );
-            }
-            if (gid === 'gallery_03') {
-              return (
-                isGalleryPuzzleCompleted('gallery_03') ||
-                isGalleryPuzzleCompleted('gallery-03') ||
-                isGalleryPuzzleCompleted('gallery_04') ||
-                isGalleryPuzzleCompleted('gallery-04')
-              );
-            }
-            if (gid === 'gallery_04') {
-              return (
-                isGalleryPuzzleCompleted('gallery_04') ||
-                isGalleryPuzzleCompleted('gallery-04') ||
-                isGalleryPuzzleCompleted('gallery_05') ||
-                isGalleryPuzzleCompleted('gallery-05')
-              );
-            }
-            if (gid === 'gallery_05') {
-              return (
-                isGalleryPuzzleCompleted('gallery_05') ||
-                isGalleryPuzzleCompleted('gallery-05') ||
-                isGalleryPuzzleCompleted('gallery_06') ||
-                isGalleryPuzzleCompleted('gallery-06')
-              );
-            }
-            if (gid === 'gallery_06') {
-              return (
-                isGalleryPuzzleCompleted('gallery_06') ||
-                isGalleryPuzzleCompleted('gallery-06') ||
-                isGalleryPuzzleCompleted('gallery_07') ||
-                isGalleryPuzzleCompleted('gallery-07')
-              );
-            }
-            if (gid === 'gallery_07') {
-              return (
-                isGalleryPuzzleCompleted('gallery_07') ||
-                isGalleryPuzzleCompleted('gallery-07') ||
-                isGalleryPuzzleCompleted('gallery_08') ||
-                isGalleryPuzzleCompleted('gallery-08')
-              );
-            }
-            if (gid === 'gallery_08') {
-              return (
-                isGalleryPuzzleCompleted('gallery_08') ||
-                isGalleryPuzzleCompleted('gallery-08') ||
-                isGalleryPuzzleCompleted('gallery_09') ||
-                isGalleryPuzzleCompleted('gallery-09')
-              );
-            }
-            return isGalleryPuzzleCompleted(gid);
+            const canon = normalizeGalleryId(gid);
+            return (
+              isGalleryPuzzleCompleted(gid) ||
+              isGalleryPuzzleCompleted(canon) ||
+              isGalleryPuzzleCompleted(gid.replace('_', '-'))
+            );
           };
 
           const isReached = (gid: string) => {

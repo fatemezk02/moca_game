@@ -359,8 +359,22 @@ export function buildDefaultSeedContent(): GameContentData {
     const orderMatch = pq.id.match(/q0*([1-3])$/i) || pq.id.match(/0*([1-3])$/i);
     const orderNum = orderMatch ? parseInt(orderMatch[1], 10) : 1;
 
-    if (canonGId === 'gallery_01' || canonGId === 'gallery_02') {
+    if (canonGId === 'gallery_01') {
       puzzlePointId = orderNum === 1 ? 'puzzle-point-01' : orderNum === 2 ? 'puzzle-point-02' : 'puzzle-point-03';
+    } else if (canonGId === 'gallery_02') {
+      puzzlePointId = `puzzle-g03-point-${String(orderNum).padStart(2, '0')}`;
+    } else if (canonGId === 'gallery_03') {
+      puzzlePointId = `puzzle-g04-point-${String(orderNum).padStart(2, '0')}`;
+    } else if (canonGId === 'gallery_04') {
+      puzzlePointId = `puzzle-g05-point-${String(orderNum).padStart(2, '0')}`;
+    } else if (canonGId === 'gallery_05') {
+      puzzlePointId = `puzzle-g06-point-${String(orderNum).padStart(2, '0')}`;
+    } else if (canonGId === 'gallery_06') {
+      puzzlePointId = `puzzle-g07-point-${String(orderNum).padStart(2, '0')}`;
+    } else if (canonGId === 'gallery_07') {
+      puzzlePointId = `puzzle-g08-point-${String(orderNum).padStart(2, '0')}`;
+    } else if (canonGId === 'gallery_08') {
+      puzzlePointId = `puzzle-g09-point-${String(orderNum).padStart(2, '0')}`;
     } else {
       const gNum = canonGId.replace(/[^0-9]/g, '');
       puzzlePointId = `puzzle-g${gNum}-point-${String(orderNum).padStart(2, '0')}`;

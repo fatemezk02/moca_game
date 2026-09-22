@@ -50,8 +50,8 @@ export function resetEntireGame(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('museum_active_gallery', 'gallery-00');
       localStorage.setItem('museum_current_gallery', 'gallery-00');
-      localStorage.setItem('museum_player_current_gallery', 'gallery-02');
-      localStorage.setItem('currentGalleryId', 'gallery-02');
+      localStorage.setItem('museum_player_current_gallery', 'gallery-01');
+      localStorage.setItem('currentGalleryId', 'gallery-01');
       localStorage.removeItem('museum_has_entered_gallery_02');
     }
 

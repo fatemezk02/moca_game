@@ -217,49 +217,35 @@ export function isGalleryReached(rawGalleryId: string): boolean {
     return (
       isGalleryPuzzleCompleted('gallery_02') ||
       isGalleryPuzzleCompleted('gallery-02') ||
-      isGalleryPuzzleCompleted('gallery_03') ||
-      isGalleryPuzzleCompleted('gallery-03')
+      isGalleryPuzzleCompleted('gallery_03')
     );
   }
   if (canon === 'gallery_04') {
     return (
       isGalleryPuzzleCompleted('gallery_03') ||
       isGalleryPuzzleCompleted('gallery-03') ||
-      isGalleryPuzzleCompleted('gallery_04') ||
-      isGalleryPuzzleCompleted('gallery-04')
+      isGalleryPuzzleCompleted('gallery_04')
     );
   }
   if (canon === 'gallery_05') {
     return (
       isGalleryPuzzleCompleted('gallery_04') ||
       isGalleryPuzzleCompleted('gallery-04') ||
-      isGalleryPuzzleCompleted('gallery_05') ||
-      isGalleryPuzzleCompleted('gallery-05')
+      isGalleryPuzzleCompleted('gallery_05')
     );
   }
   if (canon === 'gallery_06') {
     return (
       isGalleryPuzzleCompleted('gallery_05') ||
       isGalleryPuzzleCompleted('gallery-05') ||
-      isGalleryPuzzleCompleted('gallery_06') ||
-      isGalleryPuzzleCompleted('gallery-06')
+      isGalleryPuzzleCompleted('gallery_06')
     );
   }
   if (canon === 'gallery_07') {
-    return (
-      isGalleryPuzzleCompleted('gallery_06') ||
-      isGalleryPuzzleCompleted('gallery-06') ||
-      isGalleryPuzzleCompleted('gallery_07') ||
-      isGalleryPuzzleCompleted('gallery-07')
-    );
+    return isGalleryPuzzleCompleted('gallery_06') || isGalleryPuzzleCompleted('gallery-06') || isGalleryPuzzleCompleted('gallery-07');
   }
   if (canon === 'gallery_08') {
-    return (
-      isGalleryPuzzleCompleted('gallery_07') ||
-      isGalleryPuzzleCompleted('gallery-07') ||
-      isGalleryPuzzleCompleted('gallery_08') ||
-      isGalleryPuzzleCompleted('gallery-08')
-    );
+    return isGalleryPuzzleCompleted('gallery_07') || isGalleryPuzzleCompleted('gallery-07') || isGalleryPuzzleCompleted('gallery-08');
   }
 
   return false;

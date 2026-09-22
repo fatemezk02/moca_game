@@ -165,6 +165,32 @@ export function normalizeGalleryId(raw: string): string {
 }
 
 /**
+ * Maps any gallery identifier (canonical 'gallery_01'..'gallery_08', view routes 'gallery-01'..'gallery-09',
+ * or numbers) to the standard 1-based logical gallery number (1 to 8, or 0 for lobby).
+ */
+export function getLogicalGalleryNumber(galleryId?: string): number | null {
+  if (!galleryId || typeof galleryId !== 'string') return null;
+  const s = galleryId.toLowerCase().trim();
+
+  if (s === 'gallery-00' || s === 'gallery_00' || s === '00' || s === '0' || s === 'main-map') return 0;
+  if (s === 'gallery-01' || s === 'gallery_01' || s === 'gallery01' || s === '01' || s === '1') return 1;
+  if (s === 'gallery-02' || s === 'gallery_02' || s === 'gallery02' || s === '02' || s === '2') return 2;
+  if (s === 'gallery-03' || s === 'gallery_03' || s === 'gallery03' || s === '03' || s === '3') return 3;
+  if (s === 'gallery-04' || s === 'gallery_04' || s === 'gallery04' || s === '04' || s === '4') return 4;
+  if (s === 'gallery-05' || s === 'gallery_05' || s === 'gallery05' || s === '05' || s === '5') return 5;
+  if (s === 'gallery-06' || s === 'gallery_06' || s === 'gallery06' || s === '06' || s === '6') return 6;
+  if (s === 'gallery-07' || s === 'gallery_07' || s === 'gallery07' || s === '07' || s === '7') return 7;
+  if (s === 'gallery-08' || s === 'gallery_08' || s === 'gallery08' || s === '08' || s === '8') return 8;
+
+  const m = s.match(/\d+/);
+  if (m) {
+    const num = parseInt(m[0], 10);
+    if (num >= 1 && num <= 8) return num;
+  }
+  return null;
+}
+
+/**
  * ============================================================================
  * 1. MAPPER: Spreadsheet Row -> QuestionContent
  * ============================================================================

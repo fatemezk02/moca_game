@@ -22,13 +22,14 @@ export function getGalleryRank(galleryId: string): number {
   if (norm.includes('gallery-05')) return 5;
   if (norm.includes('gallery-04')) return 4;
   if (norm.includes('gallery-03')) return 3;
-  if (norm.includes('gallery-01') || norm.includes('gallery-02')) return 2;
+  if (norm.includes('gallery-02')) return 2;
+  if (norm.includes('gallery-01')) return 1;
   return 0;
 }
 
 /**
  * Gets the current gallery the player is located in.
- * Starting state defaults to "gallery-02".
+ * Starting state defaults to "gallery-01".
  * Survives page navigation and browser refresh.
  */
 export function getCurrentGalleryId(): string {
@@ -42,12 +43,12 @@ export function getCurrentGalleryId(): string {
   } catch (err) {
     console.error('Failed to read player currentGalleryId:', err);
   }
-  return 'gallery-02';
+  return 'gallery-01';
 }
 
 /**
  * Updates the player's current gallery location.
- * Tracks the last gallery the user was in (from galleries 02 to 09).
+ * Tracks the last gallery the user was in (from galleries 01 to 08).
  * Preserves current gallery location when user views the map (gallery-00).
  * Dispatches a 'museum_player_location_updated' custom event.
  */
@@ -65,7 +66,7 @@ export function setCurrentGalleryId(galleryId: string): void {
     return;
   }
 
-  // Update to the last gallery the user entered (from 02 to 09)
+  // Update to the last gallery the user entered (from 01 to 08)
   try {
     localStorage.setItem(PLAYER_GALLERY_STORAGE_KEY, target);
     localStorage.setItem(ALTERNATIVE_STORAGE_KEY, target);
@@ -81,16 +82,16 @@ export function setCurrentGalleryId(galleryId: string): void {
 }
 
 /**
- * Resets the player's location to the starting state (Gallery 02)
+ * Resets the player's location to the starting state (Gallery 01)
  */
 export function resetPlayerLocation(): void {
   try {
-    localStorage.setItem(PLAYER_GALLERY_STORAGE_KEY, 'gallery-02');
-    localStorage.setItem(ALTERNATIVE_STORAGE_KEY, 'gallery-02');
-    localStorage.setItem('museum_active_gallery', 'gallery-02');
+    localStorage.setItem(PLAYER_GALLERY_STORAGE_KEY, 'gallery-01');
+    localStorage.setItem(ALTERNATIVE_STORAGE_KEY, 'gallery-01');
+    localStorage.setItem('museum_active_gallery', 'gallery-01');
     window.dispatchEvent(
       new CustomEvent('museum_player_location_updated', {
-        detail: { currentGalleryId: 'gallery-02' },
+        detail: { currentGalleryId: 'gallery-01' },
       })
     );
   } catch (err) {
