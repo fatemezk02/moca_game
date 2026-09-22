@@ -21,6 +21,52 @@ import {
 type StatusListener = (status: ContentServiceStatus) => void;
 
 /**
+ * Helper to extract canonical Star Number (1 to 25) from any valid star identifier or alias.
+ */
+export function extractCanonicalStarNumber(s?: string | number | null): number | null {
+  if (s === undefined || s === null) return null;
+  if (typeof s === 'number') {
+    return s >= 1 && s <= 25 ? s : null;
+  }
+  const clean = String(s).trim().toLowerCase();
+  if (!clean) return null;
+
+  // Direct integer check
+  if (/^\d+$/.test(clean)) {
+    const parsed = parseInt(clean, 10);
+    return parsed >= 1 && parsed <= 25 ? parsed : null;
+  }
+
+  // Exact point ID aliases
+  if (clean === 'artwork-01' || clean === 'col-01') return 1;
+  if (clean === 'star-02' || clean === 'col-02') return 2;
+  if (clean === 'artwork-g03-star' || clean === 'col-03') return 3;
+  if (clean === 'col-8549') return 16;
+  if (clean === 'col-6925') return 17;
+  if (clean === 'col-0594') return 18;
+  if (clean === 'col-g09-01') return 20;
+  if (clean === 'col-g09-02') return 21;
+  if (clean === 'col-g09-03') return 22;
+  if (clean === 'col-g09-04') return 23;
+
+  // Regex patterns: star-01, star-1, star-q-01, star_01, point-star-01, etc.
+  const starMatch = clean.match(/(?:star(?:-q)?|star_point|artwork|point)[-_]?0*(\d+)/i);
+  if (starMatch && starMatch[1]) {
+    const parsed = parseInt(starMatch[1], 10);
+    return parsed >= 1 && parsed <= 25 ? parsed : null;
+  }
+
+  // Generic trailing digits fallback
+  const trailingDigitsMatch = clean.match(/0*(\d+)$/);
+  if (trailingDigitsMatch && trailingDigitsMatch[1]) {
+    const parsed = parseInt(trailingDigitsMatch[1], 10);
+    return parsed >= 1 && parsed <= 25 ? parsed : null;
+  }
+
+  return null;
+}
+
+/**
  * Central Content Service
  *
  * Responsibilities:
@@ -332,12 +378,7 @@ class ContentService {
    */
   getQuestionForPuzzlePoint(galleryId: string, puzzlePointId: string): QuestionContent | null {
     const questions = this.getQuestions();
-    let canonGalleryId = normalizeGalleryId(galleryId);
-    // Canonical gallery IDs: gallery_01 is Master Gallery with no puzzles;
-    // previous Gallery 01 is now canonical gallery_02.
-    if (canonGalleryId === 'gallery_01') {
-      canonGalleryId = 'gallery_02';
-    }
+    const canonGalleryId = normalizeGalleryId(galleryId);
 
     // Determine expected question_order (1, 2, or 3) for this puzzle point:
     // Existing Puzzle Point #1 must ALWAYS open Question order 1
@@ -474,268 +515,102 @@ class ContentService {
    *   Does NOT crash and does NOT fall back to stars[0] or another Star's content.
    * - If duplicate star_id records exist: logs a development warning and returns a deterministic record.
    */
+  /**
+   * Resolves the authoritative StarContent for a specific Star Point or star_id.
+   *
+   * STRICT MAPPING RULES:
+   * - Matches strictly by Star Identity (star_id or canonical Star Number 1..25).
+   * - All Star content fields (question, options, answer, reward, info, artwork) come from the SAME row.
+   * - Does NOT use array order, rendering order, or positional fallbacks.
+   * - Returns null if no matching star is found.
+   */
   getStarForStarPoint(
     starPointId?: string,
     galleryId?: string,
     explicitStarId?: string
   ): StarContent | null {
     if (!starPointId && !explicitStarId) return null;
-    const stars = this.getStars();
 
     const lookupPointId = (starPointId || '').trim();
     const lookupStarId = (explicitStarId || '').trim();
 
-    if (!stars || stars.length === 0) {
-      console.warn(
-        `[ContentService] No stars data loaded in cache when resolving Star Point ID: "${lookupPointId}", star_id: "${lookupStarId || lookupPointId}".`
-      );
-      return null;
-    }
+    // 1. Resolve canonical star number (1 to 25)
+    const targetNum =
+      extractCanonicalStarNumber(lookupStarId) ??
+      extractCanonicalStarNumber(lookupPointId);
 
-    const activeStars = stars.filter((s) => s.active !== false);
-    const canonGalleryId = galleryId ? normalizeGalleryId(galleryId) : null;
+    const stars = this.getStars();
+    const activeStars = (stars || []).filter((s) => s.active !== false);
 
-    // Helper: Extract integer numeric value from ID or starNumber
-    const extractNumeric = (s?: string): number | null => {
-      if (!s) return null;
-      const clean = s.trim();
-      if (/^\d+$/.test(clean)) return parseInt(clean, 10);
-      if (clean === 'col-g09-01') return 20;
-      if (clean === 'col-g09-02') return 21;
-      if (clean === 'col-g09-03') return 22;
-      if (clean === 'col-g09-04') return 23;
-      if (clean === 'artwork-01' || clean === 'col-01') return 1;
-      if (clean === 'artwork-g03-star') return 3;
-      const m = clean.match(/(?:star|artwork|point)?[-_]?0*(\d+)$/i);
-      if (m && m[1]) return parseInt(m[1], 10);
-      return null;
-    };
-
-    // Helper: Check if two strings match normalized
-    const isCleanMatch = (a?: string, b?: string): boolean => {
-      if (!a || !b) return false;
-      const cleanA = a.toLowerCase().trim();
-      const cleanB = b.toLowerCase().trim();
-      if (cleanA === cleanB) return true;
-      const alphaA = cleanA.replace(/[^a-z0-9]/g, '');
-      const alphaB = cleanB.replace(/[^a-z0-9]/g, '');
-      return alphaA.length > 0 && alphaA === alphaB;
-    };
-
-    // If galleryId is specified, perform gallery-scoped matching
-    if (canonGalleryId) {
-      // 1. Filter active stars belonging strictly to this gallery (with Gallery 01 / Gallery 02 backward compatibility)
-      const galleryStars = activeStars.filter((star) => {
-        if (!star.galleryId) return false;
-        const starGallery = normalizeGalleryId(star.galleryId);
-        const isG01Compatible =
-          (canonGalleryId === 'gallery_01' || canonGalleryId === 'gallery-01') &&
-          (starGallery === 'gallery_01' || starGallery === 'gallery-01' || starGallery === 'gallery_02' || starGallery === 'gallery-02');
-        const isG02Compatible =
-          (canonGalleryId === 'gallery_02' || canonGalleryId === 'gallery-02') &&
-          (starGallery === 'gallery_02' || starGallery === 'gallery-02');
-        const isExactMatch = starGallery === canonGalleryId;
-        return isG01Compatible || isG02Compatible || isExactMatch;
-      });
-
-      // Sort gallery stars deterministically by starNumber/ID
-      galleryStars.sort((a, b) => {
-        const numA = extractNumeric(a.starNumber) ?? extractNumeric(a.starId) ?? extractNumeric(a.id) ?? 9999;
-        const numB = extractNumeric(b.starNumber) ?? extractNumeric(b.starId) ?? extractNumeric(b.id) ?? 9999;
-        if (numA !== numB) return numA - numB;
-        return (a.id || '').localeCompare(b.id || '');
-      });
-
-      // Retrieve all collection/star points configured for this gallery
-      const mapConfig = getGalleryMapConfig(canonGalleryId);
-      const existingStarPoints = (mapConfig?.collectionPoints || []).filter(
-        (cp) => cp.pointType === 'star'
-      );
-
-      // Ensure the queried lookupPoint is represented in the list of points to match if missing
-      const allPointsToMatch = [...existingStarPoints];
-      if (
-        lookupPointId &&
-        !allPointsToMatch.some((p) => p.id === lookupPointId)
-      ) {
-        allPointsToMatch.push({
-          id: lookupPointId,
-          starId: lookupStarId || undefined,
-          pointType: 'star',
-          type: 'collection',
-          galleryId: canonGalleryId,
-          x: 0,
-          y: 0,
-          title: '',
-          frames: [],
+    // 2. Search in loaded Google Sheets active stars
+    if (activeStars.length > 0) {
+      // 2a. Match by exact canonical star number
+      if (targetNum !== null) {
+        const numMatch = activeStars.find((s) => {
+          const sNum =
+            extractCanonicalStarNumber(s.starNumber) ??
+            extractCanonicalStarNumber(s.starId) ??
+            extractCanonicalStarNumber(s.id);
+          return sNum !== null && sNum === targetNum;
         });
+        if (numMatch) {
+          return numMatch;
+        }
       }
 
-      // DETERMINISTIC MATCHING:
-      // Point ID -> StarContent
-      const pointToStarMap = new Map<string, StarContent>();
-      const usedStarIds = new Set<string>();
+      // 2b. Match by explicit string ID / starId
+      const targetIds = [lookupStarId, lookupPointId]
+        .filter(Boolean)
+        .map((id) => id.toLowerCase().trim());
 
-      // PHASE 1: Preserve existing correct mappings first
-      for (const point of allPointsToMatch) {
-        const pId = point.id;
-        const pStarId = point.starId;
-        const pNum = extractNumeric(pStarId) ?? extractNumeric(pId);
-
-        // Try direct starId match
-        let matchedStar = galleryStars.find((s) => {
-          if (usedStarIds.has(s.id)) return false;
-          const sId = s.starId || s.id;
-          return (pStarId && isCleanMatch(pStarId, sId)) || isCleanMatch(pId, sId);
+      for (const tid of targetIds) {
+        const directMatch = activeStars.find((s) => {
+          const sid = (s.starId || '').toLowerCase().trim();
+          const id = (s.id || '').toLowerCase().trim();
+          if (sid === tid || id === tid) return true;
+          if (sid.replace(/[^a-z0-9]/g, '') === tid.replace(/[^a-z0-9]/g, '')) return true;
+          return false;
         });
-
-        // Try numeric match within this gallery
-        if (!matchedStar && pNum !== null) {
-          matchedStar = galleryStars.find((s) => {
-            if (usedStarIds.has(s.id)) return false;
-            const sNum = extractNumeric(s.starId || s.id) ?? extractNumeric(s.starNumber);
-            return sNum !== null && sNum === pNum;
-          });
+        if (directMatch) {
+          return directMatch;
         }
-
-        // Try explicit alias match (e.g. artwork-01 -> 1, artwork-g03-star -> 3, col-g09-01 -> 20)
-        if (!matchedStar) {
-          if (pId.toLowerCase() === 'artwork-01' || pId.toLowerCase() === 'col-01') {
-            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 1);
-          } else if (pId.toLowerCase() === 'artwork-g03-star') {
-            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 3);
-          } else if (pId.toLowerCase() === 'col-g09-01') {
-            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 20);
-          } else if (pId.toLowerCase() === 'col-g09-02') {
-            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 21);
-          } else if (pId.toLowerCase() === 'col-g09-03') {
-            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 22);
-          } else if (pId.toLowerCase() === 'col-g09-04') {
-            matchedStar = galleryStars.find((s) => !usedStarIds.has(s.id) && extractNumeric(s.starId || s.id) === 23);
-          }
-        }
-
-        if (matchedStar) {
-          pointToStarMap.set(pId, matchedStar);
-          usedStarIds.add(matchedStar.id);
-        }
-      }
-
-      // PHASE 2: Assign remaining unused gallery records to unmatched existing Star Points in gallery-local order
-      for (const point of allPointsToMatch) {
-        if (!pointToStarMap.has(point.id)) {
-          const unusedStar = galleryStars.find((s) => !usedStarIds.has(s.id));
-          if (unusedStar) {
-            pointToStarMap.set(point.id, unusedStar);
-            usedStarIds.add(unusedStar.id);
-          }
-        }
-      }
-
-      // RESOLUTION FOR THE CURRENT QUERY:
-      // 1. By Point ID
-      if (lookupPointId && pointToStarMap.has(lookupPointId)) {
-        return pointToStarMap.get(lookupPointId)!;
-      }
-
-      // 2. By Star ID (find point having that starId or matching star directly)
-      if (lookupStarId) {
-        // Check if any point was mapped to a star matching lookupStarId
-        for (const star of pointToStarMap.values()) {
-          if (isCleanMatch(star.starId || star.id, lookupStarId)) {
-            return star;
-          }
-        }
-        // Check unused or direct star in galleryStars
-        const directStar = galleryStars.find((s) => isCleanMatch(s.starId || s.id, lookupStarId));
-        if (directStar) {
-          return directStar;
-        }
-      }
-
-      // 3. If single lookupPointId matches any star in galleryStars directly
-      if (lookupPointId) {
-        const directStar = galleryStars.find((s) => isCleanMatch(s.starId || s.id, lookupPointId));
-        if (directStar) {
-          return directStar;
-        }
-      }
-
-      // If no match in this gallery: Attempt cross-gallery and global fallback
-      const missingStarId = lookupStarId || lookupPointId;
-      console.info(
-        `[ContentService] Star Point ID "${lookupPointId}" (star_id: "${missingStarId}") not found within gallery "${galleryId}". Attempting cross-gallery fallback...`
-      );
-    }
-
-    // Fallback: Global lookup across all active stars
-    // 1. Direct ID / starId match
-    const singleMatch = activeStars.find((s) => {
-      const sId = s.starId || s.id;
-      if (lookupStarId && isCleanMatch(sId, lookupStarId)) return true;
-      if (lookupPointId && isCleanMatch(sId, lookupPointId)) return true;
-      return false;
-    });
-
-    if (singleMatch) {
-      return singleMatch;
-    }
-
-    // 2. Numeric match globally
-    const pNum = extractNumeric(lookupStarId) ?? extractNumeric(lookupPointId);
-    if (pNum !== null) {
-      const numMatch = activeStars.find((s) => {
-        const sNum = extractNumeric(s.starId || s.id) ?? extractNumeric(s.starNumber);
-        return sNum !== null && sNum === pNum;
-      });
-      if (numMatch) {
-        return numMatch;
       }
     }
 
-    // 3. Fallback to bundled seed stars
+    // 3. Fallback to bundled seed stars (strictly matched by targetNum or ID)
     try {
       const defaultSeed = buildDefaultSeedContent();
       const seedStars = defaultSeed.stars || [];
 
-      // Try ID match in seed
-      const seedMatch = seedStars.find((s) => {
-        const sId = s.starId || s.id;
-        if (lookupStarId && isCleanMatch(sId, lookupStarId)) return true;
-        if (lookupPointId && isCleanMatch(sId, lookupPointId)) return true;
-        return false;
-      });
-      if (seedMatch) return seedMatch;
-
-      // Try numeric match in seed
-      if (pNum !== null) {
+      if (targetNum !== null) {
         const seedNumMatch = seedStars.find((s) => {
-          const sNum = extractNumeric(s.starId || s.id);
-          return sNum !== null && sNum === pNum;
+          const sNum =
+            extractCanonicalStarNumber(s.starNumber) ??
+            extractCanonicalStarNumber(s.starId) ??
+            extractCanonicalStarNumber(s.id);
+          return sNum !== null && sNum === targetNum;
         });
         if (seedNumMatch) return seedNumMatch;
       }
 
-      // Try alias match in seed (e.g. artwork-01 -> star-01)
-      if (lookupPointId.toLowerCase() === 'artwork-01' || lookupPointId.toLowerCase() === 'col-01') {
-        const s01 = seedStars.find((s) => s.id === 'star-01');
-        if (s01) return s01;
-      }
-      if (lookupPointId.toLowerCase() === 'artwork-g03-star') {
-        const s03 = seedStars.find((s) => s.id === 'star-03');
-        if (s03) return s03;
-      }
+      const targetIds = [lookupStarId, lookupPointId]
+        .filter(Boolean)
+        .map((id) => id.toLowerCase().trim());
 
-      if (seedStars.length > 0) {
-        return seedStars[0];
+      for (const tid of targetIds) {
+        const seedMatch = seedStars.find((s) => {
+          const sid = (s.starId || '').toLowerCase().trim();
+          const id = (s.id || '').toLowerCase().trim();
+          return sid === tid || id === tid;
+        });
+        if (seedMatch) return seedMatch;
       }
     } catch {
       // ignore
     }
 
-    const missingStarId = lookupStarId || lookupPointId;
     console.warn(
-      `[ContentService] No matching Star record found for Star Point ID "${lookupPointId}", missing star_id: "${missingStarId}".`
+      `[ContentService] No Star record matched for Star Point ID "${lookupPointId}", star_id: "${lookupStarId}", targetNum: ${targetNum}.`
     );
     return null;
   }
@@ -830,21 +705,23 @@ class ContentService {
       const canonId = normalizeGalleryId(galleryId);
       const defaultMappings: Record<string, string> = {
         'gallery_01': '26',
-        'gallery_03': '27',
-        'gallery_04': '28',
-        'gallery_05': '29',
-        'gallery_06': '30',
-        'gallery_07': '31',
-        'gallery_08': '32',
-        'gallery_09': '33',
+        'gallery_02': '27',
+        'gallery_03': '28',
+        'gallery_04': '29',
+        'gallery_05': '30',
+        'gallery_06': '31',
+        'gallery_07': '32',
+        'gallery_08': '33',
         'gallery-01': '26',
-        'gallery-03': '27',
-        'gallery-04': '28',
-        'gallery-05': '29',
-        'gallery-06': '30',
-        'gallery-07': '31',
-        'gallery-08': '32',
+        'gallery-02': '27',
+        'gallery-03': '28',
+        'gallery-04': '29',
+        'gallery-05': '30',
+        'gallery-06': '31',
+        'gallery-07': '32',
+        'gallery-08': '33',
         'gallery-09': '33',
+        'gallery_09': '33',
       };
       if (defaultMappings[canonId]) {
         puzzleArtId = defaultMappings[canonId];

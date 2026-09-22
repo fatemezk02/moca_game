@@ -11,6 +11,7 @@ export const contentCache = {
    * Retrieves cached content from localStorage
    */
   get(): GameContentData | null {
+    if (typeof localStorage === 'undefined') return null;
     try {
       const raw = localStorage.getItem(CACHE_STORAGE_KEY);
       if (!raw) return null;
@@ -49,6 +50,7 @@ export const contentCache = {
    * Saves updated content into localStorage
    */
   set(data: GameContentData): boolean {
+    if (typeof localStorage === 'undefined') return false;
     try {
       const toStore: GameContentData = {
         ...data,
@@ -76,6 +78,7 @@ export const contentCache = {
    * Clears the cached content (useful for testing and debug resets)
    */
   clear(): void {
+    if (typeof localStorage === 'undefined') return;
     try {
       localStorage.removeItem(CACHE_STORAGE_KEY);
     } catch (err) {

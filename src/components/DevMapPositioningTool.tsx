@@ -205,6 +205,7 @@ interface EditableElement {
   currentRotation?: number;
   aspectRatio?: number; // width / height
   subType?: string;
+  starId?: string;
   extra?: any;
 }
 
@@ -464,6 +465,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       for (const sp of starPoints) {
         list.push({
           id: sp.id,
+          starId: sp.starId || (sp.id.startsWith('star-') ? sp.id : undefined),
           type: 'star',
           title: sp.title || `نقطه ستاره ${sp.id}`,
           originalX: sp.x,
@@ -1579,7 +1581,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                       .filter((e) => e.type === 'star')
                       .map((e) => (
                         <option key={e.id} value={e.id}>
-                          {e.title} (X: {e.currentX}, Y: {e.currentY})
+                          {e.starId ? `[${e.starId}] ` : ''}{e.title} (X: {e.currentX}, Y: {e.currentY})
                         </option>
                       ))}
                   </optgroup>
@@ -1858,7 +1860,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                     {item.type === 'lamp' && '💡 '}
                     {item.type === 'lock' && '🔒 '}
                     {item.type === 'icon' && '📍 '}
-                    {item.id}
+                    {item.type === 'star' && item.starId ? `${item.starId} (${item.id})` : item.id}
                   </div>
                 </div>
               );
@@ -1933,7 +1935,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                       .filter((e) => e.type === 'star')
                       .map((e) => (
                         <option key={e.id} value={e.id}>
-                          {e.title} (X: {e.currentX}, Y: {e.currentY})
+                          {e.starId ? `[${e.starId}] ` : ''}{e.title} (X: {e.currentX}, Y: {e.currentY})
                         </option>
                       ))}
                   </optgroup>
@@ -2003,6 +2005,16 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
               )}
             </select>
           </div>
+
+          {/* Star ID Display Badge */}
+          {selectedElement.type === 'star' && (
+            <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/30 rounded-lg px-2.5 py-1 text-xs">
+              <span className="text-amber-300 font-medium">شناسه ستاره (star_id):</span>
+              <span className="font-mono-custom font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/40">
+                {selectedElement.starId || selectedElement.id}
+              </span>
+            </div>
+          )}
 
           {/* Coordinates readout */}
           <div className="bg-stone-900/90 rounded-xl p-2 border border-stone-800 flex items-center justify-around font-mono-custom text-center">

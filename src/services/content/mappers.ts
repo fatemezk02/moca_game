@@ -485,7 +485,10 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
       'گالری',
       'شناسه گالری',
     ]) || 'gallery-01';
-  const galleryId = normalizeGalleryId(rawGalleryId);
+  let galleryId = normalizeGalleryId(rawGalleryId);
+  if (id === 'star-24' || id === 'star-25' || id === '24' || id === '25') {
+    galleryId = 'gallery_07';
+  }
 
   const labelTextFa =
     getValueByAliases(row, [

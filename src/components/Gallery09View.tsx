@@ -61,8 +61,8 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
   onNavigateToGallery,
   onSelectTab,
 }) => {
-  const galleryRecord = contentService.getGalleryById('gallery-09');
-  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '09');
+  const galleryRecord = contentService.getGalleryById('gallery-08') || contentService.getGalleryById('gallery-09');
+  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '08');
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'تلاقی رسانه‌ها';
 
   const [points, setPoints] = useState<AdminMapPoint[]>(() => getGalleryPoints('gallery-09'));
@@ -182,23 +182,21 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
     }
   };
 
-  // Dynamic Stars resolution: load all active stars for gallery_09 from ContentService
+  // Dynamic Stars resolution: load all active stars for gallery_08 / gallery_09 from ContentService
   const effectiveCollectionPoints = useMemo(() => {
     const configuredCollectionPoints = points.filter(
-      (p): p is AdminCollectionPoint =>
-        p.type === 'collection' &&
-        !['star-20', 'star-21', 'star-22', 'star-23', 'star-26', 'star-27', 'star-28'].includes(p.id) &&
-        !['star-20', 'star-21', 'star-22', 'star-23', 'star-26', 'star-27', 'star-28'].includes(p.starId || '')
+      (p): p is AdminCollectionPoint => p.type === 'collection'
     );
 
     // Query active stars from ContentService
     const allStars = contentService.getStars().filter((s) => s.active !== false);
-    const g09Stars = allStars.filter((s) => {
+    const g08Stars = allStars.filter((s) => {
       const gId = normalizeGalleryId(s.galleryId);
-      const starId = s.starId || s.id;
       return (
-        (gId === 'gallery_09' || gId === 'gallery-09') &&
-        !['star-20', 'star-21', 'star-22', 'star-23', 'star-26', 'star-27', 'star-28'].includes(starId)
+        gId === 'gallery_08' ||
+        gId === 'gallery-08' ||
+        gId === 'gallery_09' ||
+        gId === 'gallery-09'
       );
     });
 
@@ -214,10 +212,10 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
       { x: 210, y: 420 },
     ];
 
-    g09Stars.forEach((star, idx) => {
+    g08Stars.forEach((star, idx) => {
       const starId = star.starId || star.id;
       const alreadyExists = result.some(
-        (cp) => cp.id === starId || cp.starId === starId || cp.id === `star-${starId}`
+        (cp) => cp.id === starId || cp.starId === starId || cp.id === `star-${starId}` || cp.id === `col-g09-0${idx + 1}`
       );
 
       if (!alreadyExists) {
@@ -261,7 +259,7 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
       {activeStarDiscoveryId && (
         <StarDiscoveryModal
           starPointId={activeStarDiscoveryId}
-          starId={activeStarDiscoveryId}
+          starId={effectiveCollectionPoints.find((cp) => cp.id === activeStarDiscoveryId)?.starId || activeStarDiscoveryId}
           galleryId="gallery-09"
           isOpen={true}
           onClose={() => setActiveStarDiscoveryId(null)}
@@ -272,7 +270,7 @@ export const Gallery09View: React.FC<Gallery09ViewProps> = ({
       {/* Puzzle Question Modal */}
       {activePuzzlePoint && (
         <PuzzleQuestionModal
-          galleryId="gallery_09"
+          galleryId="gallery_08"
           puzzlePoint={activePuzzlePoint}
           isOpen={true}
           onClose={() => setActivePuzzlePoint(null)}

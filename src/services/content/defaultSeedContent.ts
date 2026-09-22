@@ -151,16 +151,6 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     id: 'gallery_01',
     galleryId: 'gallery_01',
     galleryNumber: '01',
-    nameFa: 'نقشه اصلی',
-    nameEn: 'Master Gallery',
-    descriptionFa: 'نقشه اصلی موزه و مسیر دسترسی به تالارها',
-    descriptionEn: 'Main Museum Floor Plan and Gallery Navigation',
-    active: true,
-  },
-  {
-    id: 'gallery_02',
-    galleryId: 'gallery_02',
-    galleryNumber: '02',
     nameFa: 'کیمیای نور',
     nameEn: 'Alchemy of Light',
     descriptionFa: 'پیدایش و سیر تحول عکاسی در ایران و جهان',
@@ -171,9 +161,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery_03',
-    galleryId: 'gallery_03',
-    galleryNumber: '03',
+    id: 'gallery_02',
+    galleryId: 'gallery_02',
+    galleryNumber: '02',
     nameFa: 'آلبوم‌های دیپلماتیک',
     nameEn: 'Diplomatic Albums',
     descriptionFa: 'آلبوم‌های تاریخی و عکس‌های تشریفاتی دوره قاجار',
@@ -184,9 +174,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery_04',
-    galleryId: 'gallery_04',
-    galleryNumber: '04',
+    id: 'gallery_03',
+    galleryId: 'gallery_03',
+    galleryNumber: '03',
     nameFa: 'ثبت دوام ما',
     nameEn: 'Recording Our Endurance',
     descriptionFa: 'روایت تصویری از هویت، زیست و حافظه جمعی',
@@ -197,9 +187,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery_05',
-    galleryId: 'gallery_05',
-    galleryNumber: '05',
+    id: 'gallery_04',
+    galleryId: 'gallery_04',
+    galleryNumber: '04',
     nameFa: 'ضرب آهنگ شهر',
     nameEn: 'City Rhythm',
     descriptionFa: 'عکاسی خیابانی و نبض دگرگونی‌های شهری',
@@ -208,9 +198,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery_06',
-    galleryId: 'gallery_06',
-    galleryNumber: '06',
+    id: 'gallery_05',
+    galleryId: 'gallery_05',
+    galleryNumber: '05',
     nameFa: 'در کشاکش تماشا و استیلا',
     nameEn: 'Between Gaze and Mastery',
     descriptionFa: 'رویکردهای انتقادی به تصویر و قدرت دیدن',
@@ -219,9 +209,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery_07',
-    galleryId: 'gallery_07',
-    galleryNumber: '07',
+    id: 'gallery_06',
+    galleryId: 'gallery_06',
+    galleryNumber: '06',
     nameFa: 'گذر از برون به درون',
     nameEn: 'Passing from Outside to Inside',
     descriptionFa: 'روایت‌های شخصی، پرتره‌نگاری و نگاه درون‌نگر',
@@ -230,9 +220,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery_08',
-    galleryId: 'gallery_08',
-    galleryNumber: '08',
+    id: 'gallery_07',
+    galleryId: 'gallery_07',
+    galleryNumber: '07',
     nameFa: 'آونگ زمان',
     nameEn: 'Pendulum of Time',
     descriptionFa: 'گذر زمان در قالب فرم و متریال عکاسانه',
@@ -241,9 +231,9 @@ export const DEFAULT_GALLERIES: GalleryContent[] = [
     active: true,
   },
   {
-    id: 'gallery_09',
-    galleryId: 'gallery_09',
-    galleryNumber: '09',
+    id: 'gallery_08',
+    galleryId: 'gallery_08',
+    galleryNumber: '08',
     nameFa: 'تلاقی رسانه‌ها',
     nameEn: 'Intersection of Media',
     descriptionFa: 'پیوند عکاسی با رسانه‌ها و هنرهای نوظهور',
@@ -328,9 +318,9 @@ export function buildDefaultSeedContent(): GameContentData {
   GALLERY_01_QUESTIONS.forEach((q, idx) => {
     questions.push({
       id: `g01-q${q.id}`,
-      galleryId: 'gallery_02',
+      galleryId: 'gallery_01',
       questionOrder: idx + 1,
-      title: `تالار ۰۲ — سوال ${q.id}`,
+      title: `تالار ۰۱ — سوال ${q.id}`,
       question: q.question,
       questionFa: q.question,
       options: [...q.options],
@@ -369,7 +359,7 @@ export function buildDefaultSeedContent(): GameContentData {
     const orderMatch = pq.id.match(/q0*([1-3])$/i) || pq.id.match(/0*([1-3])$/i);
     const orderNum = orderMatch ? parseInt(orderMatch[1], 10) : 1;
 
-    if (canonGId === 'gallery_02') {
+    if (canonGId === 'gallery_01' || canonGId === 'gallery_02') {
       puzzlePointId = orderNum === 1 ? 'puzzle-point-01' : orderNum === 2 ? 'puzzle-point-02' : 'puzzle-point-03';
     } else {
       const gNum = canonGId.replace(/[^0-9]/g, '');
@@ -404,7 +394,9 @@ export function buildDefaultSeedContent(): GameContentData {
       : {};
   const stars: StarContent[] = Object.values(rawStarDiscoveries).map((star) => ({
     id: star.id,
-    starId: star.id,
+    starId: star.starId || star.id,
+    starNumber: star.starNumber || star.id.replace(/^star[-_]?/i, ''),
+    questionId: star.questionId || `star-q-${String(star.starNumber || star.id.replace(/^star[-_]?/i, '')).padStart(2, '0')}`,
     galleryId: star.galleryId,
     artworkId: (star as any).artworkId,
     labelTextFa: star.labelTextFa,
@@ -432,7 +424,7 @@ export function buildDefaultSeedContent(): GameContentData {
     { id: '4', artworkId: '4', galleryId: 'gallery-01', title: 'میدان مشق تهران', imageUrl: 'https://www.olo.pics/images/2026/09/05/1934-010.webp' },
     { id: '5', artworkId: '5', galleryId: 'gallery-01', title: 'عکاسخانه ناصری', imageUrl: 'https://www.olo.pics/images/2026/09/05/1932-012.webp' },
     { id: '6', artworkId: '6', galleryId: 'gallery-01', title: 'شمس العماره', imageUrl: 'https://www.olo.pics/images/2026/09/05/970329_15.webp' },
-    { id: '26', artworkId: '26', galleryId: 'gallery_02', title: 'پازل گالری ۰۲', imageUrl: 'https://www.olo.pics/images/2026/09/05/45fa62f550893fd78aad04a202819595.webp' },
+    { id: '26', artworkId: '26', galleryId: 'gallery_01', title: 'پازل گالری ۰۱', imageUrl: 'https://www.olo.pics/images/2026/09/05/45fa62f550893fd78aad04a202819595.webp' },
     { id: '27', artworkId: '27', galleryId: 'gallery_03', title: 'پازل گالری ۰۳', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-004.webp' },
     { id: '28', artworkId: '28', galleryId: 'gallery_04', title: 'پازل گالری ۰۴', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-006.webp' },
     { id: '29', artworkId: '29', galleryId: 'gallery_05', title: 'پازل گالری ۰۵', imageUrl: 'https://www.olo.pics/images/2026/09/05/1931-008.webp' },

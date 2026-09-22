@@ -79,12 +79,12 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
     { id: string; starId: string; title: string; defaultX: number; defaultY: number }[]
   > = {
     'gallery-01': [
-      { id: 'artwork-01', starId: 'star-01', title: 'کالوتایپ — فاکس تالبوت', defaultX: 317, defaultY: 518 },
-      { id: 'star-02', starId: 'star-02', title: 'مجله‌های Camera Work', defaultX: 137, defaultY: 211 },
+      { id: 'artwork-01', starId: 'star-02', title: 'مجله‌های Camera Work', defaultX: 317, defaultY: 518 },
+      { id: 'star-02', starId: 'star-01', title: 'کالوتایپ — فاکس تالبوت', defaultX: 137, defaultY: 211 },
     ],
     'gallery-02': [
-      { id: 'artwork-01', starId: 'star-01', title: 'North Apse Monolith', defaultX: 317, defaultY: 518 },
-      { id: 'star-02', starId: 'star-02', title: 'مجله‌های Camera Work', defaultX: 137, defaultY: 211 },
+      { id: 'artwork-01', starId: 'star-02', title: 'مجله‌های Camera Work', defaultX: 317, defaultY: 518 },
+      { id: 'star-02', starId: 'star-01', title: 'کالوتایپ — فاکس تالبوت', defaultX: 137, defaultY: 211 },
     ],
     'gallery-03': [
       { id: 'artwork-g03-star', starId: 'star-03', title: 'در جست‌وجوی فن و فضیلت', defaultX: 363, defaultY: 446 },
@@ -116,10 +116,11 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
     'gallery-07': [
       { id: 'star-19', starId: 'star-19', title: 'ستاره کشف ۱۹', defaultX: 342, defaultY: 544 },
     ],
-    'gallery-08': [],
+    'gallery-08': [
+      { id: 'star-24', starId: 'star-24', title: 'ستاره کشف ۲۴', defaultX: 230, defaultY: 410 },
+      { id: 'star-25', starId: 'star-25', title: 'ستاره کشف ۲۵', defaultX: 470, defaultY: 410 },
+    ],
     'gallery-09': [
-      { id: 'star-24', starId: 'star-24', title: 'ستاره کشف ۲۴', defaultX: 401, defaultY: 215 },
-      { id: 'star-25', starId: 'star-25', title: 'ستاره کشف ۲۵', defaultX: 253, defaultY: 667 },
       { id: 'col-g09-01', starId: 'col-g09-01', title: 'تابلو فرش', defaultX: 137, defaultY: 111 },
       { id: 'col-g09-02', starId: 'col-g09-02', title: 'سوپ داگر', defaultX: 249, defaultY: 48 },
       { id: 'col-g09-03', starId: 'col-g09-03', title: 'عکسها و حکاکی ها', defaultX: 137, defaultY: 374 },

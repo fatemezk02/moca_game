@@ -38,13 +38,13 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
   },
   'gallery-02': {
     galleryId: 'gallery-02',
-    targetGalleryId: 'gallery-03',
-    arrowId: 'arrow-g01-to-g03',
+    targetGalleryId: 'gallery-04',
+    arrowId: 'arrow-g03-to-g04',
     requiredPuzzlePiecesCount: 3,
     requiredPuzzlePieceIds: [
-      'gallery01-piece-01',
-      'gallery01-piece-02',
-      'gallery01-piece-03',
+      'gallery03-piece-01',
+      'gallery03-piece-02',
+      'gallery03-piece-03',
     ],
   },
   'gallery-03': {
@@ -155,8 +155,7 @@ export function isProgressionConditionsSatisfied(galleryId: string): boolean {
   const norm = galleryId.toLowerCase().replace('_', '-');
   const rule =
     getProgressionRuleForGallery(norm) ||
-    getProgressionRuleForGallery(galleryId) ||
-    (norm === 'gallery-02' ? getProgressionRuleForGallery('gallery-01') : undefined);
+    getProgressionRuleForGallery(galleryId);
 
   if (!rule) {
     return isGalleryPuzzleCompleted(galleryId) || isGalleryPuzzleCompleted(norm);

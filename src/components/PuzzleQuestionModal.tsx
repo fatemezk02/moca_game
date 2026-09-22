@@ -72,17 +72,8 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
   // Never display the old Gallery 01 number.
   // Do not derive the gallery number from an old page/component name.
   // Use the current gallery_id and Galleries.gallery_number.
-  const rawGalleryId =
-    galleryId ||
-    (puzzlePoint.galleryId === 'gallery-01' || puzzlePoint.galleryId === 'gallery_01'
-      ? 'gallery_02'
-      : puzzlePoint.galleryId) ||
-    '';
-
-  const canonicalGalleryId =
-    rawGalleryId === 'gallery-01' || rawGalleryId === 'gallery_01'
-      ? 'gallery_02'
-      : normalizeGalleryId(rawGalleryId);
+  const rawGalleryId = galleryId || puzzlePoint.galleryId || '';
+  const canonicalGalleryId = normalizeGalleryId(rawGalleryId);
 
   // Final gallery puzzle artwork (Galleries.puzzle_artwork_id -> Artworks -> image_url)
   const puzzleConfig = getGalleryPuzzleConfig(canonicalGalleryId);
@@ -90,6 +81,10 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
 
   const currentPieceConfig: PuzzlePieceConfig =
     puzzleConfig.pieces.find((p) => p.id === puzzlePoint.puzzlePieceId) ||
+    puzzleConfig.pieces.find((p) => {
+      const pieceOrderMatch = (puzzlePoint.puzzlePieceId || '').match(/0*([1-3])$/);
+      return pieceOrderMatch && p.order === parseInt(pieceOrderMatch[1], 10);
+    }) ||
     puzzleConfig.pieces[0];
 
   // Dynamic question loaded from Google Sheets via ContentService using canonicalGalleryId + puzzle_point_id

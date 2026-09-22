@@ -62,8 +62,8 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
   onNavigateToGallery,
   onSelectTab,
 }) => {
-  const galleryRecord = contentService.getGalleryById('gallery-06');
-  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '06');
+  const galleryRecord = contentService.getGalleryById('gallery-05') || contentService.getGalleryById('gallery-06');
+  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '05');
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'در کشاکش تماشا و استیلا';
 
   const [points, setPoints] = useState<AdminMapPoint[]>(() => getGalleryPoints('gallery-06'));
@@ -223,7 +223,7 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
       {/* Puzzle Question Modal (if opened directly in view without global handler) */}
       {activePuzzlePoint && (
         <PuzzleQuestionModal
-          galleryId="gallery_06"
+          galleryId="gallery_05"
           puzzlePoint={activePuzzlePoint}
           isOpen={true}
           onClose={() => setActivePuzzlePoint(null)}

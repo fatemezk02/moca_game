@@ -1,5 +1,6 @@
 import React from 'react';
 import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
+import { contentService, formatTwoDigitPersian } from '../services/content';
 
 interface NavigationLightProps {
   /** X position as percentage (0 - 100) within the SVG coordinate space */
@@ -28,15 +29,34 @@ export function formatGalleryLabelFa(id?: string, customLabel?: string): string 
 
   const mapping: Record<string, string> = {
     'gallery-00': 'گالری ۰۰',
+    'gallery_00': 'گالری ۰۰',
     'gallery-01': 'گالری ۰۱',
-    'gallery-02': 'گالری ۰۲',
-    'gallery-03': 'گالری ۰۳',
-    'gallery-04': 'گالری ۰۴',
-    'gallery-05': 'گالری ۰۵',
-    'gallery-06': 'گالری ۰۶',
+    'gallery_01': 'گالری ۰۱',
+    'gallery-02': 'گالری ۰۱',
+    'gallery_02': 'گالری ۰۱',
+    'gallery-03': 'گالری ۰۲',
+    'gallery_03': 'گالری ۰۲',
+    'gallery-04': 'گالری ۰۳',
+    'gallery_04': 'گالری ۰۳',
+    'gallery-05': 'گالری ۰۴',
+    'gallery_05': 'گالری ۰۴',
+    'gallery-06': 'گالری ۰۵',
+    'gallery_06': 'گالری ۰۵',
+    'gallery-07': 'گالری ۰۶',
+    'gallery_07': 'گالری ۰۶',
+    'gallery-08': 'گالری ۰۷',
+    'gallery_08': 'گالری ۰۷',
+    'gallery-09': 'گالری ۰۸',
+    'gallery_09': 'گالری ۰۸',
   };
   if (mapping[id]) {
     return mapping[id];
+  }
+
+  // Also check contentService
+  const cs = contentService.getGalleryById(id);
+  if (cs && cs.galleryNumber) {
+    return `گالری ${formatTwoDigitPersian(cs.galleryNumber)}`;
   }
 
   const match = typeof id === 'string' ? id.match(/\d+/) : null;

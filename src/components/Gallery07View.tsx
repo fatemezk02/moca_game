@@ -60,8 +60,8 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
   onNavigateToGallery,
   onSelectTab,
 }) => {
-  const galleryRecord = contentService.getGalleryById('gallery-07');
-  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '07');
+  const galleryRecord = contentService.getGalleryById('gallery-06') || contentService.getGalleryById('gallery_06');
+  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '06');
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'گذر از برون به درون';
 
   const [points, setPoints] = useState<AdminMapPoint[]>(() => getGalleryPoints('gallery-07'));
@@ -181,7 +181,7 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
     }
   };
 
-  // Dynamic Stars resolution: load all active stars for gallery_07 from ContentService
+  // Dynamic Stars resolution: load all active stars for gallery_06 from ContentService
   const effectiveCollectionPoints = useMemo(() => {
     const configuredCollectionPoints = points.filter(
       (p): p is AdminCollectionPoint =>
@@ -192,11 +192,11 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
 
     // Query active stars from ContentService
     const allStars = contentService.getStars().filter((s) => s.active !== false);
-    const g07Stars = allStars.filter((s) => {
+    const g06Stars = allStars.filter((s) => {
       const gId = normalizeGalleryId(s.galleryId);
       const starId = s.starId || s.id;
       return (
-        (gId === 'gallery_07' || gId === 'gallery-07') &&
+        (gId === 'gallery_06' || gId === 'gallery-06') &&
         !['star-16', 'star-17', 'star-18'].includes(starId)
       );
     });
@@ -213,7 +213,7 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
       { x: 381, y: 880 },
     ];
 
-    g07Stars.forEach((star, idx) => {
+    g06Stars.forEach((star, idx) => {
       const starId = star.starId || star.id;
       const alreadyExists = result.some(
         (cp) => cp.id === starId || cp.starId === starId || cp.id === `star-${starId}`
@@ -226,7 +226,7 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
           starId: starId,
           type: 'collection',
           pointType: 'star',
-          galleryId: 'gallery-07',
+          galleryId: 'gallery-06',
           title: star.titleFa || star.labelTextFa || `ستاره کشف ${starId}`,
           x: pos.x,
           y: pos.y,
@@ -242,13 +242,13 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
   const puzzlePoints = points.filter((p): p is AdminPuzzlePoint => p.type === 'puzzle');
 
   const { blinkingPointId, handleBlinkEnd, triggerNextPuzzleBlink } = usePuzzleBlinkGuidance({
-    galleryId: 'gallery-07',
+    galleryId: 'gallery-06',
     puzzlePoints,
     activePuzzlePoint,
   });
 
   const effectiveIconPoints: AdminIconPoint[] = iconPoints.filter(
-    (p) => p.destination !== 'gallery-07' && p.id !== 'icon-g07-info' && p.id !== 'icon-g07-info-fallback'
+    (p) => p.destination !== 'gallery-06' && p.destination !== 'gallery-07' && p.id !== 'icon-g07-info' && p.id !== 'icon-g07-info-fallback'
   );
 
   // Filter arrows based on completion condition engine
@@ -265,7 +265,8 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
       {activeStarDiscoveryId && (
         <StarDiscoveryModal
           starPointId={activeStarDiscoveryId}
-          galleryId="gallery-07"
+          starId={effectiveCollectionPoints.find((cp) => cp.id === activeStarDiscoveryId)?.starId || activeStarDiscoveryId}
+          galleryId="gallery-06"
           isOpen={true}
           onClose={() => setActiveStarDiscoveryId(null)}
           onSelectTab={onSelectTab}
@@ -276,7 +277,8 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
       {selectedStarPointId && selectedStarArtwork && (
         <StarQuestionPopup
           starPointId={selectedStarPointId}
-          galleryId="gallery-07"
+          starId={selectedStarArtwork.starId || selectedStarPointId}
+          galleryId="gallery-06"
           artworkTitle={selectedStarArtwork.title}
           onClose={handleClosePopup}
           onOpenDiscoveryModal={() => {
@@ -289,7 +291,7 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
       {/* Puzzle Question Modal */}
       {activePuzzlePoint && (
         <PuzzleQuestionModal
-          galleryId="gallery_07"
+          galleryId="gallery_06"
           puzzlePoint={activePuzzlePoint}
           isOpen={true}
           onClose={() => setActivePuzzlePoint(null)}
@@ -299,7 +301,7 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
       {/* Gallery Info Modal */}
       {activeGalleryInfoId && (
         <GalleryInfoModal
-          galleryId="gallery-07"
+          galleryId="gallery-06"
           isOpen={true}
           onClose={() => setActiveGalleryInfoId(null)}
         />
@@ -315,7 +317,7 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
-      onOpenGuide={() => setActiveGalleryInfoId('gallery-07')}
+      onOpenGuide={() => setActiveGalleryInfoId('gallery-06')}
       onTriggerNextPuzzle={triggerNextPuzzleBlink}
       mapWidth={GALLERY_07_MAP_WIDTH}
       mapHeight={GALLERY_07_MAP_HEIGHT}
@@ -401,7 +403,7 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
         <PuzzlePoint
           key={puzzlePoint.id}
           puzzlePoint={puzzlePoint}
-          galleryId="gallery-07"
+          galleryId="gallery-06"
           mapWidth={GALLERY_07_MAP_WIDTH}
           mapHeight={GALLERY_07_MAP_HEIGHT}
           onClick={handlePuzzlePointClick}
@@ -422,7 +424,7 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
               x={artwork.x}
               y={artwork.y}
               title={artwork.title}
-              galleryId="gallery-07"
+              galleryId="gallery-06"
               mapWidth={GALLERY_07_MAP_WIDTH}
               mapHeight={GALLERY_07_MAP_HEIGHT}
               isSelected={selectedStarPointId === artwork.id}

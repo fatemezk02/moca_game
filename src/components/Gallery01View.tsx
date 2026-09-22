@@ -52,16 +52,16 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   onNavigateToGallery,
   onSelectTab,
 }) => {
-  const galleryRecord = contentService.getGalleryById('gallery_02');
-  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '02');
+  const galleryRecord = contentService.getGalleryById('gallery_01');
+  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '01');
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'کیمیای نور';
 
-  // Current Gallery ID for this page is gallery_02
+  // Current Gallery ID for this page is gallery_01
   useEffect(() => {
-    setCurrentGalleryId('gallery_02');
+    setCurrentGalleryId('gallery_01');
     markArrowUsed('arrow-g00-to-g01');
     try {
-      localStorage.setItem('museum_has_entered_gallery_02', 'true');
+      localStorage.setItem('museum_has_entered_gallery_01', 'true');
     } catch {}
   }, []);
 
@@ -189,8 +189,8 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
     } else if (iconPoint.destination === 'collection' || iconPoint.destination === 'tasks' || iconPoint.destination === 'curator') {
       onSelectTab?.(iconPoint.destination);
     } else {
-      // Requirement 1 & 11: Central icon on gallery map opens Gallery Information Modal for Gallery 02
-      setActiveGalleryInfoId('gallery_02');
+      // Requirement 1 & 11: Central icon on gallery map opens Gallery Information Modal for Gallery 01
+      setActiveGalleryInfoId('gallery_01');
     }
   };
 
@@ -201,7 +201,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
 
   const { blinkingPointId, handleBlinkEnd, triggerNextPuzzleBlink } = usePuzzleBlinkGuidance({
-    galleryId: 'gallery_02',
+    galleryId: 'gallery_01',
     puzzlePoints,
     activePuzzlePoint,
   });
@@ -223,6 +223,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
       {activeStarDiscoveryId && (
         <StarQuestionPopup
           starPointId={activeStarDiscoveryId}
+          starId={collectionPoints.find((cp) => cp.id === activeStarDiscoveryId)?.starId || activeStarDiscoveryId}
           galleryId="gallery-01"
           isOpen={!!activeStarDiscoveryId}
           onClose={() => setActiveStarDiscoveryId(null)}
@@ -232,7 +233,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
       {/* Shared Puzzle Question Modal */}
       {activePuzzlePoint && (
         <PuzzleQuestionModal
-          galleryId="gallery_02"
+          galleryId="gallery_01"
           puzzlePoint={activePuzzlePoint}
           onClose={() => setActivePuzzlePoint(null)}
         />
@@ -240,7 +241,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
 
       {/* Shared Gallery Information Modal for Gallery Center Icon */}
       <GalleryInfoModal
-        galleryId={activeGalleryInfoId || 'gallery_02'}
+        galleryId={activeGalleryInfoId || 'gallery_01'}
         isOpen={Boolean(activeGalleryInfoId)}
         onClose={() => setActiveGalleryInfoId(null)}
       />
@@ -255,7 +256,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
-      onOpenGuide={() => setActiveGalleryInfoId('gallery_02')}
+      onOpenGuide={() => setActiveGalleryInfoId('gallery_01')}
       onTriggerNextPuzzle={triggerNextPuzzleBlink}
       mapWidth={GALLERY_02_MAP_WIDTH}
       mapHeight={GALLERY_02_MAP_HEIGHT}
@@ -340,7 +341,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
         <PuzzlePoint
           key={puzzlePoint.id}
           puzzlePoint={puzzlePoint}
-          galleryId="gallery_02"
+          galleryId="gallery_01"
           mapWidth={GALLERY_02_MAP_WIDTH}
           mapHeight={GALLERY_02_MAP_HEIGHT}
           scaleFactor={1.05}

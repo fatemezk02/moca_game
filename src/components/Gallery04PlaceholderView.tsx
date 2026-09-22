@@ -28,7 +28,7 @@ export const Gallery04PlaceholderView: React.FC<Gallery04PlaceholderViewProps> =
 
           <div className="flex items-center gap-2">
             <span className="font-mono-custom text-[11px] font-black px-2 py-0.5 rounded-full bg-[#fef3c7] text-[#92400e] border border-[#1e1b18]">
-              GALLERY 04
+              GALLERY 03
             </span>
           </div>
         </div>
@@ -46,10 +46,10 @@ export const Gallery04PlaceholderView: React.FC<Gallery04PlaceholderViewProps> =
               مقصد جدید آنلاک شد 🎉
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-[#1e1b18]">
-              گالری ۰۴
+              گالری ۰۳
             </h1>
             <p className="text-xs sm:text-sm text-[#64748b] mt-1.5 leading-relaxed">
-              شما با موفقیت معماها و پازل‌های گالری‌های پیشین را حل کرده و به گالری ۰۴ راه یافتید. چیدمان و آثار این تالار در فاز توسعه بعدی موزه قرار دارد.
+              شما با موفقیت معماها و پازل‌های گالری‌های پیشین را حل کرده و به گالری ۰۳ راه یافتید. چیدمان و آثار این تالار در فاز توسعه بعدی موزه قرار دارد.
             </p>
           </div>
 

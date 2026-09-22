@@ -113,6 +113,12 @@ export function getEquivalentStarKeys(id?: string): string[] {
   }
 
   // Gallery 01 / 03 known point-to-star aliases
+  if (clean === 'star-02' || clean === 'col-02' || clean === '2') {
+    keys.add('star-02');
+    keys.add('col-02');
+    keys.add('2');
+    return Array.from(keys);
+  }
   if (clean === 'artwork-01' || clean === 'col-01' || clean === 'star-01' || clean === '1') {
     keys.add('artwork-01');
     keys.add('col-01');

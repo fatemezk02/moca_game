@@ -36,15 +36,15 @@ export const DEFAULT_GALLERY_00_LAMP_POSITION = {
  * Standard known museum gallery lamps on the Master Map SVG (0 0 604.8 844.86)
  */
 export const DEFAULT_GALLERY_LAMPS: Array<{ galleryId: string; title: string; defaultX: number; defaultY: number }> = [
-  { galleryId: 'gallery_01', title: 'چراغ گالری ۰۱', defaultX: 309, defaultY: 734 },
-  { galleryId: 'gallery_02', title: 'چراغ گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 165, defaultY: 480 },
-  { galleryId: 'gallery_03', title: 'چراغ گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 162, defaultY: 326 },
-  { galleryId: 'gallery_04', title: 'چراغ گالری ۰۴ (ثبت دوام ما)', defaultX: 162, defaultY: 172 },
-  { galleryId: 'gallery_05', title: 'چراغ گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 313, defaultY: 124 },
-  { galleryId: 'gallery_06', title: 'چراغ گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 466, defaultY: 254 },
-  { galleryId: 'gallery_07', title: 'چراغ گالری ۰۷ (گذر از برون به درون)', defaultX: 418, defaultY: 283 },
-  { galleryId: 'gallery_08', title: 'چراغ گالری ۰۸ (آونگ زمان)', defaultX: 427, defaultY: 382 },
-  { galleryId: 'gallery_09', title: 'چراغ گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 463, defaultY: 481 },
+  { galleryId: 'gallery_01', title: 'چراغ ورودی (گالری ۰۰)', defaultX: 309, defaultY: 734 },
+  { galleryId: 'gallery_02', title: 'چراغ گالری ۰۱ (کیمیای نور / تالار معماری)', defaultX: 165, defaultY: 480 },
+  { galleryId: 'gallery_03', title: 'چراغ گالری ۰۲ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 162, defaultY: 326 },
+  { galleryId: 'gallery_04', title: 'چراغ گالری ۰۳ (ثبت دوام ما)', defaultX: 162, defaultY: 172 },
+  { galleryId: 'gallery_05', title: 'چراغ گالری ۰۴ (ضرب آهنگ شهر)', defaultX: 313, defaultY: 124 },
+  { galleryId: 'gallery_06', title: 'چراغ گالری ۰۵ (در کشاکش تماشا و استیلا)', defaultX: 466, defaultY: 254 },
+  { galleryId: 'gallery_07', title: 'چراغ گالری ۰۶ (گذر از برون به درون)', defaultX: 418, defaultY: 283 },
+  { galleryId: 'gallery_08', title: 'چراغ گالری ۰۷ (آونگ زمان)', defaultX: 427, defaultY: 382 },
+  { galleryId: 'gallery_09', title: 'چراغ گالری ۰۸ (تلاقی رسانه‌ها)', defaultX: 463, defaultY: 481 },
   { galleryId: 'gallery_00', title: 'چراغ ورودی (نقشه اصلی)', defaultX: 512, defaultY: 94 },
 ];
 
@@ -57,7 +57,7 @@ export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
     id: 'area-gallery-02',
     galleryId: 'gallery_02',
     masterMapGalleryId: 'gallery-00',
-    title: 'گالری ۰۲ — تالار معماری',
+    title: 'گالری ۰۱ — تالار معماری (کیمیای نور)',
     area: {
       type: 'polygon',
       points: [
@@ -76,7 +76,7 @@ export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
     id: 'area-gallery-03',
     galleryId: 'gallery-03',
     masterMapGalleryId: 'gallery-00',
-    title: 'گالری ۰۳ — تالار مدرن',
+    title: 'گالری ۰۲ — تالار مدرن (آلبوم‌های دیپلماتیک)',
     area: {
       type: 'polygon',
       points: [
@@ -95,7 +95,7 @@ export const DEFAULT_GALLERY_AREAS: GalleryAreaConfig[] = [
     id: 'area-gallery-04',
     galleryId: 'gallery-04',
     masterMapGalleryId: 'gallery-00',
-    title: 'گالری ۰۴',
+    title: 'گالری ۰۳ — ثبت دوام ما',
     area: {
       type: 'polygon',
       points: [
@@ -416,14 +416,14 @@ export function createNewGalleryArea(galleryId: string, title?: string): Gallery
  * Standard known museum gallery locks on the Master Map SVG (0 0 604.8 844.86)
  */
 export const DEFAULT_GALLERY_LOCKS: Array<{ galleryId: string; title: string; defaultX: number; defaultY: number }> = [
-  { galleryId: 'gallery_02', title: 'قفل گالری ۰۲ (کیمیای نور / تالار معماری)', defaultX: 175, defaultY: 502 },
-  { galleryId: 'gallery_03', title: 'قفل گالری ۰۳ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 157, defaultY: 336 },
-  { galleryId: 'gallery_04', title: 'قفل گالری ۰۴ (ثبت دوام ما)', defaultX: 161, defaultY: 185 },
-  { galleryId: 'gallery_05', title: 'قفل گالری ۰۵ (ضرب آهنگ شهر)', defaultX: 312, defaultY: 148 },
-  { galleryId: 'gallery_06', title: 'قفل گالری ۰۶ (در کشاکش تماشا و استیلا)', defaultX: 467, defaultY: 268 },
-  { galleryId: 'gallery_07', title: 'قفل گالری ۰۷ (گذر از برون به درون)', defaultX: 376, defaultY: 253 },
-  { galleryId: 'gallery_08', title: 'قفل گالری ۰۸ (آونگ زمان)', defaultX: 422, defaultY: 381 },
-  { galleryId: 'gallery_09', title: 'قفل گالری ۰۹ (تلاقی رسانه‌ها)', defaultX: 453, defaultY: 501 },
+  { galleryId: 'gallery_02', title: 'قفل گالری ۰۱ (کیمیای نور / تالار معماری)', defaultX: 175, defaultY: 502 },
+  { galleryId: 'gallery_03', title: 'قفل گالری ۰۲ (آلبوم‌های دیپلماتیک / تالار مدرن)', defaultX: 157, defaultY: 336 },
+  { galleryId: 'gallery_04', title: 'قفل گالری ۰۳ (ثبت دوام ما)', defaultX: 161, defaultY: 185 },
+  { galleryId: 'gallery_05', title: 'قفل گالری ۰۴ (ضرب آهنگ شهر)', defaultX: 312, defaultY: 148 },
+  { galleryId: 'gallery_06', title: 'قفل گالری ۰۵ (در کشاکش تماشا و استیلا)', defaultX: 467, defaultY: 268 },
+  { galleryId: 'gallery_07', title: 'قفل گالری ۰۶ (گذر از برون به درون)', defaultX: 376, defaultY: 253 },
+  { galleryId: 'gallery_08', title: 'قفل گالری ۰۷ (آونگ زمان)', defaultX: 422, defaultY: 381 },
+  { galleryId: 'gallery_09', title: 'قفل گالری ۰۸ (تلاقی رسانه‌ها)', defaultX: 453, defaultY: 501 },
 ];
 
 /**

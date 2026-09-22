@@ -150,16 +150,16 @@ export const Gallery03QuestionsView: React.FC<Gallery03QuestionsViewProps> = ({
       >
         <button
           onClick={onNavigateBack}
-          aria-label="بازگشت به گالری ۰۳"
+          aria-label="بازگشت به گالری ۰۲"
           className="p-1.5 -ml-1.5 text-[#0e0f0f] hover:bg-[#eae7e7] rounded-md transition-colors flex items-center gap-1.5 cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
-          <span className="font-mono-custom text-xs tracking-wider uppercase">گالری ۰۳</span>
+          <span className="font-mono-custom text-xs tracking-wider uppercase">گالری ۰۲</span>
         </button>
 
         <div className="flex flex-col items-center">
           <span className="text-[10px] font-mono-custom tracking-widest text-[#747878] uppercase">
-            گالری ۰۳
+            گالری ۰۲
           </span>
           <h1 className="text-sm font-bold tracking-tight font-sans-custom uppercase">
             پرسش‌ها
@@ -338,7 +338,7 @@ export const Gallery03QuestionsView: React.FC<Gallery03QuestionsViewProps> = ({
               </div>
               <div className="border border-[#0e0f0f] bg-white p-4 w-full text-center shrink-0">
                 <span className="text-[10px] font-mono-custom font-bold text-[#747878] uppercase tracking-widest block mb-1">
-                  گالری ۰۳
+                  گالری ۰۲
                 </span>
                 <h3 className="text-base font-bold uppercase tracking-tight text-[#0e0f0f]">
                   همه ۳ پرسش پاسخ داده شدند

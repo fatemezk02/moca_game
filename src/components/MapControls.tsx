@@ -23,14 +23,14 @@ export const MapControls: React.FC<MapControlsProps> = ({
   const isMainMap = currentView === 'gallery-00';
   const getTargetLabel = (gid: string) => {
     const norm = gid.toLowerCase().replace('_', '-');
-    if (norm.includes('09')) return 'گالری ۰۹';
-    if (norm.includes('08')) return 'گالری ۰۸';
-    if (norm.includes('07')) return 'گالری ۰۷';
-    if (norm.includes('06')) return 'گالری ۰۶';
-    if (norm.includes('05')) return 'گالری ۰۵';
-    if (norm.includes('04')) return 'گالری ۰۴';
-    if (norm.includes('03')) return 'گالری ۰۳';
-    return 'گالری ۰۲';
+    if (norm.includes('09')) return 'گالری ۰۸';
+    if (norm.includes('08')) return 'گالری ۰۷';
+    if (norm.includes('07')) return 'گالری ۰۶';
+    if (norm.includes('06')) return 'گالری ۰۵';
+    if (norm.includes('05')) return 'گالری ۰۴';
+    if (norm.includes('04')) return 'گالری ۰۳';
+    if (norm.includes('03')) return 'گالری ۰۲';
+    return 'گالری ۰۱';
   };
   const targetLabel = isMainMap ? getTargetLabel(associatedGallery) : 'گالری ۰۰';
 

@@ -68,7 +68,7 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
                   <span>داستان و هدف بازی</span>
                 </div>
                 <p className="text-xs sm:text-[13px] text-[#1e293b] leading-relaxed font-medium text-right">
-                  در این سفر تاریخی ۸ اثر مربوط به ۸ برحه زمانی مهم در عکاسی را پیدا می کنی تا از این طریق با داستان پرپیچ و خم پیدایش هویت عکاسی از زمان ابداع تا عصر حاضر آشنا شوی.
+                  در این بازی ۸ اثر مربوط به ۸ برهه مهم تاریخ عکاسی جهان را پیدا می‌کنی و از این طریق با ابعاد متفاوت عکاسی و مسیرش از فن به فرهنگ و هنر آشنا می‌شوی.
                 </p>
               </div>
 
@@ -81,15 +81,15 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
                 <ul className="text-[11px] sm:text-xs text-[#475569] leading-relaxed font-medium text-right space-y-1 w-full list-none">
                   <li className="flex items-start gap-1.5">
                     <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                    <span>در هر گالری تکه های پازل رو جمع کن</span>
+                    <span>در هر گالری تکه‌های پازل رو جمع کن</span>
                   </li>
                   <li className="flex items-start gap-1.5">
                     <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                    <span>اطلاعات جالب رو کشف کن یا با تجربه های تعاملی آشنا شو</span>
+                    <span>اطلاعات جالب رو کشف کن یا با تجربه‌های تعاملی آشنا شو</span>
                   </li>
                   <li className="flex items-start gap-1.5">
                     <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                    <span>و با استفاده از فلش های راهنما به گالری بعدی برو تا به زمان حال برسی</span>
+                    <span>و با استفاده از فلش‌های راهنما به گالری بعدی برو تا به زمان حال برسی</span>
                   </li>
                 </ul>
               </div>
@@ -103,7 +103,7 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
                   <div>
                     <span className="text-xs font-black text-[#1e1b18] block">پازل‌ها</span>
                     <p className="text-[11px] text-[#581c87] font-medium leading-tight">
-                      در هر گالری به محدوده پازل‌ها برو. سوالات پازل تو را با هویت عکاسی در هر دوره آشنا می‌کنند.
+                      در هر گالری به محدوده پازل‌ها برو. سؤالات پازل تو را با هویت عکاسی در هر دوره آشنا می‌کنند.
                     </p>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
                   <div>
                     <span className="text-xs font-black text-[#1e1b18] block">ستاره‌ها</span>
                     <p className="text-[11px] text-[#064e3b] font-medium leading-tight">
-                      با رفتن به محدوده نقاط ستاره می‌تونی با سکه یا پاسخ به سوال اطلاعات اضافه و جالب کشف کنی.
+                      با رفتن به محدوده نقاط ستاره می‌تونی با سکه یا پاسخ به سؤال اطلاعات اضافه و جالب کشف کنی.
                     </p>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
                   <div>
                     <span className="text-xs font-black text-[#1e1b18] block">سکه‌ها</span>
                     <p className="text-[11px] text-[#713f12] font-medium leading-tight">
-                      سکه‌ها بخشی از پاداش پاسخ به سوالات ستاره یا تجربه هستند و می‌تونی با اون‌ها قفل گالری یا اطلاعات رو باز کنی.
+                      سکه‌ها بخشی از پاداش پاسخ به سؤالات ستاره یا تجربه هستند و می‌تونی با اون‌ها قفل گالری یا اطلاعات رو باز کنی.
                     </p>
                   </div>
                 </div>
@@ -145,7 +145,7 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
                   <div>
                     <span className="text-xs font-black text-[#1e1b18] block">تجربه</span>
                     <p className="text-[11px] text-[#0369a1] font-medium leading-tight">
-                      این نقاط حاوی اطلاعات جالب یا محتوای چندرسانه‌ای درباره ابزارهای تجربه تعاملی در موزه هستن.
+                      این نقاط حاوی اطلاعات جالب یا محتوای چندرسانه‌ای درباره ابزارهای تجربه تعاملی در موزه هستند.
                     </p>
                   </div>
                 </div>

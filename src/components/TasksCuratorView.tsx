@@ -94,9 +94,40 @@ function isGalleryUnlockedState(galleryId: string): boolean {
   return false;
 }
 
-function parseGalleryTitleAndNumber(gallery: { id: string; nameFa?: string; name?: string; nameEn?: string }) {
-  const numMatch = gallery.id.match(/\d+/);
-  const galleryNumInt = numMatch ? parseInt(numMatch[0], 10) : 1;
+const GALLERY_DISPLAY_NUMBER_MAP: Record<string, number> = {
+  'gallery-01': 1,
+  'gallery_01': 1,
+  'gallery-02': 1,
+  'gallery_02': 1,
+  'gallery-03': 2,
+  'gallery_03': 2,
+  'gallery-04': 3,
+  'gallery_04': 3,
+  'gallery-05': 4,
+  'gallery_05': 4,
+  'gallery-06': 5,
+  'gallery_06': 5,
+  'gallery-07': 6,
+  'gallery_07': 6,
+  'gallery-08': 7,
+  'gallery_08': 7,
+  'gallery-09': 8,
+  'gallery_09': 8,
+};
+
+function parseGalleryTitleAndNumber(gallery: { id: string; nameFa?: string; name?: string; nameEn?: string; csGalleryNumber?: string }) {
+  let galleryNumInt = GALLERY_DISPLAY_NUMBER_MAP[gallery.id];
+  if (gallery.csGalleryNumber) {
+    const parsed = parseInt(gallery.csGalleryNumber, 10);
+    if (!isNaN(parsed)) {
+      galleryNumInt = parsed;
+    }
+  }
+  if (!galleryNumInt) {
+    const numMatch = gallery.id.match(/\d+/);
+    galleryNumInt = numMatch ? parseInt(numMatch[0], 10) : 1;
+  }
+
   const formattedNum = galleryNumInt < 10 ? `0${galleryNumInt}` : `${galleryNumInt}`;
   const faNum = formatTwoDigitPersian(galleryNumInt);
 
@@ -119,6 +150,8 @@ function parseGalleryTitleAndNumber(gallery: { id: string; nameFa?: string; name
     subtitle: `${subtitle} • Gallery ${formattedNum}`,
     rawSubtitle: subtitle,
     formattedNum,
+    faNum,
+    numInt: galleryNumInt,
   };
 }
 
@@ -157,9 +190,9 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
     return <CuratorExhibitionWall onNavigateToMap={onNavigateToMap} />;
   }
 
-  // Tasks Tab: Exhibition Galleries List (excluding gallery-00 and gallery-01)
+  // Tasks Tab: Exhibition Galleries List (excluding gallery-00 master map and gallery-02 coming soon placeholder)
   const targetGalleries = GALLERIES.filter(
-    (g) => g.id !== 'gallery-00' && g.id !== 'gallery-01' && g.id.startsWith('gallery-')
+    (g) => g.id !== 'gallery-00' && g.id !== 'gallery-02' && g.id.startsWith('gallery-')
   );
 
   const allStars: StarContent[] = contentService.getStars().filter((s) => s.active !== false);
@@ -167,20 +200,18 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
   // Compute cards dynamic data
   const galleryCards = targetGalleries.map((gallery) => {
     const canonId = normalizeGalleryId(gallery.id);
-    const numMatch = gallery.id.match(/\d+/);
-    const galleryNumInt = numMatch ? parseInt(numMatch[0], 10) : null;
-    const formattedNum = galleryNumInt !== null ? (galleryNumInt < 10 ? `0${galleryNumInt}` : `${galleryNumInt}`) : '01';
 
     // ContentService gallery entity for title / metadata overrides
     const csGallery = contentService.getGalleryById(gallery.id);
     const rawFa = csGallery?.nameFa || gallery.nameFa || gallery.name;
     const rawEn = csGallery?.nameEn || gallery.name;
 
-    const { title, subtitle } = parseGalleryTitleAndNumber({
+    const { title, subtitle, formattedNum, faNum, numInt } = parseGalleryTitleAndNumber({
       id: gallery.id,
       nameFa: rawFa,
       name: gallery.name,
       nameEn: rawEn,
+      csGalleryNumber: csGallery?.galleryNumber,
     });
 
     const isUnlocked = isGalleryUnlockedState(gallery.id);
@@ -190,9 +221,9 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       if (!s.galleryId) return false;
       const sCanon = normalizeGalleryId(s.galleryId);
       if (sCanon === canonId) return true;
-      if (galleryNumInt !== null) {
+      if (numInt !== null) {
         const sNumMatch = s.galleryId.match(/\d+/);
-        if (sNumMatch && parseInt(sNumMatch[0], 10) === galleryNumInt) return true;
+        if (sNumMatch && parseInt(sNumMatch[0], 10) === numInt) return true;
       }
       return false;
     });
@@ -223,7 +254,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
     return {
       id: gallery.id,
       number: formattedNum,
-      numberPersian: formatTwoDigitPersian(galleryNumInt || 1),
+      numberPersian: faNum,
       title,
       subtitle,
       isUnlocked,

@@ -51,8 +51,8 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
   onNavigateToGallery,
   onSelectTab,
 }) => {
-  const galleryRecord = contentService.getGalleryById('gallery-04');
-  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '04');
+  const galleryRecord = contentService.getGalleryById('gallery-03') || contentService.getGalleryById('gallery-04');
+  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '03');
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'ثبت دوام ما';
 
   const [points, setPoints] = useState<AdminMapPoint[]>(() => getGalleryPoints('gallery-04'));
@@ -211,6 +211,7 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
       {activeStarDiscoveryId && (
         <StarQuestionPopup
           starPointId={activeStarDiscoveryId}
+          starId={collectionPoints.find((cp) => cp.id === activeStarDiscoveryId)?.starId || activeStarDiscoveryId}
           galleryId="gallery-04"
           isOpen={!!activeStarDiscoveryId}
           onClose={() => setActiveStarDiscoveryId(null)}
@@ -220,7 +221,7 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
       {/* Shared Puzzle Question Modal */}
       {activePuzzlePoint && (
         <PuzzleQuestionModal
-          galleryId="gallery_04"
+          galleryId="gallery_03"
           puzzlePoint={activePuzzlePoint}
           onClose={() => setActivePuzzlePoint(null)}
         />

@@ -65,8 +65,8 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
   onNavigateToGallery,
   onSelectTab,
 }) => {
-  const galleryRecord = contentService.getGalleryById('gallery-08');
-  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '08');
+  const galleryRecord = contentService.getGalleryById('gallery-07') || contentService.getGalleryById('gallery-08');
+  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '07');
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'آونگ زمان';
 
   const [points, setPoints] = useState<AdminMapPoint[]>(() => getGalleryPoints('gallery-08'));
@@ -189,23 +189,23 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
     }
   };
 
-  // Dynamic Stars resolution: load all active stars for gallery_08 from ContentService
+  // Dynamic Stars resolution: Gallery 07 has no stars in the sheet; exclude star-24 and star-25
   const effectiveCollectionPoints = useMemo(() => {
     const configuredCollectionPoints = points.filter(
       (p): p is AdminCollectionPoint =>
         p.type === 'collection' &&
-        !['star-20', 'star-21', 'star-22', 'star-23'].includes(p.id) &&
-        !['star-20', 'star-21', 'star-22', 'star-23'].includes(p.starId || '')
+        !['star-20', 'star-21', 'star-22', 'star-23', 'star-24', 'star-25'].includes(p.id) &&
+        !['star-20', 'star-21', 'star-22', 'star-23', 'star-24', 'star-25'].includes(p.starId || '')
     );
 
-    // Query active stars from ContentService
+    // Query active stars strictly for Gallery 07 from ContentService (no stars in sheet for gallery_07)
     const allStars = contentService.getStars().filter((s) => s.active !== false);
-    const g08Stars = allStars.filter((s) => {
+    const g07Stars = allStars.filter((s) => {
       const gId = normalizeGalleryId(s.galleryId);
       const starId = s.starId || s.id;
       return (
-        (gId === 'gallery_08' || gId === 'gallery-08') &&
-        !['star-20', 'star-21', 'star-22', 'star-23'].includes(starId)
+        (gId === 'gallery_07' || gId === 'gallery-07') &&
+        !['star-20', 'star-21', 'star-22', 'star-23', 'star-24', 'star-25'].includes(starId)
       );
     });
 
@@ -221,7 +221,7 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
       { x: 360, y: 850 },
     ];
 
-    g08Stars.forEach((star, idx) => {
+    g07Stars.forEach((star, idx) => {
       const starId = star.starId || star.id;
       const alreadyExists = result.some(
         (cp) => cp.id === starId || cp.starId === starId || cp.id === `star-${starId}`
@@ -234,7 +234,7 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
           starId: starId,
           type: 'collection',
           pointType: 'star',
-          galleryId: 'gallery-08',
+          galleryId: 'gallery-07',
           title: star.titleFa || star.labelTextFa || `ستاره کشف ${starId}`,
           x: pos.x,
           y: pos.y,
@@ -274,6 +274,7 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
       {activeStarDiscoveryId && (
         <StarDiscoveryModal
           starPointId={activeStarDiscoveryId}
+          starId={effectiveCollectionPoints.find((cp) => cp.id === activeStarDiscoveryId)?.starId || activeStarDiscoveryId}
           galleryId="gallery-08"
           isOpen={true}
           onClose={() => setActiveStarDiscoveryId(null)}
@@ -285,6 +286,7 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
       {selectedStarPointId && selectedStarArtwork && (
         <StarQuestionPopup
           starPointId={selectedStarPointId}
+          starId={selectedStarArtwork.starId || selectedStarPointId}
           galleryId="gallery-08"
           artworkTitle={selectedStarArtwork.title}
           onClose={handleClosePopup}
@@ -298,7 +300,7 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
       {/* Puzzle Question Modal */}
       {activePuzzlePoint && (
         <PuzzleQuestionModal
-          galleryId="gallery_08"
+          galleryId="gallery_07"
           puzzlePoint={activePuzzlePoint}
           isOpen={true}
           onClose={() => setActivePuzzlePoint(null)}

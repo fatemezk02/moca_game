@@ -65,8 +65,8 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
   onNavigateToGallery,
   onSelectTab,
 }) => {
-  const galleryRecord = contentService.getGalleryById('gallery-05');
-  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '05');
+  const galleryRecord = contentService.getGalleryById('gallery-04') || contentService.getGalleryById('gallery-05');
+  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '04');
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'ضرب آهنگ شهر';
 
   const [points, setPoints] = useState<AdminMapPoint[]>(() => getGalleryPoints('gallery-05'));
@@ -214,7 +214,7 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
       {activeStarDiscoveryId && (
         <StarDiscoveryModal
           starPointId={activeStarDiscoveryId}
-          starId={activeStarDiscoveryId}
+          starId={collectionPoints.find((cp) => cp.id === activeStarDiscoveryId)?.starId || activeStarDiscoveryId}
           galleryId="gallery-05"
           isOpen={Boolean(activeStarDiscoveryId)}
           onClose={() => setActiveStarDiscoveryId(null)}
@@ -224,7 +224,7 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
       {/* In-view Puzzle Question Modal fallback */}
       {activePuzzlePoint && (
         <PuzzleQuestionModal
-          galleryId="gallery_05"
+          galleryId="gallery_04"
           puzzlePoint={activePuzzlePoint}
           onClose={() => setActivePuzzlePoint(null)}
         />

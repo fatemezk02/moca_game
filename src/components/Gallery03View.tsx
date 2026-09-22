@@ -51,8 +51,8 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
   onNavigateToGallery,
   onSelectTab,
 }) => {
-  const galleryRecord = contentService.getGalleryById('gallery-03');
-  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '03');
+  const galleryRecord = contentService.getGalleryById('gallery-02') || contentService.getGalleryById('gallery-03');
+  const galleryNumFa = formatTwoDigitPersian(galleryRecord?.galleryNumber || '02');
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'آلبوم‌های دیپلماتیک';
 
   const [points, setPoints] = useState<AdminMapPoint[]>(() => getGalleryPoints('gallery-03'));
@@ -239,7 +239,7 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
         <StarQuestionPopup
           starPointId={activeStarDiscoveryId}
           starId={collectionPoints.find((cp) => cp.id === activeStarDiscoveryId)?.starId || activeStarDiscoveryId}
-          galleryId="gallery_03"
+          galleryId="gallery-02"
           isOpen={!!activeStarDiscoveryId}
           onClose={() => setActiveStarDiscoveryId(null)}
         />
@@ -248,7 +248,7 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
       {/* Shared Puzzle Question Modal */}
       {activePuzzlePoint && (
         <PuzzleQuestionModal
-          galleryId="gallery_03"
+          galleryId="gallery-02"
           puzzlePoint={activePuzzlePoint}
           onClose={() => setActivePuzzlePoint(null)}
         />
@@ -274,13 +274,13 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
 
   return (
     <SharedGalleryPageLayout
-      galleryId="gallery-03"
+      galleryId="gallery-02"
       galleryNumberPersian={galleryNumFa}
       galleryNamePersian={galleryNameFa}
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
-      onOpenGuide={() => setActiveGalleryInfoId('gallery-03')}
+      onOpenGuide={() => setActiveGalleryInfoId('gallery-02')}
       onTriggerNextPuzzle={triggerNextPuzzleBlink}
       mapWidth={GALLERY_03_MAP_WIDTH}
       mapHeight={GALLERY_03_MAP_HEIGHT}
