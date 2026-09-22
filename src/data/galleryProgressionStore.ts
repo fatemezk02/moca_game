@@ -49,17 +49,6 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
   },
   'gallery-03': {
     galleryId: 'gallery-03',
-    targetGalleryId: 'gallery-04',
-    arrowId: 'arrow-g03-to-g04',
-    requiredPuzzlePiecesCount: 3,
-    requiredPuzzlePieceIds: [
-      'gallery03-piece-01',
-      'gallery03-piece-02',
-      'gallery03-piece-03',
-    ],
-  },
-  'gallery-04': {
-    galleryId: 'gallery-04',
     targetGalleryId: 'gallery-05',
     arrowId: 'arrow-g04-to-g05',
     requiredPuzzlePiecesCount: 3,
@@ -69,8 +58,8 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
       'gallery04-piece-03',
     ],
   },
-  'gallery-05': {
-    galleryId: 'gallery-05',
+  'gallery-04': {
+    galleryId: 'gallery-04',
     targetGalleryId: 'gallery-06',
     arrowId: 'arrow-g05-to-g06',
     requiredPuzzlePiecesCount: 3,
@@ -80,8 +69,8 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
       'gallery05-piece-03',
     ],
   },
-  'gallery-06': {
-    galleryId: 'gallery-06',
+  'gallery-05': {
+    galleryId: 'gallery-05',
     targetGalleryId: 'gallery-07',
     arrowId: 'arrow-g06-to-g07',
     requiredPuzzlePiecesCount: 3,
@@ -91,8 +80,8 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
       'gallery06-piece-03',
     ],
   },
-  'gallery-07': {
-    galleryId: 'gallery-07',
+  'gallery-06': {
+    galleryId: 'gallery-06',
     targetGalleryId: 'gallery-08',
     arrowId: 'arrow-g07-to-g08',
     requiredPuzzlePiecesCount: 3,
@@ -102,8 +91,8 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
       'gallery07-piece-03',
     ],
   },
-  'gallery-08': {
-    galleryId: 'gallery-08',
+  'gallery-07': {
+    galleryId: 'gallery-07',
     targetGalleryId: 'gallery-09',
     arrowId: 'arrow-g08-to-g09',
     requiredPuzzlePiecesCount: 3,
@@ -113,8 +102,8 @@ export const GALLERY_PROGRESSION_RULES: Record<string, GalleryProgressionRule> =
       'gallery08-piece-03',
     ],
   },
-  'gallery-09': {
-    galleryId: 'gallery-09',
+  'gallery-08': {
+    galleryId: 'gallery-08',
     targetGalleryId: 'gallery-00',
     arrowId: 'arrow-g09-to-g00',
     requiredPuzzlePiecesCount: 3,
@@ -140,16 +129,24 @@ export function getProgressionRuleForArrow(arrowId: string): GalleryProgressionR
 export function getProgressionRuleForGallery(galleryId: string): GalleryProgressionRule | undefined {
   if (!galleryId) return undefined;
   const norm = galleryId.toLowerCase().replace('_', '-');
-  return GALLERY_PROGRESSION_RULES[norm] || GALLERY_PROGRESSION_RULES[galleryId];
+  if (GALLERY_PROGRESSION_RULES[norm]) return GALLERY_PROGRESSION_RULES[norm];
+  if (GALLERY_PROGRESSION_RULES[galleryId]) return GALLERY_PROGRESSION_RULES[galleryId];
+
+  // Map view IDs to progression rules
+  if (norm === 'gallery-03') return GALLERY_PROGRESSION_RULES['gallery-02'];
+  if (norm === 'gallery-04') return GALLERY_PROGRESSION_RULES['gallery-03'];
+  if (norm === 'gallery-05') return GALLERY_PROGRESSION_RULES['gallery-04'];
+  if (norm === 'gallery-06') return GALLERY_PROGRESSION_RULES['gallery-05'];
+  if (norm === 'gallery-07') return GALLERY_PROGRESSION_RULES['gallery-06'];
+  if (norm === 'gallery-08') return GALLERY_PROGRESSION_RULES['gallery-07'];
+  if (norm === 'gallery-09') return GALLERY_PROGRESSION_RULES['gallery-08'];
+
+  return undefined;
 }
 
 /**
  * Evaluates whether the progression conditions for unlocking the next gallery from
  * a given source gallery are currently satisfied by the player.
- *
- * - Gallery 00 -> Unlocked from start (0 pieces)
- * - Gallery 01 -> Requires all 3 puzzle pieces collected (piece1 && piece2 && piece3)
- * - Gallery 03 -> Requires all 3 puzzle pieces collected (piece1 && piece2 && piece3)
  */
 export function isProgressionConditionsSatisfied(galleryId: string): boolean {
   const norm = galleryId.toLowerCase().replace('_', '-');
@@ -178,8 +175,8 @@ export function isProgressionConditionsSatisfied(galleryId: string): boolean {
         isPuzzlePieceCollected(galleryId, pieceId) ||
         isPuzzlePieceCollected(norm, pieceId)
     );
-    if (!allPiecesCollected) {
-      return false;
+    if (allPiecesCollected) {
+      return true;
     }
   }
 

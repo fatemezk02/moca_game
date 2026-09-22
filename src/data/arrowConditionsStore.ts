@@ -408,16 +408,18 @@ export function isArrowVisibleToPlayer(arrow: AdminArrowPoint): boolean {
   // Check progression rules for game progression arrows
   const progressionRule = getProgressionRuleForArrow(arrow.id);
   if (progressionRule && progressionRule.requiredPuzzlePiecesCount > 0) {
-    if (progressionRule.requiredPuzzlePieceIds && progressionRule.requiredPuzzlePieceIds.length > 0) {
-      const allPiecesCollected = progressionRule.requiredPuzzlePieceIds.every((pieceId) =>
-        isPuzzlePieceCollected(progressionRule.galleryId, pieceId)
-      );
-      if (!allPiecesCollected) {
+    const isCompleted = isGalleryPuzzleCompleted(progressionRule.galleryId);
+    if (!isCompleted) {
+      if (progressionRule.requiredPuzzlePieceIds && progressionRule.requiredPuzzlePieceIds.length > 0) {
+        const allPiecesCollected = progressionRule.requiredPuzzlePieceIds.every((pieceId) =>
+          isPuzzlePieceCollected(progressionRule.galleryId, pieceId)
+        );
+        if (!allPiecesCollected) {
+          return false;
+        }
+      } else {
         return false;
       }
-    }
-    if (!isGalleryPuzzleCompleted(progressionRule.galleryId)) {
-      return false;
     }
   }
 

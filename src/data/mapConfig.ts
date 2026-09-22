@@ -700,7 +700,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
           {
             id: 'cond-g03-puzzle-completed',
             type: 'galleryPuzzleCompleted',
-            galleryId: 'gallery-03',
+            galleryId: 'gallery-02',
           },
         ],
       },
@@ -778,7 +778,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
           {
             id: 'cond-g04-puzzle-completed',
             type: 'galleryPuzzleCompleted',
-            galleryId: 'gallery-04',
+            galleryId: 'gallery-03',
           },
         ],
       },
@@ -900,7 +900,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
           {
             id: 'cond-g05-puzzle-completed',
             type: 'galleryPuzzleCompleted',
-            galleryId: 'gallery-05',
+            galleryId: 'gallery-04',
           },
         ],
       },
@@ -1067,7 +1067,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
           {
             id: 'cond-g06-puzzle-completed',
             type: 'galleryPuzzleCompleted',
-            galleryId: 'gallery-06',
+            galleryId: 'gallery-05',
           },
         ],
       },
@@ -1156,7 +1156,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
           {
             id: 'cond-g07-puzzle-completed',
             type: 'galleryPuzzleCompleted',
-            galleryId: 'gallery-07',
+            galleryId: 'gallery-06',
           },
         ],
       },
@@ -1233,7 +1233,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
           {
             id: 'cond-g08-puzzle-completed',
             type: 'galleryPuzzleCompleted',
-            galleryId: 'gallery-08',
+            galleryId: 'gallery-07',
           },
         ],
       },
@@ -1377,7 +1377,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
           {
             id: 'cond-g09-puzzle-completed',
             type: 'galleryPuzzleCompleted',
-            galleryId: 'gallery-09',
+            galleryId: 'gallery-08',
           },
         ],
       },
@@ -1385,7 +1385,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
   },
 };
 
-const STORAGE_MAP_CONFIG_KEY = 'museum_map_config_v6';
+const STORAGE_MAP_CONFIG_KEY = 'museum_map_config_v7';
 
 /**
  * In-memory working database with live persistent synchronization

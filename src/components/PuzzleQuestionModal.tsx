@@ -156,12 +156,8 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
     canonicalGalleryId,
     puzzlePoint.puzzlePieceId
   );
-  const isAllInitiallyComplete = isGalleryPuzzleCompleted(canonicalGalleryId);
 
   const [viewMode, setViewMode] = useState<ModalViewMode>(() => {
-    if (isAllInitiallyComplete) {
-      return 'completed';
-    }
     if (initialCollected) {
       return 'already_collected';
     }

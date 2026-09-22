@@ -157,28 +157,6 @@ export function isPuzzlePointCompleted(
         }
       }
     }
-    if (puzzlePieceId && isPuzzlePieceCollected(galleryId, puzzlePieceId)) {
-      return true;
-    }
-  } else {
-    // Search across all galleries
-    for (const gId in progress) {
-      const gProg = progress[gId];
-      if (
-        pointId &&
-        Array.isArray(gProg.completedPointIds) &&
-        gProg.completedPointIds.includes(pointId)
-      ) {
-        return true;
-      }
-      if (
-        puzzlePieceId &&
-        Array.isArray(gProg.collectedPieces) &&
-        gProg.collectedPieces.includes(puzzlePieceId)
-      ) {
-        return true;
-      }
-    }
   }
 
   return false;
@@ -291,27 +269,43 @@ export function getCompletedGalleryPuzzles(): string[] {
             }
           }
 
-          // Auto-heal legacy bug: If gallery_02 is in completed list, verify whether it truly completed its own puzzle
-          if (uniqueSet.has('gallery_02')) {
-            const progress = getPuzzleProgress();
-            const g02Prog = progress['gallery_02'] || progress['gallery-02'];
-            const pieces = g02Prog?.collectedPieces || [];
-            const questions = g02Prog?.completedQuestions || [];
-            const points = g02Prog?.completedPointIds || [];
+          // Auto-heal: Verify whether each gallery in completed list truly completed its own puzzles
+          const progress = getPuzzleProgress();
+          const globalPoints = getCompletedPuzzlePoints();
+          const galleryPointMap: Record<string, string[]> = {
+            gallery_01: ['puzzle-point-01', 'puzzle-point-02', 'puzzle-point-03'],
+            gallery_02: ['puzzle-g03-point-01', 'puzzle-g03-point-02', 'puzzle-g03-point-03'],
+            gallery_03: ['puzzle-g04-point-01', 'puzzle-g04-point-02', 'puzzle-g04-point-03'],
+            gallery_04: ['puzzle-g05-point-01', 'puzzle-g05-point-02', 'puzzle-g05-point-03'],
+            gallery_05: ['puzzle-g06-point-01', 'puzzle-g06-point-02', 'puzzle-g06-point-03'],
+            gallery_06: ['puzzle-g07-point-01', 'puzzle-g07-point-02', 'puzzle-g07-point-03'],
+            gallery_07: ['puzzle-g08-point-01', 'puzzle-g08-point-02', 'puzzle-g08-point-03'],
+            gallery_08: ['puzzle-g09-point-01', 'puzzle-g09-point-02', 'puzzle-g09-point-03'],
+          };
 
-            const hasGenuineG02Completion =
-              Boolean(g02Prog?.isCompleted) &&
-              (pieces.some((p: string) => p.includes('gallery03-piece') || p.includes('gallery02-piece')) ||
-               questions.some((q: string) => ['4', '5', '6'].includes(q)) ||
-               points.some((pt: string) => pt.startsWith('puzzle-g03-') || pt.startsWith('puzzle-g02-')));
+          let modified = false;
+          for (const gId of Array.from(uniqueSet)) {
+            const gProg = progress[gId] || progress[gId.replace('_', '-')];
+            const pieces = gProg?.collectedPieces || [];
+            const points = gProg?.completedPointIds || [];
+            const expectedPts = galleryPointMap[gId] || [];
 
-            if (!hasGenuineG02Completion) {
-              uniqueSet.delete('gallery_02');
-              uniqueSet.delete('gallery-02');
-              const nextList = Array.from(uniqueSet);
-              localStorage.setItem(STORAGE_COMPLETED_GALLERIES_KEY, JSON.stringify(nextList));
-              localStorage.setItem('completedGalleryPuzzles', JSON.stringify(nextList));
+            const hasGenuineCompletion =
+              (pieces.length >= 3 && Boolean(gProg?.isCompleted)) ||
+              (points.length >= 3 && Boolean(gProg?.isCompleted)) ||
+              (expectedPts.length > 0 && expectedPts.every((pt) => globalPoints.includes(pt)));
+
+            if (!hasGenuineCompletion) {
+              uniqueSet.delete(gId);
+              uniqueSet.delete(gId.replace('_', '-'));
+              modified = true;
             }
+          }
+
+          if (modified) {
+            const nextList = Array.from(uniqueSet);
+            localStorage.setItem(STORAGE_COMPLETED_GALLERIES_KEY, JSON.stringify(nextList));
+            localStorage.setItem('completedGalleryPuzzles', JSON.stringify(nextList));
           }
 
           return Array.from(uniqueSet);
@@ -326,7 +320,7 @@ export function getCompletedGalleryPuzzles(): string[] {
 
 /**
  * Retrieves the entire puzzle progress database from localStorage,
- * automatically sanitizing any legacy cross-contamination between Gallery 01 and Gallery 02.
+ * automatically sanitizing any legacy cross-contamination between galleries.
  */
 export function getPuzzleProgress(): PuzzleProgressDatabase {
   try {
@@ -371,6 +365,19 @@ export function getPuzzleProgress(): PuzzleProgressDatabase {
             }
           }
 
+          // Sanitize any gallery having isCompleted=true without actually collecting 3 pieces or points
+          for (const key of Object.keys(parsed)) {
+            const gData = parsed[key];
+            if (gData && gData.isCompleted) {
+              const pieces = Array.isArray(gData.collectedPieces) ? gData.collectedPieces : [];
+              const points = Array.isArray(gData.completedPointIds) ? gData.completedPointIds : [];
+              if (pieces.length < 3 && points.length < 3) {
+                gData.isCompleted = false;
+                modified = true;
+              }
+            }
+          }
+
           if (modified) {
             localStorage.setItem(STORAGE_PUZZLE_PROGRESS_KEY, JSON.stringify(parsed));
           }
@@ -389,18 +396,20 @@ export function getPuzzleProgress(): PuzzleProgressDatabase {
  * Checks whether a specific puzzle piece has already been collected
  */
 export function isPuzzlePieceCollected(galleryId: string, puzzlePieceId: string): boolean {
-  if (!galleryId || !puzzlePieceId) return false;
+  if (!puzzlePieceId) return false;
   const progress = getPuzzleProgress();
-  const canonId = toCanonicalGalleryId(galleryId);
+  const canonId = galleryId ? toCanonicalGalleryId(galleryId) : '';
   const legacyId = canonId.replace('_', '-');
 
-  const checkIds = Array.from(new Set([canonId, legacyId, galleryId]));
+  const checkIds = Array.from(new Set([canonId, legacyId, galleryId].filter(Boolean)));
 
-  for (const id of checkIds) {
-    const galleryProgress = progress[id];
-    if (galleryProgress && Array.isArray(galleryProgress.collectedPieces)) {
-      if (galleryProgress.collectedPieces.includes(puzzlePieceId)) {
-        return true;
+  if (checkIds.length > 0) {
+    for (const id of checkIds) {
+      const galleryProgress = progress[id];
+      if (galleryProgress && Array.isArray(galleryProgress.collectedPieces)) {
+        if (galleryProgress.collectedPieces.includes(puzzlePieceId)) {
+          return true;
+        }
       }
     }
   }
@@ -454,10 +463,10 @@ export function getCollectedPiecesForGallery(galleryId: string): string[] {
 
 /**
  * Checks whether the puzzle for a specific gallery has been completed:
- * 1. Progress database isCompleted flag
+ * 1. Progress database isCompleted flag (verified with at least 3 collected pieces/points)
  * 2. Or completed gallery puzzles list in localStorage
- * 3. Or all 3 puzzle pieces have been collected
- * 4. Or all 3 puzzle points or questions have been answered
+ * 3. Or all 3 puzzle pieces have been collected in this specific gallery
+ * 4. Or all 3 puzzle points for this gallery are in global completed list
  */
 export function isGalleryPuzzleCompleted(galleryId?: string): boolean {
   if (!galleryId) return false;
@@ -470,7 +479,14 @@ export function isGalleryPuzzleCompleted(galleryId?: string): boolean {
 
   // 1. Check isCompleted flag
   for (const id of relatedGalleryIds) {
-    if (progress[id]?.isCompleted) return true;
+    const gProg = progress[id];
+    if (gProg?.isCompleted) {
+      const piecesCount = gProg.collectedPieces?.length || 0;
+      const pointsCount = gProg.completedPointIds?.length || 0;
+      if (piecesCount >= 3 || pointsCount >= 3) {
+        return true;
+      }
+    }
   }
 
   // 2. Check completedList
@@ -480,7 +496,7 @@ export function isGalleryPuzzleCompleted(galleryId?: string): boolean {
     if (completedList.includes(id)) return true;
   }
 
-  // 3. Check collected pieces count across related gallery IDs
+  // 3. Check collected pieces count across related gallery IDs for THIS gallery only
   const allCollectedPieces: string[] = [];
   const allCompletedPoints: string[] = [];
   const allCompletedQuestions: string[] = [];
@@ -505,12 +521,19 @@ export function isGalleryPuzzleCompleted(galleryId?: string): boolean {
     return true;
   }
 
-  // 4. Check specific piece IDs
-  const cleanId = canonId.replace(/[-_]/g, '');
-  const candidatePrefixes = [cleanId];
-  if (canonId === 'gallery_02') {
-    candidatePrefixes.push('gallery03');
-  }
+  // 4. Check specific piece IDs for this gallery
+  const galleryPiecePrefixMap: Record<string, string[]> = {
+    gallery_01: ['gallery01'],
+    gallery_02: ['gallery03', 'gallery02'],
+    gallery_03: ['gallery04'],
+    gallery_04: ['gallery05'],
+    gallery_05: ['gallery06'],
+    gallery_06: ['gallery07'],
+    gallery_07: ['gallery08'],
+    gallery_08: ['gallery09'],
+  };
+
+  const candidatePrefixes = galleryPiecePrefixMap[canonId] || [canonId.replace(/[-_]/g, '')];
 
   for (const prefix of candidatePrefixes) {
     const required = [`${prefix}-piece-01`, `${prefix}-piece-02`, `${prefix}-piece-03`];
@@ -519,18 +542,22 @@ export function isGalleryPuzzleCompleted(galleryId?: string): boolean {
     }
   }
 
-  // 5. Check global completed puzzle points for Gallery 01 / Gallery 02
+  // 5. Check global completed puzzle points for each gallery
   const globalCompletedPoints = getCompletedPuzzlePoints();
-  if (canonId === 'gallery_01') {
-    const g01Points = ['puzzle-point-01', 'puzzle-point-02', 'puzzle-point-03'];
-    if (g01Points.every((pt) => globalCompletedPoints.includes(pt))) {
-      return true;
-    }
-  } else if (canonId === 'gallery_02') {
-    const g02Points = ['puzzle-g03-point-01', 'puzzle-g03-point-02', 'puzzle-g03-point-03'];
-    if (g02Points.every((pt) => globalCompletedPoints.includes(pt))) {
-      return true;
-    }
+  const galleryPointMap: Record<string, string[]> = {
+    gallery_01: ['puzzle-point-01', 'puzzle-point-02', 'puzzle-point-03'],
+    gallery_02: ['puzzle-g03-point-01', 'puzzle-g03-point-02', 'puzzle-g03-point-03'],
+    gallery_03: ['puzzle-g04-point-01', 'puzzle-g04-point-02', 'puzzle-g04-point-03'],
+    gallery_04: ['puzzle-g05-point-01', 'puzzle-g05-point-02', 'puzzle-g05-point-03'],
+    gallery_05: ['puzzle-g06-point-01', 'puzzle-g06-point-02', 'puzzle-g06-point-03'],
+    gallery_06: ['puzzle-g07-point-01', 'puzzle-g07-point-02', 'puzzle-g07-point-03'],
+    gallery_07: ['puzzle-g08-point-01', 'puzzle-g08-point-02', 'puzzle-g08-point-03'],
+    gallery_08: ['puzzle-g09-point-01', 'puzzle-g09-point-02', 'puzzle-g09-point-03'],
+  };
+
+  const expectedPoints = galleryPointMap[canonId];
+  if (expectedPoints && expectedPoints.every((pt) => globalCompletedPoints.includes(pt))) {
+    return true;
   }
 
   return false;
