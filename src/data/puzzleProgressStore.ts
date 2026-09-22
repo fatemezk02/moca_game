@@ -184,6 +184,13 @@ export function markPuzzlePointCompleted(
         if (!currentList.includes(pointId)) {
           const nextList = [...currentList, pointId];
           localStorage.setItem(STORAGE_COMPLETED_PUZZLE_POINTS_KEY, JSON.stringify(nextList));
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(
+              new CustomEvent('museum_completed_puzzle_points_updated', {
+                detail: { pointId, completedList: nextList },
+              })
+            );
+          }
         }
       }
     } catch (e) {

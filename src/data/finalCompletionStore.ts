@@ -1,5 +1,10 @@
 import confetti from 'canvas-confetti';
-import { isGalleryPuzzleCompleted, getPuzzleProgress } from './puzzleProgressStore';
+import {
+  isGalleryPuzzleCompleted,
+  getPuzzleProgress,
+  getCompletedPuzzlePoints,
+  toCanonicalGalleryId,
+} from './puzzleProgressStore';
 
 export const STORAGE_FINAL_COMPLETION_AWARDED = 'museum_final_completion_awarded';
 export const STORAGE_FINAL_CARD_CODE = 'museum_final_card_code';
@@ -7,10 +12,24 @@ export const STORAGE_FINAL_CARD_CLAIMED = 'museum_final_card_claimed';
 export const STORAGE_EXPLORER_CONFETTI_SHOWN = 'museum_explorer_confetti_shown';
 
 /**
- * List of the prerequisite 7 gallery IDs before Gallery 09
+ * List of the prerequisite 7 gallery IDs before Gallery 08
  */
 export const PREREQUISITE_GALLERY_IDS = [
   'gallery-01',
+  'gallery-02',
+  'gallery-03',
+  'gallery-04',
+  'gallery-05',
+  'gallery-06',
+  'gallery-07',
+];
+
+/**
+ * All 8 galleries that have puzzles in the game (Gallery 01 to Gallery 08)
+ */
+export const ALL_8_GALLERY_IDS = [
+  'gallery-01',
+  'gallery-02',
   'gallery-03',
   'gallery-04',
   'gallery-05',
@@ -20,17 +39,33 @@ export const PREREQUISITE_GALLERY_IDS = [
 ];
 
 /**
- * All 8 galleries that have puzzles in the game
+ * All 24 required unique puzzle point IDs across the 8 galleries
  */
-export const ALL_8_GALLERY_IDS = [
-  'gallery-01',
-  'gallery-03',
-  'gallery-04',
-  'gallery-05',
-  'gallery-06',
-  'gallery-07',
-  'gallery-08',
-  'gallery-09',
+export const ALL_24_REQUIRED_PUZZLE_POINT_IDS = [
+  'puzzle-point-01',
+  'puzzle-point-02',
+  'puzzle-point-03',
+  'puzzle-g03-point-01',
+  'puzzle-g03-point-02',
+  'puzzle-g03-point-03',
+  'puzzle-g04-point-01',
+  'puzzle-g04-point-02',
+  'puzzle-g04-point-03',
+  'puzzle-g05-point-01',
+  'puzzle-g05-point-02',
+  'puzzle-g05-point-03',
+  'puzzle-g06-point-01',
+  'puzzle-g06-point-02',
+  'puzzle-g06-point-03',
+  'puzzle-g07-point-01',
+  'puzzle-g07-point-02',
+  'puzzle-g07-point-03',
+  'puzzle-g08-point-01',
+  'puzzle-g08-point-02',
+  'puzzle-g08-point-03',
+  'puzzle-g09-point-01',
+  'puzzle-g09-point-02',
+  'puzzle-g09-point-03',
 ];
 
 // In-session tracking to avoid duplicate auto-transition sequences
@@ -193,25 +228,10 @@ export function setFinalCompletionAwarded(): void {
 }
 
 /**
- * Checks whether all 7 prerequisite gallery puzzles (Galleries 01 to 08) are completed.
+ * Checks whether all 7 prerequisite gallery puzzles (Galleries 01 to 07) are completed.
  */
 export function areAllPrerequisitePuzzlesCompleted(): boolean {
-  const candidatePrereqs = [
-    'gallery-01',
-    'gallery-02',
-    'gallery-03',
-    'gallery-04',
-    'gallery-05',
-    'gallery-06',
-    'gallery-07',
-    'gallery-08',
-  ];
-  const completed = new Set(
-    candidatePrereqs
-      .filter((id) => isGalleryPuzzleCompleted(id))
-      .map((id) => (id === 'gallery-02' ? 'gallery-01' : id))
-  );
-  return completed.size >= 7;
+  return PREREQUISITE_GALLERY_IDS.every((id) => isGalleryPuzzleCompleted(id));
 }
 
 /**
@@ -219,61 +239,78 @@ export function areAllPrerequisitePuzzlesCompleted(): boolean {
  * Independent of stars, star counts, or star modal state.
  */
 export function areAll8GalleryPuzzlesCompleted(): boolean {
-  const candidateGalleries = [
-    'gallery-01',
-    'gallery-02',
-    'gallery-03',
-    'gallery-04',
-    'gallery-05',
-    'gallery-06',
-    'gallery-07',
-    'gallery-08',
-    'gallery-09',
-  ];
-  const completed = new Set(
-    candidateGalleries
-      .filter((id) => isGalleryPuzzleCompleted(id))
-      .map((id) => (id === 'gallery-02' ? 'gallery-01' : id))
+  if (isFinalCompletionAwarded()) return true;
+
+  const allGalleriesDone = ALL_8_GALLERY_IDS.every((id) => isGalleryPuzzleCompleted(id));
+  if (allGalleriesDone) return true;
+
+  const globalPoints = getCompletedPuzzlePoints();
+  const allPointsDone = ALL_24_REQUIRED_PUZZLE_POINT_IDS.every((ptId) =>
+    globalPoints.includes(ptId)
   );
-  return completed.size >= 8;
+  return allPointsDone;
 }
 
 /**
- * Calculates authoritative overall game progress (percentage, completed galleries count, etc.)
+ * Calculates authoritative overall game progress (percentage, completed galleries count, completed puzzles count, etc.)
  */
 export function getOverallGameProgress(): {
   completedGalleriesCount: number;
   totalGalleries: number;
   percentage: number;
   isAllComplete: boolean;
+  completedPuzzlesCount: number;
+  totalPuzzlesCount: number;
 } {
-  const completedCount = ALL_8_GALLERY_IDS.filter((id) =>
-    isGalleryPuzzleCompleted(id)
-  ).length;
+  const completedGalleries = ALL_8_GALLERY_IDS.filter((id) => isGalleryPuzzleCompleted(id));
+  const completedCount = completedGalleries.length;
 
   const progressDb = getPuzzleProgress();
-  let collectedPiecesCount = 0;
+  const globalCompletedPoints = getCompletedPuzzlePoints();
+
+  const galleryPointMap: Record<string, string[]> = {
+    'gallery-01': ['puzzle-point-01', 'puzzle-point-02', 'puzzle-point-03'],
+    'gallery-02': ['puzzle-g03-point-01', 'puzzle-g03-point-02', 'puzzle-g03-point-03'],
+    'gallery-03': ['puzzle-g04-point-01', 'puzzle-g04-point-02', 'puzzle-g04-point-03'],
+    'gallery-04': ['puzzle-g05-point-01', 'puzzle-g05-point-02', 'puzzle-g05-point-03'],
+    'gallery-05': ['puzzle-g06-point-01', 'puzzle-g06-point-02', 'puzzle-g06-point-03'],
+    'gallery-06': ['puzzle-g07-point-01', 'puzzle-g07-point-02', 'puzzle-g07-point-03'],
+    'gallery-07': ['puzzle-g08-point-01', 'puzzle-g08-point-02', 'puzzle-g08-point-03'],
+    'gallery-08': ['puzzle-g09-point-01', 'puzzle-g09-point-02', 'puzzle-g09-point-03'],
+  };
+
+  let uniqueCompletedPuzzlePoints = 0;
   for (const gId of ALL_8_GALLERY_IDS) {
-    const canon = gId === 'gallery-01' ? 'gallery_02' : gId.replace('-', '_');
     if (isGalleryPuzzleCompleted(gId)) {
-      collectedPiecesCount += 3;
+      uniqueCompletedPuzzlePoints += 3;
     } else {
-      const pieces = progressDb[canon]?.collectedPieces;
-      collectedPiecesCount += Array.isArray(pieces) ? pieces.length : 0;
+      const canon = toCanonicalGalleryId(gId);
+      const gProg = progressDb[canon] || progressDb[gId];
+      const gPoints = Array.isArray(gProg?.completedPointIds) ? gProg.completedPointIds : [];
+      const gPieces = Array.isArray(gProg?.collectedPieces) ? gProg.collectedPieces : [];
+      const expectedPts = galleryPointMap[gId] || [];
+
+      const completedPtsInGallery = expectedPts.filter(
+        (pt) => globalCompletedPoints.includes(pt) || gPoints.includes(pt)
+      ).length;
+
+      uniqueCompletedPuzzlePoints += Math.max(completedPtsInGallery, Math.min(3, gPieces.length));
     }
   }
 
+  const isCardAwarded = isFinalCompletionAwarded();
   const isAllDone =
+    isCardAwarded ||
     completedCount >= 8 ||
-    areAll8GalleryPuzzlesCompleted() ||
-    isFinalCompletionAwarded();
+    uniqueCompletedPuzzlePoints >= 24 ||
+    areAll8GalleryPuzzlesCompleted();
 
   let percentage = 0;
-  if (isAllDone) {
+  if (isAllDone || uniqueCompletedPuzzlePoints >= 24) {
     percentage = 100;
   } else {
     // Total pieces across all 8 galleries is 24 (8 * 3 = 24)
-    percentage = Math.min(99, Math.round((collectedPiecesCount / 24) * 100));
+    percentage = Math.min(99, Math.round((uniqueCompletedPuzzlePoints / 24) * 100));
   }
 
   return {
@@ -281,6 +318,8 @@ export function getOverallGameProgress(): {
     totalGalleries: 8,
     percentage,
     isAllComplete: isAllDone,
+    completedPuzzlesCount: isAllDone ? 24 : Math.min(24, uniqueCompletedPuzzlePoints),
+    totalPuzzlesCount: 24,
   };
 }
 

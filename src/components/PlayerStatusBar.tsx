@@ -44,7 +44,9 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
     window.addEventListener('museum_puzzle_progress_updated', handleUpdate);
     window.addEventListener('museum_player_progress_updated', handleUpdate);
     window.addEventListener('museum_completed_gallery_puzzles_updated', handleUpdate);
+    window.addEventListener('museum_completed_puzzle_points_updated', handleUpdate);
     window.addEventListener('museum_final_completion_awarded', handleUpdate);
+    window.addEventListener('museum_final_card_code_generated', handleUpdate);
     window.addEventListener('museum_game_fully_reset', handleUpdate);
     window.addEventListener('museum_star_point_progress_updated', handleUpdate);
     window.addEventListener('museum_player_stats_updated', handleUpdate);
@@ -53,7 +55,9 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
       window.removeEventListener('museum_puzzle_progress_updated', handleUpdate);
       window.removeEventListener('museum_player_progress_updated', handleUpdate);
       window.removeEventListener('museum_completed_gallery_puzzles_updated', handleUpdate);
+      window.removeEventListener('museum_completed_puzzle_points_updated', handleUpdate);
       window.removeEventListener('museum_final_completion_awarded', handleUpdate);
+      window.removeEventListener('museum_final_card_code_generated', handleUpdate);
       window.removeEventListener('museum_game_fully_reset', handleUpdate);
       window.removeEventListener('museum_star_point_progress_updated', handleUpdate);
       window.removeEventListener('museum_player_stats_updated', handleUpdate);
