@@ -11,8 +11,8 @@ import { StarPoint, StarLabel } from './StarPoint';
 import { isArrowVisibleToPlayer, markArrowUsed, isArrowUsed } from '../data/arrowConditionsStore';
 import { getCurrentGalleryId, setCurrentGalleryId } from '../data/playerLocationStore';
 import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
-import { getLampPositionForGallery, getAllGalleryLamps, getAllGalleryLocks } from '../data/galleryAreasStore';
-import { isGalleryReached, markGalleryReached } from '../data/reachedGalleriesStore';
+import { getLampPositionForGallery, getAllGalleryLamps, getAllGalleryLocks, getLockPositionForGallery, DEFAULT_GALLERY_LOCKS } from '../data/galleryAreasStore';
+import { isGalleryReached, markGalleryReached, isGalleryManuallyUnlocked } from '../data/reachedGalleriesStore';
 import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
 import { GalleryLockIndicator } from './GalleryLockIndicator';
 import { GalleryLockModal } from './GalleryLockModal';
@@ -416,21 +416,21 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     if (canon === 'gallery_00' || galleryId === 'gallery-00') return;
 
     let targetGid: any = 'gallery-01';
-    if (canon === 'gallery_01' || canon === 'gallery_02') {
+    if (canon === 'gallery_01') {
       targetGid = 'gallery-01';
-    } else if (canon === 'gallery_03') {
+    } else if (canon === 'gallery_02') {
       targetGid = 'gallery-03';
-    } else if (canon === 'gallery_04') {
+    } else if (canon === 'gallery_03') {
       targetGid = 'gallery-04';
-    } else if (canon === 'gallery_05') {
+    } else if (canon === 'gallery_04') {
       targetGid = 'gallery-05';
-    } else if (canon === 'gallery_06') {
+    } else if (canon === 'gallery_05') {
       targetGid = 'gallery-06';
-    } else if (canon === 'gallery_07') {
+    } else if (canon === 'gallery_06') {
       targetGid = 'gallery-07';
-    } else if (canon === 'gallery_08') {
+    } else if (canon === 'gallery_07') {
       targetGid = 'gallery-08';
-    } else if (canon === 'gallery_09') {
+    } else if (canon === 'gallery_08' || canon === 'gallery_09') {
       targetGid = 'gallery-09';
     } else {
       targetGid = galleryId.replace('_', '-');
@@ -565,8 +565,9 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
 
         {/* Gallery Lamp & Lock Indicators (Hidden when Location Points are ON) */}
         {!areLocationPinsVisible && (() => {
-          // Standard museum galleries 02 to 09
+          // Standard museum galleries 01 to 08
           const standardGalleries = [
+            'gallery_01',
             'gallery_02',
             'gallery_03',
             'gallery_04',
@@ -574,122 +575,193 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
             'gallery_06',
             'gallery_07',
             'gallery_08',
-            'gallery_09',
           ];
 
-          // 1. Determine Current Gallery (the last gallery the user was in from galleries 2 to 9)
+          // 1. Determine Current Player Gallery (map player location to canonical gallery_01 .. gallery_08)
           const rawCurrent = playerGalleryId || getCurrentGalleryId();
-          let canonPlayerId = normalizeGalleryId(rawCurrent);
-          if (canonPlayerId === 'gallery_01') canonPlayerId = 'gallery_02';
-          if (!canonPlayerId || canonPlayerId === 'gallery_00' || !standardGalleries.includes(canonPlayerId)) {
-            const fallback = normalizeGalleryId(getCurrentGalleryId());
-            const normFallback = fallback === 'gallery_01' ? 'gallery_02' : fallback;
-            canonPlayerId = (normFallback && standardGalleries.includes(normFallback)) ? normFallback : 'gallery_02';
+          const normCurrent = normalizeGalleryId(rawCurrent);
+
+          let canonPlayerId = 'gallery_01';
+          if (
+            normCurrent === 'gallery_01' ||
+            normCurrent === 'gallery_02' ||
+            rawCurrent === 'gallery-01' ||
+            rawCurrent === 'gallery-02'
+          ) {
+            canonPlayerId = 'gallery_01';
+          } else if (normCurrent === 'gallery_03' || rawCurrent === 'gallery-03') {
+            canonPlayerId = 'gallery_02';
+          } else if (normCurrent === 'gallery_04' || rawCurrent === 'gallery-04') {
+            canonPlayerId = 'gallery_03';
+          } else if (normCurrent === 'gallery_05' || rawCurrent === 'gallery-05') {
+            canonPlayerId = 'gallery_04';
+          } else if (normCurrent === 'gallery_06' || rawCurrent === 'gallery-06') {
+            canonPlayerId = 'gallery_05';
+          } else if (normCurrent === 'gallery_07' || rawCurrent === 'gallery-07') {
+            canonPlayerId = 'gallery_06';
+          } else if (normCurrent === 'gallery_08' || rawCurrent === 'gallery-08') {
+            canonPlayerId = 'gallery_07';
+          } else if (normCurrent === 'gallery_09' || rawCurrent === 'gallery-09') {
+            canonPlayerId = 'gallery_08';
           }
 
           const isCompleted = (gid: string) => {
-            const norm = normalizeGalleryId(gid);
-            if (norm === 'gallery_01' || norm === 'gallery_02') {
+            if (gid === 'gallery_01') {
+              return isGalleryPuzzleCompleted('gallery_01') || isGalleryPuzzleCompleted('gallery-01');
+            }
+            if (gid === 'gallery_02') {
               return (
-                isGalleryPuzzleCompleted('gallery_01') ||
                 isGalleryPuzzleCompleted('gallery_02') ||
-                isGalleryPuzzleCompleted('gallery-01') ||
-                isGalleryPuzzleCompleted('gallery-02')
+                isGalleryPuzzleCompleted('gallery-02') ||
+                isGalleryPuzzleCompleted('gallery_03') ||
+                isGalleryPuzzleCompleted('gallery-03')
               );
             }
-            return (
-              isGalleryPuzzleCompleted(gid) ||
-              isGalleryPuzzleCompleted(norm) ||
-              isGalleryPuzzleCompleted(norm.replace('_', '-'))
-            );
+            if (gid === 'gallery_03') {
+              return (
+                isGalleryPuzzleCompleted('gallery_03') ||
+                isGalleryPuzzleCompleted('gallery-03') ||
+                isGalleryPuzzleCompleted('gallery_04') ||
+                isGalleryPuzzleCompleted('gallery-04')
+              );
+            }
+            if (gid === 'gallery_04') {
+              return (
+                isGalleryPuzzleCompleted('gallery_04') ||
+                isGalleryPuzzleCompleted('gallery-04') ||
+                isGalleryPuzzleCompleted('gallery_05') ||
+                isGalleryPuzzleCompleted('gallery-05')
+              );
+            }
+            if (gid === 'gallery_05') {
+              return (
+                isGalleryPuzzleCompleted('gallery_05') ||
+                isGalleryPuzzleCompleted('gallery-05') ||
+                isGalleryPuzzleCompleted('gallery_06') ||
+                isGalleryPuzzleCompleted('gallery-06')
+              );
+            }
+            if (gid === 'gallery_06') {
+              return (
+                isGalleryPuzzleCompleted('gallery_06') ||
+                isGalleryPuzzleCompleted('gallery-06') ||
+                isGalleryPuzzleCompleted('gallery_07') ||
+                isGalleryPuzzleCompleted('gallery-07')
+              );
+            }
+            if (gid === 'gallery_07') {
+              return (
+                isGalleryPuzzleCompleted('gallery_07') ||
+                isGalleryPuzzleCompleted('gallery-07') ||
+                isGalleryPuzzleCompleted('gallery_08') ||
+                isGalleryPuzzleCompleted('gallery-08')
+              );
+            }
+            if (gid === 'gallery_08') {
+              return (
+                isGalleryPuzzleCompleted('gallery_08') ||
+                isGalleryPuzzleCompleted('gallery-08') ||
+                isGalleryPuzzleCompleted('gallery_09') ||
+                isGalleryPuzzleCompleted('gallery-09')
+              );
+            }
+            return isGalleryPuzzleCompleted(gid);
           };
 
           const isReached = (gid: string) => {
-            const norm = normalizeGalleryId(gid);
-            if (norm === 'gallery_00' || norm === 'gallery_01' || norm === 'gallery_02') {
-              return true;
+            if (gid === 'gallery_01') return true;
+            if (gid === 'gallery_02') {
+              return isCompleted('gallery_01') || isGalleryManuallyUnlocked('gallery_02') || isGalleryManuallyUnlocked('gallery-02') || isGalleryManuallyUnlocked('gallery-01');
             }
-            return (
-              isGalleryReached(gid) ||
-              isGalleryReached(norm) ||
-              isGalleryReached(norm.replace('_', '-'))
-            );
+            if (gid === 'gallery_03') {
+              return isCompleted('gallery_02') || isGalleryManuallyUnlocked('gallery_03') || isGalleryManuallyUnlocked('gallery-03');
+            }
+            if (gid === 'gallery_04') {
+              return isCompleted('gallery_03') || isGalleryManuallyUnlocked('gallery_04') || isGalleryManuallyUnlocked('gallery-04');
+            }
+            if (gid === 'gallery_05') {
+              return isCompleted('gallery_04') || isGalleryManuallyUnlocked('gallery_05') || isGalleryManuallyUnlocked('gallery-05');
+            }
+            if (gid === 'gallery_06') {
+              return isCompleted('gallery_05') || isGalleryManuallyUnlocked('gallery_06') || isGalleryManuallyUnlocked('gallery-06');
+            }
+            if (gid === 'gallery_07') {
+              return isCompleted('gallery_06') || isGalleryManuallyUnlocked('gallery_07') || isGalleryManuallyUnlocked('gallery-07');
+            }
+            if (gid === 'gallery_08') {
+              return isCompleted('gallery_07') || isGalleryManuallyUnlocked('gallery_08') || isGalleryManuallyUnlocked('gallery-08');
+            }
+            return false;
           };
-
-          // Position of the ONE active lit lamp on the current gallery (چراغ روشن)
-          const currentLampPos = getLampPositionForGallery(canonPlayerId);
-          const currentMapX = (currentLampPos.x / 604.8) * 100;
-          const currentMapY = (currentLampPos.y / 844.86) * 100;
-
-          // Other galleries that are completed get green lamps (چراغ سبز)
-          const otherCompletedGalleries = standardGalleries.filter(
-            (gid) => gid !== canonPlayerId && isCompleted(gid)
-          );
-
-          // All gallery locks from store (excluding current gallery and completed galleries)
-          const allLocks = getAllGalleryLocks().filter((lock) => {
-            const canonLockId = normalizeGalleryId(lock.galleryId) === 'gallery_01' ? 'gallery_02' : normalizeGalleryId(lock.galleryId);
-            if (canonLockId === 'gallery_00') return false;
-            // Current gallery has the lit lamp, no lock
-            if (canonLockId === canonPlayerId) return false;
-            // Completed gallery has a green lamp, no lock
-            if (isCompleted(canonLockId)) return false;
-            return true;
-          });
 
           return (
             <>
-              {/* 1. Exactly ONE lit lamp on the current gallery (چراغ روشن) */}
-              <NavigationLight
-                key={`current-lit-lamp-${canonPlayerId}`}
-                mapX={currentMapX}
-                mapY={currentMapY}
-                galleryId={canonPlayerId}
-                destinationName={canonPlayerId}
-                isLocationIndicator={true}
-                isUnlocked={false}
-                onNavigate={() => handleLampClick(canonPlayerId)}
-              />
+              {standardGalleries.map((gid) => {
+                const isCurrent = gid === canonPlayerId;
+                const completed = isCompleted(gid);
 
-              {/* 2. Green lights for other completed galleries (چراغ سبز) */}
-              {otherCompletedGalleries.map((gid) => {
-                const lampPos = getLampPositionForGallery(gid);
-                const lampMapX = (lampPos.x / 604.8) * 100;
-                const lampMapY = (lampPos.y / 844.86) * 100;
-                return (
-                  <NavigationLight
-                    key={`completed-lamp-${gid}`}
-                    mapX={lampMapX}
-                    mapY={lampMapY}
-                    galleryId={gid}
-                    destinationName={gid}
-                    isLocationIndicator={false}
-                    isUnlocked={true}
-                    onNavigate={() => handleLampClick(gid)}
-                  />
-                );
-              })}
+                // CASE 1 — CURRENT GALLERY:
+                // Regardless of complete or incomplete: show existing lit location indicator lamp (never green)
+                if (isCurrent) {
+                  const lampPos = getLampPositionForGallery(gid);
+                  const lampMapX = (lampPos.x / 604.8) * 100;
+                  const lampMapY = (lampPos.y / 844.86) * 100;
+                  return (
+                    <NavigationLight
+                      key={`current-lit-lamp-${gid}`}
+                      mapX={lampMapX}
+                      mapY={lampMapY}
+                      galleryId={gid}
+                      destinationName={gid}
+                      isLocationIndicator={true}
+                      isUnlocked={false}
+                      onNavigate={() => handleLampClick(gid)}
+                    />
+                  );
+                }
 
-              {/* 3. Locks for other galleries: open lock if reached, closed lock if unreached */}
-              {allLocks.map((lock) => {
-                const canonLockId = normalizeGalleryId(lock.galleryId) === 'gallery_01' ? 'gallery_02' : normalizeGalleryId(lock.galleryId);
-                const isOpen = isReached(canonLockId);
-                const posX = (lock.x / 604.8) * 100;
-                const posY = (lock.y / 844.86) * 100;
+                // CASE 2 — COMPLETED GALLERY (NOT CURRENT):
+                // Show green lamp
+                if (completed) {
+                  const lampPos = getLampPositionForGallery(gid);
+                  const lampMapX = (lampPos.x / 604.8) * 100;
+                  const lampMapY = (lampPos.y / 844.86) * 100;
+                  return (
+                    <NavigationLight
+                      key={`completed-lamp-${gid}`}
+                      mapX={lampMapX}
+                      mapY={lampMapY}
+                      galleryId={gid}
+                      destinationName={gid}
+                      isLocationIndicator={false}
+                      isUnlocked={true}
+                      onNavigate={() => handleLampClick(gid)}
+                    />
+                  );
+                }
+
+                // CASE 3 — NOT CURRENT & NOT COMPLETED:
+                // Show Lock (open lock if reached, closed lock if unreached)
+                const lockPos = getLockPositionForGallery(gid);
+                const lockMapX = (lockPos.x / 604.8) * 100;
+                const lockMapY = (lockPos.y / 844.86) * 100;
+                const open = isReached(gid);
+                const lockDef = DEFAULT_GALLERY_LOCKS.find((l) => l.galleryId === gid);
+                const title = lockDef?.title || `قفل ${gid}`;
 
                 return (
                   <GalleryLockIndicator
-                    key={`lock-${lock.id}`}
-                    mapX={posX}
-                    mapY={posY}
-                    galleryId={lock.galleryId}
-                    title={lock.title}
-                    isOpen={isOpen}
+                    key={`lock-${gid}`}
+                    mapX={lockMapX}
+                    mapY={lockMapY}
+                    galleryId={gid}
+                    title={title}
+                    isOpen={open}
                     onClick={() => {
-                      if (isOpen) {
-                        handleLampClick(lock.galleryId);
+                      if (open) {
+                        handleLampClick(gid);
                       } else {
-                        handleLockClick(lock.galleryId, lock.title);
+                        handleLockClick(gid, title);
                       }
                     }}
                   />

@@ -570,6 +570,98 @@ export function isGalleryPuzzleCompleted(galleryId?: string): boolean {
   return false;
 }
 
+export const GALLERY_PUZZLE_1_CONFIG: Record<
+  string,
+  { pointIds: string[]; questionIds: string[] }
+> = {
+  gallery_01: {
+    pointIds: ['puzzle-point-01', 'puzzle-g01-point-01', 'gallery01-puzzle-01'],
+    questionIds: ['gallery01-puzzle-q01', '1'],
+  },
+  gallery_02: {
+    pointIds: ['puzzle-g03-point-01', 'puzzle-g02-point-01', 'gallery02-puzzle-01', 'gallery03-puzzle-01'],
+    questionIds: ['4', 'gallery02-puzzle-q01', 'gallery03-puzzle-q01'],
+  },
+  gallery_03: {
+    pointIds: ['puzzle-g04-point-01', 'gallery03-puzzle-01', 'gallery04-puzzle-01'],
+    questionIds: ['7', 'gallery03-puzzle-q01', 'gallery04-puzzle-q01'],
+  },
+  gallery_04: {
+    pointIds: ['puzzle-g05-point-01', 'gallery04-puzzle-01', 'gallery05-puzzle-01'],
+    questionIds: ['10', 'gallery04-puzzle-q01', 'gallery05-puzzle-q01'],
+  },
+  gallery_05: {
+    pointIds: ['puzzle-g06-point-01', 'gallery05-puzzle-01', 'gallery06-puzzle-01'],
+    questionIds: ['13', 'gallery05-puzzle-q01', 'gallery06-puzzle-q01'],
+  },
+  gallery_06: {
+    pointIds: ['puzzle-g07-point-01', 'gallery06-puzzle-01', 'gallery07-puzzle-01'],
+    questionIds: ['16', 'gallery06-puzzle-q01', 'gallery07-puzzle-q01'],
+  },
+  gallery_07: {
+    pointIds: ['puzzle-g08-point-01', 'gallery07-puzzle-01', 'gallery08-puzzle-01'],
+    questionIds: ['19', 'gallery07-puzzle-q01', 'gallery08-puzzle-q01'],
+  },
+  gallery_08: {
+    pointIds: ['puzzle-g09-point-01', 'gallery08-puzzle-01', 'gallery09-puzzle-01'],
+    questionIds: ['22', 'gallery08-puzzle-q01', 'gallery09-puzzle-q01'],
+  },
+};
+
+/**
+ * Evaluates whether Puzzle 1 of the given gallery is fully completed.
+ * Does NOT return true merely because a puzzle piece was collected.
+ * Requires that Puzzle 1 itself (its puzzle point / question) was completed.
+ */
+export function isGalleryPuzzle1Completed(galleryId: string): boolean {
+  if (!galleryId) return false;
+  const canonId = toCanonicalGalleryId(galleryId);
+  const config = GALLERY_PUZZLE_1_CONFIG[canonId];
+  if (!config) return false;
+
+  // 1. Check in global completed puzzle point IDs
+  const globalCompletedPoints = getCompletedPuzzlePoints();
+  if (config.pointIds.some((id) => globalCompletedPoints.includes(id))) {
+    return true;
+  }
+
+  // 2. Check answered questions in localStorage
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem('museum_answered_questions');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && config.questionIds.some((qid) => parsed.includes(qid))) {
+          return true;
+        }
+      }
+    }
+  } catch {}
+
+  // 3. Check within gallery progress
+  const progress = getPuzzleProgress();
+  const checkKeys = Array.from(new Set([canonId, canonId.replace('_', '-'), galleryId]));
+  for (const k of checkKeys) {
+    const gp = progress[k];
+    if (gp) {
+      if (
+        Array.isArray(gp.completedPointIds) &&
+        config.pointIds.some((id) => gp.completedPointIds.includes(id))
+      ) {
+        return true;
+      }
+      if (
+        Array.isArray(gp.completedQuestions) &&
+        config.questionIds.some((qid) => gp.completedQuestions.includes(qid))
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 /**
  * Marks a gallery puzzle as fully assembled and completed
  */

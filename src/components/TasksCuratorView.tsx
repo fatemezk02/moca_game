@@ -29,69 +29,9 @@ interface TasksCuratorViewProps {
  */
 function isGalleryUnlockedState(galleryId: string): boolean {
   const norm = galleryId.toLowerCase().replace('_', '-');
-  if (norm === 'gallery-00' || norm === 'gallery-01' || norm === 'gallery-02') return true;
+  if (norm === 'gallery-00' || norm === 'gallery-01') return true;
 
-  if (isGalleryReached(galleryId) || isGalleryReached(norm) || isGalleryReached(norm.replace('-', '_'))) {
-    return true;
-  }
-
-  // If the player has already completed this gallery's puzzle or has pieces, it is unlocked
-  if (isGalleryPuzzleCompleted(norm) || isGalleryPuzzleCompleted(norm.replace('-', '_'))) return true;
-  const puzzleProgress = getPuzzleProgress();
-  if (
-    Array.isArray(puzzleProgress[norm]?.collectedPieces) &&
-    puzzleProgress[norm].collectedPieces.length > 0
-  ) {
-    return true;
-  }
-
-  // Linear progression chain evaluation
-  if (norm === 'gallery-03') {
-    return (
-      isProgressionConditionsSatisfied('gallery-01') ||
-      isProgressionConditionsSatisfied('gallery-02') ||
-      isGalleryPuzzleCompleted('gallery-01') ||
-      isGalleryPuzzleCompleted('gallery-02')
-    );
-  }
-  if (norm === 'gallery-04') {
-    return (
-      isGalleryUnlockedState('gallery-03') &&
-      (isProgressionConditionsSatisfied('gallery-03') || isGalleryPuzzleCompleted('gallery-03'))
-    );
-  }
-  if (norm === 'gallery-05') {
-    return (
-      isGalleryUnlockedState('gallery-04') &&
-      (isProgressionConditionsSatisfied('gallery-04') || isGalleryPuzzleCompleted('gallery-04'))
-    );
-  }
-  if (norm === 'gallery-06') {
-    return (
-      isGalleryUnlockedState('gallery-05') &&
-      (isProgressionConditionsSatisfied('gallery-05') || isGalleryPuzzleCompleted('gallery-05'))
-    );
-  }
-  if (norm === 'gallery-07') {
-    return (
-      isGalleryUnlockedState('gallery-06') &&
-      (isProgressionConditionsSatisfied('gallery-06') || isGalleryPuzzleCompleted('gallery-06'))
-    );
-  }
-  if (norm === 'gallery-08') {
-    return (
-      isGalleryUnlockedState('gallery-07') &&
-      (isProgressionConditionsSatisfied('gallery-07') || isGalleryPuzzleCompleted('gallery-07'))
-    );
-  }
-  if (norm === 'gallery-09') {
-    return (
-      isGalleryUnlockedState('gallery-08') &&
-      (isProgressionConditionsSatisfied('gallery-08') || isGalleryPuzzleCompleted('gallery-08'))
-    );
-  }
-
-  return false;
+  return isGalleryReached(galleryId) || isGalleryReached(norm) || isGalleryReached(norm.replace('-', '_'));
 }
 
 const GALLERY_DISPLAY_NUMBER_MAP: Record<string, number> = {

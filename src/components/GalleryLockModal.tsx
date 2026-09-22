@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, X, Coins, Compass } from 'lucide-react';
 import { getCurrentGalleryId } from '../data/playerLocationStore';
-import { markGalleryReached } from '../data/reachedGalleriesStore';
+import { markGalleryReached, markGalleryManuallyUnlocked } from '../data/reachedGalleriesStore';
 import { formatGalleryLabelFa } from './NavigationLight';
 import { normalizeGalleryId } from '../services/content/mappers';
 
@@ -90,6 +90,7 @@ export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
             <div className="flex flex-row gap-3 pt-2">
               <button
                 onClick={() => {
+                  markGalleryManuallyUnlocked(lockGallery.galleryId);
                   markGalleryReached(lockGallery.galleryId);
                   const targetId = lockGallery.galleryId;
                   onClose();
