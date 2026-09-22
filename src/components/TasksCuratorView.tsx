@@ -2,21 +2,21 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Lock, Unlock, Star, CheckCircle2, ChevronLeft } from 'lucide-react';
 import { CuratorExhibitionWall } from './CuratorExhibitionWall';
 import { GalleryLockModal } from './GalleryLockModal';
-import { GALLERIES } from '../data/mapConfig';
 import { contentService } from '../services/content/contentService';
+import { DEFAULT_GALLERIES } from '../services/content/defaultSeedContent';
 import {
   isStarPointUnlocked,
   isStarPointInformationUnlocked,
 } from '../data/starPointProgressStore';
-import { isProgressionConditionsSatisfied } from '../data/galleryProgressionStore';
-import { isGalleryPuzzleCompleted, getPuzzleProgress } from '../data/puzzleProgressStore';
-import { isGalleryReached } from '../data/reachedGalleriesStore';
+import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
+import { isGalleryReached, isGalleryManuallyUnlocked } from '../data/reachedGalleriesStore';
 import {
   normalizeGalleryId,
+  getLogicalGalleryNumber,
   toPersianDigits,
   formatTwoDigitPersian,
 } from '../services/content/mappers';
-import { StarContent } from '../services/content/types';
+import { StarContent, GalleryContent } from '../services/content/types';
 
 interface TasksCuratorViewProps {
   type: 'tasks' | 'curator';
@@ -28,71 +28,29 @@ interface TasksCuratorViewProps {
  * Checks whether a gallery is unlocked based on authoritative progression rules and puzzle state.
  */
 function isGalleryUnlockedState(galleryId: string): boolean {
-  const norm = galleryId.toLowerCase().replace('_', '-');
-  if (norm === 'gallery-00' || norm === 'gallery-01') return true;
+  const canon = normalizeGalleryId(galleryId);
+  if (canon === 'gallery_00' || canon === 'gallery_01') return true;
 
-  return isGalleryReached(galleryId) || isGalleryReached(norm) || isGalleryReached(norm.replace('-', '_'));
+  return (
+    isGalleryReached(canon) ||
+    isGalleryReached(galleryId) ||
+    isGalleryManuallyUnlocked(canon) ||
+    isGalleryManuallyUnlocked(galleryId)
+  );
 }
 
-const GALLERY_DISPLAY_NUMBER_MAP: Record<string, number> = {
-  'gallery-01': 1,
-  'gallery_01': 1,
-  'gallery-02': 1,
-  'gallery_02': 1,
-  'gallery-03': 2,
-  'gallery_03': 2,
-  'gallery-04': 3,
-  'gallery_04': 3,
-  'gallery-05': 4,
-  'gallery_05': 4,
-  'gallery-06': 5,
-  'gallery_06': 5,
-  'gallery-07': 6,
-  'gallery_07': 6,
-  'gallery-08': 7,
-  'gallery_08': 7,
-  'gallery-09': 8,
-  'gallery_09': 8,
-};
-
-function parseGalleryTitleAndNumber(gallery: { id: string; nameFa?: string; name?: string; nameEn?: string; csGalleryNumber?: string }) {
-  let galleryNumInt = GALLERY_DISPLAY_NUMBER_MAP[gallery.id];
-  if (gallery.csGalleryNumber) {
-    const parsed = parseInt(gallery.csGalleryNumber, 10);
-    if (!isNaN(parsed)) {
-      galleryNumInt = parsed;
-    }
+function parseGalleryTitle(rawFa: string): string {
+  if (!rawFa) return '';
+  let title = rawFa.trim();
+  if (title.includes(' — ')) {
+    const parts = title.split(' — ');
+    return parts[parts.length - 1].trim();
   }
-  if (!galleryNumInt) {
-    const numMatch = gallery.id.match(/\d+/);
-    galleryNumInt = numMatch ? parseInt(numMatch[0], 10) : 1;
+  if (title.includes(' - ')) {
+    const parts = title.split(' - ');
+    return parts[parts.length - 1].trim();
   }
-
-  const formattedNum = galleryNumInt < 10 ? `0${galleryNumInt}` : `${galleryNumInt}`;
-  const faNum = formatTwoDigitPersian(galleryNumInt);
-
-  const rawFa = gallery.nameFa || gallery.name || '';
-  let title = rawFa;
-  let subtitle = `گالری ${faNum}`;
-
-  if (rawFa.includes(' — ')) {
-    const parts = rawFa.split(' — ');
-    subtitle = parts[0].trim();
-    title = parts[1].trim();
-  } else if (rawFa.includes(' - ')) {
-    const parts = rawFa.split(' - ');
-    subtitle = parts[0].trim();
-    title = parts[1].trim();
-  }
-
-  return {
-    title,
-    subtitle: `${subtitle} • Gallery ${formattedNum}`,
-    rawSubtitle: subtitle,
-    formattedNum,
-    faNum,
-    numInt: galleryNumInt,
-  };
+  return title;
 }
 
 export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
@@ -114,6 +72,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
     window.addEventListener('museum_puzzle_progress_updated', refreshState);
     window.addEventListener('museum_completed_gallery_puzzles_updated', refreshState);
     window.addEventListener('museum_gallery_reached', refreshState);
+    window.addEventListener('museum_gallery_manually_unlocked', refreshState);
 
     return () => {
       unsub();
@@ -122,6 +81,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       window.removeEventListener('museum_puzzle_progress_updated', refreshState);
       window.removeEventListener('museum_completed_gallery_puzzles_updated', refreshState);
       window.removeEventListener('museum_gallery_reached', refreshState);
+      window.removeEventListener('museum_gallery_manually_unlocked', refreshState);
     };
   }, [refreshState]);
 
@@ -130,49 +90,70 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
     return <CuratorExhibitionWall onNavigateToMap={onNavigateToMap} />;
   }
 
-  // Tasks Tab: Exhibition Galleries List (excluding gallery-00 master map and gallery-02 coming soon placeholder)
-  const targetGalleries = GALLERIES.filter(
-    (g) => g.id !== 'gallery-00' && g.id !== 'gallery-02' && g.id.startsWith('gallery-')
-  );
+  // Authoritative Google Sheets Galleries data as source of truth
+  const rawGalleries: GalleryContent[] = contentService.getGalleries();
+  const sourceGalleries = rawGalleries && rawGalleries.length > 0 ? rawGalleries : DEFAULT_GALLERIES;
+
+  // Deduplicate and filter canonical galleries (01 to 08 only, strictly no gallery 09 or master map 00)
+  const canonicalGalleryMap = new Map<string, GalleryContent>();
+
+  for (const g of sourceGalleries) {
+    if (g.active === false) continue;
+    const canonId = normalizeGalleryId(g.galleryId || g.id);
+    if (!canonId || canonId === 'gallery_00') continue;
+
+    const numInt =
+      getLogicalGalleryNumber(canonId) ??
+      (g.galleryNumber ? parseInt(g.galleryNumber, 10) : null);
+
+    // Only accept valid exhibition galleries 1 through 8
+    if (numInt === null || numInt < 1 || numInt > 8) continue;
+
+    if (!canonicalGalleryMap.has(canonId)) {
+      canonicalGalleryMap.set(canonId, g);
+    }
+  }
+
+  // Ensure all 8 galleries exist from canonical defaults if missing from active sheet rows
+  for (let i = 1; i <= 8; i++) {
+    const cid = `gallery_0${i}`;
+    if (!canonicalGalleryMap.has(cid)) {
+      const defaultG = DEFAULT_GALLERIES.find((dg) => dg.id === cid || dg.galleryId === cid);
+      if (defaultG) {
+        canonicalGalleryMap.set(cid, defaultG);
+      }
+    }
+  }
 
   const allStars: StarContent[] = contentService.getStars().filter((s) => s.active !== false);
 
-  // Compute cards dynamic data
-  const galleryCards = targetGalleries.map((gallery) => {
-    const canonId = normalizeGalleryId(gallery.id);
+  // Build card data for each canonical gallery
+  const galleryCards = Array.from(canonicalGalleryMap.entries()).map(([canonId, gallery]) => {
+    const numInt =
+      getLogicalGalleryNumber(canonId) ??
+      (gallery.galleryNumber ? parseInt(gallery.galleryNumber, 10) : 1);
 
-    // ContentService gallery entity for title / metadata overrides
-    const csGallery = contentService.getGalleryById(gallery.id);
-    const rawFa = csGallery?.nameFa || gallery.nameFa || gallery.name;
-    const rawEn = csGallery?.nameEn || gallery.name;
+    const formattedNum = numInt < 10 ? `0${numInt}` : `${numInt}`;
+    const faNum = formatTwoDigitPersian(numInt);
 
-    const { title, subtitle, formattedNum, faNum, numInt } = parseGalleryTitleAndNumber({
-      id: gallery.id,
-      nameFa: rawFa,
-      name: gallery.name,
-      nameEn: rawEn,
-      csGalleryNumber: csGallery?.galleryNumber,
-    });
+    const rawFa = gallery.nameFa || gallery.nameEn || '';
+    const title = parseGalleryTitle(rawFa);
+    const subtitle = `گالری ${faNum} • Gallery ${formattedNum}`;
 
-    const isUnlocked = isGalleryUnlockedState(gallery.id);
+    const isUnlocked = isGalleryUnlockedState(canonId);
+    const isPuzzleCompleted = isGalleryPuzzleCompleted(canonId);
+    const isComplete = isPuzzleCompleted;
 
-    // Calculate stars for this gallery from active stars loaded from sheets / content service
+    // Calculate stars belonging strictly to this canonical gallery
     const galleryStars = allStars.filter((s) => {
       if (!s.galleryId) return false;
       const sCanon = normalizeGalleryId(s.galleryId);
-      if (sCanon === canonId) return true;
-      if (numInt !== null) {
-        const sNumMatch = s.galleryId.match(/\d+/);
-        if (sNumMatch && parseInt(sNumMatch[0], 10) === numInt) return true;
-      }
-      return false;
+      return sCanon === canonId;
     });
 
-    // Exact count of active stars for this gallery
     const totalStars = galleryStars.length;
-
     let collectedStars = 0;
-    if (galleryStars.length > 0) {
+    if (totalStars > 0) {
       collectedStars = galleryStars.filter((star) => {
         return (
           isStarPointUnlocked(star.id) ||
@@ -182,17 +163,9 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       }).length;
     }
 
-    const isPuzzleCompleted = Boolean(
-      isGalleryPuzzleCompleted(gallery.id) ||
-      isGalleryPuzzleCompleted(normalizeGalleryId(gallery.id)) ||
-      isGalleryPuzzleCompleted(gallery.id.replace('-', '_')) ||
-      (gallery.id === 'gallery-02' && (isGalleryPuzzleCompleted('gallery-01') || isGalleryPuzzleCompleted('gallery_01'))) ||
-      (gallery.id === 'gallery-01' && (isGalleryPuzzleCompleted('gallery-02') || isGalleryPuzzleCompleted('gallery_02')))
-    );
-    const isComplete = isPuzzleCompleted;
-
     return {
-      id: gallery.id,
+      id: canonId,
+      numInt,
       number: formattedNum,
       numberPersian: faNum,
       title,
@@ -202,9 +175,17 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
       isPuzzleCompleted,
       collectedStars,
       totalStars,
-      progressPercent: totalStars > 0 ? Math.min(100, Math.round((collectedStars / totalStars) * 100)) : (isPuzzleCompleted ? 100 : 0),
+      progressPercent:
+        totalStars > 0
+          ? Math.min(100, Math.round((collectedStars / totalStars) * 100))
+          : isPuzzleCompleted
+          ? 100
+          : 0,
     };
   });
+
+  // Sort numerically: 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08
+  galleryCards.sort((a, b) => a.numInt - b.numInt);
 
   const totalUnlockedCount = galleryCards.filter((g) => g.isUnlocked).length;
   const totalStarsCollected = galleryCards.reduce((sum, g) => sum + g.collectedStars, 0);
@@ -353,6 +334,3 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
     </div>
   );
 };
-
-
-

@@ -38,6 +38,7 @@ import {
 } from './data/starPointProgressStore';
 import { resetEntireGame } from './data/gameReset';
 import { markGalleryReached } from './data/reachedGalleriesStore';
+import { normalizeGalleryId } from './services/content/mappers';
 import { getCurrentGalleryId, setCurrentGalleryId } from './data/playerLocationStore';
 import { contentService, registerContentDebugAPI } from './services/content';
 import { Volume2, Pause, Play, X, Compass, Sparkles } from 'lucide-react';
@@ -128,34 +129,41 @@ export default function App() {
 
   const navigateToGalleryWithTrack = (galleryId: string) => {
     if (!galleryId || typeof galleryId !== 'string') return;
-    const norm = galleryId.replace('_', '-');
-    markGalleryReached(norm);
-    setCurrentGalleryId(norm);
-    setAssociatedGallery(getCurrentGalleryId());
+    const canon = normalizeGalleryId(galleryId);
+    markGalleryReached(canon);
 
-    if (norm === 'gallery-09') {
-      setCurrentGallery('gallery-09');
-    } else if (norm === 'gallery-08') {
-      setCurrentGallery('gallery-08');
-    } else if (norm === 'gallery-07') {
-      setCurrentGallery('gallery-07');
-    } else if (norm === 'gallery-06') {
-      setCurrentGallery('gallery-06');
-    } else if (norm === 'gallery-05') {
-      setCurrentGallery('gallery-05');
-    } else if (norm === 'gallery-04') {
-      setCurrentGallery('gallery-04');
-    } else if (norm === 'gallery-03' || norm === 'gallery-03-questions') {
-      setCurrentGallery(norm as any);
-    } else if (norm === 'gallery-01' || norm === 'gallery-01-questions' || norm === 'gallery-02') {
-      const target = norm === 'gallery-02' ? 'gallery-01' : norm;
-      setCurrentGallery(target as any);
-    } else if (norm === 'gallery-00' || norm === 'main-map') {
+    let routeTarget = 'gallery-01';
+    if (galleryId === 'gallery-00' || canon === 'gallery_00' || galleryId === 'main-map') {
       setActiveTab('map');
       setCurrentGallery('gallery-00');
+      setCurrentGalleryId('gallery-00');
+      setAssociatedGallery('gallery-00');
+      return;
+    } else if (galleryId === 'gallery_01' || galleryId === 'gallery-01') {
+      routeTarget = 'gallery-01';
+    } else if (galleryId === 'gallery_02' || galleryId === 'gallery-02') {
+      routeTarget = 'gallery-03';
+    } else if (galleryId === 'gallery_03') {
+      routeTarget = 'gallery-04';
+    } else if (galleryId === 'gallery_04') {
+      routeTarget = 'gallery-05';
+    } else if (galleryId === 'gallery_05') {
+      routeTarget = 'gallery-06';
+    } else if (galleryId === 'gallery_06') {
+      routeTarget = 'gallery-07';
+    } else if (galleryId === 'gallery_07') {
+      routeTarget = 'gallery-08';
+    } else if (galleryId === 'gallery_08') {
+      routeTarget = 'gallery-09';
+    } else if (galleryId === 'gallery-09' || galleryId === 'gallery_09') {
+      routeTarget = 'gallery-09';
     } else {
-      setCurrentGallery(norm as any);
+      routeTarget = galleryId.replace('_', '-');
     }
+
+    setCurrentGalleryId(routeTarget);
+    setAssociatedGallery(routeTarget);
+    setCurrentGallery(routeTarget as any);
   };
 
   // Navigation & View state
