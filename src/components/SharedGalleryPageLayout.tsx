@@ -19,6 +19,7 @@ export interface SharedGalleryPageLayoutProps {
   galleryId: string;
   galleryNumberPersian?: string;
   galleryNamePersian?: string;
+  additionalHeaderTitles?: string[];
   onNavigateBack: () => void;
   onSelectTab?: (tab: 'map' | 'collection' | 'tasks' | 'curator') => void;
   onClickOutside?: () => void;
@@ -66,6 +67,7 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
   galleryId,
   galleryNumberPersian,
   galleryNamePersian,
+  additionalHeaderTitles,
   onNavigateBack,
   onSelectTab,
   onClickOutside,
@@ -111,25 +113,6 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
     galleryId === 'gallery_00' ||
     galleryId === 'main-map';
 
-  // 5-second interval state for alternating between gallery name and gallery number
-  const [showGalleryName, setShowGalleryName] = useState<boolean>(true);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setShowGalleryName((prev) => !prev);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const handleVisUpdate = (e: any) => {
-      const isVis = typeof e?.detail?.visible === 'boolean' ? e.detail.visible : getLocationPinsVisible();
-      setAreLocationPinsVisible(isVis);
-    };
-    window.addEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
-    return () => window.removeEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
-  }, []);
-
   const fallback =
     GALLERY_METADATA_MAP[galleryId] ||
     GALLERY_METADATA_MAP[normalizeGalleryId(galleryId)] || { num: '۰۲', name: 'کیمیای نور' };
@@ -141,6 +124,36 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
       : fallback.num);
 
   const nameFa = galleryNamePersian || galleryRecord?.nameFa?.trim() || fallback.name;
+
+  const headerTitles = React.useMemo(() => {
+    const list = [nameFa, `گالری ${numFa}`];
+    if (additionalHeaderTitles && additionalHeaderTitles.length > 0) {
+      list.push(...additionalHeaderTitles);
+    } else if (galleryId === 'gallery-08' || galleryId === 'gallery_08') {
+      list.push('گذر از برون به درون');
+    }
+    return list;
+  }, [nameFa, numFa, additionalHeaderTitles, galleryId]);
+
+  // 5-second interval state for cycling through header titles
+  const [titleIndex, setTitleIndex] = useState<number>(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTitleIndex((prev) => (prev + 1) % headerTitles.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [headerTitles.length]);
+
+  useEffect(() => {
+    const handleVisUpdate = (e: any) => {
+      const isVis = typeof e?.detail?.visible === 'boolean' ? e.detail.visible : getLocationPinsVisible();
+      setAreLocationPinsVisible(isVis);
+    };
+    window.addEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
+    return () => window.removeEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
+  }, []);
+
   const isGallery02 =
     galleryId === 'gallery-01' ||
     galleryId === 'gallery-02' ||
@@ -179,39 +192,30 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
             <ArrowLeft className="w-5 h-5 text-[#1e1b18]" />
           </button>
 
-          {/* Center Title (Alternating every 5s between Gallery Name and Gallery Number) */}
+          {/* Center Title (Alternating every 5s between Header Titles) */}
           <div
             id={`${galleryId}-header-title-container`}
             className="flex items-center justify-center h-full relative px-2 overflow-hidden"
           >
             <AnimatePresence mode="wait" initial={false}>
-              {showGalleryName ? (
-                <motion.div
-                  key="title-name"
-                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-center justify-center text-center max-w-[220px] sm:max-w-xs"
+              <motion.div
+                key={`title-${titleIndex}-${headerTitles[titleIndex]}`}
+                initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-center justify-center text-center max-w-[220px] sm:max-w-xs"
+              >
+                <h1
+                  className={`font-sans-custom font-bold text-[#1e1b18] tracking-tight truncate ${
+                    headerTitles[titleIndex]?.startsWith('گالری ')
+                      ? 'text-[18px] sm:text-[20px]'
+                      : 'text-[17px] sm:text-[19px]'
+                  }`}
                 >
-                  <h1 className="font-sans-custom text-[17px] sm:text-[19px] font-bold text-[#1e1b18] tracking-tight truncate">
-                    {nameFa}
-                  </h1>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="title-number"
-                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-center justify-center text-center"
-                >
-                  <h1 className="font-sans-custom text-[18px] sm:text-[20px] font-bold text-[#1e1b18] tracking-tight">
-                    گالری {numFa}
-                  </h1>
-                </motion.div>
-              )}
+                  {headerTitles[titleIndex]}
+                </h1>
+              </motion.div>
             </AnimatePresence>
           </div>
 
