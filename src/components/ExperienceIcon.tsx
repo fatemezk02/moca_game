@@ -19,16 +19,35 @@ export const ExperienceIcon: React.FC<ExperienceIconProps> = ({
 
   // Resolve icon type based on iconId or aliases
   let resolvedType: ExperienceIconType = 'frame';
-  if (cleanId.includes('shadow') || cleanId.includes('silhouette') || cleanId.includes('سایه')) {
+  if (
+    cleanId.includes('reversed-camera') ||
+    cleanId.includes('opposite-camera') ||
+    cleanId.includes('reversed') ||
+    cleanId.includes('opposite')
+  ) {
+    resolvedType = 'reversed-camera';
+  } else if (cleanId.includes('shadow') || cleanId.includes('silhouette') || cleanId.includes('سایه')) {
     resolvedType = 'shadow-silhouette';
-  } else if (cleanId.includes('mirror-selfie') || cleanId.includes('selfie') || cleanId.includes('سلفی')) {
+  } else if (
+    cleanId.includes('mirror-selfie') ||
+    cleanId.includes('selfie') ||
+    cleanId.includes('سلفی') ||
+    cleanId.includes('phone') ||
+    cleanId.includes('گوشی') ||
+    cleanId.includes('mobile') ||
+    cleanId.includes('موبایل')
+  ) {
     resolvedType = 'mirror-selfie';
-  } else if (cleanId.includes('mirror') || cleanId.includes('آینه') || cleanId.includes('اینه')) {
-    resolvedType = 'mirror';
-  } else if (cleanId.includes('camera') || cleanId.includes('vintage') || cleanId.includes('دوربین')) {
+  } else if (
+    cleanId.includes('camera') ||
+    cleanId.includes('vintage') ||
+    cleanId.includes('دوربین')
+  ) {
     resolvedType = 'vintage-camera';
   } else if (cleanId.includes('darkroom') || cleanId.includes('تاریک') || cleanId.includes('ظهور')) {
     resolvedType = 'darkroom';
+  } else if (cleanId.includes('mirror') || cleanId.includes('آینه') || cleanId.includes('اینه')) {
+    resolvedType = 'mirror';
   } else if (cleanId.includes('frame') || cleanId.includes('قاب')) {
     resolvedType = 'frame';
   }
@@ -36,6 +55,141 @@ export const ExperienceIcon: React.FC<ExperienceIconProps> = ({
   const strokeColor = '#1e1b18';
 
   switch (resolvedType) {
+    case 'reversed-camera':
+      // 0. Gallery 02: reversed / opposite-facing front camera matching reference image
+      return (
+        <svg
+          viewBox="0 0 32 32"
+          className={`${className} overflow-visible`}
+          style={style}
+        >
+          {/* Main camera rectangular body */}
+          <rect
+            x="4.5"
+            y="7"
+            width="23"
+            height="14.5"
+            rx="1.5"
+            fill={isSelected ? '#ef4444' : '#0d9488'}
+            stroke={strokeColor}
+            strokeWidth="0.95"
+            strokeLinejoin="round"
+            className="transition-colors"
+          />
+          {/* Top section panel / viewfinder bar */}
+          <rect
+            x="4.5"
+            y="7"
+            width="23"
+            height="4"
+            rx="1.2"
+            fill={isSelected ? '#fca5a5' : '#fef3c7'}
+            stroke={strokeColor}
+            strokeWidth="0.8"
+          />
+          {/* Shutter button on top left */}
+          <rect
+            x="7"
+            y="4.8"
+            width="4.2"
+            height="2.2"
+            rx="0.6"
+            fill="#fbbf24"
+            stroke={strokeColor}
+            strokeWidth="0.8"
+          />
+          {/* Right mode dial on top */}
+          <rect
+            x="21"
+            y="5.2"
+            width="3.6"
+            height="1.8"
+            rx="0.5"
+            fill="#e2e8f0"
+            stroke={strokeColor}
+            strokeWidth="0.75"
+          />
+          {/* Horizontal body divider line behind lens */}
+          <line
+            x1="4.5"
+            y1="17.2"
+            x2="27.5"
+            y2="17.2"
+            stroke={strokeColor}
+            strokeWidth="0.85"
+          />
+          {/* Bottom right protruding tab / base foot as in reference */}
+          <rect
+            x="22"
+            y="21.5"
+            width="3.5"
+            height="1.8"
+            rx="0.4"
+            fill="#1e1b18"
+            stroke={strokeColor}
+            strokeWidth="0.7"
+          />
+          {/* Bottom center mount bracket / tripod socket with cutout matching reference */}
+          <path
+            d="M 12.5 21.5 L 12.8 24.8 H 19.2 L 19.5 21.5 Z"
+            fill="#fbbf24"
+            stroke={strokeColor}
+            strokeWidth="0.85"
+            strokeLinejoin="round"
+          />
+          {/* Mount cutout inside the bottom bracket */}
+          <rect
+            x="14.2"
+            y="22.4"
+            width="3.6"
+            height="1.6"
+            rx="0.3"
+            fill="#1e1b18"
+          />
+          {/* Large front-facing circular lens outer barrel (prominent central element) */}
+          <circle
+            cx="16"
+            cy="15"
+            r="6.8"
+            fill="#1e1b18"
+            stroke={strokeColor}
+            strokeWidth="1.0"
+          />
+          {/* Lens aperture ring accent */}
+          <circle
+            cx="16"
+            cy="15"
+            r="5.4"
+            fill={isSelected ? '#dc2626' : '#0d9488'}
+            stroke="#fbbf24"
+            strokeWidth="0.75"
+          />
+          {/* Inner lens glass reflection */}
+          <circle
+            cx="16"
+            cy="15"
+            r="4.0"
+            fill="#38bdf8"
+            stroke={strokeColor}
+            strokeWidth="0.65"
+          />
+          {/* Glass specular curved highlight glare */}
+          <path
+            d="M 13.5 13 A 3 3 0 0 1 18.5 13"
+            fill="none"
+            stroke="#ffffff"
+            strokeWidth="0.8"
+            strokeLinecap="round"
+          />
+          <circle
+            cx="17.2"
+            cy="16.5"
+            r="0.75"
+            fill="#ffffff"
+            opacity="0.85"
+          />
+        </svg>
+      );
     case 'frame':
       // 1. Gallery 03: frame (Reference 1)
       // Baroque ornate frame (1.1x scaled) with a completely hollow/empty inner opening

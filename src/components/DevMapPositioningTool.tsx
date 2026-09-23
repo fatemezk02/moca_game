@@ -32,6 +32,7 @@ import {
   getExperiencePointsForGallery,
   saveExperiencePointPosition,
 } from '../data/experiencePointsConfig';
+import { ExperienceIcon } from './ExperienceIcon';
 import {
   getAllGalleryLamps,
   saveGalleryLampPosition,
@@ -344,12 +345,20 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
 
       // 2. Look for gallery specific canvas container first if not Gallery 00
       if (currentGalleryId && currentGalleryId !== 'gallery-00') {
-        const canvasArea = document.querySelector<HTMLElement>(
-          `#${currentGalleryId}-canvas-area > div, #${currentGalleryId}-canvas-area [style*="aspect-ratio"], #${currentGalleryId}-canvas-area [style*="aspectRatio"]`
-        );
-        if (canvasArea) {
-          setMapContainerEl(canvasArea);
-          return;
+        const candidateIds = [
+          currentGalleryId,
+          currentGalleryId === 'gallery-03' ? 'gallery-02' : undefined,
+          currentGalleryId === 'gallery-02' ? 'gallery-03' : undefined,
+        ].filter(Boolean) as string[];
+
+        for (const cid of candidateIds) {
+          const canvasArea = document.querySelector<HTMLElement>(
+            `#${cid}-canvas-area > div, #${cid}-canvas-area [style*="aspect-ratio"], #${cid}-canvas-area [style*="aspectRatio"]`
+          );
+          if (canvasArea) {
+            setMapContainerEl(canvasArea);
+            return;
+          }
         }
       }
 
@@ -522,7 +531,11 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     }
 
     // D. Experience Points
-    const expPoints = getExperiencePointsForGallery(currentGalleryId);
+    const expPoints = [
+      ...getExperiencePointsForGallery(currentGalleryId),
+      ...(currentGalleryId === 'gallery-03' ? getExperiencePointsForGallery('gallery-02') : []),
+      ...(currentGalleryId === 'gallery-02' ? getExperiencePointsForGallery('gallery-03') : []),
+    ];
     for (const exp of expPoints) {
       if (!list.some((item) => item.id === exp.id)) {
         list.push({
@@ -1345,6 +1358,8 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       saveGalleryPuzzlePoints(currentGalleryId, updated);
       showToast(`موقعیت «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY}`, 'success');
     } else if (el.type === 'experience') {
+      const targetGallery = currentGalleryId === 'gallery-03' ? 'gallery-02' : currentGalleryId;
+      saveExperiencePointPosition(idToSave, finalX, finalY, targetGallery);
       saveExperiencePointPosition(idToSave, finalX, finalY, currentGalleryId);
       showToast(`موقعیت «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY}`, 'success');
     } else if (el.type === 'lamp') {
@@ -1820,6 +1835,14 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                         <div className="w-8 h-8 rounded-full bg-amber-500/30 border border-amber-400 flex items-center justify-center shadow-lg">
                           <Compass className="w-5 h-5 text-amber-300" />
                         </div>
+                      </div>
+                    ) : item.type === 'experience' ? (
+                      <div className="relative flex items-center justify-center pointer-events-none w-7 h-7">
+                        <ExperienceIcon
+                          iconId={item.subType || 'reversed-camera'}
+                          isSelected={isSelected}
+                          className="w-5 h-5 drop-shadow-sm pointer-events-none"
+                        />
                       </div>
                     ) : (
                       <div

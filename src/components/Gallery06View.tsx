@@ -183,7 +183,7 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
 
   // Filter and separate point types
   const collectionPoints = points.filter(
-    (p): p is AdminCollectionPoint => p.type === 'collection' && p.id !== 'star-11'
+    (p): p is AdminCollectionPoint => p.type === 'collection' && p.id !== 'star-11' && p.id !== 'col-0594'
   );
   const iconPoints = points.filter((p): p is AdminIconPoint => p.type === 'icon');
   const puzzlePoints = points.filter((p): p is AdminPuzzlePoint => p.type === 'puzzle');

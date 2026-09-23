@@ -108,7 +108,6 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
       { id: 'star-15', starId: 'star-15', title: 'افق‌های نوین نقد', defaultX: 450, defaultY: 310 },
       { id: 'col-8549', starId: 'star-16', title: 'اصفهان، نیویورک', defaultX: 452, defaultY: 368 },
       { id: 'col-6925', starId: 'star-17', title: 'پیشنهاد برای تغییر زمین', defaultX: 327, defaultY: 738 },
-      { id: 'col-0594', starId: 'star-18', title: 'بازخوانی دههٔ ۱۹۶۰', defaultX: 50, defaultY: 153 },
       { id: 'star-16', starId: 'star-16', title: 'اصفهان، نیویورک', defaultX: 452, defaultY: 368 },
       { id: 'star-17', starId: 'star-17', title: 'پیشنهاد برای تغییر زمین', defaultX: 327, defaultY: 738 },
       { id: 'star-18', starId: 'star-18', title: 'بازخوانی دههٔ ۱۹۶۰', defaultX: 50, defaultY: 153 },

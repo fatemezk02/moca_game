@@ -992,17 +992,6 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         y: 738,
         frames: [],
       },
-      {
-        id: 'col-0594',
-        starId: 'star-18',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-06',
-        title: 'بازخوانی دههٔ ۱۹۶۰',
-        x: 50,
-        y: 153,
-        frames: [],
-      },
     ],
     iconPoints: [],
     puzzlePoints: [
@@ -1419,7 +1408,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
   },
 };
 
-const STORAGE_MAP_CONFIG_KEY = 'museum_map_config_v13';
+const STORAGE_MAP_CONFIG_KEY = 'museum_map_config_v14';
 
 /**
  * In-memory working database with live persistent synchronization
@@ -1514,7 +1503,7 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
               const savedCollections = (parsed[key].collectionPoints || []).filter(
                 (c: any) =>
                   !(key === 'gallery-01' && (c.id === 'artwork-02' || c.id === 'artwork-03' || c.id === 'artwork-04')) &&
-                  !((key === 'gallery-06' || key === 'gallery_06') && c.id === 'star-11') &&
+                  !((key === 'gallery-06' || key === 'gallery_06') && (c.id === 'star-11' || c.id === 'col-0594')) &&
                   !((key === 'gallery-07' || key === 'gallery_07') && (c.id === 'star-16' || c.id === 'star-17' || c.id === 'star-18')) &&
                   !((key === 'gallery-08' || key === 'gallery_08') && (c.id === 'star-23' || c.id === 'star-24' || c.id === 'star-25' || c.id === 'star-26' || c.id === 'star-27' || c.id === 'star-28')) &&
                   !((key === 'gallery-09' || key === 'gallery_09') && (c.id === 'star-20' || c.id === 'star-21' || c.id === 'star-22'))
@@ -1537,7 +1526,7 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                     ((key === 'gallery-03' || key === 'gallery_03') && (defCol.id === 'star-04' || defCol.id === 'star-05' || defCol.id === 'star-06' || defCol.id === 'artwork-g03-star' || defCol.starId === 'star-03')) ||
                     ((key === 'gallery-04' || key === 'gallery_04') && (defCol.id === 'star-07')) ||
                     ((key === 'gallery-05' || key === 'gallery_05') && (defCol.id === 'star-08' || defCol.id === 'star-09' || defCol.id === 'star-10' || defCol.id === 'star-11')) ||
-                    ((key === 'gallery-06' || key === 'gallery_06') && (defCol.id === 'star-12' || defCol.id === 'star-13' || defCol.id === 'star-14' || defCol.id === 'star-15' || defCol.starId === 'star-16' || defCol.starId === 'star-17' || defCol.starId === 'star-18' || defCol.id === 'col-8549' || defCol.id === 'col-6925' || defCol.id === 'col-0594')) ||
+                    ((key === 'gallery-06' || key === 'gallery_06') && (defCol.id === 'star-12' || defCol.id === 'star-13' || defCol.id === 'star-14' || defCol.id === 'star-15' || defCol.starId === 'star-16' || defCol.starId === 'star-17' || defCol.starId === 'star-18' || defCol.id === 'col-8549' || defCol.id === 'col-6925')) ||
                     ((key === 'gallery-07' || key === 'gallery_07') && (defCol.id === 'star-19')) ||
                     ((key === 'gallery-08' || key === 'gallery_08') && (defCol.id === 'star-20' || defCol.id === 'star-21' || defCol.id === 'star-22')) ||
                     ((key === 'gallery-09' || key === 'gallery_09') && (defCol.starId === 'star-23' || defCol.starId === 'star-24' || defCol.starId === 'star-25' || defCol.starId === 'star-26' || defCol.id === 'star-27' || defCol.id === 'star-28' || defCol.id === 'col-g09-01' || defCol.id === 'col-g09-02' || defCol.id === 'col-g09-03' || defCol.id === 'col-g09-04'))
@@ -1600,7 +1589,7 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
           (cp) =>
             !((safeGalleryId === 'gallery-00' || canonId === 'gallery-00' || safeGalleryId === 'gallery_00' || canonId === 'gallery_00') && (cp.id === 'col-02' || cp.id === 'col-04' || cp.id === 'col-07')) &&
             !((safeGalleryId === 'gallery-01' || canonId === 'gallery-01') && (cp.id === 'artwork-02' || cp.id === 'artwork-03' || cp.id === 'artwork-04')) &&
-            !((safeGalleryId === 'gallery-06' || canonId === 'gallery-06' || safeGalleryId === 'gallery_06' || canonId === 'gallery_06') && (cp.id === 'star-11')) &&
+            !((safeGalleryId === 'gallery-06' || canonId === 'gallery-06' || safeGalleryId === 'gallery_06' || canonId === 'gallery_06') && (cp.id === 'star-11' || cp.id === 'col-0594')) &&
             !((safeGalleryId === 'gallery-07' || canonId === 'gallery-07' || safeGalleryId === 'gallery_07' || canonId === 'gallery_07') && (cp.id === 'star-16' || cp.id === 'star-17' || cp.id === 'star-18')) &&
             !((safeGalleryId === 'gallery-08' || canonId === 'gallery-08' || safeGalleryId === 'gallery_08' || canonId === 'gallery_08') && (cp.id === 'star-23' || cp.id === 'star-24' || cp.id === 'star-25' || cp.id === 'star-26' || cp.id === 'star-27' || cp.id === 'star-28')) &&
             !((safeGalleryId === 'gallery-09' || canonId === 'gallery-09' || safeGalleryId === 'gallery_09' || canonId === 'gallery_09') && (cp.id === 'star-20' || cp.id === 'star-21' || cp.id === 'star-22'))

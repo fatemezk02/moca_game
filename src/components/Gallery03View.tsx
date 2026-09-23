@@ -114,13 +114,19 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
     };
   }, []);
 
-  // Sync with puzzle progress updates
+  // Sync with puzzle and experience points updates
   useEffect(() => {
-    const handlePuzzleProgress = () => {
+    const handleUpdates = () => {
       setPuzzleUpdateTrigger((prev) => prev + 1);
     };
-    window.addEventListener('museum_puzzle_progress_updated', handlePuzzleProgress);
-    return () => window.removeEventListener('museum_puzzle_progress_updated', handlePuzzleProgress);
+    window.addEventListener('museum_puzzle_progress_updated', handleUpdates);
+    window.addEventListener('museum_experience_points_updated', handleUpdates);
+    window.addEventListener('museum_points_updated', handleUpdates);
+    return () => {
+      window.removeEventListener('museum_puzzle_progress_updated', handleUpdates);
+      window.removeEventListener('museum_experience_points_updated', handleUpdates);
+      window.removeEventListener('museum_points_updated', handleUpdates);
+    };
   }, []);
 
   const handlePointClick = (artwork: AdminCollectionPoint, e: React.MouseEvent) => {
@@ -220,7 +226,7 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
   const collectionPoints = points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
   const iconPoints = points.filter((p) => p.type === 'icon') as AdminIconPoint[];
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
-  const experiencePoints = React.useMemo(() => getExperiencePointsForGallery('gallery-03'), [puzzleUpdateTrigger]);
+  const experiencePoints = React.useMemo(() => getExperiencePointsForGallery('gallery-02'), [puzzleUpdateTrigger]);
 
   const { blinkingPointId, handleBlinkEnd, triggerNextPuzzleBlink } = usePuzzleBlinkGuidance({
     galleryId: 'gallery-03',
@@ -376,13 +382,13 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
               />
             ))}
 
-            {/* Interactive Experience Points (Gallery 03: frame, shadow-silhouette) */}
+            {/* Interactive Experience Points */}
             {experiencePoints.map((exp) => (
               <ExperiencePoint
                 key={exp.id}
                 id={exp.id}
                 experienceId={exp.experienceId}
-                galleryId="gallery_03"
+                galleryId={exp.galleryId || "gallery_02"}
                 x={exp.x}
                 y={exp.y}
                 iconId={exp.iconId}

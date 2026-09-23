@@ -3,7 +3,17 @@
  * Tracks which interactive experiences the player has discovered / viewed in the museum.
  */
 
-const STORAGE_KEY = 'museum_experience_progress_v1';
+const STORAGE_KEY = 'museum_experience_progress_v2';
+const OLD_STORAGE_KEY = 'museum_experience_progress_v1';
+
+const SHIFT_MAP: Record<string, string> = {
+  experience_1: 'experience_2',
+  experience_2: 'experience_3',
+  experience_3: 'experience_4',
+  experience_4: 'experience_5',
+  experience_5: 'experience_6',
+  experience_6: 'experience_7',
+};
 
 export function getDiscoveredExperiences(): string[] {
   if (typeof window === 'undefined' || !window.localStorage) {
@@ -11,9 +21,22 @@ export function getDiscoveredExperiences(): string[] {
   }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+
+    // Migrate from v1 with +1 ID shift
+    const oldRaw = localStorage.getItem(OLD_STORAGE_KEY);
+    if (oldRaw) {
+      const oldParsed = JSON.parse(oldRaw);
+      if (Array.isArray(oldParsed)) {
+        const migrated = oldParsed.map((id) => SHIFT_MAP[id] || id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        return migrated;
+      }
+    }
+    return [];
   } catch (err) {
     console.error('Failed to read experience progress from localStorage:', err);
     return [];

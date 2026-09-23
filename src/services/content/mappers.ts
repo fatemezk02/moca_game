@@ -1047,7 +1047,14 @@ export function mapRowToExperience(row: Record<string, string>, index: number): 
   // Determine iconId
   let iconId: ExperienceIconType = 'frame';
   if (rawIconId) {
-    if (rawIconId.includes('frame') || rawIconId.includes('قاب')) {
+    if (
+      rawIconId.includes('reversed-camera') ||
+      rawIconId.includes('opposite-camera') ||
+      rawIconId.includes('reversed') ||
+      rawIconId.includes('opposite')
+    ) {
+      iconId = 'reversed-camera';
+    } else if (rawIconId.includes('frame') || rawIconId.includes('قاب')) {
       iconId = 'frame';
     } else if (
       rawIconId.includes('shadow') ||
@@ -1058,15 +1065,12 @@ export function mapRowToExperience(row: Record<string, string>, index: number): 
     } else if (
       rawIconId.includes('mirror-selfie') ||
       rawIconId.includes('selfie') ||
-      rawIconId.includes('سلفی')
+      rawIconId.includes('سلفی') ||
+      rawIconId.includes('phone') ||
+      rawIconId.includes('گوشی') ||
+      rawIconId.includes('موبایل')
     ) {
       iconId = 'mirror-selfie';
-    } else if (
-      rawIconId.includes('mirror') ||
-      rawIconId.includes('آینه') ||
-      rawIconId.includes('اینه')
-    ) {
-      iconId = 'mirror';
     } else if (
       rawIconId.includes('camera') ||
       rawIconId.includes('vintage') ||
@@ -1079,40 +1083,58 @@ export function mapRowToExperience(row: Record<string, string>, index: number): 
       rawIconId.includes('ظهور')
     ) {
       iconId = 'darkroom';
+    } else if (
+      rawIconId.includes('mirror') ||
+      rawIconId.includes('آینه') ||
+      rawIconId.includes('اینه')
+    ) {
+      iconId = 'mirror';
     } else {
       iconId = rawIconId as ExperienceIconType;
     }
   } else {
-    // Default fallback based on experienceId or galleryId / index
+    // Default fallback based on shifted experienceId or galleryId / index
     const cleanExpId = experienceId.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (cleanExpId.includes('1') || cleanExpId.includes('frame')) {
+    if (
+      cleanExpId === 'experience1' ||
+      cleanExpId === '1' ||
+      cleanExpId === 'exp1' ||
+      galleryId === 'gallery_02'
+    ) {
+      iconId = 'reversed-camera';
+    } else if (cleanExpId.includes('2') || cleanExpId.includes('frame')) {
       iconId = 'frame';
     } else if (
-      cleanExpId.includes('2') ||
+      cleanExpId.includes('3') ||
       cleanExpId.includes('shadow') ||
       cleanExpId.includes('silhouette')
     ) {
       iconId = 'shadow-silhouette';
-    } else if (
-      cleanExpId.includes('3') ||
-      (galleryId === 'gallery_04' && !cleanExpId.includes('selfie'))
-    ) {
+    } else if (cleanExpId.includes('4') || cleanExpId.includes('mirror')) {
       iconId = 'mirror';
     } else if (
-      cleanExpId.includes('4') ||
-      (galleryId === 'gallery_05' && (cleanExpId.includes('camera') || index === 3))
+      cleanExpId.includes('5') ||
+      cleanExpId.includes('camera') ||
+      cleanExpId.includes('vintage') ||
+      cleanExpId.includes('دوربین')
     ) {
       iconId = 'vintage-camera';
     } else if (
-      cleanExpId.includes('5') ||
+      cleanExpId.includes('6') ||
       cleanExpId.includes('selfie') ||
-      (galleryId === 'gallery_05' && index === 4)
+      cleanExpId.includes('phone') ||
+      cleanExpId.includes('سلفی') ||
+      cleanExpId.includes('گوشی') ||
+      cleanExpId.includes('موبایل')
     ) {
       iconId = 'mirror-selfie';
     } else if (
-      cleanExpId.includes('6') ||
+      cleanExpId.includes('7') ||
       cleanExpId.includes('darkroom') ||
-      galleryId === 'gallery_08'
+      cleanExpId.includes('تاریک') ||
+      cleanExpId.includes('ظهور') ||
+      galleryId === 'gallery_08' ||
+      galleryId === 'gallery_07'
     ) {
       iconId = 'darkroom';
     }

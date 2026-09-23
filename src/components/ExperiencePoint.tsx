@@ -93,7 +93,14 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
   }, [experienceId, galleryId, propIconId, propLabel, propTitle]);
 
   const displayLabel = resolvedExperience.labelFa || resolvedExperience.title || experienceId;
-  const effectiveIcon = resolvedExperience.iconId || propIconId || 'frame';
+  const effectiveIcon =
+    id === 'exp-g02-reversed-camera' || propIconId === 'reversed-camera' || resolvedExperience.iconId === 'reversed-camera'
+      ? 'reversed-camera'
+      : id === 'exp-g05-vintage-camera'
+      ? 'vintage-camera'
+      : id === 'exp-g05-mirror-selfie'
+      ? 'mirror-selfie'
+      : propIconId || resolvedExperience.iconId || 'frame';
 
   // Responsive map percentage coordinates
   const leftPercent = (x / mapWidth) * 100;
