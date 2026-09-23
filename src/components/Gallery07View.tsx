@@ -273,21 +273,6 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
         />
       )}
 
-      {/* Star Question Popup */}
-      {selectedStarPointId && selectedStarArtwork && (
-        <StarQuestionPopup
-          starPointId={selectedStarPointId}
-          starId={selectedStarArtwork.starId || selectedStarPointId}
-          galleryId="gallery-06"
-          artworkTitle={selectedStarArtwork.title}
-          onClose={handleClosePopup}
-          onOpenDiscoveryModal={() => {
-            setActiveStarDiscoveryId(selectedStarPointId);
-            setSelectedStarPointId(null);
-          }}
-        />
-      )}
-
       {/* Puzzle Question Modal */}
       {activePuzzlePoint && (
         <PuzzleQuestionModal
