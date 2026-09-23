@@ -25,14 +25,24 @@ export const CURRENT_STORAGE_VERSION = 'v2_580x720';
  * Default lookup ensures instant, flicker-free rendering before image network loads.
  */
 export const KNOWN_ARTWORK_ASPECT_RATIOS: Record<string, number> = {
-  'gallery-01': 0.73125, // 117x160 portrait (Qajar architectural hall)
-  'gallery-03': 0.75711, // 2687x3549 portrait (Diplomatic album)
-  'gallery-04': 0.69521, // 479x689 portrait (Edward Steichen portrait)
-  'gallery-05': 1.37748, // 4784x3473 landscape (City rhythm / industrial worker)
-  'gallery-06': 0.81077, // 2408x2970 portrait (Critical gaze / endurance)
-  'gallery-07': 1.31765, // 448x340 landscape (Passing inside to outside)
-  'gallery-08': 1.33333, // 1000x750 landscape 4:3 (Pendulum of time)
-  'gallery-09': 1.41945, // 978x689 landscape (Intersection of media)
+  'gallery-01': 0.73125, // 117x160 portrait (Qajar architectural hall - Gallery 01)
+  'gallery_01': 0.73125,
+  'gallery-02': 0.75711, // 2687x3549 portrait (Diplomatic album - Gallery 02)
+  'gallery_02': 0.75711,
+  'gallery-03': 0.69521, // 479x689 portrait (Edward Steichen portrait - Gallery 03)
+  'gallery_03': 0.69521,
+  'gallery-04': 1.37748, // 4784x3473 landscape (City rhythm - Gallery 04)
+  'gallery_04': 1.37748,
+  'gallery-05': 0.81077, // 2408x2970 portrait (Critical gaze / endurance - Gallery 05)
+  'gallery_05': 0.81077,
+  'gallery-06': 1.31765, // 448x340 landscape (Passing inside to outside - Gallery 06)
+  'gallery_06': 1.31765,
+  'gallery-07': 1.33333, // 1000x750 landscape 4:3 (Pendulum of time - Gallery 07)
+  'gallery_07': 1.33333,
+  'gallery-08': 1.41945, // 978x689 landscape (Intersection of media - Gallery 08)
+  'gallery_08': 1.41945,
+  'gallery-09': 1.41945, // Backward compatibility alias for Gallery 08
+  'gallery_09': 1.41945,
 };
 
 const dynamicRatioCache: Record<string, number> = {};
@@ -243,16 +253,7 @@ export interface ReferenceFrameDef {
  * Verified and audited coordinates (never altered at runtime).
  */
 export const AUTHORITATIVE_REFERENCE_FRAMES: Record<string, ReferenceFrameDef> = {
-  'gallery-02': {
-    galleryId: 'gallery-02',
-    topLeftX: 110,
-    topLeftY: 613,
-    width: 205.4,
-    height: 176.9,
-    aspectRatio: 205.4 / 176.9, // 1.161108
-  },
   'gallery-01': {
-    // Gallery 01 is an alias for Gallery 02's slot
     galleryId: 'gallery-01',
     topLeftX: 110,
     topLeftY: 613,
@@ -260,53 +261,125 @@ export const AUTHORITATIVE_REFERENCE_FRAMES: Record<string, ReferenceFrameDef> =
     height: 176.9,
     aspectRatio: 205.4 / 176.9,
   },
-  'gallery-03': {
-    galleryId: 'gallery-03',
+  'gallery_01': {
+    galleryId: 'gallery_01',
+    topLeftX: 110,
+    topLeftY: 613,
+    width: 205.4,
+    height: 176.9,
+    aspectRatio: 205.4 / 176.9,
+  },
+  'gallery-02': {
+    galleryId: 'gallery-02',
     topLeftX: 246,
     topLeftY: 243,
     width: 330,
     height: 250,
-    aspectRatio: 330 / 250, // 1.32
+    aspectRatio: 330 / 250,
   },
-  'gallery-04': {
-    galleryId: 'gallery-04',
+  'gallery_02': {
+    galleryId: 'gallery_02',
+    topLeftX: 246,
+    topLeftY: 243,
+    width: 330,
+    height: 250,
+    aspectRatio: 330 / 250,
+  },
+  'gallery-03': {
+    galleryId: 'gallery-03',
     topLeftX: 522,
     topLeftY: 305,
     width: 257,
     height: 179,
-    aspectRatio: 257 / 179, // 1.435754
+    aspectRatio: 257 / 179,
   },
-  'gallery-05': {
-    galleryId: 'gallery-05',
+  'gallery_03': {
+    galleryId: 'gallery_03',
+    topLeftX: 522,
+    topLeftY: 305,
+    width: 257,
+    height: 179,
+    aspectRatio: 257 / 179,
+  },
+  'gallery-04': {
+    galleryId: 'gallery-04',
     topLeftX: 17,
     topLeftY: 339,
     width: 239,
     height: 192,
-    aspectRatio: 239 / 192, // 1.244792
+    aspectRatio: 239 / 192,
   },
-  'gallery-06': {
-    galleryId: 'gallery-06',
+  'gallery_04': {
+    galleryId: 'gallery_04',
+    topLeftX: 17,
+    topLeftY: 339,
+    width: 239,
+    height: 192,
+    aspectRatio: 239 / 192,
+  },
+  'gallery-05': {
+    galleryId: 'gallery-05',
     topLeftX: 318,
     topLeftY: 608,
     width: 237,
     height: 329,
-    aspectRatio: 237 / 329, // 0.720365
+    aspectRatio: 237 / 329,
   },
-  'gallery-07': {
-    galleryId: 'gallery-07',
+  'gallery_05': {
+    galleryId: 'gallery_05',
+    topLeftX: 318,
+    topLeftY: 608,
+    width: 237,
+    height: 329,
+    aspectRatio: 237 / 329,
+  },
+  'gallery-06': {
+    galleryId: 'gallery-06',
     topLeftX: 44,
     topLeftY: 57,
     width: 243,
     height: 180,
-    aspectRatio: 243 / 180, // 1.35
+    aspectRatio: 243 / 180,
   },
-  'gallery-08': {
-    galleryId: 'gallery-08',
+  'gallery_06': {
+    galleryId: 'gallery_06',
+    topLeftX: 44,
+    topLeftY: 57,
+    width: 243,
+    height: 180,
+    aspectRatio: 243 / 180,
+  },
+  'gallery-07': {
+    galleryId: 'gallery-07',
     topLeftX: 513,
     topLeftY: 37,
     width: 227,
     height: 189,
-    aspectRatio: 227 / 189, // 1.201058
+    aspectRatio: 227 / 189,
+  },
+  'gallery_07': {
+    galleryId: 'gallery_07',
+    topLeftX: 513,
+    topLeftY: 37,
+    width: 227,
+    height: 189,
+    aspectRatio: 227 / 189,
+  },
+  'gallery-08': {
+    galleryId: 'gallery-08',
+    topLeftX: 251,
+    topLeftY: 12,
+    width: 185,
+    height: 239,
+    aspectRatio: 185 / 239,
+  },
+  'gallery_08': {
+    galleryId: 'gallery_08',
+    topLeftX: 251,
+    topLeftY: 12,
+    width: 185,
+    height: 239,
+    aspectRatio: 185 / 239,
   },
   'gallery-09': {
     galleryId: 'gallery-09',
@@ -314,7 +387,7 @@ export const AUTHORITATIVE_REFERENCE_FRAMES: Record<string, ReferenceFrameDef> =
     topLeftY: 12,
     width: 185,
     height: 239,
-    aspectRatio: 185 / 239, // 0.774059
+    aspectRatio: 185 / 239,
   },
 };
 
@@ -362,13 +435,21 @@ export function buildConfigFromReference(ref: ReferenceFrameDef): CuratorFrameCo
  */
 export const DEFAULT_CURATOR_FRAME_MAP: Record<string, WallFramePosition> = {
   'gallery-01': { x: 110, y: 613, width: 205.4, height: 176.9, rotation: 0 },
-  'gallery-02': { x: 110, y: 613, width: 205.4, height: 176.9, rotation: 0 },
-  'gallery-03': { x: 246, y: 243, width: 330, height: 250, rotation: 0 },
-  'gallery-04': { x: 522, y: 305, width: 257, height: 179, rotation: 0 },
-  'gallery-05': { x: 17, y: 339, width: 239, height: 192, rotation: 0 },
-  'gallery-06': { x: 318, y: 608, width: 237, height: 329, rotation: 0 },
-  'gallery-07': { x: 44, y: 57, width: 243, height: 180, rotation: 0 },
-  'gallery-08': { x: 513, y: 37, width: 227, height: 189, rotation: 0 },
+  'gallery_01': { x: 110, y: 613, width: 205.4, height: 176.9, rotation: 0 },
+  'gallery-02': { x: 246, y: 243, width: 330, height: 250, rotation: 0 },
+  'gallery_02': { x: 246, y: 243, width: 330, height: 250, rotation: 0 },
+  'gallery-03': { x: 522, y: 305, width: 257, height: 179, rotation: 0 },
+  'gallery_03': { x: 522, y: 305, width: 257, height: 179, rotation: 0 },
+  'gallery-04': { x: 17, y: 339, width: 239, height: 192, rotation: 0 },
+  'gallery_04': { x: 17, y: 339, width: 239, height: 192, rotation: 0 },
+  'gallery-05': { x: 318, y: 608, width: 237, height: 329, rotation: 0 },
+  'gallery_05': { x: 318, y: 608, width: 237, height: 329, rotation: 0 },
+  'gallery-06': { x: 44, y: 57, width: 243, height: 180, rotation: 0 },
+  'gallery_06': { x: 44, y: 57, width: 243, height: 180, rotation: 0 },
+  'gallery-07': { x: 513, y: 37, width: 227, height: 189, rotation: 0 },
+  'gallery_07': { x: 513, y: 37, width: 227, height: 189, rotation: 0 },
+  'gallery-08': { x: 251, y: 12, width: 185, height: 239, rotation: 0 },
+  'gallery_08': { x: 251, y: 12, width: 185, height: 239, rotation: 0 },
   'gallery-09': { x: 251, y: 12, width: 185, height: 239, rotation: 0 },
 };
 
@@ -377,13 +458,13 @@ export const DEFAULT_CURATOR_FRAME_MAP: Record<string, WallFramePosition> = {
  */
 export const DEFAULT_SALON_SLOTS_LIST: WallFramePosition[] = [
   DEFAULT_CURATOR_FRAME_MAP['gallery-01'],
+  DEFAULT_CURATOR_FRAME_MAP['gallery-02'],
   DEFAULT_CURATOR_FRAME_MAP['gallery-03'],
   DEFAULT_CURATOR_FRAME_MAP['gallery-04'],
   DEFAULT_CURATOR_FRAME_MAP['gallery-05'],
   DEFAULT_CURATOR_FRAME_MAP['gallery-06'],
-  DEFAULT_CURATOR_FRAME_MAP['gallery-08'],
-  DEFAULT_CURATOR_FRAME_MAP['gallery-09'],
   DEFAULT_CURATOR_FRAME_MAP['gallery-07'],
+  DEFAULT_CURATOR_FRAME_MAP['gallery-08'],
 ];
 
 /**
@@ -489,13 +570,16 @@ export function getCuratorFrameConfig(
   indexFallback = 0
 ): CuratorFrameConfig {
   const savedAll = getSavedCuratorFrames();
-  // Check direct ID, artwork- prefixed ID, and aliases (gallery-01 and gallery-02)
-  const aliasId = galleryId === 'gallery-01' ? 'gallery-02' : (galleryId === 'gallery-02' ? 'gallery-01' : galleryId);
+  // Check direct ID, artwork- prefixed ID, and format variants (gallery_01 vs gallery-01)
+  const canonId = galleryId.replace('-', '_');
+  const routeId = galleryId.replace('_', '-');
   const saved =
     savedAll[galleryId] ||
     savedAll[`artwork-${galleryId}`] ||
-    savedAll[aliasId] ||
-    savedAll[`artwork-${aliasId}`];
+    savedAll[canonId] ||
+    savedAll[`artwork-${canonId}`] ||
+    savedAll[routeId] ||
+    savedAll[`artwork-${routeId}`];
 
   if (saved && saved.centerNormX !== undefined && saved.centerNormY !== undefined) {
     const refWidth = saved.refWidth ?? saved.width;
@@ -531,7 +615,10 @@ export function getCuratorFrameConfig(
   }
 
   // Look up authoritative reference frame definition
-  const refDef = AUTHORITATIVE_REFERENCE_FRAMES[galleryId] || AUTHORITATIVE_REFERENCE_FRAMES[aliasId];
+  const refDef =
+    AUTHORITATIVE_REFERENCE_FRAMES[galleryId] ||
+    AUTHORITATIVE_REFERENCE_FRAMES[canonId] ||
+    AUTHORITATIVE_REFERENCE_FRAMES[routeId];
   if (refDef) {
     return buildConfigFromReference({
       ...refDef,
@@ -657,9 +744,11 @@ export function saveCuratorFrameConfig(params: {
       const current = getSavedCuratorFrames();
       current[params.galleryId] = fullConfig;
       current[fullConfig.artworkId] = fullConfig;
-      // Sync gallery-01 and gallery-02 aliases
-      if (params.galleryId === 'gallery-01') current['gallery-02'] = fullConfig;
-      if (params.galleryId === 'gallery-02') current['gallery-01'] = fullConfig;
+      // Sync canonical and route format aliases
+      const syncCanonId = params.galleryId.replace('-', '_');
+      const syncRouteId = params.galleryId.replace('_', '-');
+      current[syncCanonId] = fullConfig;
+      current[syncRouteId] = fullConfig;
 
       localStorage.setItem(STORAGE_CURATOR_WALL_KEY, JSON.stringify(current));
       localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_STORAGE_VERSION);

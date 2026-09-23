@@ -12,7 +12,6 @@ import {
 } from '../data/galleryPuzzleConfig';
 import { JigsawPieceGraphic } from './JigsawPieceGraphic';
 import { toPersianDigits } from '../services/content/mappers';
-import { GALLERIES } from '../data/mapConfig';
 import { MapPin, X, Eye, Lock, Sparkles, Award } from 'lucide-react';
 import {
   areAll8GalleryPuzzlesCompleted,
@@ -78,65 +77,134 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
   >({});
 
   const refreshArtworks = () => {
-    // Gallery ordering matching salon frame orientations in image.png:
-    // Slot 0: Top-Left (Portrait) -> Gallery 01
-    // Slot 1: Bottom-Left (Landscape) -> Gallery 03
-    // Slot 2: Top-Center (Portrait) -> Gallery 04
-    // Slot 3: Center-Middle (Wide Landscape) -> Gallery 05
-    // Slot 4: Bottom-Center (Portrait) -> Gallery 06
-    // Slot 5: Top-Right (Landscape) -> Gallery 08
-    // Slot 6: Bottom-Right (Wide Landscape) -> Gallery 09
-    // Slot 7: Mid-Right Extension -> Gallery 07
-    const desiredGalleryOrder = [
-      'gallery-01',
-      'gallery-03',
-      'gallery-04',
-      'gallery-05',
-      'gallery-06',
-      'gallery-08',
-      'gallery-09',
-      'gallery-07',
+    // 8 canonical galleries: gallery_01 through gallery_08
+    const CANONICAL_EXHIBITION_GALLERIES = [
+      {
+        id: 'gallery_01',
+        routeId: 'gallery-01',
+        num: 1,
+        nameFa: 'گالری ۰۱ — کیمیای نور',
+        nameEn: 'Alchemy of Light',
+        puzzleArtworkId: '26',
+      },
+      {
+        id: 'gallery_02',
+        routeId: 'gallery-02',
+        num: 2,
+        nameFa: 'گالری ۰۲ — آلبوم‌های دیپلماتیک',
+        nameEn: 'Diplomatic Albums',
+        puzzleArtworkId: '27',
+      },
+      {
+        id: 'gallery_03',
+        routeId: 'gallery-03',
+        num: 3,
+        nameFa: 'گالری ۰۳ — ثبت دوام ما',
+        nameEn: 'Recording Our Endurance',
+        puzzleArtworkId: '28',
+      },
+      {
+        id: 'gallery_04',
+        routeId: 'gallery-04',
+        num: 4,
+        nameFa: 'گالری ۰۴ — ضرب آهنگ شهر',
+        nameEn: 'City Rhythm',
+        puzzleArtworkId: '29',
+      },
+      {
+        id: 'gallery_05',
+        routeId: 'gallery-05',
+        num: 5,
+        nameFa: 'گالری ۰۵ — در کشاکش تماشا و استیلا',
+        nameEn: 'Between Gaze and Mastery',
+        puzzleArtworkId: '30',
+      },
+      {
+        id: 'gallery_06',
+        routeId: 'gallery-06',
+        num: 6,
+        nameFa: 'گالری ۰۶ — گذر از برون به درون',
+        nameEn: 'Passing from Outside to Inside',
+        puzzleArtworkId: '31',
+      },
+      {
+        id: 'gallery_07',
+        routeId: 'gallery-07',
+        num: 7,
+        nameFa: 'گالری ۰۷ — آونگ زمان',
+        nameEn: 'Pendulum of Time',
+        puzzleArtworkId: '32',
+      },
+      {
+        id: 'gallery_08',
+        routeId: 'gallery-08',
+        num: 8,
+        nameFa: 'گالری ۰۸ — تلاقی رسانه‌ها',
+        nameEn: 'Intersection of Media',
+        puzzleArtworkId: '33',
+      },
     ];
 
-    // Filter galleries 01 to 09 (ignoring gallery-00 rotunda and gallery-02 coming soon)
-    const validGalleries = GALLERIES.filter(
-      (g) => g.id !== 'gallery-00' && g.id !== 'gallery-02' && g.id.startsWith('gallery-')
-    ).sort((a, b) => {
-      const idxA = desiredGalleryOrder.indexOf(a.id);
-      const idxB = desiredGalleryOrder.indexOf(b.id);
-      return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
-    });
+    const list: ExhibitionArtwork[] = CANONICAL_EXHIBITION_GALLERIES.map((g, idx) => {
+      // Direct canonical lookup for puzzle artwork
+      const puzzleArtwork =
+        contentService.getGalleryPuzzleArtwork(g.id) ||
+        contentService.getGalleryPuzzleArtwork(g.routeId) ||
+        contentService.getArtworkById(g.puzzleArtworkId);
 
-    const list: ExhibitionArtwork[] = validGalleries.map((g, idx) => {
-      const puzzleArtwork = contentService.getGalleryPuzzleArtwork(g.id);
-      const dynamicSrc = contentService.getGalleryPuzzleArtworkSrc(g.id);
-      const puzzleConfig = getGalleryPuzzleConfig(g.id);
-      const collectedPieces = getCollectedPiecesForGallery(g.id);
+      const dynamicSrc =
+        contentService.getGalleryPuzzleArtworkSrc(g.id) ||
+        contentService.getGalleryPuzzleArtworkSrc(g.routeId);
+
+      const puzzleConfig =
+        getGalleryPuzzleConfig(g.id) ||
+        getGalleryPuzzleConfig(g.routeId);
+
+      const collectedPieces = [
+        ...new Set([
+          ...getCollectedPiecesForGallery(g.id),
+          ...getCollectedPiecesForGallery(g.routeId),
+        ]),
+      ];
+
       const totalPieces = puzzleConfig?.totalPieces || 3;
       const completed =
         isGalleryPuzzleCompleted(g.id) ||
+        isGalleryPuzzleCompleted(g.routeId) ||
         (collectedPieces.length >= totalPieces && collectedPieces.length > 0);
 
-      const title = puzzleArtwork?.title || g.nameFa;
+      const sheetGallery =
+        contentService.getGalleryById(g.id) ||
+        contentService.getGalleryById(g.routeId);
+
+      const galleryNameFa = sheetGallery?.nameFa
+        ? `گالری ${g.num < 10 ? '۰' + g.num : g.num} — ${sheetGallery.nameFa}`
+        : g.nameFa;
+      const galleryName = sheetGallery?.nameEn || g.nameEn;
+      const title = puzzleArtwork?.title || galleryNameFa;
       const imageUrl = dynamicSrc || puzzleArtwork?.imageUrl || '';
 
       // Preload image dimensions in background for empty & completed frames
       if (imageUrl) {
         preloadArtworkImageRatio(g.id, imageUrl);
+        preloadArtworkImageRatio(g.routeId, imageUrl);
       }
 
       const fallbackSlot =
         DEFAULT_CURATOR_FRAME_MAP[g.id] ||
+        DEFAULT_CURATOR_FRAME_MAP[g.routeId] ||
         DEFAULT_SALON_SLOTS_LIST[idx % DEFAULT_SALON_SLOTS_LIST.length];
       const frameConfig = getCuratorFrameConfig(g.id, fallbackSlot, idx);
-      const realRatio = getArtworkRealAspectRatio(g.id, imageUrl);
+      const realRatio =
+        getArtworkRealAspectRatio(g.id, imageUrl) ||
+        getArtworkRealAspectRatio(g.routeId, imageUrl);
       const aspectRatio = realRatio || frameConfig.aspectRatio || 1;
 
       return {
         id: `artwork-${g.id}`,
         galleryId: g.id,
-        galleryName: g.name,
-        galleryNameFa: g.nameFa,
+        galleryName,
+        galleryNameFa,
         title,
         imageUrl,
         isCompleted: completed,
@@ -514,7 +582,11 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                       {art.galleryNameFa}
                     </span>
                     <span className="text-[12px] sm:text-[13px] font-sans-custom font-bold text-[#1e1b18] mt-0.5 line-clamp-1">
-                      {art.title}
+                      {art.isCompleted
+                        ? art.title
+                        : hasPartialPieces
+                        ? `${art.title} (${toPersianDigits(art.collectedPieces.length)} از ${toPersianDigits(art.totalPieces)} قطعه)`
+                        : 'هنوز کشف نشده'}
                     </span>
                   </div>
                 </div>
