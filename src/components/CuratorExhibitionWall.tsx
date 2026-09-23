@@ -514,11 +514,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                       {art.galleryNameFa}
                     </span>
                     <span className="text-[12px] sm:text-[13px] font-sans-custom font-bold text-[#1e1b18] mt-0.5 line-clamp-1">
-                      {art.isCompleted
-                        ? art.title
-                        : hasPartialPieces
-                        ? `${art.title} (${toPersianDigits(art.collectedPieces.length)} از ${toPersianDigits(art.totalPieces)} قطعه)`
-                        : 'هنوز کشف نشده'}
+                      {art.title}
                     </span>
                   </div>
                 </div>

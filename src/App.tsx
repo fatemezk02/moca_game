@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import { MUSEUM_COLLECTIONS } from './data/museumCollections';
 import { MuseumCollection, MapDisplayMode } from './types';
 import { MuseumFloorPlan } from './components/MuseumFloorPlan';
-import { CollectionPreviewPanel } from './components/CollectionPreviewPanel';
 import { TopAppBar } from './components/TopAppBar';
 import { BottomNavBar } from './components/BottomNavBar';
 import { MapControls } from './components/MapControls';
@@ -619,24 +618,6 @@ export default function App() {
               onOpenStarDiscovery={(starId) => {
                 setActiveStarDiscoveryId(starId);
                 setSelectedCollection(null);
-              }}
-            />
-
-            {/* Collection Preview Panel with Wall-Origin Motion */}
-            <CollectionPreviewPanel
-              collection={selectedCollection}
-              onClose={handleClearSelection}
-              onOpenFullDetail={(col) => setDetailModalCollection(col)}
-              onAudioPlay={handleToggleAudio}
-              isAudioPlaying={
-                isPlayingAudio && playingAudioCollection?.id === selectedCollection?.id
-              }
-              isStarPoint={selectedCollection ? isCollectionStarPoint(selectedCollection.id) : false}
-              onOpenStarDiscovery={() => {
-                if (selectedCollection) {
-                  setActiveStarDiscoveryId(selectedCollection.id);
-                  setSelectedCollection(null);
-                }
               }}
             />
 

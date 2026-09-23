@@ -128,24 +128,6 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
 
       {/* Right Side: Badges grouped together with separated icon medallion and number capsule */}
       <div className="flex items-center gap-2 sm:gap-2.5 pointer-events-auto" dir="ltr">
-        {/* Stars Badge: Circular Star Medallion + Separate Number Capsule showing acquired / total */}
-        <div
-          id="player-stars-badge"
-          className="relative flex items-center cursor-default group"
-          title={`ستاره‌های کسب شده: ${toPersianDigits(displayStars)} از ${toPersianDigits(totalStars)} ستاره`}
-        >
-          {/* Star Icon Medallion */}
-          <div className="relative z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-[#1e1b18] bg-[#fef3c7] flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e1b18] shrink-0">
-            <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1e1b18] fill-[#f59e0b] stroke-[1.5]" />
-          </div>
-          {/* Value Capsule */}
-          <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 sm:pr-2.5 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[44px] sm:min-w-[48px] flex items-center justify-center">
-            <span className="font-mono-custom text-xs sm:text-[13px] font-black text-[#1e1b18] leading-none select-none">
-              {toPersianDigits(displayStars)}/{toPersianDigits(totalStars)}
-            </span>
-          </div>
-        </div>
-
         {/* Puzzles Badge: Circular Puzzle Medallion + Separate Number Capsule showing completed / total */}
         <div
           id="player-puzzles-badge"
@@ -160,6 +142,24 @@ export const PlayerStatusBar: React.FC<PlayerStatusBarProps> = ({
           <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 sm:pr-2.5 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[44px] sm:min-w-[48px] flex items-center justify-center">
             <span className="font-mono-custom text-xs sm:text-[13px] font-black text-[#1e1b18] leading-none select-none">
               {toPersianDigits(displayPuzzles)}/{toPersianDigits(totalPuzzles)}
+            </span>
+          </div>
+        </div>
+
+        {/* Stars Badge: Circular Star Medallion + Separate Number Capsule showing acquired / total */}
+        <div
+          id="player-stars-badge"
+          className="relative flex items-center cursor-default group"
+          title={`ستاره‌های کسب شده: ${toPersianDigits(displayStars)} از ${toPersianDigits(totalStars)} ستاره`}
+        >
+          {/* Star Icon Medallion */}
+          <div className="relative z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-[#1e1b18] bg-[#fef3c7] flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e1b18] shrink-0">
+            <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1e1b18] fill-[#f59e0b] stroke-[1.5]" />
+          </div>
+          {/* Value Capsule */}
+          <div className="-ml-2 pl-3 sm:pl-3.5 pr-2 sm:pr-2.5 h-6 sm:h-6.5 rounded-full border-2 border-[#1e1b18] bg-[#ffffff] shadow-[1.5px_1.5px_0px_#1e1b18] min-w-[44px] sm:min-w-[48px] flex items-center justify-center">
+            <span className="font-mono-custom text-xs sm:text-[13px] font-black text-[#1e1b18] leading-none select-none">
+              {toPersianDigits(displayStars)}/{toPersianDigits(totalStars)}
             </span>
           </div>
         </div>
