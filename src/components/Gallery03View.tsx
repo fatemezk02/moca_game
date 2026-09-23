@@ -149,6 +149,9 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
 
   const handleArrowClick = (arrow: AdminArrowPoint, e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
+    if (!isArrowVisibleToPlayer(arrow)) {
+      return;
+    }
     if (!arrow.destination || arrow.destination === 'none') {
       return;
     }
@@ -298,7 +301,8 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
       modals={modalsContent}
     >
             {/* Dynamic Navigation Arrows Layer */}
-            {arrows.filter(isArrowVisibleToPlayer).map((arrow) => {
+            {arrows.map((arrow) => {
+              const isEnabled = isArrowVisibleToPlayer(arrow);
               const leftPercent = (arrow.x / GALLERY_03_MAP_WIDTH) * 100;
               const topPercent = (arrow.y / GALLERY_03_MAP_HEIGHT) * 100;
 
@@ -312,12 +316,13 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
                     transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
                     transformOrigin: 'center center',
                   }}
-                  className="absolute z-30 pointer-events-auto"
+                  className={`absolute z-30 ${isEnabled ? 'pointer-events-auto' : 'pointer-events-none'}`}
                 >
                   <NavigationArrowRender
                     arrow={arrow}
-                    isInteractive={true}
-                    onClick={(e) => handleArrowClick(arrow, e)}
+                    isDisabled={!isEnabled}
+                    isInteractive={isEnabled}
+                    onClick={isEnabled ? (e) => handleArrowClick(arrow, e) : undefined}
                   />
                 </div>
               );

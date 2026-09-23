@@ -281,6 +281,9 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   const handleArrowClick = (arrow: AdminArrowPoint, e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     setSelectedLocationPinId(null);
+    if (!isArrowVisibleToPlayer(arrow) || isArrowUsed(arrow.id)) {
+      return;
+    }
     if (!arrow.destination || arrow.destination === 'none') {
       return;
     }
@@ -716,9 +719,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
 
 
         {/* Dynamic Navigation Arrows Layer (Configured in Admin Editor) */}
-        {adminArrows
-          .filter((arrow) => isArrowVisibleToPlayer(arrow) && !isArrowUsed(arrow.id))
-          .map((arrow) => {
+        {adminArrows.map((arrow) => {
+          const isEnabled = isArrowVisibleToPlayer(arrow) && !isArrowUsed(arrow.id);
           const posX = (arrow.x / 604.8) * 100;
           const posY = (arrow.y / 844.86) * 100;
 
@@ -732,12 +734,13 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                 transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
                 transformOrigin: 'center center',
               }}
-              className="absolute z-30 pointer-events-auto"
+              className={`absolute z-30 ${isEnabled ? 'pointer-events-auto' : 'pointer-events-none'}`}
             >
               <NavigationArrowRender
                 arrow={arrow}
-                isInteractive={true}
-                onClick={(e) => handleArrowClick(arrow, e)}
+                isDisabled={!isEnabled}
+                isInteractive={isEnabled}
+                onClick={isEnabled ? (e) => handleArrowClick(arrow, e) : undefined}
               />
             </div>
           );

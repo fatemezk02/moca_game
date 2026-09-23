@@ -163,6 +163,9 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
 
   const handleArrowClick = (arrow: AdminArrowPoint, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isArrowVisibleToPlayer(arrow)) {
+      return;
+    }
     if (!arrow.title?.includes('بازگشت') && !arrow.id.includes('-to-g05')) {
       markArrowUsed(arrow.id);
     }
@@ -261,7 +264,8 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
       modals={modalsContent}
     >
       {/* 1. Dynamic Navigation Arrows Layer */}
-      {visibleArrows.map((arrow) => {
+      {arrows.map((arrow) => {
+        const isEnabled = isArrowVisibleToPlayer(arrow);
         const leftPercent = (arrow.x / GALLERY_06_MAP_WIDTH) * 100;
         const topPercent = (arrow.y / GALLERY_06_MAP_HEIGHT) * 100;
 
@@ -275,12 +279,13 @@ export const Gallery06View: React.FC<Gallery06ViewProps> = ({
               transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
               transformOrigin: 'center center',
             }}
-            className="absolute z-30 pointer-events-auto"
+            className={`absolute z-30 ${isEnabled ? 'pointer-events-auto' : 'pointer-events-none'}`}
           >
             <NavigationArrowRender
               arrow={arrow}
-              isInteractive={true}
-              onClick={(e) => handleArrowClick(arrow, e)}
+              isDisabled={!isEnabled}
+              isInteractive={isEnabled}
+              onClick={isEnabled ? (e) => handleArrowClick(arrow, e) : undefined}
             />
           </div>
         );
