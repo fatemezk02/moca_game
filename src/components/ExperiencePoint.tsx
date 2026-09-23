@@ -56,12 +56,13 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
   // Resolve the specific experience data for this point.
   // CRITICAL: Never fall back to the first experience of another entity.
   const resolvedExperience = React.useMemo<ExperienceContent>(() => {
+    const targetId = (experienceId || id || '').toLowerCase();
     const fromService =
-      contentService.getExperienceById(experienceId) ||
-      contentService.getExperiencesForGallery(galleryId).find(
+      contentService.getExperienceById(experienceId || id || '') ||
+      contentService.getExperiencesForGallery(galleryId || '').find(
         (e) =>
-          e.experienceId.toLowerCase() === experienceId.toLowerCase() ||
-          e.id.toLowerCase() === experienceId.toLowerCase()
+          (e.experienceId || '').toLowerCase() === targetId ||
+          (e.id || '').toLowerCase() === targetId
       );
 
     if (fromService) {
@@ -71,8 +72,8 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
     // Seed fallback for this specific experienceId ONLY
     const fromSeed = DEFAULT_EXPERIENCES.find(
       (e) =>
-        e.experienceId.toLowerCase() === experienceId.toLowerCase() ||
-        e.id.toLowerCase() === experienceId.toLowerCase()
+        (e.experienceId || '').toLowerCase() === targetId ||
+        (e.id || '').toLowerCase() === targetId
     );
 
     if (fromSeed) {
@@ -81,8 +82,8 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
 
     // Fallback constructed ONLY for this experience entity
     return {
-      id: experienceId,
-      experienceId,
+      id: experienceId || id || 'experience',
+      experienceId: experienceId || id || 'experience',
       galleryId,
       labelFa: propLabel || propTitle || experienceId,
       title: propTitle || propLabel || experienceId,

@@ -14,6 +14,8 @@ import {
   toggleLocationPinsVisible,
 } from '../data/locationPinsVisibilityStore';
 import { markCollectionsAsViewed } from '../data/collectionNotificationStore';
+import { ProfileAvatar } from './ProfileAvatar';
+import { getUserProfile, UserProfile } from '../data/userProfileStore';
 
 export interface SharedGalleryPageLayoutProps {
   galleryId: string;
@@ -145,6 +147,14 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
     return () => clearInterval(timer);
   }, [headerTitles.length]);
 
+  const [profile, setProfile] = useState<UserProfile | null>(() => getUserProfile());
+
+  useEffect(() => {
+    const handleProfileUpdate = (e: any) => setProfile(e.detail);
+    window.addEventListener('museum_user_profile_updated', handleProfileUpdate);
+    return () => window.removeEventListener('museum_user_profile_updated', handleProfileUpdate);
+  }, []);
+
   useEffect(() => {
     const handleVisUpdate = (e: any) => {
       const isVis = typeof e?.detail?.visible === 'boolean' ? e.detail.visible : getLocationPinsVisible();
@@ -154,11 +164,16 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
     return () => window.removeEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
   }, []);
 
-  const isGallery02 =
+  const isGallery01 =
     galleryId === 'gallery-01' ||
-    galleryId === 'gallery-02' ||
-    galleryId === 'gallery_02' ||
-    numFa === '۰۲';
+    galleryId === 'gallery_01' ||
+    numFa === '۰۱';
+
+  const isGallery02 =
+    !isGallery01 &&
+    (galleryId === 'gallery-02' ||
+      galleryId === 'gallery_02' ||
+      numFa === '۰۲');
 
   const isGallery06 =
     galleryId === 'gallery-06' ||
@@ -219,8 +234,16 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
             </AnimatePresence>
           </div>
 
-          {/* Right Spacer to preserve optical center alignment */}
-          <div className="w-9 h-9 sm:w-10 sm:h-10 pointer-events-none opacity-0" aria-hidden="true" />
+          {/* Right Action (Profile Avatar matching main header position and size) */}
+          <button
+            id={`${galleryId}-profile-btn`}
+            onClick={() => window.dispatchEvent(new CustomEvent('museum_open_profile'))}
+            aria-label="پروفایل کاربری"
+            title="پروفایل کاربری"
+            className="active:scale-95 transition-all duration-150 rounded-full cursor-pointer inline-flex items-center justify-center shrink-0"
+          >
+            <ProfileAvatar avatarId={profile?.avatarId} size="md" className="scale-[1.04]" />
+          </button>
         </div>
       </header>
 
@@ -241,7 +264,8 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
             aspectRatio: `${mapWidth} / ${mapHeight}`,
             maxWidth: '100%',
             maxHeight: '100%',
-            ...(isGallery02 ? { transform: 'translateX(6%)' } : {}),
+            ...(isGallery01 ? { transform: 'translateX(6%)' } : {}),
+            ...(isGallery02 ? { transform: 'translateX(2.2%)' } : {}),
             ...(isGallery06 ? { transform: 'translateX(-5.5%)' } : {}),
             ['--map-point-scale' as any]: dimensions
               ? (dimensions.width / 360).toFixed(4)

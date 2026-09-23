@@ -1,9 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 
 export interface MapDimensions {
   width: number;
   height: number;
   scale: number;
+}
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
+function getInitialEstimatedDimensions(mapWidth: number, mapHeight: number): MapDimensions | null {
+  if (typeof window === 'undefined') return null;
+  // Available width & height accounting for header, status bar, and bottom nav
+  const availWidth = Math.max(0, window.innerWidth - 16);
+  const availHeight = Math.max(0, window.innerHeight - 170);
+  if (availWidth <= 0 || availHeight <= 0) return null;
+  const scale = Math.min(availWidth / mapWidth, availHeight / mapHeight);
+  const fittedWidth = Math.floor(mapWidth * scale * 10) / 10;
+  const fittedHeight = Math.floor(mapHeight * scale * 10) / 10;
+  return { width: fittedWidth, height: fittedHeight, scale };
 }
 
 /**
@@ -22,7 +36,9 @@ export function useFitMapDimensions(
   safeMargin: number = 8
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState<MapDimensions | null>(null);
+  const [dimensions, setDimensions] = useState<MapDimensions | null>(() =>
+    getInitialEstimatedDimensions(mapWidth, mapHeight)
+  );
 
   const calculateFitting = useCallback(() => {
     const el = containerRef.current;
@@ -62,6 +78,10 @@ export function useFitMapDimensions(
       return { width: fittedWidth, height: fittedHeight, scale };
     });
   }, [mapWidth, mapHeight]);
+
+  useIsomorphicLayoutEffect(() => {
+    calculateFitting();
+  }, [calculateFitting]);
 
   useEffect(() => {
     const el = containerRef.current;

@@ -7,7 +7,7 @@ import {
 } from './puzzleProgressStore';
 import { isGalleryQuestionsCompleted, getQuestionProgress } from './questionProgressStore';
 import { getProgressionRuleForArrow } from './galleryProgressionStore';
-import { isGalleryReached } from './reachedGalleriesStore';
+import { isGalleryReached, isGalleryManuallyUnlocked } from './reachedGalleriesStore';
 import { normalizeGalleryId } from '../services/content/mappers';
 
 /**
@@ -393,10 +393,38 @@ export function evaluateArrowConditions(
 }
 
 /**
+ * Checks if the destination / next gallery of an arrow has been manually unlocked with coins
+ */
+export function isDestinationGalleryManuallyUnlocked(arrow: AdminArrowPoint): boolean {
+  if (!arrow) return false;
+
+  const destCandidates: string[] = [];
+  if (arrow.destination && arrow.destination !== 'none') {
+    destCandidates.push(arrow.destination);
+    const destCanon = mapDestinationToCanonicalGallery(arrow.destination);
+    if (destCanon) destCandidates.push(destCanon);
+    const norm = normalizeGalleryId(arrow.destination);
+    if (norm) destCandidates.push(norm);
+  }
+
+  const progressionRule = getProgressionRuleForArrow(arrow.id);
+  if (progressionRule?.targetGalleryId) {
+    destCandidates.push(progressionRule.targetGalleryId);
+    const destCanon = mapDestinationToCanonicalGallery(progressionRule.targetGalleryId);
+    if (destCanon) destCandidates.push(destCanon);
+    const norm = normalizeGalleryId(progressionRule.targetGalleryId);
+    if (norm) destCandidates.push(norm);
+  }
+
+  return destCandidates.some((dest) => isGalleryManuallyUnlocked(dest));
+}
+
+/**
  * Evaluates whether an arrow should currently be rendered on the user-facing map:
  * 1. Progression conditions must be satisfied (if a progression rule is associated)
  * 2. ALL custom visibility conditions must be satisfied
  * Note: Navigation arrows (both next gallery and return arrows) remain permanently visible once unlocked/received.
+ * Next-gallery arrows become immediately ACTIVE if the destination gallery has been manually unlocked via coins.
  */
 export function isArrowVisibleToPlayer(arrow: AdminArrowPoint): boolean {
   // If this is the arrow on the main map pointing to Gallery 01/02, hide it permanently once the user has entered Gallery 02
@@ -422,6 +450,14 @@ export function isArrowVisibleToPlayer(arrow: AdminArrowPoint): boolean {
         return false;
       }
     }
+    return evaluateArrowConditions(arrow.visibilityConditions);
+  }
+
+  // Next-gallery manual coin unlock condition:
+  // If the destination / next gallery has already been manually unlocked with coins,
+  // the next-gallery arrow MUST be ACTIVE and clickable.
+  if (isDestinationGalleryManuallyUnlocked(arrow)) {
+    return true;
   }
 
   // Check progression rules for game progression arrows

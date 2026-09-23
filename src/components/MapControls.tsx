@@ -22,7 +22,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
   const [isPinAnimating, setIsPinAnimating] = useState(false);
   const isMainMap = currentView === 'gallery-00';
   const getTargetLabel = (gid: string) => {
-    const norm = gid.toLowerCase().replace('_', '-');
+    const norm = (gid || '').toLowerCase().replace('_', '-');
     if (norm.includes('09')) return 'گالری ۰۸';
     if (norm.includes('08')) return 'گالری ۰۷';
     if (norm.includes('07')) return 'گالری ۰۶';

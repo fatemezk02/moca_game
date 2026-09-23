@@ -8,6 +8,8 @@
  */
 
 import { isPuzzlePieceCollected, isGalleryPuzzleCompleted } from './puzzleProgressStore';
+import { isGalleryManuallyUnlocked } from './reachedGalleriesStore';
+import { normalizeGalleryId } from '../services/content/mappers';
 
 export interface GalleryProgressionRule {
   galleryId: string;
@@ -148,7 +150,8 @@ export function getProgressionRuleForGallery(galleryId: string): GalleryProgress
  * Evaluates whether the progression conditions for unlocking the next gallery from
  * a given source gallery are currently satisfied by the player.
  */
-export function isProgressionConditionsSatisfied(galleryId: string): boolean {
+export function isProgressionConditionsSatisfied(galleryId?: string): boolean {
+  if (!galleryId || typeof galleryId !== 'string') return true;
   const norm = galleryId.toLowerCase().replace('_', '-');
   const rule =
     getProgressionRuleForGallery(norm) ||
@@ -185,12 +188,21 @@ export function isProgressionConditionsSatisfied(galleryId: string): boolean {
 
 /**
  * Checks whether a progression arrow is visible to the player:
- * - Progression conditions for the gallery must be satisfied
+ * - Progression conditions for the gallery must be satisfied OR target gallery manually unlocked with coins
  * Note: Arrows remain visible for continuous navigation once unlocked.
  */
-export function isProgressionArrowVisible(arrowId: string): boolean {
+export function isProgressionArrowVisible(arrowId?: string): boolean {
+  if (!arrowId || typeof arrowId !== 'string') return true;
   const rule = getProgressionRuleForArrow(arrowId);
   if (!rule) {
+    return true;
+  }
+
+  // If destination / next gallery has already been manually unlocked with coins
+  if (
+    isGalleryManuallyUnlocked(rule.targetGalleryId) ||
+    isGalleryManuallyUnlocked(normalizeGalleryId(rule.targetGalleryId))
+  ) {
     return true;
   }
 

@@ -15,6 +15,7 @@ import { MuseumInfoModal } from './components/MuseumInfoModal';
 import { CollectionListView } from './components/CollectionListView';
 import { TasksCuratorView } from './components/TasksCuratorView';
 import { Gallery01View } from './components/Gallery01View';
+import { Gallery01To02CameraTransition } from './components/Gallery01To02CameraTransition';
 import { Gallery01QuestionsView } from './components/Gallery01QuestionsView';
 import { Gallery03View } from './components/Gallery03View';
 import { Gallery03QuestionsView } from './components/Gallery03QuestionsView';
@@ -55,15 +56,20 @@ export default function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(() => getUserProfile());
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isFinalCertificateOpen, setIsFinalCertificateOpen] = useState(false);
+  const [isTransitioningG01ToG02, setIsTransitioningG01ToG02] = useState(false);
+  const [isTransitioningG02ToG01, setIsTransitioningG02ToG01] = useState(false);
 
   useEffect(() => {
     const handleOpenCertificate = () => setIsFinalCertificateOpen(true);
     const handleCloseCertificate = () => setIsFinalCertificateOpen(false);
+    const handleOpenProfile = () => setIsProfileModalOpen(true);
     window.addEventListener('museum_open_final_certificate', handleOpenCertificate);
     window.addEventListener('museum_close_final_certificate', handleCloseCertificate);
+    window.addEventListener('museum_open_profile', handleOpenProfile);
     return () => {
       window.removeEventListener('museum_open_final_certificate', handleOpenCertificate);
       window.removeEventListener('museum_close_final_certificate', handleCloseCertificate);
+      window.removeEventListener('museum_open_profile', handleOpenProfile);
     };
   }, []);
 
@@ -129,6 +135,31 @@ export default function App() {
   const navigateToGalleryWithTrack = (galleryId: string) => {
     if (!galleryId || typeof galleryId !== 'string') return;
     const canon = normalizeGalleryId(galleryId);
+
+    // Experimental camera transition test: Gallery 01 -> Gallery 02 (Forward)
+    if (
+      currentGallery === 'gallery-01' &&
+      (galleryId === 'gallery-03' ||
+        galleryId === 'gallery-02' ||
+        galleryId === 'gallery_02' ||
+        canon === 'gallery_02' ||
+        canon === 'gallery_03')
+    ) {
+      setIsTransitioningG01ToG02(true);
+      return;
+    }
+
+    // Experimental camera transition test: Gallery 02 -> Gallery 01 (Reverse)
+    if (
+      (currentGallery === 'gallery-03' || (currentGallery as string) === 'gallery-02') &&
+      (galleryId === 'gallery-01' ||
+        galleryId === 'gallery_01' ||
+        canon === 'gallery_01')
+    ) {
+      setIsTransitioningG02ToG01(true);
+      return;
+    }
+
     markGalleryReached(canon);
 
     let routeTarget = 'gallery-01';
@@ -399,19 +430,69 @@ export default function App() {
   const renderCurrentView = () => {
     // If Admin Mode is active
     if (isAdminOpen) {
-    return (
-      <AdminManagementView
-        initialGalleryId={
-          currentGallery === 'gallery-00'
-            ? 'gallery-00'
-            : currentGallery === 'gallery-03' || currentGallery === 'gallery-03-questions'
-            ? 'gallery-03'
-            : 'gallery-01'
-        }
-        onCloseAdmin={() => setIsAdminOpen(false)}
-      />
-    );
-  }
+      return (
+        <AdminManagementView
+          initialGalleryId={
+            currentGallery === 'gallery-00'
+              ? 'gallery-00'
+              : currentGallery === 'gallery-03' || currentGallery === 'gallery-03-questions'
+              ? 'gallery-03'
+              : 'gallery-01'
+          }
+          onCloseAdmin={() => setIsAdminOpen(false)}
+        />
+      );
+    }
+
+    // If camera transition from Gallery 01 -> Gallery 02 is running (Forward)
+    if (isTransitioningG01ToG02) {
+      return (
+        <Gallery01To02CameraTransition
+          direction="forward"
+          onComplete={() => {
+            setIsTransitioningG01ToG02(false);
+            markGalleryReached('gallery_02');
+            setCurrentGalleryId('gallery-03');
+            setAssociatedGallery('gallery-03');
+            setCurrentGallery('gallery-03' as any);
+          }}
+          onNavigateBack={() => {
+            setIsTransitioningG01ToG02(false);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+          onSelectTab={(tab) => {
+            setIsTransitioningG01ToG02(false);
+            setActiveTab(tab);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+        />
+      );
+    }
+
+    // If camera transition from Gallery 02 -> Gallery 01 is running (Reverse)
+    if (isTransitioningG02ToG01) {
+      return (
+        <Gallery01To02CameraTransition
+          direction="reverse"
+          onComplete={() => {
+            setIsTransitioningG02ToG01(false);
+            markGalleryReached('gallery_01');
+            setCurrentGalleryId('gallery-01');
+            setAssociatedGallery('gallery-01');
+            setCurrentGallery('gallery-01' as any);
+          }}
+          onNavigateBack={() => {
+            setIsTransitioningG02ToG01(false);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+          onSelectTab={(tab) => {
+            setIsTransitioningG02ToG01(false);
+            setActiveTab(tab);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+        />
+      );
+    }
 
   // If user navigated into Gallery 03 Questions view
   if (currentGallery === 'gallery-03-questions') {

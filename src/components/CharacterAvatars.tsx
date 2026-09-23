@@ -19,7 +19,7 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
   id,
   className = 'w-full h-full',
 }) => {
-  const normId = id.toLowerCase().replace('-', '_');
+  const normId = (id || 'male_01').toLowerCase().replace('-', '_');
 
   switch (normId) {
     // =========================================================================

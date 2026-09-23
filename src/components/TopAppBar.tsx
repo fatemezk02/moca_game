@@ -40,7 +40,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
           title="پروفایل کاربری"
           className="active:scale-95 transition-all duration-150 rounded-full cursor-pointer"
         >
-          <ProfileAvatar avatarId={profile?.avatarId} size="md" />
+          <ProfileAvatar avatarId={profile?.avatarId} size="md" className="scale-[1.04]" />
         </button>
 
         {/* Center Logo & Title */}

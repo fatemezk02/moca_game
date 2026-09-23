@@ -108,6 +108,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
     window.addEventListener('museum_player_progress_updated', handleArrowsUpdate);
     window.addEventListener('museum_answered_questions_updated', handleArrowsUpdate);
     window.addEventListener('museum_puzzle_progress_updated', handleArrowsUpdate);
+    window.addEventListener('museum_gallery_manually_unlocked', handleArrowsUpdate);
 
     return () => {
       window.removeEventListener('museum_arrows_updated', handleArrowsUpdate);
@@ -115,6 +116,7 @@ export const Gallery01View: React.FC<Gallery01ViewProps> = ({
       window.removeEventListener('museum_player_progress_updated', handleArrowsUpdate);
       window.removeEventListener('museum_answered_questions_updated', handleArrowsUpdate);
       window.removeEventListener('museum_puzzle_progress_updated', handleArrowsUpdate);
+      window.removeEventListener('museum_gallery_manually_unlocked', handleArrowsUpdate);
     };
   }, []);
 
