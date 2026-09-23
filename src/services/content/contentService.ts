@@ -26,7 +26,7 @@ type StatusListener = (status: ContentServiceStatus) => void;
 export function extractCanonicalStarNumber(s?: string | number | null): number | null {
   if (s === undefined || s === null) return null;
   if (typeof s === 'number') {
-    return s >= 1 && s <= 25 ? s : null;
+    return s >= 1 && s <= 28 ? s : null;
   }
   const clean = String(s).trim().toLowerCase();
   if (!clean) return null;
@@ -34,7 +34,7 @@ export function extractCanonicalStarNumber(s?: string | number | null): number |
   // Direct integer check
   if (/^\d+$/.test(clean)) {
     const parsed = parseInt(clean, 10);
-    return parsed >= 1 && parsed <= 25 ? parsed : null;
+    return parsed >= 1 && parsed <= 28 ? parsed : null;
   }
 
   // Exact point ID aliases
@@ -44,23 +44,23 @@ export function extractCanonicalStarNumber(s?: string | number | null): number |
   if (clean === 'col-8549') return 16;
   if (clean === 'col-6925') return 17;
   if (clean === 'col-0594') return 18;
-  if (clean === 'col-g09-01') return 20;
-  if (clean === 'col-g09-02') return 21;
-  if (clean === 'col-g09-03') return 22;
-  if (clean === 'col-g09-04') return 23;
+  if (clean === 'col-g09-01') return 23;
+  if (clean === 'col-g09-02') return 24;
+  if (clean === 'col-g09-03') return 25;
+  if (clean === 'col-g09-04') return 26;
 
   // Regex patterns: star-01, star-1, star-q-01, star_01, point-star-01, etc.
   const starMatch = clean.match(/(?:star(?:-q)?|star_point|artwork|point)[-_]?0*(\d+)/i);
   if (starMatch && starMatch[1]) {
     const parsed = parseInt(starMatch[1], 10);
-    return parsed >= 1 && parsed <= 25 ? parsed : null;
+    return parsed >= 1 && parsed <= 28 ? parsed : null;
   }
 
   // Generic trailing digits fallback
   const trailingDigitsMatch = clean.match(/0*(\d+)$/);
   if (trailingDigitsMatch && trailingDigitsMatch[1]) {
     const parsed = parseInt(trailingDigitsMatch[1], 10);
-    return parsed >= 1 && parsed <= 25 ? parsed : null;
+    return parsed >= 1 && parsed <= 28 ? parsed : null;
   }
 
   return null;
@@ -519,7 +519,7 @@ class ContentService {
    * Resolves the authoritative StarContent for a specific Star Point or star_id.
    *
    * STRICT MAPPING RULES:
-   * - Matches strictly by Star Identity (star_id or canonical Star Number 1..25).
+   * - Matches strictly by Star Identity (star_id or canonical Star Number 1..28).
    * - All Star content fields (question, options, answer, reward, info, artwork) come from the SAME row.
    * - Does NOT use array order, rendering order, or positional fallbacks.
    * - Returns null if no matching star is found.
@@ -534,7 +534,7 @@ class ContentService {
     const lookupPointId = (starPointId || '').trim();
     const lookupStarId = (explicitStarId || '').trim();
 
-    // 1. Resolve canonical star number (1 to 25)
+    // 1. Resolve canonical star number (1 to 28)
     const targetNum =
       extractCanonicalStarNumber(lookupStarId) ??
       extractCanonicalStarNumber(lookupPointId);

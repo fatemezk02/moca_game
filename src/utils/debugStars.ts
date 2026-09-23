@@ -62,10 +62,10 @@ export async function verifyStarsMapping(): Promise<StarVerificationResult> {
 
   const starSummaryList: StarVerificationResult['stars'] = [];
 
-  // Expected 25 canonical IDs: star-01 .. star-25
-  const expectedIds = Array.from({ length: 25 }, (_, i) => `star-${String(i + 1).padStart(2, '0')}`);
+  // Expected 28 canonical IDs: star-01 .. star-28
+  const expectedIds = Array.from({ length: 28 }, (_, i) => `star-${String(i + 1).padStart(2, '0')}`);
 
-  for (let i = 1; i <= 25; i++) {
+  for (let i = 1; i <= 28; i++) {
     const expectedId = `star-${String(i).padStart(2, '0')}`;
     const expectedQId = `star-q-${String(i).padStart(2, '0')}`;
 
@@ -112,7 +112,7 @@ export async function verifyStarsMapping(): Promise<StarVerificationResult> {
   }
 
   const isValid =
-    starSummaryList.length === 25 &&
+    starSummaryList.length === 28 &&
     missingIds.length === 0 &&
     duplicateIds.length === 0 &&
     mismatchedQuestions.length === 0;
@@ -120,7 +120,7 @@ export async function verifyStarsMapping(): Promise<StarVerificationResult> {
   return {
     isValid,
     totalStars: starSummaryList.length,
-    expectedStars: 25,
+    expectedStars: 28,
     duplicateIds,
     missingIds,
     mismatchedQuestions,
@@ -132,10 +132,10 @@ export async function verifyStarsMapping(): Promise<StarVerificationResult> {
  * Logs a human-readable diagnostic report to the console.
  */
 export async function logAllStarsDebug(): Promise<void> {
-  console.group('🌟 [Star Debugging] Verifying 25 Stars & Question Mapping');
+  console.group('🌟 [Star Debugging] Verifying 28 Stars & Question Mapping');
   const result = await verifyStarsMapping();
 
-  console.log(`Status: ${result.isValid ? '✅ VALID (25/25)' : '❌ INVALID'}`);
+  console.log(`Status: ${result.isValid ? '✅ VALID (28/28)' : '❌ INVALID'}`);
   console.log(`Total active stars: ${result.totalStars} / ${result.expectedStars}`);
 
   if (result.missingIds.length > 0) {

@@ -607,7 +607,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-03',
         title: 'ژاپن در یک قاب',
-        x: 119,
+        x: 117,
         y: 315,
         frames: [],
       },
@@ -630,7 +630,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-03',
         title: 'در جست‌وجوی فن و فضیلت',
         roomSection: 'DIPLOMATIC ALBUMS',
-        x: 362,
+        x: 361,
         y: 347,
         frames: [
           { id: 'artwork-g03-f1', order: 1, x: 0, y: 0, scale: 1 },
@@ -644,8 +644,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-02',
         title: 'نقطه پازل ۰۱ — آلبوم‌های دیپلماتیک',
-        x: 359,
-        y: 316,
+        x: 358,
+        y: 524,
         questionId: '4',
         puzzlePieceId: 'gallery03-piece-01',
         isActive: true,
@@ -655,8 +655,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-02',
         title: 'نقطه پازل ۰۲ — آلبوم‌های دیپلماتیک',
-        x: 117,
-        y: 229,
+        x: 358,
+        y: 197,
         questionId: '5',
         puzzlePieceId: 'gallery03-piece-02',
         isActive: true,
@@ -666,8 +666,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-02',
         title: 'نقطه پازل ۰۳ — آلبوم‌های دیپلماتیک (قطعه نهایی)',
-        x: 117,
-        y: 402,
+        x: 115,
+        y: 521,
         questionId: '6',
         puzzlePieceId: 'gallery03-piece-03',
         isActive: true,
@@ -722,8 +722,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-04',
         title: 'ایا عکاسی میتواند شبیه نقاشی باشد',
-        x: 240,
-        y: 800,
+        x: 361,
+        y: 740,
         frames: [],
       },
     ],
@@ -735,7 +735,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-03',
         title: 'نقطه پازل ۰۱ — ثبت دوام ما',
         x: 359,
-        y: 454,
+        y: 325,
         questionId: '7',
         puzzlePieceId: 'gallery04-piece-01',
         isActive: true,
@@ -746,7 +746,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-03',
         title: 'نقطه پازل ۰۲ — ثبت دوام ما',
         x: 359,
-        y: 346,
+        y: 436,
         questionId: '8',
         puzzlePieceId: 'gallery04-piece-02',
         isActive: true,
@@ -757,7 +757,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-03',
         title: 'نقطه پازل ۰۳ — ثبت دوام ما (قطعه نهایی)',
         x: 359,
-        y: 220,
+        y: 526,
         questionId: '9',
         puzzlePieceId: 'gallery04-piece-03',
         isActive: true,
@@ -811,8 +811,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-05',
         title: 'ستاره کشف ۰۸ — وقتی شهر از زاویه‌ای تازه دیده می‌شود',
-        x: 456,
-        y: 58,
+        x: 350,
+        y: 205,
         frames: [],
       },
       {
@@ -822,8 +822,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-05',
         title: 'ستاره کشف ۰۹ — شهری در حال ناپدید شدن',
-        x: 245,
-        y: 58,
+        x: 264,
+        y: 116,
         frames: [],
       },
       {
@@ -833,8 +833,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-05',
         title: 'ستاره کشف ۱۰ — زندگی روزمره، بخشی از چهره‌ی شهر',
-        x: 469,
-        y: 338,
+        x: 595,
+        y: 240,
         frames: [],
       },
       {
@@ -844,8 +844,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-05',
         title: 'ستاره کشف ۱۱ — تخریب و دگرگونی شهر',
-        x: 455,
-        y: 611,
+        x: 433,
+        y: 582,
         frames: [],
       },
     ],
@@ -856,8 +856,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-04',
         title: 'نقطه پازل ۰۱ — ضرب آهنگ شهر',
-        x: 358,
-        y: 212,
+        x: 467,
+        y: 332,
         questionId: '10',
         puzzlePieceId: 'gallery05-piece-01',
         isActive: true,
@@ -867,8 +867,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-04',
         title: 'نقطه پازل ۰۲ — ضرب آهنگ شهر',
-        x: 615,
-        y: 221,
+        x: 346,
+        y: 134,
         questionId: '11',
         puzzlePieceId: 'gallery05-piece-02',
         isActive: true,
@@ -933,8 +933,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-06',
         title: 'ستاره کشف ۱۲ — سیاستِ نگاه',
-        x: 451,
-        y: 536,
+        x: 201,
+        y: 620,
         frames: [],
       },
       {
@@ -944,8 +944,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-06',
         title: 'ستاره کشف ۱۳ — بستر معنا و تصویر',
-        x: 451,
-        y: 641,
+        x: 200,
+        y: 371,
         frames: [],
       },
       {
@@ -955,8 +955,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-06',
         title: 'ستاره کشف ۱۴ — تصویر و حافظه',
-        x: 450,
-        y: 588,
+        x: 200,
+        y: 493,
         frames: [],
       },
       {
@@ -966,8 +966,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-06',
         title: 'ستاره کشف ۱۵ — افق‌های نوین نقد',
-        x: 449,
-        y: 339,
+        x: 450,
+        y: 310,
         frames: [],
       },
       {
@@ -977,8 +977,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-06',
         title: 'اصفهان، نیویورک',
-        x: 200,
-        y: 359,
+        x: 452,
+        y: 368,
         frames: [],
       },
       {
@@ -1011,8 +1011,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-05',
         title: 'نقطه پازل ۰۱ — در کشاکش تماشا و استیلا',
-        x: 198,
-        y: 608,
+        x: 199,
+        y: 427,
         questionId: '13',
         puzzlePieceId: 'gallery06-piece-01',
         isActive: true,
@@ -1022,8 +1022,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-05',
         title: 'نقطه پازل ۰۲ — در کشاکش تماشا و استیلا',
-        x: 198,
-        y: 455,
+        x: 199,
+        y: 580,
         questionId: '14',
         puzzlePieceId: 'gallery06-piece-02',
         isActive: true,
@@ -1034,7 +1034,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-05',
         title: 'نقطه پازل ۰۳ — در کشاکش تماشا و استیلا (قطعه نهایی)',
         x: 448,
-        y: 433,
+        y: 582,
         questionId: '15',
         puzzlePieceId: 'gallery06-piece-03',
         isActive: true,
@@ -1088,8 +1088,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-06',
         title: 'دگردیسی',
-        x: 342,
-        y: 544,
+        x: 315,
+        y: 609,
         frames: [],
       },
     ],
@@ -1100,8 +1100,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-06',
         title: 'نقطه پازل ۰۱ — گذر از برون به درون',
-        x: 342,
-        y: 278,
+        x: 272,
+        y: 182,
         questionId: '16',
         puzzlePieceId: 'gallery07-piece-01',
         isActive: true,
@@ -1111,8 +1111,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-06',
         title: 'نقطه پازل ۰۲ — گذر از برون به درون',
-        x: 343,
-        y: 365,
+        x: 272,
+        y: 271,
         questionId: '17',
         puzzlePieceId: 'gallery07-piece-02',
         isActive: true,
@@ -1122,8 +1122,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-06',
         title: 'نقطه پازل ۰۳ — گذر از برون به درون (قطعه نهایی)',
-        x: 343,
-        y: 463,
+        x: 337,
+        y: 370,
         questionId: '18',
         puzzlePieceId: 'gallery07-piece-03',
         isActive: true,
@@ -1169,7 +1169,41 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     viewBox: '0 0 501.5 642.18',
     width: 501.5,
     height: 642.18,
-    collectionPoints: [],
+    collectionPoints: [
+      {
+        id: 'star-20',
+        starId: 'star-20',
+        type: 'collection',
+        pointType: 'star',
+        galleryId: 'gallery-08',
+        title: 'ستاره کشف ۲۰',
+        x: 230,
+        y: 410,
+        frames: [],
+      },
+      {
+        id: 'star-21',
+        starId: 'star-21',
+        type: 'collection',
+        pointType: 'star',
+        galleryId: 'gallery-08',
+        title: 'ستاره کشف ۲۱',
+        x: 470,
+        y: 410,
+        frames: [],
+      },
+      {
+        id: 'star-22',
+        starId: 'star-22',
+        type: 'collection',
+        pointType: 'star',
+        galleryId: 'gallery-08',
+        title: 'ستاره کشف ۲۲',
+        x: 250,
+        y: 550,
+        frames: [],
+      },
+    ],
     iconPoints: [],
     puzzlePoints: [
       {
@@ -1177,8 +1211,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-07',
         title: 'نقطه پازل ۰۱ — آونگ زمان',
-        x: 225,
-        y: 58,
+        x: 40,
+        y: 227,
         questionId: '19',
         puzzlePieceId: 'gallery08-piece-01',
         isActive: true,
@@ -1188,8 +1222,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-07',
         title: 'نقطه پازل ۰۲ — آونگ زمان',
-        x: 362,
-        y: 124,
+        x: 225,
+        y: 47,
         questionId: '20',
         puzzlePieceId: 'gallery08-piece-02',
         isActive: true,
@@ -1199,8 +1233,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-07',
         title: 'نقطه پازل ۰۳ — آونگ زمان (قطعه نهایی)',
-        x: 123,
-        y: 124,
+        x: 121,
+        y: 352,
         questionId: '21',
         puzzlePieceId: 'gallery08-piece-03',
         isActive: true,
@@ -1249,51 +1283,51 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
     collectionPoints: [
       {
         id: 'col-g09-01',
-        starId: 'star-20',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-09',
-        title: 'تابلوی دام',
-        x: 137,
-        y: 111,
-        frames: [],
-      },
-      {
-        id: 'col-g09-02',
-        starId: 'star-21',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-09',
-        title: 'سوپ داگر',
-        x: 249,
-        y: 48,
-        frames: [],
-      },
-      {
-        id: 'col-g09-03',
-        starId: 'star-22',
-        type: 'collection',
-        pointType: 'star',
-        galleryId: 'gallery-09',
-        title: 'عکس‌ها و اچینگ‌ها',
-        x: 137,
-        y: 374,
-        frames: [],
-      },
-      {
-        id: 'col-g09-04',
         starId: 'star-23',
         type: 'collection',
         pointType: 'star',
         galleryId: 'gallery-09',
-        title: 'سگ سه پا',
-        x: 138,
-        y: 602,
+        title: 'تابلوی دام',
+        x: 251,
+        y: 39,
         frames: [],
       },
       {
-        id: 'star-24',
+        id: 'col-g09-02',
         starId: 'star-24',
+        type: 'collection',
+        pointType: 'star',
+        galleryId: 'gallery-09',
+        title: 'سوپ داگر',
+        x: 360,
+        y: 341,
+        frames: [],
+      },
+      {
+        id: 'col-g09-03',
+        starId: 'star-25',
+        type: 'collection',
+        pointType: 'star',
+        galleryId: 'gallery-09',
+        title: 'عکس‌ها و اچینگ‌ها',
+        x: 355,
+        y: 130,
+        frames: [],
+      },
+      {
+        id: 'col-g09-04',
+        starId: 'star-26',
+        type: 'collection',
+        pointType: 'star',
+        galleryId: 'gallery-09',
+        title: 'سگ سه پا',
+        x: 324,
+        y: 90,
+        frames: [],
+      },
+      {
+        id: 'star-27',
+        starId: 'star-27',
         type: 'collection',
         pointType: 'star',
         galleryId: 'gallery-09',
@@ -1303,8 +1337,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         frames: [],
       },
       {
-        id: 'star-25',
-        starId: 'star-25',
+        id: 'star-28',
+        starId: 'star-28',
         type: 'collection',
         pointType: 'star',
         galleryId: 'gallery-09',
@@ -1321,8 +1355,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-08',
         title: 'نقطه پازل ۰۱ — تلاقی رسانه‌ها',
-        x: 355,
-        y: 117,
+        x: 166,
+        y: 98,
         questionId: '22',
         puzzlePieceId: 'gallery09-piece-01',
         isActive: true,
@@ -1332,8 +1366,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-08',
         title: 'نقطه پازل ۰۲ — تلاقی رسانه‌ها',
-        x: 356,
-        y: 408,
+        x: 135,
+        y: 342,
         questionId: '23',
         puzzlePieceId: 'gallery09-piece-02',
         isActive: true,
@@ -1343,8 +1377,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         type: 'puzzle',
         galleryId: 'gallery-08',
         title: 'نقطه پازل ۰۳ — تلاقی رسانه‌ها (قطعه نهایی)',
-        x: 356,
-        y: 567,
+        x: 137,
+        y: 565,
         questionId: '24',
         puzzlePieceId: 'gallery09-piece-03',
         isActive: true,
@@ -1385,7 +1419,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
   },
 };
 
-const STORAGE_MAP_CONFIG_KEY = 'museum_map_config_v7';
+const STORAGE_MAP_CONFIG_KEY = 'museum_map_config_v13';
 
 /**
  * In-memory working database with live persistent synchronization
@@ -1443,6 +1477,18 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                     galleryId: defPuzzle.galleryId,
                     questionId: defPuzzle.questionId,
                   };
+                  if (
+                    ((key === 'gallery-03' || key === 'gallery_03') && (defPuzzle.id === 'puzzle-g03-point-01' || defPuzzle.id === 'puzzle-g03-point-02' || defPuzzle.id === 'puzzle-g03-point-03')) ||
+                    ((key === 'gallery-04' || key === 'gallery_04') && (defPuzzle.id === 'puzzle-g04-point-01' || defPuzzle.id === 'puzzle-g04-point-02' || defPuzzle.id === 'puzzle-g04-point-03')) ||
+                    ((key === 'gallery-05' || key === 'gallery_05') && (defPuzzle.id === 'puzzle-g05-point-01' || defPuzzle.id === 'puzzle-g05-point-02' || defPuzzle.id === 'puzzle-g05-point-03')) ||
+                    ((key === 'gallery-06' || key === 'gallery_06') && (defPuzzle.id === 'puzzle-g06-point-01' || defPuzzle.id === 'puzzle-g06-point-02' || defPuzzle.id === 'puzzle-g06-point-03')) ||
+                    ((key === 'gallery-07' || key === 'gallery_07') && (defPuzzle.id === 'puzzle-g07-point-01' || defPuzzle.id === 'puzzle-g07-point-02' || defPuzzle.id === 'puzzle-g07-point-03')) ||
+                    ((key === 'gallery-08' || key === 'gallery_08') && (defPuzzle.id === 'puzzle-g08-point-01' || defPuzzle.id === 'puzzle-g08-point-02' || defPuzzle.id === 'puzzle-g08-point-03')) ||
+                    ((key === 'gallery-09' || key === 'gallery_09') && (defPuzzle.id === 'puzzle-g09-point-01' || defPuzzle.id === 'puzzle-g09-point-02' || defPuzzle.id === 'puzzle-g09-point-03'))
+                  ) {
+                    combinedPuzzles[existingIdx].x = defPuzzle.x;
+                    combinedPuzzles[existingIdx].y = defPuzzle.y;
+                  }
                 }
               }
 
@@ -1468,9 +1514,10 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
               const savedCollections = (parsed[key].collectionPoints || []).filter(
                 (c: any) =>
                   !(key === 'gallery-01' && (c.id === 'artwork-02' || c.id === 'artwork-03' || c.id === 'artwork-04')) &&
+                  !((key === 'gallery-06' || key === 'gallery_06') && c.id === 'star-11') &&
                   !((key === 'gallery-07' || key === 'gallery_07') && (c.id === 'star-16' || c.id === 'star-17' || c.id === 'star-18')) &&
-                  !((key === 'gallery-08' || key === 'gallery_08') && (c.id === 'star-20' || c.id === 'star-21' || c.id === 'star-22' || c.id === 'star-23')) &&
-                  !((key === 'gallery-09' || key === 'gallery_09') && (c.id === 'star-20' || c.id === 'star-21' || c.id === 'star-22' || c.id === 'star-23' || c.id === 'star-26' || c.id === 'star-27' || c.id === 'star-28'))
+                  !((key === 'gallery-08' || key === 'gallery_08') && (c.id === 'star-23' || c.id === 'star-24' || c.id === 'star-25' || c.id === 'star-26' || c.id === 'star-27' || c.id === 'star-28')) &&
+                  !((key === 'gallery-09' || key === 'gallery_09') && (c.id === 'star-20' || c.id === 'star-21' || c.id === 'star-22'))
               );
               const combinedCollections = [...savedCollections];
               for (const defCol of defaultCollections) {
@@ -1487,14 +1534,13 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                   }
                   if (
                     ((key === 'gallery-01' || key === 'gallery-02' || key === 'gallery_01' || key === 'gallery_02') && (defCol.id === 'artwork-01' || defCol.id === 'star-02')) ||
-                    defCol.starId === 'star-03' ||
-                    defCol.starId === 'star-04' ||
-                    defCol.starId === 'star-05' ||
-                    defCol.starId === 'star-06' ||
-                    defCol.id === 'artwork-g03-star' ||
-                    defCol.id === 'star-04' ||
-                    defCol.id === 'star-05' ||
-                    defCol.id === 'star-06'
+                    ((key === 'gallery-03' || key === 'gallery_03') && (defCol.id === 'star-04' || defCol.id === 'star-05' || defCol.id === 'star-06' || defCol.id === 'artwork-g03-star' || defCol.starId === 'star-03')) ||
+                    ((key === 'gallery-04' || key === 'gallery_04') && (defCol.id === 'star-07')) ||
+                    ((key === 'gallery-05' || key === 'gallery_05') && (defCol.id === 'star-08' || defCol.id === 'star-09' || defCol.id === 'star-10' || defCol.id === 'star-11')) ||
+                    ((key === 'gallery-06' || key === 'gallery_06') && (defCol.id === 'star-12' || defCol.id === 'star-13' || defCol.id === 'star-14' || defCol.id === 'star-15' || defCol.starId === 'star-16' || defCol.starId === 'star-17' || defCol.starId === 'star-18' || defCol.id === 'col-8549' || defCol.id === 'col-6925' || defCol.id === 'col-0594')) ||
+                    ((key === 'gallery-07' || key === 'gallery_07') && (defCol.id === 'star-19')) ||
+                    ((key === 'gallery-08' || key === 'gallery_08') && (defCol.id === 'star-20' || defCol.id === 'star-21' || defCol.id === 'star-22')) ||
+                    ((key === 'gallery-09' || key === 'gallery_09') && (defCol.starId === 'star-23' || defCol.starId === 'star-24' || defCol.starId === 'star-25' || defCol.starId === 'star-26' || defCol.id === 'star-27' || defCol.id === 'star-28' || defCol.id === 'col-g09-01' || defCol.id === 'col-g09-02' || defCol.id === 'col-g09-03' || defCol.id === 'col-g09-04'))
                   ) {
                     combinedCollections[existingIdx].x = defCol.x;
                     combinedCollections[existingIdx].y = defCol.y;
@@ -1554,9 +1600,10 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
           (cp) =>
             !((safeGalleryId === 'gallery-00' || canonId === 'gallery-00' || safeGalleryId === 'gallery_00' || canonId === 'gallery_00') && (cp.id === 'col-02' || cp.id === 'col-04' || cp.id === 'col-07')) &&
             !((safeGalleryId === 'gallery-01' || canonId === 'gallery-01') && (cp.id === 'artwork-02' || cp.id === 'artwork-03' || cp.id === 'artwork-04')) &&
+            !((safeGalleryId === 'gallery-06' || canonId === 'gallery-06' || safeGalleryId === 'gallery_06' || canonId === 'gallery_06') && (cp.id === 'star-11')) &&
             !((safeGalleryId === 'gallery-07' || canonId === 'gallery-07' || safeGalleryId === 'gallery_07' || canonId === 'gallery_07') && (cp.id === 'star-16' || cp.id === 'star-17' || cp.id === 'star-18')) &&
-            !((safeGalleryId === 'gallery-08' || canonId === 'gallery-08' || safeGalleryId === 'gallery_08' || canonId === 'gallery_08') && (cp.id === 'star-20' || cp.id === 'star-21' || cp.id === 'star-22' || cp.id === 'star-23')) &&
-            !((safeGalleryId === 'gallery-09' || canonId === 'gallery-09' || safeGalleryId === 'gallery_09' || canonId === 'gallery_09') && (cp.id === 'star-20' || cp.id === 'star-21' || cp.id === 'star-22' || cp.id === 'star-23' || cp.id === 'star-26' || cp.id === 'star-27' || cp.id === 'star-28'))
+            !((safeGalleryId === 'gallery-08' || canonId === 'gallery-08' || safeGalleryId === 'gallery_08' || canonId === 'gallery_08') && (cp.id === 'star-23' || cp.id === 'star-24' || cp.id === 'star-25' || cp.id === 'star-26' || cp.id === 'star-27' || cp.id === 'star-28')) &&
+            !((safeGalleryId === 'gallery-09' || canonId === 'gallery-09' || safeGalleryId === 'gallery_09' || canonId === 'gallery_09') && (cp.id === 'star-20' || cp.id === 'star-21' || cp.id === 'star-22'))
         )
         .map((cp) => ({
           ...cp,

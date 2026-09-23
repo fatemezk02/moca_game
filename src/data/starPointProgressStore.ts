@@ -77,38 +77,55 @@ export function getEquivalentStarKeys(id?: string): string[] {
   const keys = new Set<string>([clean]);
 
   // Gallery 09 specific mappings
-  if (clean === 'col-g09-01' || clean === 'star-20' || clean === '20') {
+  if (clean === 'col-g09-01' || clean === 'star-23' || clean === '23') {
     keys.add('col-g09-01');
-    keys.add('star-20');
-    keys.add('20');
-    return Array.from(keys);
-  }
-  if (clean === 'col-g09-02' || clean === 'star-21' || clean === '21') {
-    keys.add('col-g09-02');
-    keys.add('star-21');
-    keys.add('21');
-    return Array.from(keys);
-  }
-  if (clean === 'col-g09-03' || clean === 'star-22' || clean === '22') {
-    keys.add('col-g09-03');
-    keys.add('star-22');
-    keys.add('22');
-    return Array.from(keys);
-  }
-  if (clean === 'col-g09-04' || clean === 'star-23' || clean === '23') {
-    keys.add('col-g09-04');
     keys.add('star-23');
     keys.add('23');
     return Array.from(keys);
   }
-  if (clean === 'star-24' || clean === '24') {
+  if (clean === 'col-g09-02' || clean === 'star-24' || clean === '24') {
+    keys.add('col-g09-02');
     keys.add('star-24');
     keys.add('24');
     return Array.from(keys);
   }
-  if (clean === 'star-25' || clean === '25') {
+  if (clean === 'col-g09-03' || clean === 'star-25' || clean === '25') {
+    keys.add('col-g09-03');
     keys.add('star-25');
     keys.add('25');
+    return Array.from(keys);
+  }
+  if (clean === 'col-g09-04' || clean === 'star-26' || clean === '26') {
+    keys.add('col-g09-04');
+    keys.add('star-26');
+    keys.add('26');
+    return Array.from(keys);
+  }
+  if (clean === 'star-27' || clean === '27') {
+    keys.add('star-27');
+    keys.add('27');
+    return Array.from(keys);
+  }
+  if (clean === 'star-28' || clean === '28') {
+    keys.add('star-28');
+    keys.add('28');
+    return Array.from(keys);
+  }
+
+  // Gallery 07 specific mappings
+  if (clean === 'star-20' || clean === '20') {
+    keys.add('star-20');
+    keys.add('20');
+    return Array.from(keys);
+  }
+  if (clean === 'star-21' || clean === '21') {
+    keys.add('star-21');
+    keys.add('21');
+    return Array.from(keys);
+  }
+  if (clean === 'star-22' || clean === '22') {
+    keys.add('star-22');
+    keys.add('22');
     return Array.from(keys);
   }
 

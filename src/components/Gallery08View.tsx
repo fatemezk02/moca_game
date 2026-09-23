@@ -189,23 +189,23 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
     }
   };
 
-  // Dynamic Stars resolution: Gallery 07 has no stars in the sheet; exclude star-24 and star-25
+  // Dynamic Stars resolution: Gallery 07 has star-20, star-21, star-22
   const effectiveCollectionPoints = useMemo(() => {
     const configuredCollectionPoints = points.filter(
       (p): p is AdminCollectionPoint =>
         p.type === 'collection' &&
-        !['star-20', 'star-21', 'star-22', 'star-23', 'star-24', 'star-25'].includes(p.id) &&
-        !['star-20', 'star-21', 'star-22', 'star-23', 'star-24', 'star-25'].includes(p.starId || '')
+        !['star-23', 'star-24', 'star-25', 'star-26', 'star-27', 'star-28'].includes(p.id) &&
+        !['star-23', 'star-24', 'star-25', 'star-26', 'star-27', 'star-28'].includes(p.starId || '')
     );
 
-    // Query active stars strictly for Gallery 07 from ContentService (no stars in sheet for gallery_07)
+    // Query active stars strictly for Gallery 07 from ContentService
     const allStars = contentService.getStars().filter((s) => s.active !== false);
     const g07Stars = allStars.filter((s) => {
       const gId = normalizeGalleryId(s.galleryId);
       const starId = s.starId || s.id;
       return (
         (gId === 'gallery_07' || gId === 'gallery-07') &&
-        !['star-20', 'star-21', 'star-22', 'star-23', 'star-24', 'star-25'].includes(starId)
+        !['star-23', 'star-24', 'star-25', 'star-26', 'star-27', 'star-28'].includes(starId)
       );
     });
 
