@@ -123,7 +123,7 @@ export const FinalCompletionCardBack: React.FC<FinalCompletionCardBackProps> = (
 
         {/* Main congratulatory text */}
         <p className="text-[13px] sm:text-[14px] font-bold text-[#1e1b18] leading-relaxed max-w-[340px] px-1">
-          تو موفق شدی سفر در تاریخ عکاسی در موزه هنرهای معاصر تهران رو به اتمام برسونی
+          تو موفق شدی در سفر تاریخی عکاسی آثار رو مهمی رو برای گنجینه موزه هنرهای معاصر جمع آوری کنی.
         </p>
 
         {/* Free return-visit ticket notice */}
