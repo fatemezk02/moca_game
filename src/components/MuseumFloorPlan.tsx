@@ -70,6 +70,26 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
   const [locationAnimKey, setLocationAnimKey] = useState(0);
 
+  const isMasterMapG01Arrow = (arrow: AdminArrowPoint): boolean =>
+    arrow.id === 'arrow-g00-to-g01' ||
+    ((arrow.galleryId === 'gallery-00' || arrow.galleryId === 'main-map') &&
+      (arrow.destination === 'gallery-01' || arrow.destination === 'gallery_01'));
+
+  const [isG01ArrowFadingOut, setIsG01ArrowFadingOut] = useState(false);
+  const [isG01ArrowDismissed, setIsG01ArrowDismissed] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || !window.localStorage) return false;
+    try {
+      return (
+        isArrowUsed('arrow-g00-to-g01') ||
+        localStorage.getItem('museum_has_entered_gallery_02') === 'true' ||
+        localStorage.getItem('museum_has_entered_gallery_01') === 'true' ||
+        localStorage.getItem('museum_has_entered_any_gallery') === 'true'
+      );
+    } catch {
+      return false;
+    }
+  });
+
   const handleLockClick = (galleryId: string, title?: string) => {
     setSelectedLockGallery({ galleryId, title: title || formatGalleryLabelFa(galleryId) });
   };
@@ -136,12 +156,26 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   useEffect(() => {
     const handleArrowsUpdate = () => {
       setAdminArrows(getGalleryArrows('gallery-00'));
+      if (
+        isArrowUsed('arrow-g00-to-g01') ||
+        localStorage.getItem('museum_has_entered_gallery_02') === 'true' ||
+        localStorage.getItem('museum_has_entered_gallery_01') === 'true' ||
+        localStorage.getItem('museum_has_entered_any_gallery') === 'true'
+      ) {
+        setIsG01ArrowDismissed(true);
+      }
+    };
+    const handleReset = () => {
+      setIsG01ArrowDismissed(false);
+      setIsG01ArrowFadingOut(false);
+      setAdminArrows(getGalleryArrows('gallery-00'));
     };
     window.addEventListener('museum_arrows_updated', handleArrowsUpdate);
     window.addEventListener('museum_used_arrows_updated', handleArrowsUpdate);
     window.addEventListener('museum_player_progress_updated', handleArrowsUpdate);
     window.addEventListener('museum_puzzle_progress_updated', handleArrowsUpdate);
     window.addEventListener('museum_answered_questions_updated', handleArrowsUpdate);
+    window.addEventListener('museum_game_fully_reset', handleReset);
 
     return () => {
       window.removeEventListener('museum_arrows_updated', handleArrowsUpdate);
@@ -149,6 +183,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
       window.removeEventListener('museum_player_progress_updated', handleArrowsUpdate);
       window.removeEventListener('museum_puzzle_progress_updated', handleArrowsUpdate);
       window.removeEventListener('museum_answered_questions_updated', handleArrowsUpdate);
+      window.removeEventListener('museum_game_fully_reset', handleReset);
     };
   }, []);
 
@@ -281,6 +316,33 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   const handleArrowClick = (arrow: AdminArrowPoint, e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     setSelectedLocationPinId(null);
+
+    // Special behavior for Master Map arrow to Gallery 01
+    if (isMasterMapG01Arrow(arrow)) {
+      if (isG01ArrowDismissed || isG01ArrowFadingOut) {
+        return;
+      }
+      setIsG01ArrowFadingOut(true);
+      markArrowUsed(arrow.id);
+      markArrowUsed('arrow-g00-to-g01');
+      try {
+        localStorage.setItem('museum_has_entered_gallery_01', 'true');
+        localStorage.setItem('museum_has_entered_gallery_02', 'true');
+        localStorage.setItem('museum_has_entered_any_gallery', 'true');
+      } catch {}
+
+      setTimeout(() => {
+        setIsG01ArrowDismissed(true);
+        setCurrentGalleryId('gallery-01');
+        if (onNavigateToGallery) {
+          onNavigateToGallery('gallery-01');
+        } else {
+          onNavigateToGallery01?.();
+        }
+      }, 500);
+      return;
+    }
+
     if (!isArrowVisibleToPlayer(arrow) || isArrowUsed(arrow.id)) {
       return;
     }
@@ -720,6 +782,37 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
 
         {/* Dynamic Navigation Arrows Layer (Configured in Admin Editor) */}
         {adminArrows.map((arrow) => {
+          if (isMasterMapG01Arrow(arrow)) {
+            if (isG01ArrowDismissed) {
+              return null;
+            }
+            const posX = (arrow.x / 604.8) * 100;
+            const posY = (arrow.y / 844.86) * 100;
+
+            return (
+              <div
+                key={arrow.id}
+                id={`arrow-${arrow.id}`}
+                style={{
+                  left: `${posX}%`,
+                  top: `${posY}%`,
+                  transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                  transformOrigin: 'center center',
+                }}
+                className={`absolute z-30 transition-opacity duration-700 ease-out ${
+                  isG01ArrowFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'
+                }`}
+              >
+                <NavigationArrowRender
+                  arrow={arrow}
+                  isDisabled={false}
+                  isInteractive={!isG01ArrowFadingOut}
+                  onClick={(e) => handleArrowClick(arrow, e)}
+                />
+              </div>
+            );
+          }
+
           const isEnabled = isArrowVisibleToPlayer(arrow) && !isArrowUsed(arrow.id);
           const posX = (arrow.x / 604.8) * 100;
           const posY = (arrow.y / 844.86) * 100;

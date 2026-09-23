@@ -183,13 +183,16 @@ export default function App() {
 
   useEffect(() => {
     if (
-      currentGallery === 'gallery-01' ||
-      currentGallery === 'gallery-01-questions'
+      currentGallery &&
+      currentGallery !== 'gallery-00' &&
+      currentGallery !== 'main-map'
     ) {
       setHasEnteredGallery02(true);
       markArrowUsed('arrow-g00-to-g01');
       try {
+        localStorage.setItem('museum_has_entered_gallery_01', 'true');
         localStorage.setItem('museum_has_entered_gallery_02', 'true');
+        localStorage.setItem('museum_has_entered_any_gallery', 'true');
       } catch {}
     }
   }, [currentGallery]);
