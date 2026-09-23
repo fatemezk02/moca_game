@@ -87,9 +87,9 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
       { id: 'star-02', starId: 'star-01', title: 'کالوتایپ — فاکس تالبوت', defaultX: 137, defaultY: 211 },
     ],
     'gallery-03': [
-      { id: 'artwork-g03-star', starId: 'star-03', title: 'در جست‌وجوی فن و فضیلت', defaultX: 363, defaultY: 446 },
-      { id: 'star-04', starId: 'star-04', title: 'چهره‌های مشهور، در یک قاب', defaultX: 362, defaultY: 227 },
-      { id: 'star-05', starId: 'star-05', title: 'ژاپن در یک قاب', defaultX: 120, defaultY: 504 },
+      { id: 'artwork-g03-star', starId: 'star-03', title: 'در جست‌وجوی فن و فضیلت', defaultX: 362, defaultY: 347 },
+      { id: 'star-04', starId: 'star-04', title: 'چهره‌های مشهور، در یک قاب', defaultX: 117, defaultY: 266 },
+      { id: 'star-05', starId: 'star-05', title: 'ژاپن در یک قاب', defaultX: 119, defaultY: 315 },
       { id: 'star-06', starId: 'star-06', title: 'خودنگارهٔ چرخان نادار', defaultX: 442, defaultY: 214 },
     ],
     'gallery-04': [

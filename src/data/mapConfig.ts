@@ -596,8 +596,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-03',
         title: 'چهره‌های مشهور، در یک قاب',
-        x: 362,
-        y: 227,
+        x: 117,
+        y: 266,
         frames: [],
       },
       {
@@ -607,8 +607,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         pointType: 'star',
         galleryId: 'gallery-03',
         title: 'ژاپن در یک قاب',
-        x: 120,
-        y: 504,
+        x: 119,
+        y: 315,
         frames: [],
       },
       {
@@ -630,8 +630,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-03',
         title: 'در جست‌وجوی فن و فضیلت',
         roomSection: 'DIPLOMATIC ALBUMS',
-        x: 363,
-        y: 446,
+        x: 362,
+        y: 347,
         frames: [
           { id: 'artwork-g03-f1', order: 1, x: 0, y: 0, scale: 1 },
         ],
@@ -1485,7 +1485,17 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                   if (defCol.title) {
                     combinedCollections[existingIdx].title = defCol.title;
                   }
-                  if ((key === 'gallery-01' || key === 'gallery-02' || key === 'gallery_01' || key === 'gallery_02') && (defCol.id === 'artwork-01' || defCol.id === 'star-02')) {
+                  if (
+                    ((key === 'gallery-01' || key === 'gallery-02' || key === 'gallery_01' || key === 'gallery_02') && (defCol.id === 'artwork-01' || defCol.id === 'star-02')) ||
+                    defCol.starId === 'star-03' ||
+                    defCol.starId === 'star-04' ||
+                    defCol.starId === 'star-05' ||
+                    defCol.starId === 'star-06' ||
+                    defCol.id === 'artwork-g03-star' ||
+                    defCol.id === 'star-04' ||
+                    defCol.id === 'star-05' ||
+                    defCol.id === 'star-06'
+                  ) {
                     combinedCollections[existingIdx].x = defCol.x;
                     combinedCollections[existingIdx].y = defCol.y;
                     combinedCollections[existingIdx].starId = defCol.starId;

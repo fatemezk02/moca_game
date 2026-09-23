@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import { MUSEUM_COLLECTIONS } from './data/museumCollections';
 import { MuseumCollection, MapDisplayMode } from './types';
 import { MuseumFloorPlan } from './components/MuseumFloorPlan';
-import { CollectionPreviewPanel } from './components/CollectionPreviewPanel';
 import { TopAppBar } from './components/TopAppBar';
 import { BottomNavBar } from './components/BottomNavBar';
 import { MapControls } from './components/MapControls';
@@ -143,19 +142,19 @@ export default function App() {
       routeTarget = 'gallery-01';
     } else if (galleryId === 'gallery_02' || galleryId === 'gallery-02') {
       routeTarget = 'gallery-03';
-    } else if (galleryId === 'gallery_03' || galleryId === 'gallery-03') {
+    } else if (galleryId === 'gallery_03') {
       routeTarget = 'gallery-04';
-    } else if (galleryId === 'gallery_04' || galleryId === 'gallery-04') {
+    } else if (galleryId === 'gallery_04') {
       routeTarget = 'gallery-05';
-    } else if (galleryId === 'gallery_05' || galleryId === 'gallery-05') {
+    } else if (galleryId === 'gallery_05') {
       routeTarget = 'gallery-06';
-    } else if (galleryId === 'gallery_06' || galleryId === 'gallery-06') {
+    } else if (galleryId === 'gallery_06') {
       routeTarget = 'gallery-07';
-    } else if (galleryId === 'gallery_07' || galleryId === 'gallery-07') {
+    } else if (galleryId === 'gallery_07') {
       routeTarget = 'gallery-08';
-    } else if (galleryId === 'gallery_08' || galleryId === 'gallery-08') {
+    } else if (galleryId === 'gallery_08') {
       routeTarget = 'gallery-09';
-    } else if (galleryId === 'gallery_09' || galleryId === 'gallery-09') {
+    } else if (galleryId === 'gallery-09' || galleryId === 'gallery_09') {
       routeTarget = 'gallery-09';
     } else {
       routeTarget = galleryId.replace('_', '-');
@@ -185,7 +184,6 @@ export default function App() {
   useEffect(() => {
     if (
       currentGallery === 'gallery-01' ||
-      (currentGallery as string) === 'gallery-02' ||
       currentGallery === 'gallery-01-questions'
     ) {
       setHasEnteredGallery02(true);
@@ -521,8 +519,8 @@ export default function App() {
     );
   }
 
-  // If user navigated into Gallery 03, render the dedicated Gallery 03 view
-  if (currentGallery === 'gallery-03') {
+  // If user navigated into Gallery 03 (or legacy route gallery-02), render the dedicated Gallery 02 view (آلبوم‌های دیپلماتیک)
+  if (currentGallery === 'gallery-03' || (currentGallery as string) === 'gallery-02') {
     return (
       <Gallery03View
         onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
@@ -549,8 +547,8 @@ export default function App() {
     );
   }
 
-  // If user navigated into Gallery 01 or 02, render the dedicated Gallery view (Gallery 02 - کیمیای نور)
-  if (currentGallery === 'gallery-01' || (currentGallery as string) === 'gallery-02') {
+  // If user navigated into Gallery 01, render the dedicated Gallery 01 view (کیمیای نور)
+  if (currentGallery === 'gallery-01') {
     return (
       <Gallery01View
         onNavigateBack={() => navigateToGalleryWithTrack('gallery-00')}
@@ -622,24 +620,6 @@ export default function App() {
               }}
             />
 
-            {/* Collection Preview Panel with Wall-Origin Motion */}
-            <CollectionPreviewPanel
-              collection={selectedCollection}
-              onClose={handleClearSelection}
-              onOpenFullDetail={(col) => setDetailModalCollection(col)}
-              onAudioPlay={handleToggleAudio}
-              isAudioPlaying={
-                isPlayingAudio && playingAudioCollection?.id === selectedCollection?.id
-              }
-              isStarPoint={selectedCollection ? isCollectionStarPoint(selectedCollection.id) : false}
-              onOpenStarDiscovery={() => {
-                if (selectedCollection) {
-                  setActiveStarDiscoveryId(selectedCollection.id);
-                  setSelectedCollection(null);
-                }
-              }}
-            />
-
             {/* Floating Circular Gallery Toggle & Gallery Status Controls */}
             <MapControls
               currentView="gallery-00"
@@ -671,6 +651,7 @@ export default function App() {
             type={activeTab}
             onNavigateToMap={() => setActiveTab('map')}
             onSelectGallery={(galleryId) => {
+              setActiveTab('map');
               navigateToGalleryWithTrack(galleryId);
             }}
           />
