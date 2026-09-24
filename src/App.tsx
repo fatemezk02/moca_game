@@ -16,6 +16,8 @@ import { CollectionListView } from './components/CollectionListView';
 import { TasksCuratorView } from './components/TasksCuratorView';
 import { Gallery01View } from './components/Gallery01View';
 import { Gallery01To02CameraTransition } from './components/Gallery01To02CameraTransition';
+import { Gallery02To03CameraTransition } from './components/Gallery02To03CameraTransition';
+import { Gallery03To04CameraTransition } from './components/Gallery03To04CameraTransition';
 import { Gallery01QuestionsView } from './components/Gallery01QuestionsView';
 import { Gallery03View } from './components/Gallery03View';
 import { Gallery03QuestionsView } from './components/Gallery03QuestionsView';
@@ -58,6 +60,10 @@ export default function App() {
   const [isFinalCertificateOpen, setIsFinalCertificateOpen] = useState(false);
   const [isTransitioningG01ToG02, setIsTransitioningG01ToG02] = useState(false);
   const [isTransitioningG02ToG01, setIsTransitioningG02ToG01] = useState(false);
+  const [isTransitioningG02ToG03, setIsTransitioningG02ToG03] = useState(false);
+  const [isTransitioningG03ToG02, setIsTransitioningG03ToG02] = useState(false);
+  const [isTransitioningG03ToG04, setIsTransitioningG03ToG04] = useState(false);
+  const [isTransitioningG04ToG03, setIsTransitioningG04ToG03] = useState(false);
 
   useEffect(() => {
     const handleOpenCertificate = () => setIsFinalCertificateOpen(true);
@@ -136,7 +142,7 @@ export default function App() {
     if (!galleryId || typeof galleryId !== 'string') return;
     const canon = normalizeGalleryId(galleryId);
 
-    // Experimental camera transition test: Gallery 01 -> Gallery 02 (Forward)
+    // Camera transition: Gallery 01 -> Gallery 02 (Forward)
     if (
       currentGallery === 'gallery-01' &&
       (galleryId === 'gallery-03' ||
@@ -149,7 +155,7 @@ export default function App() {
       return;
     }
 
-    // Experimental camera transition test: Gallery 02 -> Gallery 01 (Reverse)
+    // Camera transition: Gallery 02 -> Gallery 01 (Reverse)
     if (
       (currentGallery === 'gallery-03' || (currentGallery as string) === 'gallery-02') &&
       (galleryId === 'gallery-01' ||
@@ -157,6 +163,56 @@ export default function App() {
         canon === 'gallery_01')
     ) {
       setIsTransitioningG02ToG01(true);
+      return;
+    }
+
+    // Camera transition: Gallery 02 -> Gallery 03 (Forward)
+    if (
+      (currentGallery === 'gallery-03' || (currentGallery as string) === 'gallery-02') &&
+      (galleryId === 'gallery-04' ||
+        galleryId === 'gallery_03' ||
+        galleryId === 'gallery_04' ||
+        canon === 'gallery_03' ||
+        canon === 'gallery_04')
+    ) {
+      setIsTransitioningG02ToG03(true);
+      return;
+    }
+
+    // Camera transition: Gallery 03 -> Gallery 02 (Reverse)
+    if (
+      (currentGallery === 'gallery-04' || (currentGallery as string) === 'gallery_03') &&
+      (galleryId === 'gallery-03' ||
+        galleryId === 'gallery-02' ||
+        galleryId === 'gallery_02' ||
+        canon === 'gallery_02')
+    ) {
+      setIsTransitioningG03ToG02(true);
+      return;
+    }
+
+    // Camera transition: Gallery 03 -> Gallery 04 (Forward)
+    if (
+      (currentGallery === 'gallery-04' || (currentGallery as string) === 'gallery_03') &&
+      (galleryId === 'gallery-05' ||
+        galleryId === 'gallery_04' ||
+        galleryId === 'gallery-04' ||
+        canon === 'gallery_04' ||
+        canon === 'gallery_05')
+    ) {
+      setIsTransitioningG03ToG04(true);
+      return;
+    }
+
+    // Camera transition: Gallery 04 -> Gallery 03 (Reverse)
+    if (
+      (currentGallery === 'gallery-05' || (currentGallery as string) === 'gallery_04') &&
+      (galleryId === 'gallery-04' ||
+        galleryId === 'gallery-03' ||
+        galleryId === 'gallery_03' ||
+        canon === 'gallery_03')
+    ) {
+      setIsTransitioningG04ToG03(true);
       return;
     }
 
@@ -487,6 +543,106 @@ export default function App() {
           }}
           onSelectTab={(tab) => {
             setIsTransitioningG02ToG01(false);
+            setActiveTab(tab);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+        />
+      );
+    }
+
+    // If camera transition from Gallery 02 -> Gallery 03 is running (Forward)
+    if (isTransitioningG02ToG03) {
+      return (
+        <Gallery02To03CameraTransition
+          direction="forward"
+          onComplete={() => {
+            setIsTransitioningG02ToG03(false);
+            markGalleryReached('gallery_03');
+            setCurrentGalleryId('gallery-04');
+            setAssociatedGallery('gallery-04');
+            setCurrentGallery('gallery-04' as any);
+          }}
+          onNavigateBack={() => {
+            setIsTransitioningG02ToG03(false);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+          onSelectTab={(tab) => {
+            setIsTransitioningG02ToG03(false);
+            setActiveTab(tab);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+        />
+      );
+    }
+
+    // If camera transition from Gallery 03 -> Gallery 02 is running (Reverse)
+    if (isTransitioningG03ToG02) {
+      return (
+        <Gallery02To03CameraTransition
+          direction="reverse"
+          onComplete={() => {
+            setIsTransitioningG03ToG02(false);
+            markGalleryReached('gallery_02');
+            setCurrentGalleryId('gallery-03');
+            setAssociatedGallery('gallery-03');
+            setCurrentGallery('gallery-03' as any);
+          }}
+          onNavigateBack={() => {
+            setIsTransitioningG03ToG02(false);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+          onSelectTab={(tab) => {
+            setIsTransitioningG03ToG02(false);
+            setActiveTab(tab);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+        />
+      );
+    }
+
+    // If camera transition from Gallery 03 -> Gallery 04 is running (Forward)
+    if (isTransitioningG03ToG04) {
+      return (
+        <Gallery03To04CameraTransition
+          direction="forward"
+          onComplete={() => {
+            setIsTransitioningG03ToG04(false);
+            markGalleryReached('gallery_04');
+            setCurrentGalleryId('gallery-05');
+            setAssociatedGallery('gallery-05');
+            setCurrentGallery('gallery-05' as any);
+          }}
+          onNavigateBack={() => {
+            setIsTransitioningG03ToG04(false);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+          onSelectTab={(tab) => {
+            setIsTransitioningG03ToG04(false);
+            setActiveTab(tab);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+        />
+      );
+    }
+
+    // If camera transition from Gallery 04 -> Gallery 03 is running (Reverse)
+    if (isTransitioningG04ToG03) {
+      return (
+        <Gallery03To04CameraTransition
+          direction="reverse"
+          onComplete={() => {
+            setIsTransitioningG04ToG03(false);
+            markGalleryReached('gallery_03');
+            setCurrentGalleryId('gallery-04');
+            setAssociatedGallery('gallery-04');
+            setCurrentGallery('gallery-04' as any);
+          }}
+          onNavigateBack={() => {
+            setIsTransitioningG04ToG03(false);
+            navigateToGalleryWithTrack('gallery-00');
+          }}
+          onSelectTab={(tab) => {
+            setIsTransitioningG04ToG03(false);
             setActiveTab(tab);
             navigateToGalleryWithTrack('gallery-00');
           }}

@@ -1,39 +1,49 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Map } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { getGalleryPoints, getGalleryArrows } from '../data/mapConfig';
-import { AdminCollectionPoint, AdminIconPoint, AdminPuzzlePoint } from '../types/admin';
-import { Gallery02MapSvg } from './Gallery02MapSvg';
-import { Gallery03MapSvg } from './Gallery03MapSvg';
-import { PuzzlePoint } from './PuzzlePoint';
+import {
+  AdminCollectionPoint,
+  AdminIconPoint,
+  AdminPuzzlePoint,
+} from '../types/admin';
+import { Gallery04MapSvg } from './Gallery04MapSvg';
+import { Gallery05MapSvg } from './Gallery05MapSvg';
 import { StarPoint } from './StarPoint';
 import { ExperiencePoint } from './ExperiencePoint';
-import { CustomIconRender } from './CustomIconRender';
+import { PuzzlePoint } from './PuzzlePoint';
 import { NavigationArrowRender } from './NavigationArrowRender';
+import { CustomIconRender } from './CustomIconRender';
+import { ProfileAvatar } from './ProfileAvatar';
 import { PlayerStatusBar } from './PlayerStatusBar';
 import { BottomNavBar } from './BottomNavBar';
-import { ProfileAvatar } from './ProfileAvatar';
 import { getUserProfile, UserProfile } from '../data/userProfileStore';
-import { usePlayerStats } from '../hooks/usePlayerStats';
-import { MapDimensions } from '../hooks/useFitMapDimensions';
-import { getExperiencePointsForGallery } from '../data/experiencePointsConfig';
 import { isArrowVisibleToPlayer } from '../data/arrowConditionsStore';
 import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
+import { getExperiencePointsForGallery } from '../data/experiencePointsConfig';
+import { usePlayerStats } from '../hooks/usePlayerStats';
 
-interface Gallery01To02CameraTransitionProps {
-  direction?: 'forward' | 'reverse';
+interface Gallery03To04CameraTransitionProps {
+  direction?: 'forward' | 'reverse'; // forward: Gallery 03 -> Gallery 04, reverse: Gallery 04 -> Gallery 03
   onComplete: () => void;
   onNavigateBack: () => void;
   onSelectTab?: (tab: 'map' | 'collection' | 'tasks' | 'curator') => void;
 }
 
-const G01_MAP_WIDTH = 524.2;
-const G01_MAP_HEIGHT = 822.62;
+// Canonical Map Dimensions matching SharedGalleryPageLayout & SVGs
+const G03_MAP_WIDTH = 498.55;
+const G03_MAP_HEIGHT = 851.79;
+const G04_MAP_WIDTH = 682.05;
+const G04_MAP_HEIGHT = 729.06;
 
-const G02_MAP_WIDTH = 561.28;
-const G02_MAP_HEIGHT = 851.79;
+interface MapDimensions {
+  width: number;
+  height: number;
+  scale: number;
+}
 
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
 function getInitialEstimatedDimensions(mapWidth: number, mapHeight: number): MapDimensions | null {
   if (typeof window === 'undefined') return null;
@@ -46,7 +56,15 @@ function getInitialEstimatedDimensions(mapWidth: number, mapHeight: number): Map
   return { width: fittedWidth, height: fittedHeight, scale };
 }
 
-export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransitionProps> = ({
+/**
+ * High-performance Camera-Travel Transition between Gallery 03 and Gallery 04.
+ * - Constant map scale throughout the entire camera movement (no size jumps).
+ * - Fixed world-space attachment for Experience Points (each stays on its own gallery).
+ * - Pixel-perfect layout synchronization with SharedGalleryPageLayout.
+ * - Arrow alignment ensures the two corridor portals face each other directly.
+ * - Smooth camera travel and easing with soft departing map cleanup.
+ */
+export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransitionProps> = ({
   direction = 'forward',
   onComplete,
   onNavigateBack,
@@ -58,14 +76,14 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
   const playerStats = usePlayerStats();
 
   // Synchronously compute initial estimated dimensions to prevent any first-frame flash/jump
-  const [g01Dim, setG01Dim] = useState<MapDimensions | null>(() =>
-    getInitialEstimatedDimensions(G01_MAP_WIDTH, G01_MAP_HEIGHT)
+  const [g03Dim, setG03Dim] = useState<MapDimensions | null>(() =>
+    getInitialEstimatedDimensions(G03_MAP_WIDTH, G03_MAP_HEIGHT)
   );
-  const [g02Dim, setG02Dim] = useState<MapDimensions | null>(() =>
-    getInitialEstimatedDimensions(G02_MAP_WIDTH, G02_MAP_HEIGHT)
+  const [g04Dim, setG04Dim] = useState<MapDimensions | null>(() =>
+    getInitialEstimatedDimensions(G04_MAP_WIDTH, G04_MAP_HEIGHT)
   );
 
-  // Measure the single shared viewport container for BOTH Gallery 01 and Gallery 02
+  // Measure the single shared viewport container for BOTH Gallery 03 and Gallery 04
   const calculateFitting = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -83,16 +101,37 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
 
     if (availWidth <= 0 || availHeight <= 0) return;
 
-    const s1 = Math.min(availWidth / G01_MAP_WIDTH, availHeight / G01_MAP_HEIGHT);
-    const s2 = Math.min(availWidth / G02_MAP_WIDTH, availHeight / G02_MAP_HEIGHT);
+    const s3 = Math.min(availWidth / G03_MAP_WIDTH, availHeight / G03_MAP_HEIGHT);
+    const s4 = Math.min(availWidth / G04_MAP_WIDTH, availHeight / G04_MAP_HEIGHT);
 
-    const fW1 = Math.floor(G01_MAP_WIDTH * s1 * 10) / 10;
-    const fH1 = Math.floor(G01_MAP_HEIGHT * s1 * 10) / 10;
-    const fW2 = Math.floor(G02_MAP_WIDTH * s2 * 10) / 10;
-    const fH2 = Math.floor(G02_MAP_HEIGHT * s2 * 10) / 10;
+    const fW3 = Math.floor(G03_MAP_WIDTH * s3 * 10) / 10;
+    const fH3 = Math.floor(G03_MAP_HEIGHT * s3 * 10) / 10;
+    const fW4 = Math.floor(G04_MAP_WIDTH * s4 * 10) / 10;
+    const fH4 = Math.floor(G04_MAP_HEIGHT * s4 * 10) / 10;
 
-    setG01Dim({ width: fW1, height: fH1, scale: s1 });
-    setG02Dim({ width: fW2, height: fH2, scale: s2 });
+    setG03Dim((prev) => {
+      if (
+        prev &&
+        Math.abs(prev.width - fW3) < 0.5 &&
+        Math.abs(prev.height - fH3) < 0.5 &&
+        Math.abs(prev.scale - s3) < 0.001
+      ) {
+        return prev;
+      }
+      return { width: fW3, height: fH3, scale: s3 };
+    });
+
+    setG04Dim((prev) => {
+      if (
+        prev &&
+        Math.abs(prev.width - fW4) < 0.5 &&
+        Math.abs(prev.height - fH4) < 0.5 &&
+        Math.abs(prev.scale - s4) < 0.001
+      ) {
+        return prev;
+      }
+      return { width: fW4, height: fH4, scale: s4 };
+    });
   }, []);
 
   useIsomorphicLayoutEffect(() => {
@@ -123,77 +162,75 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
     };
   }, [calculateFitting]);
 
-  // Listen to profile updates
+  // Sync profile
   useEffect(() => {
-    const handleProfileUpdate = (e: any) => setProfile(e.detail);
+    const handleProfileUpdate = () => setProfile(getUserProfile());
     window.addEventListener('museum_user_profile_updated', handleProfileUpdate);
     return () => window.removeEventListener('museum_user_profile_updated', handleProfileUpdate);
   }, []);
 
-  // Gallery 01 Data
-  const g01Points = getGalleryPoints('gallery_01');
-  const g01Arrows = getGalleryArrows('gallery_01');
-  const g01ColPoints = g01Points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
-  const g01IconPoints = g01Points.filter((p) => p.type === 'icon') as AdminIconPoint[];
-  const g01PuzzlePoints = g01Points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
-  const g01ExpPoints = getExperiencePointsForGallery('gallery-01');
+  // Gallery 03 Data (gallery-04 in database) — strictly Gallery 03 points only
+  const g03Points = getGalleryPoints('gallery-04');
+  const g03Arrows = getGalleryArrows('gallery-04');
+  const g03ColPoints = g03Points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
+  const g03IconPoints = g03Points.filter((p) => p.type === 'icon') as AdminIconPoint[];
+  const g03PuzzlePoints = g03Points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
+  const g03ExpPoints = getExperiencePointsForGallery('gallery-04');
 
-  // Gallery 02 Data
-  const g02Points = getGalleryPoints('gallery-03');
-  const g02Arrows = getGalleryArrows('gallery-03');
-  const g02ColPoints = g02Points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
-  const g02IconPoints = g02Points.filter((p) => p.type === 'icon') as AdminIconPoint[];
-  const g02PuzzlePoints = g02Points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
-  const g02ExpPoints = getExperiencePointsForGallery('gallery-02');
+  // Gallery 04 Data (gallery-05 in database) — strictly Gallery 04 points only
+  const g04Points = getGalleryPoints('gallery-05');
+  const g04Arrows = getGalleryArrows('gallery-05');
+  const g04ColPoints = g04Points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
+  const g04IconPoints = g04Points.filter((p) => p.type === 'icon') as AdminIconPoint[];
+  const g04PuzzlePoints = g04Points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
+  const g04ExpPoints = getExperiencePointsForGallery('gallery-05');
 
   const areLocationPinsVisible = getLocationPinsVisible();
 
   // Relative World-Space Alignment:
-  // Arrow on Gallery 01 pointing to Gallery 02: x: 431, y: 216
-  // Arrow on Gallery 02 pointing back to Gallery 01: x: 28, y: 645
-  const g01H = g01Dim?.height || 500;
-  const g01W = g01Dim?.width || 320;
-  const g02H = g02Dim?.height || 500;
-  const g02W = g02Dim?.width || 340;
+  // Arrow on Gallery 03 pointing to Gallery 04: x: 462.55, y: 640
+  // Arrow on Gallery 04 pointing back to Gallery 03: x: 64, y: 227
+  const g03H = g03Dim?.height || 500;
+  const g03W = g03Dim?.width || 320;
+  const g04H = g04Dim?.height || 500;
+  const g04W = g04Dim?.width || 380;
 
-  const g01ArrowRelY = ((216 / G01_MAP_HEIGHT) - 0.5) * g01H;
-  const g02ArrowRelY = ((645 / G02_MAP_HEIGHT) - 0.5) * g02H;
+  const g03ArrowRelY = ((640 / G03_MAP_HEIGHT) - 0.5) * g03H;
+  const g04ArrowRelY = ((227 / G04_MAP_HEIGHT) - 0.5) * g04H;
 
-  // Align Gallery 02 so its return arrow is positioned directly opposite Gallery 01 forward arrow
-  const targetOffsetY = g01ArrowRelY - g02ArrowRelY;
-  // Shifted 3% closer horizontally from 1.007 -> 0.977
-  const targetOffsetX = Math.max(g01W, g02W) * 0.977;
+  // The relative vertical offset that aligns the two navigation arrows on the exact same horizontal axis:
+  const targetOffsetY = g03ArrowRelY - g04ArrowRelY;
+  // Natural horizontal gap bringing Gallery 04 into continuous adjacent world position:
+  const targetOffsetX = Math.max(g03W, g04W) * 0.98;
 
-  // Header titles cross-fade during travel
-  const [headerTitle, setHeaderTitle] = useState(isReverse ? 'گالری ۰۲' : 'گالری ۰۱');
+  // Header Title Cross-Fade at transition midpoint (400ms)
+  const [headerTitle, setHeaderTitle] = useState(() =>
+    isReverse ? 'گالری ۰۴' : 'گالری ۰۳'
+  );
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      setHeaderTitle(isReverse ? 'گالری ۰۱' : 'گالری ۰۲');
+      setHeaderTitle(isReverse ? 'گالری ۰۳' : 'گالری ۰۴');
     }, 400);
     return () => clearTimeout(timer);
   }, [isReverse]);
 
   return (
-    <div
-      id="g01-to-g02-transition-root"
-      className="user-facing-app h-screen h-[100dvh] max-h-[100dvh] w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom select-none pointer-events-none"
-    >
-      {/* Top App Bar Header */}
-      <header
-        id="transition-top-bar"
-        dir="ltr"
-        className="bg-[#ffffff] border-b-[1.25px] border-[#1e1b18] shadow-[0px_2px_0px_#1e1b18] flex flex-col w-full z-40 relative select-none pt-safe shrink-0 pointer-events-auto"
-      >
-        <div className="h-[5px] w-full bg-[#f59e0b] border-b border-[#1e1b18]" />
-        <div className="flex justify-between items-center px-3.5 sm:px-6 h-[56px] sm:h-[60px]">
+    <div className="user-facing-app h-screen h-[100dvh] max-h-[100dvh] w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom">
+      {/* Top Header - Pixel-perfect match with SharedGalleryPageLayout */}
+      <header className="user-header shrink-0 z-30 px-3 py-2 bg-[#fbf9f9] border-b-2 border-[#1e1b18] shadow-[0_2px_0_rgba(0,0,0,0.06)]">
+        <div className="max-w-md mx-auto flex items-center justify-between h-11">
+          {/* Back Button */}
           <button
             onClick={onNavigateBack}
             aria-label="بازگشت به نقشه اصلی"
-            className="border-2 border-[#1e1b18] rounded-xl bg-[#fef3c7] hover:bg-[#fde047] text-[#1e1b18] p-2 shadow-[1.5px_1.5px_0px_#1e1b18] inline-flex items-center justify-center cursor-pointer"
+            title="بازگشت به نقشه اصلی"
+            className="border-2 border-[#1e1b18] rounded-xl bg-[#fef3c7] hover:bg-[#fde047] text-[#1e1b18] p-2 shadow-[1.5px_1.5px_0px_#1e1b18] hover:shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-150"
           >
             <ArrowLeft className="w-5 h-5 text-[#1e1b18]" />
           </button>
 
+          {/* Center Title */}
           <div className="flex items-center justify-center h-full relative px-2 overflow-hidden">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -211,29 +248,32 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
             </AnimatePresence>
           </div>
 
+          {/* Right Profile Avatar */}
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('museum_open_profile'))}
             aria-label="پروفایل کاربری"
-            className="rounded-full cursor-pointer inline-flex items-center justify-center shrink-0"
+            title="پروفایل کاربری"
+            className="active:scale-95 transition-all duration-150 rounded-full cursor-pointer inline-flex items-center justify-center shrink-0"
           >
             <ProfileAvatar avatarId={profile?.avatarId} size="md" className="scale-[1.04]" />
           </button>
         </div>
       </header>
 
-      {/* Player Status Bar */}
+      {/* Compact Player Status Bar - Ensures exactly identical available map height */}
       <PlayerStatusBar puzzles={playerStats.completedPuzzles} stars={playerStats.stars} coins={playerStats.coins} />
 
-      {/* Main Floor Plan Canvas Viewport */}
+      {/* Main Map Viewport & Virtual Camera Viewport */}
       <main
         ref={containerRef}
         id="camera-transition-canvas-area"
-        className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-2 sm:p-2.5 mb-[calc(64px+env(safe-area-inset-bottom,0px))] sm:mb-[calc(68px+env(safe-area-inset-bottom,0px))]"
+        className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-2 sm:p-2.5 mb-[calc(64px+env(safe-area-inset-bottom,0px))] sm:mb-[calc(68px+env(safe-area-inset-bottom,0px))] touch-none select-none"
       >
-        {/* Virtual Museum Map Stage
-            Forward Transition: Camera moves from Gallery 01 (0, 0) to Gallery 02 (targetOffsetX, targetOffsetY).
-            Reverse Transition: Camera moves from Gallery 02 (targetOffsetX, targetOffsetY) back to Gallery 01 (0, 0).
-            Both maps stay in their fixed world-space positions.
+        {/*
+            Virtual Camera Stage:
+            Forward Transition: Camera moves from Gallery 03 (0, 0) to Gallery 04 (targetOffsetX, targetOffsetY).
+            Reverse Transition: Camera moves from Gallery 04 (targetOffsetX, targetOffsetY) back to Gallery 03 (0, 0).
+            Both maps stay in their fixed world-space positions at CONSTANT scale throughout.
         */}
         <motion.div
           id="camera-virtual-stage"
@@ -253,12 +293,13 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
           }}
           className="will-change-transform pointer-events-none"
         >
-          {/* Panel 1: Gallery 01 Map & Markers (Fixed Origin: 0, 0)
-              If forward (G01 -> G02), G01 softly fades out during the final ~240ms of easing.
-              If reverse (G02 -> G01), G01 is the destination and remains 100% visible throughout.
+          {/* Panel 1: Gallery 03 Map & Markers (Fixed Origin: 0, 0)
+              If forward (G03 -> G04), G03 softly fades out during the final ~240ms of easing.
+              If reverse (G04 -> G03), G03 is the destination and remains 100% visible throughout.
+              Constant scale throughout entire movement.
           */}
           <motion.div
-            id="panel-gallery-01"
+            id="panel-gallery-03"
             initial={{ opacity: 1 }}
             animate={isReverse ? { opacity: 1 } : { opacity: [1, 1, 0] }}
             transition={
@@ -278,25 +319,24 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
           >
             <div
               style={{
-                ...(g01Dim
-                  ? { width: `${g01Dim.width}px`, height: `${g01Dim.height}px` }
+                ...(g03Dim
+                  ? { width: `${g03Dim.width}px`, height: `${g03Dim.height}px` }
                   : { width: '100%', height: 'auto' }),
-                aspectRatio: `${G01_MAP_WIDTH} / ${G01_MAP_HEIGHT}`,
+                aspectRatio: `${G03_MAP_WIDTH} / ${G03_MAP_HEIGHT}`,
                 maxWidth: '100%',
                 maxHeight: '100%',
-                transform: 'translateX(6%)',
-                ['--map-point-scale' as any]: g01Dim ? (g01Dim.width / 360).toFixed(4) : '1',
+                ['--map-point-scale' as any]: g03Dim ? (g03Dim.width / 360).toFixed(4) : '1',
               }}
               className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
             >
-              <Gallery02MapSvg className="w-full h-full object-contain filter drop-shadow-sm pointer-events-none" />
+              <Gallery04MapSvg className="w-full h-full object-contain filter drop-shadow-sm pointer-events-none" />
 
               <div className="absolute inset-0 pointer-events-none">
-                {/* G01 Arrows */}
-                {g01Arrows.map((arrow) => {
+                {/* G03 Arrows */}
+                {g03Arrows.map((arrow) => {
                   const isEnabled = isArrowVisibleToPlayer(arrow);
-                  const leftPercent = (arrow.x / G01_MAP_WIDTH) * 100;
-                  const topPercent = (arrow.y / G01_MAP_HEIGHT) * 100;
+                  const leftPercent = (arrow.x / G03_MAP_WIDTH) * 100;
+                  const topPercent = (arrow.y / G03_MAP_HEIGHT) * 100;
                   return (
                     <div
                       key={arrow.id}
@@ -314,12 +354,12 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
                   );
                 })}
 
-                {/* G01 Custom Icons */}
-                {g01IconPoints
+                {/* G03 Custom Icons */}
+                {g03IconPoints
                   .filter((ip) => ip.iconType === 'preset-question' || areLocationPinsVisible)
                   .map((iconPoint) => {
-                    const leftPercent = (iconPoint.x / G01_MAP_WIDTH) * 100;
-                    const topPercent = (iconPoint.y / G01_MAP_HEIGHT) * 100;
+                    const leftPercent = (iconPoint.x / G03_MAP_WIDTH) * 100;
+                    const topPercent = (iconPoint.y / G03_MAP_HEIGHT) * 100;
                     const isGuideQuestion = iconPoint.iconType === 'preset-question';
                     return (
                       <div
@@ -340,8 +380,8 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
                     );
                   })}
 
-                {/* G01 Star Points — directly positioned without redundant outer wrapper */}
-                {g01ColPoints
+                {/* G03 Star Points */}
+                {g03ColPoints
                   .filter((cp) => (cp as any).pointType === 'star')
                   .map((artwork) => (
                     <StarPoint
@@ -351,39 +391,41 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
                       x={artwork.x}
                       y={artwork.y}
                       title={artwork.title}
-                      galleryId="gallery_01"
-                      mapWidth={G01_MAP_WIDTH}
-                      mapHeight={G01_MAP_HEIGHT}
+                      galleryId="gallery-04"
+                      mapWidth={G03_MAP_WIDTH}
+                      mapHeight={G03_MAP_HEIGHT}
+                      scaleFactor={1.12}
                       onOpenDiscoveryModal={() => {}}
                     />
                   ))}
 
-                {/* G01 Experience Points */}
-                {g01ExpPoints.map((exp) => (
+                {/* G03 Experience Points (Gallery 03 / gallery_04 strictly) */}
+                {g03ExpPoints.map((exp) => (
                   <ExperiencePoint
                     key={exp.id}
                     id={exp.id}
                     experienceId={exp.experienceId}
-                    galleryId={exp.galleryId || 'gallery_01'}
+                    galleryId="gallery_04"
                     x={exp.x}
                     y={exp.y}
                     iconId={exp.iconId}
                     label={exp.labelFa}
                     title={exp.title}
-                    mapWidth={G01_MAP_WIDTH}
-                    mapHeight={G01_MAP_HEIGHT}
+                    mapWidth={G03_MAP_WIDTH}
+                    mapHeight={G03_MAP_HEIGHT}
                     onOpenModal={() => {}}
                   />
                 ))}
 
-                {/* G01 Puzzle Points — directly positioned without redundant outer wrapper */}
-                {g01PuzzlePoints.map((puzzlePoint) => (
+                {/* G03 Puzzle Points */}
+                {g03PuzzlePoints.map((puzzlePoint) => (
                   <PuzzlePoint
                     key={puzzlePoint.id}
                     puzzlePoint={puzzlePoint}
-                    galleryId="gallery-01"
-                    mapWidth={G01_MAP_WIDTH}
-                    mapHeight={G01_MAP_HEIGHT}
+                    galleryId="gallery-04"
+                    mapWidth={G03_MAP_WIDTH}
+                    mapHeight={G03_MAP_HEIGHT}
+                    scaleFactor={1.12}
                     onClick={() => {}}
                   />
                 ))}
@@ -391,13 +433,14 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
             </div>
           </motion.div>
 
-          {/* Panel 2: Gallery 02 Map & Markers
-              Fixed world position: exactly opposite the Gallery 01 forward arrow.
-              If forward (G01 -> G02), G02 is the destination and remains 100% visible throughout.
-              If reverse (G02 -> G01), G02 softly fades out during the final ~240ms of easing.
+          {/* Panel 2: Gallery 04 Map & Markers
+              Fixed world position: exactly opposite the Gallery 03 forward arrow.
+              If forward (G03 -> G04), G04 is the destination and remains 100% visible throughout.
+              If reverse (G04 -> G03), G04 softly fades out during the final ~240ms of easing.
+              Constant scale throughout entire movement.
           */}
           <motion.div
-            id="panel-gallery-02"
+            id="panel-gallery-04"
             initial={{ opacity: 1 }}
             animate={isReverse ? { opacity: [1, 1, 0] } : { opacity: 1 }}
             transition={
@@ -417,25 +460,25 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
           >
             <div
               style={{
-                ...(g02Dim
-                  ? { width: `${g02Dim.width}px`, height: `${g02Dim.height}px` }
+                ...(g04Dim
+                  ? { width: `${g04Dim.width}px`, height: `${g04Dim.height}px` }
                   : { width: '100%', height: 'auto' }),
-                aspectRatio: `${G02_MAP_WIDTH} / ${G02_MAP_HEIGHT}`,
+                aspectRatio: `${G04_MAP_WIDTH} / ${G04_MAP_HEIGHT}`,
                 maxWidth: '100%',
                 maxHeight: '100%',
-                transform: 'translateX(2.2%)',
-                ['--map-point-scale' as any]: g02Dim ? (g02Dim.width / 360).toFixed(4) : '1',
+                transformOrigin: 'center center',
+                ['--map-point-scale' as any]: g04Dim ? (g04Dim.width / 360).toFixed(4) : '1',
               }}
               className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
             >
-              <Gallery03MapSvg className="w-full h-full object-contain filter drop-shadow-sm pointer-events-none" />
+              <Gallery05MapSvg className="w-full h-full object-contain filter drop-shadow-sm pointer-events-none" />
 
               <div className="absolute inset-0 pointer-events-none">
-                {/* G02 Arrows */}
-                {g02Arrows.map((arrow) => {
+                {/* G04 Arrows */}
+                {g04Arrows.map((arrow) => {
                   const isEnabled = isArrowVisibleToPlayer(arrow);
-                  const leftPercent = (arrow.x / G02_MAP_WIDTH) * 100;
-                  const topPercent = (arrow.y / G02_MAP_HEIGHT) * 100;
+                  const leftPercent = (arrow.x / G04_MAP_WIDTH) * 100;
+                  const topPercent = (arrow.y / G04_MAP_HEIGHT) * 100;
                   return (
                     <div
                       key={arrow.id}
@@ -453,12 +496,12 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
                   );
                 })}
 
-                {/* G02 Custom Icons */}
-                {g02IconPoints
+                {/* G04 Custom Icons */}
+                {g04IconPoints
                   .filter((ip) => ip.iconType === 'preset-question' || areLocationPinsVisible)
                   .map((iconPoint) => {
-                    const leftPercent = (iconPoint.x / G02_MAP_WIDTH) * 100;
-                    const topPercent = (iconPoint.y / G02_MAP_HEIGHT) * 100;
+                    const leftPercent = (iconPoint.x / G04_MAP_WIDTH) * 100;
+                    const topPercent = (iconPoint.y / G04_MAP_HEIGHT) * 100;
                     const isGuideQuestion = iconPoint.iconType === 'preset-question';
                     return (
                       <div
@@ -479,8 +522,8 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
                     );
                   })}
 
-                {/* G02 Star Points — directly positioned with exact map dimensions */}
-                {g02ColPoints
+                {/* G04 Star Points */}
+                {g04ColPoints
                   .filter((cp) => (cp as any).pointType === 'star')
                   .map((artwork) => (
                     <StarPoint
@@ -490,39 +533,41 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
                       x={artwork.x}
                       y={artwork.y}
                       title={artwork.title}
-                      galleryId="gallery_03"
-                      mapWidth={G02_MAP_WIDTH}
-                      mapHeight={G02_MAP_HEIGHT}
+                      galleryId="gallery-05"
+                      mapWidth={G04_MAP_WIDTH}
+                      mapHeight={G04_MAP_HEIGHT}
+                      scaleFactor={1.12}
                       onOpenDiscoveryModal={() => {}}
                     />
                   ))}
 
-                {/* G02 Experience Points */}
-                {g02ExpPoints.map((exp) => (
+                {/* G04 Experience Points (Gallery 04 / gallery_05 strictly) */}
+                {g04ExpPoints.map((exp) => (
                   <ExperiencePoint
                     key={exp.id}
                     id={exp.id}
                     experienceId={exp.experienceId}
-                    galleryId={exp.galleryId || 'gallery_02'}
+                    galleryId="gallery_05"
                     x={exp.x}
                     y={exp.y}
                     iconId={exp.iconId}
                     label={exp.labelFa}
                     title={exp.title}
-                    mapWidth={G02_MAP_WIDTH}
-                    mapHeight={G02_MAP_HEIGHT}
+                    mapWidth={G04_MAP_WIDTH}
+                    mapHeight={G04_MAP_HEIGHT}
                     onOpenModal={() => {}}
                   />
                 ))}
 
-                {/* G02 Puzzle Points — directly positioned with exact map dimensions */}
-                {g02PuzzlePoints.map((puzzlePoint) => (
+                {/* G04 Puzzle Points */}
+                {g04PuzzlePoints.map((puzzlePoint) => (
                   <PuzzlePoint
                     key={puzzlePoint.id}
                     puzzlePoint={puzzlePoint}
-                    galleryId="gallery-03"
-                    mapWidth={G02_MAP_WIDTH}
-                    mapHeight={G02_MAP_HEIGHT}
+                    galleryId="gallery-05"
+                    mapWidth={G04_MAP_WIDTH}
+                    mapHeight={G04_MAP_HEIGHT}
+                    scaleFactor={1.12}
                     onClick={() => {}}
                   />
                 ))}
@@ -532,30 +577,19 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
         </motion.div>
       </main>
 
-      {/* Bottom Floating Controls */}
-      <div className="absolute bottom-20 right-4 sm:right-6 z-30 flex items-center justify-center pointer-events-auto">
+      {/* Floating Circular Map View Button */}
+      <div className="fixed bottom-20 right-4 sm:right-6 z-30 pointer-events-auto">
         <button
           onClick={onNavigateBack}
           aria-label="بازگشت به نقشه اصلی"
-          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center cursor-pointer"
+          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center cursor-pointer active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-150 hover:bg-[#d97706]"
         >
-          <Map className="w-6 h-6 stroke-[2.5]" />
+          <span className="text-sm font-bold">نقشه</span>
         </button>
       </div>
 
       {/* Bottom Navigation Bar */}
-      <div className="pointer-events-auto">
-        <BottomNavBar
-          activeTab="map"
-          onTabChange={(tab) => {
-            if (tab === 'map') {
-              onNavigateBack();
-            } else {
-              onSelectTab?.(tab);
-            }
-          }}
-        />
-      </div>
+      <BottomNavBar activeTab="map" onSelectTab={onSelectTab} />
     </div>
   );
 };

@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Map } from 'lucide-react';
 import { getGalleryPoints, getGalleryArrows } from '../data/mapConfig';
 import { AdminCollectionPoint, AdminIconPoint, AdminPuzzlePoint } from '../types/admin';
-import { Gallery02MapSvg } from './Gallery02MapSvg';
 import { Gallery03MapSvg } from './Gallery03MapSvg';
+import { Gallery04MapSvg } from './Gallery04MapSvg';
 import { PuzzlePoint } from './PuzzlePoint';
 import { StarPoint } from './StarPoint';
 import { ExperiencePoint } from './ExperiencePoint';
@@ -20,18 +20,18 @@ import { getExperiencePointsForGallery } from '../data/experiencePointsConfig';
 import { isArrowVisibleToPlayer } from '../data/arrowConditionsStore';
 import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
 
-interface Gallery01To02CameraTransitionProps {
+interface Gallery02To03CameraTransitionProps {
   direction?: 'forward' | 'reverse';
   onComplete: () => void;
   onNavigateBack: () => void;
   onSelectTab?: (tab: 'map' | 'collection' | 'tasks' | 'curator') => void;
 }
 
-const G01_MAP_WIDTH = 524.2;
-const G01_MAP_HEIGHT = 822.62;
-
 const G02_MAP_WIDTH = 561.28;
 const G02_MAP_HEIGHT = 851.79;
+
+const G03_MAP_WIDTH = 498.55;
+const G03_MAP_HEIGHT = 851.79;
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -46,7 +46,7 @@ function getInitialEstimatedDimensions(mapWidth: number, mapHeight: number): Map
   return { width: fittedWidth, height: fittedHeight, scale };
 }
 
-export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransitionProps> = ({
+export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransitionProps> = ({
   direction = 'forward',
   onComplete,
   onNavigateBack,
@@ -58,14 +58,14 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
   const playerStats = usePlayerStats();
 
   // Synchronously compute initial estimated dimensions to prevent any first-frame flash/jump
-  const [g01Dim, setG01Dim] = useState<MapDimensions | null>(() =>
-    getInitialEstimatedDimensions(G01_MAP_WIDTH, G01_MAP_HEIGHT)
-  );
   const [g02Dim, setG02Dim] = useState<MapDimensions | null>(() =>
     getInitialEstimatedDimensions(G02_MAP_WIDTH, G02_MAP_HEIGHT)
   );
+  const [g03Dim, setG03Dim] = useState<MapDimensions | null>(() =>
+    getInitialEstimatedDimensions(G03_MAP_WIDTH, G03_MAP_HEIGHT)
+  );
 
-  // Measure the single shared viewport container for BOTH Gallery 01 and Gallery 02
+  // Measure the single shared viewport container for BOTH Gallery 02 and Gallery 03
   const calculateFitting = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -83,16 +83,16 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
 
     if (availWidth <= 0 || availHeight <= 0) return;
 
-    const s1 = Math.min(availWidth / G01_MAP_WIDTH, availHeight / G01_MAP_HEIGHT);
     const s2 = Math.min(availWidth / G02_MAP_WIDTH, availHeight / G02_MAP_HEIGHT);
+    const s3 = Math.min(availWidth / G03_MAP_WIDTH, availHeight / G03_MAP_HEIGHT);
 
-    const fW1 = Math.floor(G01_MAP_WIDTH * s1 * 10) / 10;
-    const fH1 = Math.floor(G01_MAP_HEIGHT * s1 * 10) / 10;
     const fW2 = Math.floor(G02_MAP_WIDTH * s2 * 10) / 10;
     const fH2 = Math.floor(G02_MAP_HEIGHT * s2 * 10) / 10;
+    const fW3 = Math.floor(G03_MAP_WIDTH * s3 * 10) / 10;
+    const fH3 = Math.floor(G03_MAP_HEIGHT * s3 * 10) / 10;
 
-    setG01Dim({ width: fW1, height: fH1, scale: s1 });
     setG02Dim({ width: fW2, height: fH2, scale: s2 });
+    setG03Dim({ width: fW3, height: fH3, scale: s3 });
   }, []);
 
   useIsomorphicLayoutEffect(() => {
@@ -130,15 +130,7 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
     return () => window.removeEventListener('museum_user_profile_updated', handleProfileUpdate);
   }, []);
 
-  // Gallery 01 Data
-  const g01Points = getGalleryPoints('gallery_01');
-  const g01Arrows = getGalleryArrows('gallery_01');
-  const g01ColPoints = g01Points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
-  const g01IconPoints = g01Points.filter((p) => p.type === 'icon') as AdminIconPoint[];
-  const g01PuzzlePoints = g01Points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
-  const g01ExpPoints = getExperiencePointsForGallery('gallery-01');
-
-  // Gallery 02 Data
+  // Gallery 02 Data (gallery-03 in database)
   const g02Points = getGalleryPoints('gallery-03');
   const g02Arrows = getGalleryArrows('gallery-03');
   const g02ColPoints = g02Points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
@@ -146,54 +138,63 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
   const g02PuzzlePoints = g02Points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
   const g02ExpPoints = getExperiencePointsForGallery('gallery-02');
 
+  // Gallery 03 Data (gallery-04 in database)
+  const g03Points = getGalleryPoints('gallery-04');
+  const g03Arrows = getGalleryArrows('gallery-04');
+  const g03ColPoints = g03Points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
+  const g03IconPoints = g03Points.filter((p) => p.type === 'icon') as AdminIconPoint[];
+  const g03PuzzlePoints = g03Points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
+  const g03ExpPoints = [
+    ...getExperiencePointsForGallery('gallery-03'),
+    ...getExperiencePointsForGallery('gallery-04'),
+  ];
+
   const areLocationPinsVisible = getLocationPinsVisible();
 
   // Relative World-Space Alignment:
-  // Arrow on Gallery 01 pointing to Gallery 02: x: 431, y: 216
-  // Arrow on Gallery 02 pointing back to Gallery 01: x: 28, y: 645
-  const g01H = g01Dim?.height || 500;
-  const g01W = g01Dim?.width || 320;
+  // Arrow on Gallery 02 pointing to Gallery 03: x: 532, y: 229
+  // Arrow on Gallery 03 pointing back to Gallery 02: x: 28, y: 645
   const g02H = g02Dim?.height || 500;
   const g02W = g02Dim?.width || 340;
+  const g03H = g03Dim?.height || 500;
+  const g03W = g03Dim?.width || 320;
 
-  const g01ArrowRelY = ((216 / G01_MAP_HEIGHT) - 0.5) * g01H;
-  const g02ArrowRelY = ((645 / G02_MAP_HEIGHT) - 0.5) * g02H;
+  const g02ArrowRelY = ((229 / G02_MAP_HEIGHT) - 0.5) * g02H;
+  const g03ArrowRelY = ((645 / G03_MAP_HEIGHT) - 0.5) * g03H;
 
-  // Align Gallery 02 so its return arrow is positioned directly opposite Gallery 01 forward arrow
-  const targetOffsetY = g01ArrowRelY - g02ArrowRelY;
-  // Shifted 3% closer horizontally from 1.007 -> 0.977
-  const targetOffsetX = Math.max(g01W, g02W) * 0.977;
+  // The relative vertical offset that aligns the two navigation arrows, with Gallery 03 moved exactly 0.4% downward:
+  const targetOffsetY = (g02ArrowRelY - g03ArrowRelY) + (g03H * 0.004);
+  // Natural horizontal gap bringing Gallery 03 into continuous adjacent world position:
+  const targetOffsetX = Math.max(g02W, g03W) * 0.98;
 
-  // Header titles cross-fade during travel
-  const [headerTitle, setHeaderTitle] = useState(isReverse ? 'گالری ۰۲' : 'گالری ۰۱');
+  // Header Title Cross-Fade at transition midpoint (400ms)
+  const [headerTitle, setHeaderTitle] = useState(() =>
+    isReverse ? 'گالری ۰۳' : 'گالری ۰۲'
+  );
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      setHeaderTitle(isReverse ? 'گالری ۰۱' : 'گالری ۰۲');
+      setHeaderTitle(isReverse ? 'گالری ۰۲' : 'گالری ۰۳');
     }, 400);
     return () => clearTimeout(timer);
   }, [isReverse]);
 
   return (
-    <div
-      id="g01-to-g02-transition-root"
-      className="user-facing-app h-screen h-[100dvh] max-h-[100dvh] w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom select-none pointer-events-none"
-    >
-      {/* Top App Bar Header */}
-      <header
-        id="transition-top-bar"
-        dir="ltr"
-        className="bg-[#ffffff] border-b-[1.25px] border-[#1e1b18] shadow-[0px_2px_0px_#1e1b18] flex flex-col w-full z-40 relative select-none pt-safe shrink-0 pointer-events-auto"
-      >
-        <div className="h-[5px] w-full bg-[#f59e0b] border-b border-[#1e1b18]" />
-        <div className="flex justify-between items-center px-3.5 sm:px-6 h-[56px] sm:h-[60px]">
+    <div className="user-facing-app h-screen h-[100dvh] max-h-[100dvh] w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom">
+      {/* Top Header */}
+      <header className="user-header shrink-0 z-30 px-3 py-2 bg-[#fbf9f9] border-b-2 border-[#1e1b18] shadow-[0_2px_0_rgba(0,0,0,0.06)]">
+        <div className="max-w-md mx-auto flex items-center justify-between h-11">
+          {/* Back Button */}
           <button
             onClick={onNavigateBack}
             aria-label="بازگشت به نقشه اصلی"
-            className="border-2 border-[#1e1b18] rounded-xl bg-[#fef3c7] hover:bg-[#fde047] text-[#1e1b18] p-2 shadow-[1.5px_1.5px_0px_#1e1b18] inline-flex items-center justify-center cursor-pointer"
+            title="بازگشت به نقشه اصلی"
+            className="border-2 border-[#1e1b18] rounded-xl bg-[#fef3c7] hover:bg-[#fde047] text-[#1e1b18] p-2 shadow-[1.5px_1.5px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-150"
           >
             <ArrowLeft className="w-5 h-5 text-[#1e1b18]" />
           </button>
 
+          {/* Center Title */}
           <div className="flex items-center justify-center h-full relative px-2 overflow-hidden">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -211,6 +212,7 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
             </AnimatePresence>
           </div>
 
+          {/* Right Profile Avatar */}
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('museum_open_profile'))}
             aria-label="پروفایل کاربری"
@@ -222,7 +224,11 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
       </header>
 
       {/* Player Status Bar */}
-      <PlayerStatusBar puzzles={playerStats.completedPuzzles} stars={playerStats.stars} coins={playerStats.coins} />
+      <PlayerStatusBar
+        puzzles={playerStats.completedPuzzles}
+        stars={playerStats.stars}
+        coins={playerStats.coins}
+      />
 
       {/* Main Floor Plan Canvas Viewport */}
       <main
@@ -231,8 +237,8 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
         className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-2 sm:p-2.5 mb-[calc(64px+env(safe-area-inset-bottom,0px))] sm:mb-[calc(68px+env(safe-area-inset-bottom,0px))]"
       >
         {/* Virtual Museum Map Stage
-            Forward Transition: Camera moves from Gallery 01 (0, 0) to Gallery 02 (targetOffsetX, targetOffsetY).
-            Reverse Transition: Camera moves from Gallery 02 (targetOffsetX, targetOffsetY) back to Gallery 01 (0, 0).
+            Forward Transition: Camera moves from Gallery 02 (0, 0) to Gallery 03 (targetOffsetX, targetOffsetY).
+            Reverse Transition: Camera moves from Gallery 03 (targetOffsetX, targetOffsetY) back to Gallery 02 (0, 0).
             Both maps stay in their fixed world-space positions.
         */}
         <motion.div
@@ -253,12 +259,12 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
           }}
           className="will-change-transform pointer-events-none"
         >
-          {/* Panel 1: Gallery 01 Map & Markers (Fixed Origin: 0, 0)
-              If forward (G01 -> G02), G01 softly fades out during the final ~240ms of easing.
-              If reverse (G02 -> G01), G01 is the destination and remains 100% visible throughout.
+          {/* Panel 1: Gallery 02 Map & Markers (Fixed Origin: 0, 0)
+              If forward (G02 -> G03), G02 softly fades out during the final ~240ms of easing.
+              If reverse (G03 -> G02), G02 is the destination and remains 100% visible throughout.
           */}
           <motion.div
-            id="panel-gallery-01"
+            id="panel-gallery-02"
             initial={{ opacity: 1 }}
             animate={isReverse ? { opacity: 1 } : { opacity: [1, 1, 0] }}
             transition={
@@ -273,145 +279,6 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
               width: '100%',
               height: '100%',
               transform: 'translate3d(0px, 0px, 0)',
-            }}
-            className="flex items-center justify-center"
-          >
-            <div
-              style={{
-                ...(g01Dim
-                  ? { width: `${g01Dim.width}px`, height: `${g01Dim.height}px` }
-                  : { width: '100%', height: 'auto' }),
-                aspectRatio: `${G01_MAP_WIDTH} / ${G01_MAP_HEIGHT}`,
-                maxWidth: '100%',
-                maxHeight: '100%',
-                transform: 'translateX(6%)',
-                ['--map-point-scale' as any]: g01Dim ? (g01Dim.width / 360).toFixed(4) : '1',
-              }}
-              className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
-            >
-              <Gallery02MapSvg className="w-full h-full object-contain filter drop-shadow-sm pointer-events-none" />
-
-              <div className="absolute inset-0 pointer-events-none">
-                {/* G01 Arrows */}
-                {g01Arrows.map((arrow) => {
-                  const isEnabled = isArrowVisibleToPlayer(arrow);
-                  const leftPercent = (arrow.x / G01_MAP_WIDTH) * 100;
-                  const topPercent = (arrow.y / G01_MAP_HEIGHT) * 100;
-                  return (
-                    <div
-                      key={arrow.id}
-                      id={`arrow-${arrow.id}`}
-                      style={{
-                        left: `${leftPercent}%`,
-                        top: `${topPercent}%`,
-                        transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
-                        transformOrigin: 'center center',
-                      }}
-                      className="absolute z-30 pointer-events-none"
-                    >
-                      <NavigationArrowRender arrow={arrow} isDisabled={!isEnabled} isInteractive={false} />
-                    </div>
-                  );
-                })}
-
-                {/* G01 Custom Icons */}
-                {g01IconPoints
-                  .filter((ip) => ip.iconType === 'preset-question' || areLocationPinsVisible)
-                  .map((iconPoint) => {
-                    const leftPercent = (iconPoint.x / G01_MAP_WIDTH) * 100;
-                    const topPercent = (iconPoint.y / G01_MAP_HEIGHT) * 100;
-                    const isGuideQuestion = iconPoint.iconType === 'preset-question';
-                    return (
-                      <div
-                        key={iconPoint.id}
-                        id={`icon-point-${iconPoint.id}`}
-                        style={{
-                          left: `${leftPercent}%`,
-                          top: `${topPercent}%`,
-                          transform: isGuideQuestion
-                            ? 'translate(-50%, -50%) scale(calc(var(--map-point-scale, 1) * 1.13))'
-                            : 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
-                          transformOrigin: 'center center',
-                        }}
-                        className="absolute z-20 pointer-events-none"
-                      >
-                        <CustomIconRender point={iconPoint} />
-                      </div>
-                    );
-                  })}
-
-                {/* G01 Star Points — directly positioned without redundant outer wrapper */}
-                {g01ColPoints
-                  .filter((cp) => (cp as any).pointType === 'star')
-                  .map((artwork) => (
-                    <StarPoint
-                      key={artwork.id}
-                      id={artwork.id}
-                      starId={artwork.starId || artwork.id}
-                      x={artwork.x}
-                      y={artwork.y}
-                      title={artwork.title}
-                      galleryId="gallery_01"
-                      mapWidth={G01_MAP_WIDTH}
-                      mapHeight={G01_MAP_HEIGHT}
-                      onOpenDiscoveryModal={() => {}}
-                    />
-                  ))}
-
-                {/* G01 Experience Points */}
-                {g01ExpPoints.map((exp) => (
-                  <ExperiencePoint
-                    key={exp.id}
-                    id={exp.id}
-                    experienceId={exp.experienceId}
-                    galleryId={exp.galleryId || 'gallery_01'}
-                    x={exp.x}
-                    y={exp.y}
-                    iconId={exp.iconId}
-                    label={exp.labelFa}
-                    title={exp.title}
-                    mapWidth={G01_MAP_WIDTH}
-                    mapHeight={G01_MAP_HEIGHT}
-                    onOpenModal={() => {}}
-                  />
-                ))}
-
-                {/* G01 Puzzle Points — directly positioned without redundant outer wrapper */}
-                {g01PuzzlePoints.map((puzzlePoint) => (
-                  <PuzzlePoint
-                    key={puzzlePoint.id}
-                    puzzlePoint={puzzlePoint}
-                    galleryId="gallery-01"
-                    mapWidth={G01_MAP_WIDTH}
-                    mapHeight={G01_MAP_HEIGHT}
-                    onClick={() => {}}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Panel 2: Gallery 02 Map & Markers
-              Fixed world position: exactly opposite the Gallery 01 forward arrow.
-              If forward (G01 -> G02), G02 is the destination and remains 100% visible throughout.
-              If reverse (G02 -> G01), G02 softly fades out during the final ~240ms of easing.
-          */}
-          <motion.div
-            id="panel-gallery-02"
-            initial={{ opacity: 1 }}
-            animate={isReverse ? { opacity: [1, 1, 0] } : { opacity: 1 }}
-            transition={
-              isReverse
-                ? { duration: 0.85, times: [0, 0.72, 1], ease: 'easeOut' }
-                : { duration: 0.85 }
-            }
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              transform: `translate3d(${targetOffsetX}px, ${targetOffsetY}px, 0)`,
             }}
             className="flex items-center justify-center"
           >
@@ -479,7 +346,7 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
                     );
                   })}
 
-                {/* G02 Star Points — directly positioned with exact map dimensions */}
+                {/* G02 Star Points */}
                 {g02ColPoints
                   .filter((cp) => (cp as any).pointType === 'star')
                   .map((artwork) => (
@@ -515,7 +382,7 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
                   />
                 ))}
 
-                {/* G02 Puzzle Points — directly positioned with exact map dimensions */}
+                {/* G02 Puzzle Points */}
                 {g02PuzzlePoints.map((puzzlePoint) => (
                   <PuzzlePoint
                     key={puzzlePoint.id}
@@ -528,6 +395,153 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
                 ))}
               </div>
             </div>
+          </motion.div>
+
+          {/* Panel 2: Gallery 03 Map & Markers
+              Fixed world position: exactly opposite the Gallery 02 forward arrow.
+              If forward (G02 -> G03), G03 is the destination and remains 100% visible throughout.
+              During G02 -> G03, G03 starts at 101.3% (scale: 1.013) and smoothly scales down to 100% (scale: 1.0)
+              anchored to its center so that the corridor connection matches visually.
+              If reverse (G03 -> G02), G03 softly fades out during the final ~240ms of easing.
+          */}
+          <motion.div
+            id="panel-gallery-03"
+            initial={{ opacity: 1 }}
+            animate={isReverse ? { opacity: [1, 1, 0] } : { opacity: 1 }}
+            transition={
+              isReverse
+                ? { duration: 0.85, times: [0, 0.72, 1], ease: 'easeOut' }
+                : { duration: 0.85 }
+            }
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              transform: `translate3d(${targetOffsetX}px, ${targetOffsetY}px, 0)`,
+            }}
+            className="flex items-center justify-center"
+          >
+            <motion.div
+              initial={isReverse ? { scale: 1 } : { scale: 1.013 }}
+              animate={{ scale: 1 }}
+              transition={{
+                duration: 0.85,
+                ease: [0.4, 0.0, 0.2, 1],
+              }}
+              style={{
+                ...(g03Dim
+                  ? { width: `${g03Dim.width}px`, height: `${g03Dim.height}px` }
+                  : { width: '100%', height: 'auto' }),
+                aspectRatio: `${G03_MAP_WIDTH} / ${G03_MAP_HEIGHT}`,
+                maxWidth: '100%',
+                maxHeight: '100%',
+                transformOrigin: 'center center',
+                ['--map-point-scale' as any]: g03Dim ? (g03Dim.width / 360).toFixed(4) : '1',
+              }}
+              className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
+            >
+              <Gallery04MapSvg className="w-full h-full object-contain filter drop-shadow-sm pointer-events-none" />
+
+              <div className="absolute inset-0 pointer-events-none">
+                {/* G03 Arrows */}
+                {g03Arrows.map((arrow) => {
+                  const isEnabled = isArrowVisibleToPlayer(arrow);
+                  const leftPercent = (arrow.x / G03_MAP_WIDTH) * 100;
+                  const topPercent = (arrow.y / G03_MAP_HEIGHT) * 100;
+                  return (
+                    <div
+                      key={arrow.id}
+                      id={`arrow-${arrow.id}`}
+                      style={{
+                        left: `${leftPercent}%`,
+                        top: `${topPercent}%`,
+                        transform: 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                        transformOrigin: 'center center',
+                      }}
+                      className="absolute z-30 pointer-events-none"
+                    >
+                      <NavigationArrowRender arrow={arrow} isDisabled={!isEnabled} isInteractive={false} />
+                    </div>
+                  );
+                })}
+
+                {/* G03 Custom Icons */}
+                {g03IconPoints
+                  .filter((ip) => ip.iconType === 'preset-question' || areLocationPinsVisible)
+                  .map((iconPoint) => {
+                    const leftPercent = (iconPoint.x / G03_MAP_WIDTH) * 100;
+                    const topPercent = (iconPoint.y / G03_MAP_HEIGHT) * 100;
+                    const isGuideQuestion = iconPoint.iconType === 'preset-question';
+                    return (
+                      <div
+                        key={iconPoint.id}
+                        id={`icon-point-${iconPoint.id}`}
+                        style={{
+                          left: `${leftPercent}%`,
+                          top: `${topPercent}%`,
+                          transform: isGuideQuestion
+                            ? 'translate(-50%, -50%) scale(calc(var(--map-point-scale, 1) * 1.13))'
+                            : 'translate(-50%, -50%) scale(var(--map-point-scale, 1))',
+                          transformOrigin: 'center center',
+                        }}
+                        className="absolute z-20 pointer-events-none"
+                      >
+                        <CustomIconRender point={iconPoint} />
+                      </div>
+                    );
+                  })}
+
+                {/* G03 Star Points */}
+                {g03ColPoints
+                  .filter((cp) => (cp as any).pointType === 'star')
+                  .map((artwork) => (
+                    <StarPoint
+                      key={artwork.id}
+                      id={artwork.id}
+                      starId={artwork.starId || artwork.id}
+                      x={artwork.x}
+                      y={artwork.y}
+                      title={artwork.title}
+                      galleryId="gallery_04"
+                      mapWidth={G03_MAP_WIDTH}
+                      mapHeight={G03_MAP_HEIGHT}
+                      onOpenDiscoveryModal={() => {}}
+                    />
+                  ))}
+
+                {/* G03 Experience Points */}
+                {g03ExpPoints.map((exp) => (
+                  <ExperiencePoint
+                    key={exp.id}
+                    id={exp.id}
+                    experienceId={exp.experienceId}
+                    galleryId={exp.galleryId || 'gallery_04'}
+                    x={exp.x}
+                    y={exp.y}
+                    iconId={exp.iconId}
+                    label={exp.labelFa}
+                    title={exp.title}
+                    mapWidth={G03_MAP_WIDTH}
+                    mapHeight={G03_MAP_HEIGHT}
+                    onOpenModal={() => {}}
+                  />
+                ))}
+
+                {/* G03 Puzzle Points */}
+                {g03PuzzlePoints.map((puzzlePoint) => (
+                  <PuzzlePoint
+                    key={puzzlePoint.id}
+                    puzzlePoint={puzzlePoint}
+                    galleryId="gallery-04"
+                    mapWidth={G03_MAP_WIDTH}
+                    mapHeight={G03_MAP_HEIGHT}
+                    onClick={() => {}}
+                  />
+                ))}
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       </main>
