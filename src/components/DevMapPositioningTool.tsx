@@ -48,6 +48,12 @@ import {
   CuratorFrameConfig,
 } from '../data/curatorWallStore';
 import { contentService } from '../services/content/contentService';
+import { Gallery07MapSvg } from './Gallery07MapSvg';
+import {
+  getGallery05To06TransitionTarget,
+  saveGallery05To06TransitionTarget,
+  resetGallery05To06TransitionTarget,
+} from '../data/galleryTransitionTargetStore';
 import {
   AdminMapPoint,
   AdminCollectionPoint,
@@ -192,7 +198,7 @@ export interface DevMapPositioningToolProps {
 
 interface EditableElement {
   id: string;
-  type: 'star' | 'puzzle' | 'arrow' | 'experience' | 'lamp' | 'lock' | 'icon' | 'curator-frame';
+  type: 'star' | 'puzzle' | 'arrow' | 'experience' | 'lamp' | 'lock' | 'icon' | 'curator-frame' | 'transition-target';
   title: string;
   originalX: number;
   originalY: number;
@@ -227,6 +233,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     width?: number;
     height?: number;
     rotation?: number;
+    scale?: number;
   } | null>(null);
 
   // Currently loaded elements for the active gallery / curator wall
@@ -626,6 +633,27 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       }
     }
 
+    // G. Transition Target Ghost for Gallery 05 -> Gallery 06
+    if (
+      currentGalleryId === 'gallery-05' ||
+      currentGalleryId === 'gallery-04' ||
+      currentGalleryId === 'gallery-06'
+    ) {
+      const target = getGallery05To06TransitionTarget();
+      list.push({
+        id: 'g05-to-g06-transition-target',
+        type: 'transition-target',
+        title: '🎯 هدف انیمیشن گالری ۰۶ (Transition Target)',
+        originalX: target.x,
+        originalY: target.y,
+        currentX: target.x,
+        currentY: target.y,
+        extra: {
+          scale: target.scale,
+        },
+      });
+    }
+
     setElements(list);
   }, [isCuratorMode, currentGalleryId, mapContainerEl]);
 
@@ -649,6 +677,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     window.addEventListener('museum_gallery_areas_updated', handleUpdate);
     window.addEventListener('curator_wall_config_updated', handleUpdate);
     window.addEventListener('dev_select_curator_frame', handleDevSelect);
+    window.addEventListener('museum_g05_to_g06_transition_target_updated', handleUpdate);
 
     return () => {
       window.removeEventListener('museum_points_updated', handleUpdate);
@@ -660,6 +689,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       window.removeEventListener('museum_gallery_areas_updated', handleUpdate);
       window.removeEventListener('curator_wall_config_updated', handleUpdate);
       window.removeEventListener('dev_select_curator_frame', handleDevSelect);
+      window.removeEventListener('museum_g05_to_g06_transition_target_updated', handleUpdate);
     };
   }, [refreshElements]);
 
@@ -674,6 +704,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
           width: el.currentWidth ?? el.originalWidth,
           height: el.currentHeight ?? el.originalHeight,
           rotation: el.currentRotation ?? el.originalRotation ?? 0,
+          scale: el.extra?.scale ?? 0.97,
         });
       }
     } else {
@@ -703,6 +734,24 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     };
   };
 
+  const handleTargetScaleStep = (deltaScale: number) => {
+    if (!selectedId || !selectedElement || selectedElement.type !== 'transition-target') return;
+    const curScale = dragCoords?.scale ?? selectedElement.extra?.scale ?? 0.97;
+    const nextScale = Math.max(0.1, Math.min(3.0, Math.round((curScale + deltaScale) * 1000) / 1000));
+    const curX = dragCoords?.x ?? selectedElement.currentX;
+    const curY = dragCoords?.y ?? selectedElement.currentY;
+
+    setDragCoords({ x: curX, y: curY, scale: nextScale });
+    setElements((prev) =>
+      prev.map((el) =>
+        el.id === selectedId
+          ? { ...el, extra: { ...el.extra, scale: nextScale } }
+          : el
+      )
+    );
+    requestAnimationFrame(() => updatePanelPlacement());
+  };
+
   const selectedElement = elements.find((e) => e.id === selectedId);
   const activeX = dragCoords && selectedElement ? dragCoords.x : selectedElement?.currentX ?? 0;
   const activeY = dragCoords && selectedElement ? dragCoords.y : selectedElement?.currentY ?? 0;
@@ -726,6 +775,16 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
 
   const getSelectedPointScreenPos = useCallback((): { x: number; y: number } | null => {
     if (!selectedId || !mapContainerEl) return null;
+
+    if (selectedElement?.type === 'transition-target') {
+      const mRect = mapContainerEl.getBoundingClientRect();
+      const posX = dragCoords && selectedElement ? dragCoords.x : selectedElement?.currentX ?? 0;
+      const posY = dragCoords && selectedElement ? dragCoords.y : selectedElement?.currentY ?? 0;
+      return {
+        x: mRect.left + mRect.width / 2 + posX,
+        y: mRect.top + mRect.height / 2 + posY,
+      };
+    }
 
     // For Curator Frame: Check if frame overlay element exists in DOM
     if (selectedElement?.type === 'curator-frame') {
@@ -1019,6 +1078,32 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
               },
             },
           })
+        );
+
+        updatePanelPlacement(e.clientX, e.clientY);
+        return;
+      }
+
+      // Transition Target dragging
+      if (selectedElement.type === 'transition-target') {
+        const rect = mapContainerEl.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        const targetX = Math.round((e.clientX - centerX) - dragOffsetRef.current.offsetX);
+        const targetY = Math.round((e.clientY - centerY) - dragOffsetRef.current.offsetY);
+        const currentScale = dragCoords?.scale ?? selectedElement.extra?.scale ?? 0.97;
+
+        setDragCoords({
+          x: targetX,
+          y: targetY,
+          scale: currentScale,
+        });
+
+        setElements((prev) =>
+          prev.map((el) =>
+            el.id === selectedId ? { ...el, currentX: targetX, currentY: targetY } : el
+          )
         );
 
         updatePanelPlacement(e.clientX, e.clientY);
@@ -1370,6 +1455,17 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       const targetGalleryId = el.extra?.galleryId || el.subType || el.id.replace('lock-', '');
       saveGalleryLockPosition(targetGalleryId, finalX, finalY);
       showToast(`موقعیت «${el.title}» ذخیره شد: X: ${finalX} , Y: ${finalY}`, 'success');
+    } else if (el.type === 'transition-target') {
+      const activeScale = dragCoords?.scale ?? el.extra?.scale ?? 0.97;
+      saveGallery05To06TransitionTarget({
+        x: finalX,
+        y: finalY,
+        scale: activeScale,
+      });
+      showToast(
+        `موقعیت انیمیشن گالری ۰۶ ذخیره شد: X: ${finalX} , Y: ${finalY} , Scale: ${activeScale}`,
+        'success'
+      );
     } else {
       // Star / Collection Point
       const currentPoints = getGalleryPoints(currentGalleryId);
@@ -1415,6 +1511,29 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
     if (!selectedId) return;
     const el = elements.find((e) => e.id === selectedId);
     if (!el) return;
+
+    if (el.type === 'transition-target') {
+      const resetTarget = resetGallery05To06TransitionTarget();
+      setDragCoords({
+        x: resetTarget.x,
+        y: resetTarget.y,
+        scale: resetTarget.scale,
+      });
+      setElements((prev) =>
+        prev.map((item) =>
+          item.id === selectedId
+            ? {
+                ...item,
+                currentX: resetTarget.x,
+                currentY: resetTarget.y,
+                extra: { ...item.extra, scale: resetTarget.scale },
+              }
+            : item
+        )
+      );
+      showToast(`موقعیت انیمیشن گالری ۰۶ به حالت اولیه بازگردانده شد`, 'info');
+      return;
+    }
 
     if (el.type === 'curator-frame') {
       setDragCoords({
@@ -1772,6 +1891,73 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                 );
               }
 
+              // TRANSITION TARGET RENDERING
+              if (item.type === 'transition-target') {
+                const itemScale = isSelected && dragCoords?.scale !== undefined ? dragCoords.scale : (item.extra?.scale ?? 0.97);
+
+                return (
+                  <React.Fragment key={item.id}>
+                    {/* Semi-transparent Ghost Preview of Gallery 06 */}
+                    <div
+                      id={`dev-ghost-${item.id}`}
+                      style={{
+                        position: 'absolute',
+                        left: '50%',
+                        top: '50%',
+                        transform: `translate(-50%, -50%) translate3d(${posX}px, ${posY}px, 0) scale(${itemScale})`,
+                        transformOrigin: 'center center',
+                        opacity: isSelected ? 0.85 : 0.45,
+                        pointerEvents: 'none',
+                      }}
+                      className="transition-opacity flex items-center justify-center z-30"
+                    >
+                      <div
+                        style={{
+                          width: '320px',
+                          height: '380px',
+                          aspectRatio: '544.58 / 650',
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                        }}
+                        className="relative flex items-center justify-center shrink-0 border-2 border-dashed border-amber-400 rounded-2xl p-1 bg-amber-950/20 backdrop-blur-[1px] shadow-2xl"
+                      >
+                        <Gallery07MapSvg className="w-full h-full object-contain filter drop-shadow-md pointer-events-none" />
+                      </div>
+                    </div>
+
+                    {/* Draggable Handle for Transition Target */}
+                    <div
+                      id={`dev-handle-${item.id}`}
+                      style={{
+                        left: `calc(50% + ${posX}px)`,
+                        top: `calc(50% + ${posY}px)`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                      onPointerDown={(e) => handlePointerDown(item.id, e)}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      className={`absolute pointer-events-auto cursor-grab active:cursor-grabbing flex items-center justify-center transition-transform z-50 ${
+                        isSelected ? 'scale-110' : 'hover:scale-105'
+                      }`}
+                    >
+                      <div
+                        className={`px-3 py-1.5 rounded-xl flex items-center gap-2 font-sans-custom text-xs font-bold border shadow-2xl ${
+                          isSelected
+                            ? 'bg-amber-400 text-stone-950 border-stone-900 ring-4 ring-amber-400/30'
+                            : 'bg-stone-900/90 text-amber-300 border-amber-500/60'
+                        }`}
+                      >
+                        <span>🎯</span>
+                        <span>هدف گالری ۰۶</span>
+                        <span className="font-mono-custom text-[10px] opacity-90">
+                          (X:{posX}, Y:{posY} | Scale:{itemScale})
+                        </span>
+                      </div>
+                    </div>
+                  </React.Fragment>
+                );
+              }
+
               // MAP POINT RENDERING
               const leftPct = (posX / mapWidth) * 100;
               const topPct = (posY / mapHeight) * 100;
@@ -2020,6 +2206,17 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                         .map((e) => (
                           <option key={e.id} value={e.id}>
                             {e.title} (X: {e.currentX}, Y: {e.currentY})
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
+                  {elements.some((e) => e.type === 'transition-target') && (
+                    <optgroup label="🎯 هدف انیمیشن انتقالی (Transition Target)">
+                      {elements
+                        .filter((e) => e.type === 'transition-target')
+                        .map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.title} (X: {e.currentX}, Y: {e.currentY}, Scale: {dragCoords?.scale ?? e.extra?.scale ?? 0.97})
                           </option>
                         ))}
                     </optgroup>

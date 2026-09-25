@@ -38,7 +38,7 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 function getInitialEstimatedDimensions(mapWidth: number, mapHeight: number): MapDimensions | null {
   if (typeof window === 'undefined') return null;
   const availWidth = Math.max(0, window.innerWidth - 16);
-  const availHeight = Math.max(0, window.innerHeight - 170);
+  const availHeight = Math.max(0, window.innerHeight - 196);
   if (availWidth <= 0 || availHeight <= 0) return null;
   const scale = Math.min(availWidth / mapWidth, availHeight / mapHeight);
   const fittedWidth = Math.floor(mapWidth * scale * 10) / 10;
@@ -151,21 +151,60 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
 
   const areLocationPinsVisible = getLocationPinsVisible();
 
-  // Relative World-Space Alignment:
-  // Arrow on Gallery 02 pointing to Gallery 03: x: 532, y: 229
-  // Arrow on Gallery 03 pointing back to Gallery 02: x: 28, y: 645
+  // Anchor-based World-Space Alignment:
+  // Outgoing Connection Point on Gallery 02: x: 532, y: 229
+  // Incoming Connection Point on Gallery 03: x: 28, y: 645
   const g02H = g02Dim?.height || 500;
   const g02W = g02Dim?.width || 340;
   const g03H = g03Dim?.height || 500;
   const g03W = g03Dim?.width || 320;
 
+  const s2 = g02Dim?.scale || (g02W / G02_MAP_WIDTH);
+  const s3 = g03Dim?.scale || (g03W / G03_MAP_WIDTH);
+  const avgScale = (s2 + s3) / 2;
+
+  // Transformed map bounds in local panel space:
+  // Gallery 02 has canonical translateX(2.2%)
+  const g02Tx = 0.022 * g02W;
+  const g03Tx = 0;
+
+  const g02ArrowRelX = g02Tx + ((532 / G02_MAP_WIDTH) - 0.5) * g02W;
   const g02ArrowRelY = ((229 / G02_MAP_HEIGHT) - 0.5) * g02H;
+
+  const g03ArrowRelX = g03Tx + ((28 / G03_MAP_WIDTH) - 0.5) * g03W;
   const g03ArrowRelY = ((645 / G03_MAP_HEIGHT) - 0.5) * g03H;
 
-  // The relative vertical offset that aligns the two navigation arrows, with Gallery 03 moved exactly 0.4% downward:
-  const targetOffsetY = (g02ArrowRelY - g03ArrowRelY) + (g03H * 0.004);
-  // Natural horizontal gap bringing Gallery 03 into continuous adjacent world position:
-  const targetOffsetX = Math.max(g02W, g03W) * 0.98;
+  // 1. Align connection points on the horizontal travel axis:
+  const targetOffsetY = g02ArrowRelY - g03ArrowRelY;
+
+  // 2. Position destination map in shared world-space so actual transformed map bounds do NOT intersect:
+  // Small consistent clearance in shared world space ensures visible map boundaries never collide
+  const CLEARANCE_SVG = 12;
+  const clearanceX = CLEARANCE_SVG * avgScale;
+  const map2Right = g02Tx + (g02W / 2);
+  const map3Left = g03Tx - (g03W / 2);
+  const targetOffsetX = (map2Right - map3Left) + clearanceX;
+
+  // 3. Geometry-based Corridor Opening Matching:
+  // Outgoing corridor opening on Gallery 02 (East): height = 87.91 SVG units
+  // Incoming corridor opening on Gallery 03 (West): rect height = 84.31 SVG units
+  const G02_OUTGOING_CORRIDOR_OPENING_SVG = 87.91;
+  const G03_INCOMING_CORRIDOR_OPENING_SVG = 84.31;
+
+  const g02CorridorScreen = G02_OUTGOING_CORRIDOR_OPENING_SVG * s2;
+  const g03CorridorScreen = G03_INCOMING_CORRIDOR_OPENING_SVG * s3;
+
+  // Scale ratio derived directly from actual rendered corridor opening geometry:
+  const forwardScale = g02CorridorScreen / g03CorridorScreen;
+  const reverseScale = g03CorridorScreen / g02CorridorScreen;
+
+  const initialStageX = isReverse ? -reverseScale * targetOffsetX : 0;
+  const initialStageY = isReverse ? -reverseScale * targetOffsetY : 0;
+  const initialStageScale = isReverse ? reverseScale : forwardScale;
+
+  const targetStageX = isReverse ? 0 : -targetOffsetX;
+  const targetStageY = isReverse ? 0 : -targetOffsetY;
+  const targetStageScale = 1;
 
   // Header Title Cross-Fade at transition midpoint (400ms)
   const [headerTitle, setHeaderTitle] = useState(() =>
@@ -237,17 +276,18 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
         className="flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-2 sm:p-2.5 mb-[calc(64px+env(safe-area-inset-bottom,0px))] sm:mb-[calc(68px+env(safe-area-inset-bottom,0px))]"
       >
         {/* Virtual Museum Map Stage
-            Forward Transition: Camera moves from Gallery 02 (0, 0) to Gallery 03 (targetOffsetX, targetOffsetY).
+            Forward Transition: Camera moves from Gallery 02 (0, 0) to Gallery 03 (targetOffsetX, targetOffsetY),
+            smoothly zooming so corridor openings match seamlessly at the connection, landing at 100% scale.
             Reverse Transition: Camera moves from Gallery 03 (targetOffsetX, targetOffsetY) back to Gallery 02 (0, 0).
             Both maps stay in their fixed world-space positions.
         */}
         <motion.div
           id="camera-virtual-stage"
-          initial={isReverse ? { x: -targetOffsetX, y: -targetOffsetY } : { x: 0, y: 0 }}
-          animate={isReverse ? { x: 0, y: 0 } : { x: -targetOffsetX, y: -targetOffsetY }}
+          initial={{ x: initialStageX, y: initialStageY, scale: initialStageScale }}
+          animate={{ x: targetStageX, y: targetStageY, scale: targetStageScale }}
           transition={{
             duration: 0.85,
-            ease: [0.4, 0.0, 0.2, 1],
+            ease: [0.16, 1, 0.3, 1],
           }}
           onAnimationComplete={onComplete}
           style={{
@@ -256,6 +296,7 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
             left: 0,
             width: '100%',
             height: '100%',
+            transformOrigin: 'center center',
           }}
           className="will-change-transform pointer-events-none"
         >
@@ -507,6 +548,7 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
                       galleryId="gallery_04"
                       mapWidth={G03_MAP_WIDTH}
                       mapHeight={G03_MAP_HEIGHT}
+                      scaleFactor={1.12}
                       onOpenDiscoveryModal={() => {}}
                     />
                   ))}
@@ -537,6 +579,7 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
                     galleryId="gallery-04"
                     mapWidth={G03_MAP_WIDTH}
                     mapHeight={G03_MAP_HEIGHT}
+                    scaleFactor={1.12}
                     onClick={() => {}}
                   />
                 ))}

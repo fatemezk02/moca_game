@@ -10,9 +10,9 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 
 function getInitialEstimatedDimensions(mapWidth: number, mapHeight: number): MapDimensions | null {
   if (typeof window === 'undefined') return null;
-  // Available width & height accounting for header, status bar, and bottom nav
+  // Available width & height accounting for header (61px), status bar (32px), bottom nav (86px), and canvas padding (16px)
   const availWidth = Math.max(0, window.innerWidth - 16);
-  const availHeight = Math.max(0, window.innerHeight - 170);
+  const availHeight = Math.max(0, window.innerHeight - 196);
   if (availWidth <= 0 || availHeight <= 0) return null;
   const scale = Math.min(availWidth / mapWidth, availHeight / mapHeight);
   const fittedWidth = Math.floor(mapWidth * scale * 10) / 10;

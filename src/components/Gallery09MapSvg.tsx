@@ -38,12 +38,12 @@ export const Gallery09MapSvg = forwardRef<SVGSVGElement, Gallery09MapSvgProps>(
           <defs>
             <style>
               {`
-                .cls-1{fill:url(#linear-gradient);}
-                .cls-2{fill:url(#linear-gradient-2);}
-                .cls-3{fill:#f8efe8;}
-                .cls-4{fill:none;}
-                .cls-5{fill:#2a2623;}
-                .cls-6{fill:#998f56;stroke:#353329;stroke-miterlimit:10;}
+                .g09-cls-1{fill:url(#linear-gradient);}
+                .g09-cls-2{fill:url(#linear-gradient-2);}
+                .g09-cls-3{fill:#f8efe8;}
+                .g09-cls-4{fill:none;}
+                .g09-cls-5{fill:#2a2623;}
+                .g09-cls-6{fill:#998f56;stroke:#353329;stroke-miterlimit:10;}
               `}
             </style>
             <linearGradient
@@ -77,27 +77,27 @@ export const Gallery09MapSvg = forwardRef<SVGSVGElement, Gallery09MapSvgProps>(
           </defs>
           <g id="Layer_2" data-name="Layer 2">
             <g id="Layer_1-2" data-name="Layer 1">
-              <rect className="cls-1" x="26.57" y="164.72" width="79.55" height="206.43" />
-              <rect className="cls-2" x="168.66" y="731.38" width="161.15" height="115.07" />
+              <rect className="g09-cls-1" x="26.57" y="164.72" width="79.55" height="206.43" />
+              <rect className="g09-cls-2" x="168.66" y="731.38" width="161.15" height="115.07" />
               <path
-                className="cls-3"
+                className="g09-cls-3"
                 d="M447.59,218.67c0,51.48-57.26,53.79-57.26,53.79V731.38H106.12V62.75h90.23c0-.39,2.68-57.25,54-57.25,51.44,0,53.79,57.18,53.79,57.25h86.23v102S447.59,167.23,447.59,218.67Z"
               />
-              <line className="cls-4" x1="352.89" y1="731.38" x2="329.81" y2="731.38" />
+              <line className="g09-cls-4" x1="352.89" y1="731.38" x2="329.81" y2="731.38" />
               <path
-                className="cls-5"
+                className="g09-cls-5"
                 d="M97.62,365.65H42.48a3,3,0,0,0-3,3v5a3,3,0,0,0,3,3H97.62a3,3,0,0,1,3,3V733.88a3,3,0,0,0,3,3h56.54a3,3,0,0,1,3,3v26.64a3,3,0,0,0,3,3h5a3,3,0,0,0,3-3V728.88a3,3,0,0,0-3-3H114.62a3,3,0,0,1-3-3V281a3,3,0,0,1,3-3h78.73a3,3,0,0,0,3-3v-5a3,3,0,0,0-3-3H103.62a3,3,0,0,0-3,3v92.69A3,3,0,0,1,97.62,365.65Z"
               />
               <path
-                className="cls-5"
+                className="g09-cls-5"
                 d="M421.41,167.47a85.49,85.49,0,0,0-23.09-7.31,3,3,0,0,1-2.49-3V60.25a3,3,0,0,0-3-3H311.66a3,3,0,0,1-3-2.51,84.34,84.34,0,0,0-7.27-23.06C294.34,17.23,279.72,0,250.31,0c-23.16,0-40.82,10.86-51.07,31.41a85.18,85.18,0,0,0-7.47,23.34,3,3,0,0,1-3,2.5h-85.2a3,3,0,0,0-3,3v96a3,3,0,0,1-3,3H69.34a3,3,0,0,0-3,3v5a3,3,0,0,0,3,3h124a3,3,0,0,0,3-3v-5a3,3,0,0,0-3-3H114.62a3,3,0,0,1-3-3v-85a3,3,0,0,1,3-3h84.11a3,3,0,0,0,3-2.86l.11-2.37c.11-2.13,3.08-52,48.47-52,45,0,48.13,48.68,48.29,51.87v2.38a3,3,0,0,0,3,3h80.23a3,3,0,0,1,3,3v85a3,3,0,0,1-3,3h-74a3,3,0,0,0-3,3v5a3,3,0,0,0,3,3H390.2c3.28.17,51.89,3.52,51.89,48.45S393.4,266.8,390.2,267H307.81a3,3,0,0,0-3,3v5a3,3,0,0,0,3,3h74a3,3,0,0,1,3,3V722.88a3,3,0,0,1-3,3H327.31a3,3,0,0,0-3,3v37.64a3,3,0,0,0,3,3h5a3,3,0,0,0,3-3V739.88a3,3,0,0,1,3-3h54.52a3,3,0,0,0,3-3V280a3,3,0,0,1,2.5-3,84.92,84.92,0,0,0,23.05-7.24c14.46-7.09,31.71-21.71,31.71-51.14C453.09,195.4,442.13,177.69,421.41,167.47Z"
               />
-              <rect className="cls-6" x="0.5" y="159.22" width="24.46" height="11" rx="3" />
-              <rect className="cls-5" x="37.02" y="159.22" width="15.62" height="11" rx="3" />
-              <rect className="cls-6" x="163.16" y="810.02" width="11" height="24.46" rx="3" />
-              <rect className="cls-5" x="163.16" y="782.34" width="11" height="15.62" rx="3" />
-              <rect className="cls-6" x="324.31" y="810.02" width="11" height="24.46" rx="3" />
-              <rect className="cls-5" x="324.31" y="782.34" width="11" height="15.62" rx="3" />
+              <rect className="g09-cls-6" x="0.5" y="159.22" width="24.46" height="11" rx="3" />
+              <rect className="g09-cls-5" x="37.02" y="159.22" width="15.62" height="11" rx="3" />
+              <rect className="g09-cls-6" x="163.16" y="810.02" width="11" height="24.46" rx="3" />
+              <rect className="g09-cls-5" x="163.16" y="782.34" width="11" height="15.62" rx="3" />
+              <rect className="g09-cls-6" x="324.31" y="810.02" width="11" height="24.46" rx="3" />
+              <rect className="g09-cls-5" x="324.31" y="782.34" width="11" height="15.62" rx="3" />
             </g>
           </g>
         </svg>

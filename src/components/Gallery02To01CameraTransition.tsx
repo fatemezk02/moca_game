@@ -153,12 +153,47 @@ export const Gallery02To01CameraTransition: React.FC<Gallery02To01CameraTransiti
   const g02H = g02Dim?.height || 500;
   const g02W = g02Dim?.width || 340;
 
+  const s1 = g01Dim?.scale || (g01W / G01_MAP_WIDTH);
+  const s2 = g02Dim?.scale || (g02W / G02_MAP_WIDTH);
+  const avgScale = (s1 + s2) / 2;
+
+  // Transformed map bounds in local panel space:
+  const g01Tx = 0.06 * g01W;
+  const g02Tx = 0.022 * g02W;
+
+  const g01ArrowRelX = g01Tx + ((431 / G01_MAP_WIDTH) - 0.5) * g01W;
   const g01ArrowRelY = ((216 / G01_MAP_HEIGHT) - 0.5) * g01H;
+
+  const g02ArrowRelX = g02Tx + ((28 / G02_MAP_WIDTH) - 0.5) * g02W;
   const g02ArrowRelY = ((645 / G02_MAP_HEIGHT) - 0.5) * g02H;
 
-  // Align Gallery 02 identically to the forward transition
+  // 1. Align connection points on the horizontal travel axis:
   const targetOffsetY = g01ArrowRelY - g02ArrowRelY;
-  const targetOffsetX = Math.max(g01W, g02W) * 1.007;
+
+  // 2. Position destination map in shared world-space so actual transformed map bounds do NOT intersect:
+  const CLEARANCE_SVG = 12;
+  const clearanceX = CLEARANCE_SVG * avgScale;
+  const map1Right = g01Tx + (g01W / 2);
+  const map2Left = g02Tx - (g02W / 2);
+  const targetOffsetX = (map1Right - map2Left) + clearanceX;
+
+  // 3. Geometry-based Corridor Opening Matching:
+  const G01_OUTGOING_CORRIDOR_OPENING_SVG = 103.43;
+  const G02_INCOMING_CORRIDOR_OPENING_SVG = 84.31;
+
+  const g01CorridorScreen = G01_OUTGOING_CORRIDOR_OPENING_SVG * s1;
+  const g02CorridorScreen = G02_INCOMING_CORRIDOR_OPENING_SVG * s2;
+
+  // Scale ratio derived directly from actual rendered corridor opening geometry:
+  const reverseScale = g02CorridorScreen / g01CorridorScreen;
+
+  const initialStageX = -reverseScale * targetOffsetX;
+  const initialStageY = -reverseScale * targetOffsetY;
+  const initialStageScale = reverseScale;
+
+  const targetStageX = 0;
+  const targetStageY = 0;
+  const targetStageScale = 1;
 
   // Header titles cross-fade during travel from Gallery 02 -> Gallery 01
   const [headerTitle, setHeaderTitle] = useState('گالری ۰۲');
@@ -228,13 +263,14 @@ export const Gallery02To01CameraTransition: React.FC<Gallery02To01CameraTransiti
       >
         {/* Virtual Museum Map Stage
             Camera Movement (Reverse): Starts centered on Gallery 02 (-targetOffsetX, -targetOffsetY)
-            and travels smoothly LEFT + SLIGHTLY DOWN back to Gallery 01 (0, 0).
+            and travels smoothly LEFT + SLIGHTLY DOWN back to Gallery 01 (0, 0),
+            while smoothly zooming based on corridor opening geometry, landing at 100% scale.
             Both Gallery 01 and Gallery 02 remain fixed in the shared world-space coordinate system.
         */}
         <motion.div
           id="camera-virtual-stage"
-          initial={{ x: -targetOffsetX, y: -targetOffsetY }}
-          animate={{ x: 0, y: 0 }}
+          initial={{ x: initialStageX, y: initialStageY, scale: initialStageScale }}
+          animate={{ x: targetStageX, y: targetStageY, scale: targetStageScale }}
           transition={{
             duration: 0.85,
             ease: [0.4, 0.0, 0.2, 1],
@@ -246,6 +282,7 @@ export const Gallery02To01CameraTransition: React.FC<Gallery02To01CameraTransiti
             left: 0,
             width: '100%',
             height: '100%',
+            transformOrigin: 'center center',
           }}
           className="will-change-transform pointer-events-none"
         >

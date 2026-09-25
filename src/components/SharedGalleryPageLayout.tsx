@@ -175,11 +175,6 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
       galleryId === 'gallery_02' ||
       numFa === '۰۲');
 
-  const isGallery06 =
-    galleryId === 'gallery-06' ||
-    galleryId === 'gallery_06' ||
-    numFa === '۰۶';
-
   return (
     <div
       id={`${galleryId}-view-root`}
@@ -266,7 +261,6 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
             maxHeight: '100%',
             ...(isGallery01 ? { transform: 'translateX(6%)' } : {}),
             ...(isGallery02 ? { transform: 'translateX(2.2%)' } : {}),
-            ...(isGallery06 ? { transform: 'translateX(-5.5%)' } : {}),
             ['--map-point-scale' as any]: dimensions
               ? (dimensions.width / 360).toFixed(4)
               : '1',

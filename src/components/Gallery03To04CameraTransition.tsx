@@ -48,7 +48,7 @@ const useIsomorphicLayoutEffect =
 function getInitialEstimatedDimensions(mapWidth: number, mapHeight: number): MapDimensions | null {
   if (typeof window === 'undefined') return null;
   const availWidth = Math.max(0, window.innerWidth - 16);
-  const availHeight = Math.max(0, window.innerHeight - 170);
+  const availHeight = Math.max(0, window.innerHeight - 196);
   if (availWidth <= 0 || availHeight <= 0) return null;
   const scale = Math.min(availWidth / mapWidth, availHeight / mapHeight);
   const fittedWidth = Math.floor(mapWidth * scale * 10) / 10;
@@ -187,21 +187,59 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
 
   const areLocationPinsVisible = getLocationPinsVisible();
 
-  // Relative World-Space Alignment:
-  // Arrow on Gallery 03 pointing to Gallery 04: x: 462.55, y: 640
-  // Arrow on Gallery 04 pointing back to Gallery 03: x: 64, y: 227
+  // Anchor-based World-Space Alignment:
+  // Outgoing Connection Point on Gallery 03: x: 462.55, y: 640
+  // Incoming Connection Point on Gallery 04: x: 64, y: 227
   const g03H = g03Dim?.height || 500;
   const g03W = g03Dim?.width || 320;
   const g04H = g04Dim?.height || 500;
   const g04W = g04Dim?.width || 380;
 
+  const s3 = g03Dim?.scale || (g03W / G03_MAP_WIDTH);
+  const s4 = g04Dim?.scale || (g04W / G04_MAP_WIDTH);
+  const avgScale = (s3 + s4) / 2;
+
+  // Transformed map bounds in local panel space (neither map has horizontal translation):
+  const g03Tx = 0;
+  const g04Tx = 0;
+
+  const g03ArrowRelX = g03Tx + ((462.55 / G03_MAP_WIDTH) - 0.5) * g03W;
   const g03ArrowRelY = ((640 / G03_MAP_HEIGHT) - 0.5) * g03H;
+
+  const g04ArrowRelX = g04Tx + ((64 / G04_MAP_WIDTH) - 0.5) * g04W;
   const g04ArrowRelY = ((227 / G04_MAP_HEIGHT) - 0.5) * g04H;
 
-  // The relative vertical offset that aligns the two navigation arrows on the exact same horizontal axis:
+  // 1. Align connection points on the horizontal travel axis:
   const targetOffsetY = g03ArrowRelY - g04ArrowRelY;
-  // Natural horizontal gap bringing Gallery 04 into continuous adjacent world position:
-  const targetOffsetX = Math.max(g03W, g04W) * 0.98;
+
+  // 2. Position destination map in shared world-space so actual transformed map bounds do NOT intersect:
+  // Small consistent clearance in shared world space ensures visible map boundaries never collide
+  const CLEARANCE_SVG = 12;
+  const clearanceX = CLEARANCE_SVG * avgScale;
+  const map3Right = g03Tx + (g03W / 2);
+  const map4Left = g04Tx - (g04W / 2);
+  const targetOffsetX = (map3Right - map4Left) + clearanceX;
+
+  // 3. Geometry-based Corridor Opening Matching:
+  // Outgoing corridor opening on Gallery 03 (East): rect height = 84.31 SVG units
+  // Incoming corridor opening on Gallery 04 (West): rect height = 81.7 SVG units
+  const G03_OUTGOING_CORRIDOR_OPENING_SVG = 84.31;
+  const G04_INCOMING_CORRIDOR_OPENING_SVG = 81.7;
+
+  const g03CorridorScreen = G03_OUTGOING_CORRIDOR_OPENING_SVG * s3;
+  const g04CorridorScreen = G04_INCOMING_CORRIDOR_OPENING_SVG * s4;
+
+  // Scale ratio derived directly from actual rendered corridor opening geometry:
+  const forwardScale = g03CorridorScreen / g04CorridorScreen;
+  const reverseScale = g04CorridorScreen / g03CorridorScreen;
+
+  const initialStageX = isReverse ? -reverseScale * targetOffsetX : 0;
+  const initialStageY = isReverse ? -reverseScale * targetOffsetY : 0;
+  const initialStageScale = isReverse ? reverseScale : forwardScale;
+
+  const targetStageX = isReverse ? 0 : -targetOffsetX;
+  const targetStageY = isReverse ? 0 : -targetOffsetY;
+  const targetStageScale = 1;
 
   // Header Title Cross-Fade at transition midpoint (400ms)
   const [headerTitle, setHeaderTitle] = useState(() =>
@@ -271,17 +309,18 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
       >
         {/*
             Virtual Camera Stage:
-            Forward Transition: Camera moves from Gallery 03 (0, 0) to Gallery 04 (targetOffsetX, targetOffsetY).
+            Forward Transition: Camera moves from Gallery 03 (0, 0) to Gallery 04 (targetOffsetX, targetOffsetY),
+            smoothly zooming so corridor openings match seamlessly at the connection, landing at 100% scale.
             Reverse Transition: Camera moves from Gallery 04 (targetOffsetX, targetOffsetY) back to Gallery 03 (0, 0).
-            Both maps stay in their fixed world-space positions at CONSTANT scale throughout.
+            Both maps stay in their fixed world-space positions.
         */}
         <motion.div
           id="camera-virtual-stage"
-          initial={isReverse ? { x: -targetOffsetX, y: -targetOffsetY } : { x: 0, y: 0 }}
-          animate={isReverse ? { x: 0, y: 0 } : { x: -targetOffsetX, y: -targetOffsetY }}
+          initial={{ x: initialStageX, y: initialStageY, scale: initialStageScale }}
+          animate={{ x: targetStageX, y: targetStageY, scale: targetStageScale }}
           transition={{
             duration: 0.85,
-            ease: [0.4, 0.0, 0.2, 1],
+            ease: [0.16, 1, 0.3, 1],
           }}
           onAnimationComplete={onComplete}
           style={{
@@ -290,6 +329,7 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
             left: 0,
             width: '100%',
             height: '100%',
+            transformOrigin: 'center center',
           }}
           className="will-change-transform pointer-events-none"
         >
@@ -536,7 +576,6 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
                       galleryId="gallery-05"
                       mapWidth={G04_MAP_WIDTH}
                       mapHeight={G04_MAP_HEIGHT}
-                      scaleFactor={1.12}
                       onOpenDiscoveryModal={() => {}}
                     />
                   ))}
@@ -567,7 +606,6 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
                     galleryId="gallery-05"
                     mapWidth={G04_MAP_WIDTH}
                     mapHeight={G04_MAP_HEIGHT}
-                    scaleFactor={1.12}
                     onClick={() => {}}
                   />
                 ))}
