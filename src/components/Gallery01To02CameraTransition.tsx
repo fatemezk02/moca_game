@@ -196,9 +196,9 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
   const forwardScale = g01CorridorScreen / g02CorridorScreen;
   const reverseScale = g02CorridorScreen / g01CorridorScreen;
 
-  const initialStageX = isReverse ? -reverseScale * targetOffsetX : 0;
-  const initialStageY = isReverse ? -reverseScale * targetOffsetY : 0;
-  const initialStageScale = isReverse ? reverseScale : forwardScale;
+  const initialStageX = isReverse ? -targetOffsetX : 0;
+  const initialStageY = isReverse ? -targetOffsetY : 0;
+  const initialStageScale = 1;
 
   const targetStageX = isReverse ? 0 : -targetOffsetX;
   const targetStageY = isReverse ? 0 : -targetOffsetY;

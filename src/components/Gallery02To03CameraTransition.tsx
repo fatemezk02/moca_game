@@ -198,9 +198,9 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
   const forwardScale = g02CorridorScreen / g03CorridorScreen;
   const reverseScale = g03CorridorScreen / g02CorridorScreen;
 
-  const initialStageX = isReverse ? -reverseScale * targetOffsetX : 0;
-  const initialStageY = isReverse ? -reverseScale * targetOffsetY : 0;
-  const initialStageScale = isReverse ? reverseScale : forwardScale;
+  const initialStageX = isReverse ? -targetOffsetX : 0;
+  const initialStageY = isReverse ? -targetOffsetY : 0;
+  const initialStageScale = 1;
 
   const targetStageX = isReverse ? 0 : -targetOffsetX;
   const targetStageY = isReverse ? 0 : -targetOffsetY;
@@ -464,13 +464,7 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
             }}
             className="flex items-center justify-center"
           >
-            <motion.div
-              initial={isReverse ? { scale: 1 } : { scale: 1.013 }}
-              animate={{ scale: 1 }}
-              transition={{
-                duration: 0.85,
-                ease: [0.4, 0.0, 0.2, 1],
-              }}
+            <div
               style={{
                 ...(g03Dim
                   ? { width: `${g03Dim.width}px`, height: `${g03Dim.height}px` }
@@ -584,7 +578,7 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
                   />
                 ))}
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         </motion.div>
       </main>
