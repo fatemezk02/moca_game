@@ -315,7 +315,7 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
       {/* Gallery Info Modal */}
       {activeGalleryInfoId && (
         <GalleryInfoModal
-          galleryId="gallery-08"
+          galleryId={activeGalleryInfoId}
           isOpen={true}
           onClose={() => setActiveGalleryInfoId(null)}
         />
