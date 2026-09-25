@@ -8,6 +8,7 @@ import { resetReachedGalleries } from './reachedGalleriesStore';
 import { resetFinalCompletionState } from './finalCompletionStore';
 import { resetCollectionNotificationStore } from './collectionNotificationStore';
 import { clearUserProfile } from './userProfileStore';
+import { resetLuckMachineState } from './luckMachineStore';
 
 /**
  * Full, authoritative game reset.
@@ -45,6 +46,9 @@ export function resetEntireGame(): void {
 
     // 8. Reset collections unread notification store
     resetCollectionNotificationStore();
+
+    // 8.1 Reset luck machine attempt state
+    resetLuckMachineState();
 
     // 7. Reset active gallery navigation storage
     if (typeof window !== 'undefined' && window.localStorage) {

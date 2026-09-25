@@ -296,8 +296,8 @@ export const DEFAULT_EXPERIENCES: ExperienceContent[] = [
     galleryId: 'gallery_03',
     labelFa: 'حالا نوبت توست که وارد قاب شوی',
     title: 'یک پرتره، از زاویه‌ای دیگر',
-    descriptionFa: 'در پرتره، فقط چهرهٔ فرد مهم نیست؛ژست، زاویه، نگاه و حتی تصویری که از خودمان می‌سازیم، بخشی از عکس است.حالا روبه‌روی آینه بایست و خودت را در قاب ببین.',
-    iconId: 'mirror',
+    descriptionFa: 'حالا عکس بگیر و این لحظه را نگه دار؛',
+    iconId: 'grand-stereoscope',
     active: true,
   },
   {

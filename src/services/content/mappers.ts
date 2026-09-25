@@ -1028,6 +1028,13 @@ export function mapRowToExperience(row: Record<string, string>, index: number): 
   let iconId: ExperienceIconType = 'frame';
   if (rawIconId) {
     if (
+      rawIconId.includes('grand-stereoscope') ||
+      rawIconId.includes('stereoscope') ||
+      rawIconId.includes('گراندسیور') ||
+      rawIconId.includes('استریوسکوپ')
+    ) {
+      iconId = 'grand-stereoscope';
+    } else if (
       rawIconId.includes('reversed-camera') ||
       rawIconId.includes('opposite-camera') ||
       rawIconId.includes('reversed') ||
@@ -1090,7 +1097,17 @@ export function mapRowToExperience(row: Record<string, string>, index: number): 
       cleanExpId.includes('silhouette')
     ) {
       iconId = 'shadow-silhouette';
-    } else if (cleanExpId.includes('4') || cleanExpId.includes('mirror')) {
+    } else if (
+      cleanExpId === 'experience4' ||
+      cleanExpId === 'exp4' ||
+      cleanExpId === '4' ||
+      cleanExpId.includes('stereoscope') ||
+      cleanExpId.includes('grand') ||
+      cleanExpId.includes('گراندسیور') ||
+      cleanExpId.includes('استریوسکوپ')
+    ) {
+      iconId = 'grand-stereoscope';
+    } else if (cleanExpId.includes('mirror') || cleanExpId.includes('آینه')) {
       iconId = 'mirror';
     } else if (
       cleanExpId.includes('5') ||

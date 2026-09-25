@@ -16,6 +16,7 @@ export type ExperienceIconType =
   | 'mirror-selfie'
   | 'darkroom'
   | 'reversed-camera'
+  | 'grand-stereoscope'
   | (string & {});
 
 /**

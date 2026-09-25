@@ -30,6 +30,8 @@ import { formatTwoDigitPersian } from '../services/content/mappers';
 import { GalleryInfoModal } from './GalleryInfoModal';
 import { SharedGalleryPageLayout } from './SharedGalleryPageLayout';
 import { usePuzzleBlinkGuidance } from '../hooks/usePuzzleBlinkGuidance';
+import { LuckMachineModal } from './LuckMachineModal';
+import { isGallery02LuckMachineAvailable, LUCK_MACHINE_ENABLED } from '../data/luckMachineStore';
 
 interface Gallery03ViewProps {
   onNavigateBack: () => void;
@@ -67,6 +69,30 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
   const [puzzleUpdateTrigger, setPuzzleUpdateTrigger] = useState<number>(0);
   const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
   const [locationAnimKey, setLocationAnimKey] = useState<number>(0);
+  const [isLuckModalOpen, setIsLuckModalOpen] = useState<boolean>(false);
+  const [isLuckMachineAvailable, setIsLuckMachineAvailable] = useState<boolean>(() =>
+    isGallery02LuckMachineAvailable()
+  );
+
+  // Sync Luck Machine availability when Gallery 02 puzzles complete or game resets
+  useEffect(() => {
+    const handlePuzzleStateChange = () => {
+      setIsLuckMachineAvailable(isGallery02LuckMachineAvailable());
+    };
+
+    handlePuzzleStateChange();
+    window.addEventListener('museum_puzzle_progress_updated', handlePuzzleStateChange);
+    window.addEventListener('museum_completed_puzzle_points_updated', handlePuzzleStateChange);
+    window.addEventListener('museum_game_fully_reset', handlePuzzleStateChange);
+    window.addEventListener('museum_luck_machine_updated', handlePuzzleStateChange);
+
+    return () => {
+      window.removeEventListener('museum_puzzle_progress_updated', handlePuzzleStateChange);
+      window.removeEventListener('museum_completed_puzzle_points_updated', handlePuzzleStateChange);
+      window.removeEventListener('museum_game_fully_reset', handlePuzzleStateChange);
+      window.removeEventListener('museum_luck_machine_updated', handlePuzzleStateChange);
+    };
+  }, []);
 
   // Sync with Admin point changes dynamically
   useEffect(() => {
@@ -231,7 +257,15 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
   const collectionPoints = points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
   const iconPoints = points.filter((p) => p.type === 'icon') as AdminIconPoint[];
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
-  const experiencePoints = React.useMemo(() => getExperiencePointsForGallery('gallery-02'), [puzzleUpdateTrigger]);
+  const experiencePoints = React.useMemo(() => {
+    const list = getExperiencePointsForGallery('gallery-02');
+    const seen = new Set<string>();
+    return list.filter((exp) => {
+      if (!exp?.id || seen.has(exp.id)) return false;
+      seen.add(exp.id);
+      return true;
+    });
+  }, [puzzleUpdateTrigger]);
 
   const { blinkingPointId, handleBlinkEnd, triggerNextPuzzleBlink } = usePuzzleBlinkGuidance({
     galleryId: 'gallery-03',
@@ -280,6 +314,12 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
           experience={activeExperience}
         />
       )}
+
+      {/* Luck Machine Modal (Available after completing all 3 Gallery 02 puzzles) */}
+      <LuckMachineModal
+        isOpen={isLuckModalOpen}
+        onClose={() => setIsLuckModalOpen(false)}
+      />
     </>
   );
 
@@ -293,6 +333,8 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
       onClickOutside={handleClosePopup}
       onOpenGuide={() => setActiveGalleryInfoId('gallery-02')}
       onTriggerNextPuzzle={triggerNextPuzzleBlink}
+      onOpenLuckMachine={LUCK_MACHINE_ENABLED ? () => setIsLuckModalOpen(true) : undefined}
+      isLuckMachineAvailable={LUCK_MACHINE_ENABLED && isLuckMachineAvailable}
       mapWidth={GALLERY_03_MAP_WIDTH}
       mapHeight={GALLERY_03_MAP_HEIGHT}
       mapSvg={
@@ -302,6 +344,26 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
       }
       modals={modalsContent}
     >
+      {/* Prominent Luck Machine Entry Button (Appears ONLY when all 3 Gallery 02 puzzles are complete AND feature is enabled) */}
+      {LUCK_MACHINE_ENABLED && isLuckMachineAvailable && (
+        <div className="absolute bottom-[calc(9.2rem+env(safe-area-inset-bottom,0px))] left-4 sm:left-6 z-30 pointer-events-auto">
+          <button
+            id="btn-gallery-02-luck-machine"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsLuckModalOpen(true);
+            }}
+            aria-label="دستگاه شانس"
+            title="دستگاه شانس"
+            className="px-3.5 py-2.5 bg-[#fef08a] hover:bg-[#fde047] border-[2.25px] border-[#1e1b18] rounded-2xl shadow-[3px_3px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] text-[#1e1b18] flex items-center gap-2 cursor-pointer font-sans-custom font-extrabold text-[12.5px] sm:text-[13.5px] transition-all select-none group"
+          >
+            <span className="text-base group-hover:scale-110 transition-transform">🎰</span>
+            <span>دستگاه شانس</span>
+            <span className="w-2 h-2 rounded-full bg-[#ef4444] animate-ping" />
+          </button>
+        </div>
+      )}
             {/* Dynamic Navigation Arrows Layer */}
             {arrows.map((arrow) => {
               const isEnabled = isArrowVisibleToPlayer(arrow);
@@ -392,7 +454,7 @@ export const Gallery03View: React.FC<Gallery03ViewProps> = ({
             {/* Interactive Experience Points */}
             {experiencePoints.map((exp) => (
               <ExperiencePoint
-                key={exp.id}
+                key={`g03-exp-${exp.id}`}
                 id={exp.id}
                 experienceId={exp.experienceId}
                 galleryId={exp.galleryId || "gallery_02"}

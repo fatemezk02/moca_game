@@ -894,14 +894,36 @@ class ContentService {
    */
   getExperienceById(experienceId: string): ExperienceContent | null {
     if (!experienceId) return null;
-    const cleanId = experienceId.trim().toLowerCase();
-    return (
-      this.getExperiences().find(
-        (exp) =>
-          exp.experienceId.toLowerCase() === cleanId ||
-          exp.id.toLowerCase() === cleanId
-      ) || null
+    const cleanId = experienceId.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const experiences = this.getExperiences();
+
+    // 1. Direct match
+    const direct = experiences.find(
+      (exp) =>
+        exp.experienceId.toLowerCase() === experienceId.trim().toLowerCase() ||
+        exp.id.toLowerCase() === experienceId.trim().toLowerCase()
     );
+    if (direct) return direct;
+
+    // 2. Normalized match (e.g. '4', 'exp4', 'experience4', 'experience_4', 'exp-g03-stereoscope')
+    const normalized = experiences.find((exp) => {
+      const expClean = exp.experienceId.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const idClean = exp.id.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return (
+        expClean === cleanId ||
+        idClean === cleanId ||
+        (cleanId === '4' && (expClean === 'experience4' || idClean === 'experience4')) ||
+        ((cleanId === 'expg03stereoscope' || cleanId === 'stereoscope') &&
+          (expClean === 'experience4' || idClean === 'experience4')) ||
+        ((cleanId === 'expg03frame' || cleanId === 'frame') &&
+          (expClean === 'experience2' || idClean === 'experience2')) ||
+        ((cleanId === 'expg03shadow' || cleanId === 'shadow') &&
+          (expClean === 'experience3' || idClean === 'experience3'))
+      );
+    });
+    if (normalized) return normalized;
+
+    return null;
   }
 
   /**

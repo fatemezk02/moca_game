@@ -34,6 +34,8 @@ export interface SharedGalleryPageLayoutProps {
   modals?: React.ReactNode;
   onOpenGuide?: () => void;
   onTriggerNextPuzzle?: () => void;
+  onOpenLuckMachine?: () => void;
+  isLuckMachineAvailable?: boolean;
 }
 
 const GALLERY_METADATA_MAP: Record<string, { num: string; name: string }> = {
@@ -82,6 +84,8 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
   modals,
   onOpenGuide,
   onTriggerNextPuzzle,
+  onOpenLuckMachine,
+  isLuckMachineAvailable = false,
 }) => {
   const playerStats = usePlayerStats();
   const galleryRecord = contentService.getGalleryById(galleryId);
@@ -313,6 +317,8 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
           galleryId={galleryId}
           onOpenGuide={handleOpenGuide}
           onTriggerNextPuzzle={handleTriggerNextPuzzle}
+          onOpenLuckMachine={onOpenLuckMachine}
+          isLuckMachineAvailable={isLuckMachineAvailable}
         />
       )}
 

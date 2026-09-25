@@ -22,7 +22,6 @@ import { Gallery04To05CameraTransition } from './components/Gallery04To05CameraT
 import { Gallery05To06CameraTransition } from './components/Gallery05To06CameraTransition';
 import { Gallery06To07CameraTransition } from './components/Gallery06To07CameraTransition';
 import { Gallery07To08CameraTransition } from './components/Gallery07To08CameraTransition';
-import { Gallery06To07TransitionEditor } from './components/Gallery06To07TransitionEditor';
 import { Gallery01QuestionsView } from './components/Gallery01QuestionsView';
 import { Gallery03View } from './components/Gallery03View';
 import { Gallery03QuestionsView } from './components/Gallery03QuestionsView';
@@ -77,7 +76,6 @@ export default function App() {
   const [isTransitioningG07ToG06, setIsTransitioningG07ToG06] = useState(false);
   const [isTransitioningG07ToG08, setIsTransitioningG07ToG08] = useState(false);
   const [isTransitioningG08ToG07, setIsTransitioningG08ToG07] = useState(false);
-  const [isG06To07EditorOpen, setIsG06To07EditorOpen] = useState(false);
 
   useEffect(() => {
     const handleOpenCertificate = () => setIsFinalCertificateOpen(true);
@@ -1310,20 +1308,8 @@ export default function App() {
       {userProfile && (
         <>
           {IS_DEV_POSITIONING_ENABLED && !isAdminOpen && !currentGallery.includes('questions') && (
-            <>
-              <DevMapPositioningTool currentGalleryId={currentGallery} activeTab={activeTab} />
-              <button
-                onClick={() => setIsG06To07EditorOpen(true)}
-                className="fixed bottom-24 left-4 z-40 px-3 py-1.5 rounded-xl bg-slate-900 border-2 border-amber-400 text-amber-300 font-bold text-xs shadow-lg flex items-center space-x-1.5 space-x-reverse cursor-pointer hover:bg-slate-800 transition-all select-none"
-              >
-                <span>📐 انطباق ۰۶←۰۷</span>
-              </button>
-            </>
+            <DevMapPositioningTool currentGalleryId={currentGallery} activeTab={activeTab} />
           )}
-          <Gallery06To07TransitionEditor
-            isOpen={isG06To07EditorOpen}
-            onClose={() => setIsG06To07EditorOpen(false)}
-          />
           <ProfileModal
             isOpen={isProfileModalOpen}
             onClose={() => setIsProfileModalOpen(false)}

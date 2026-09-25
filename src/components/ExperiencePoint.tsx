@@ -95,7 +95,9 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
 
   const displayLabel = resolvedExperience.labelFa || resolvedExperience.title || experienceId;
   const effectiveIcon =
-    id === 'exp-g02-reversed-camera' || propIconId === 'reversed-camera' || resolvedExperience.iconId === 'reversed-camera'
+    id === 'exp-g03-stereoscope' || propIconId === 'grand-stereoscope' || resolvedExperience.iconId === 'grand-stereoscope'
+      ? 'grand-stereoscope'
+      : id === 'exp-g02-reversed-camera' || propIconId === 'reversed-camera' || resolvedExperience.iconId === 'reversed-camera'
       ? 'reversed-camera'
       : id === 'exp-g05-vintage-camera'
       ? 'vintage-camera'

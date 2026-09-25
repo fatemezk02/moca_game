@@ -198,7 +198,15 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
   const collectionPoints = points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
   const iconPoints = points.filter((p) => p.type === 'icon') as AdminIconPoint[];
   const puzzlePoints = points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
-  const experiencePoints = React.useMemo(() => getExperiencePointsForGallery('gallery-04'), [puzzleUpdateTrigger]);
+  const experiencePoints = React.useMemo(() => {
+    const list = getExperiencePointsForGallery('gallery-03');
+    const seen = new Set<string>();
+    return list.filter((exp) => {
+      if (!exp?.id || seen.has(exp.id)) return false;
+      seen.add(exp.id);
+      return true;
+    });
+  }, [puzzleUpdateTrigger]);
 
   const { blinkingPointId, handleBlinkEnd, triggerNextPuzzleBlink } = usePuzzleBlinkGuidance({
     galleryId: 'gallery-04',
@@ -341,13 +349,13 @@ export const Gallery04View: React.FC<Gallery04ViewProps> = ({
         />
       ))}
 
-      {/* Interactive Experience Points (Gallery 04: mirror) */}
+      {/* Interactive Experience Points (Gallery 03) */}
       {experiencePoints.map((exp) => (
         <ExperiencePoint
-          key={exp.id}
+          key={`g04-exp-${exp.id}`}
           id={exp.id}
           experienceId={exp.experienceId}
-          galleryId="gallery_04"
+          galleryId="gallery-03"
           x={exp.x}
           y={exp.y}
           iconId={exp.iconId}

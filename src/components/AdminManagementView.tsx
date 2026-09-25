@@ -116,9 +116,9 @@ export const AdminManagementView: React.FC<AdminManagementViewProps> = ({
       { id: 'star-19', starId: 'star-19', title: 'ستاره کشف ۱۹ — دگردیسی', defaultX: 315, defaultY: 609 },
     ],
     'gallery-08': [
-      { id: 'star-20', starId: 'star-20', title: 'ستاره کشف ۲۰', defaultX: 230, defaultY: 410 },
-      { id: 'star-21', starId: 'star-21', title: 'ستاره کشف ۲۱', defaultX: 470, defaultY: 410 },
-      { id: 'star-22', starId: 'star-22', title: 'ستاره کشف ۲۲', defaultX: 250, defaultY: 550 },
+      { id: 'star-20', starId: 'star-20', title: 'ستاره کشف ۲۰', defaultX: 328, defaultY: 98 },
+      { id: 'star-21', starId: 'star-21', title: 'ستاره کشف ۲۱', defaultX: 368, defaultY: 120 },
+      { id: 'star-22', starId: 'star-22', title: 'ستاره کشف ۲۲', defaultX: 331, defaultY: 147 },
     ],
     'gallery-09': [
       { id: 'col-g09-01', starId: 'star-23', title: 'تابلوی دام', defaultX: 251, defaultY: 39 },

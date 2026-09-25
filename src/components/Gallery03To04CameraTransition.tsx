@@ -445,7 +445,7 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
                 {/* G03 Experience Points (Gallery 03 / gallery_04 strictly) */}
                 {g03ExpPoints.map((exp) => (
                   <ExperiencePoint
-                    key={exp.id}
+                    key={`cam-g03to04-exp-${exp.id}`}
                     id={exp.id}
                     experienceId={exp.experienceId}
                     galleryId="gallery_04"
@@ -586,7 +586,7 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
                 {/* G04 Experience Points (Gallery 04 / gallery_05 strictly) */}
                 {g04ExpPoints.map((exp) => (
                   <ExperiencePoint
-                    key={exp.id}
+                    key={`cam-g04-exp-${exp.id}`}
                     id={exp.id}
                     experienceId={exp.experienceId}
                     galleryId="gallery_05"

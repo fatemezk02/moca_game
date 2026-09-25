@@ -654,7 +654,14 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
       });
     }
 
-    setElements(list);
+    const seenElementIds = new Set<string>();
+    const deduplicatedList = list.filter((item) => {
+      if (!item?.id || seenElementIds.has(item.id)) return false;
+      seenElementIds.add(item.id);
+      return true;
+    });
+
+    setElements(deduplicatedList);
   }, [isCuratorMode, currentGalleryId, mapContainerEl]);
 
   useEffect(() => {
@@ -1742,7 +1749,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                       {elements
                         .filter((e) => e.type === 'experience')
                         .map((e) => (
-                          <option key={e.id} value={e.id}>
+                          <option key={`dev-picker-exp-${e.id}`} value={e.id}>
                             {e.title} (X: {e.currentX}, Y: {e.currentY})
                           </option>
                         ))}
@@ -1964,7 +1971,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
 
               return (
                 <div
-                  key={item.id}
+                  key={`dev-handle-${item.id}`}
                   id={`dev-handle-${item.id}`}
                   style={{
                     left: `${leftPct}%`,
@@ -2171,7 +2178,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                       {elements
                         .filter((e) => e.type === 'experience')
                         .map((e) => (
-                          <option key={e.id} value={e.id}>
+                          <option key={`dev-quick-exp-${e.id}`} value={e.id}>
                             {e.title} (X: {e.currentX}, Y: {e.currentY})
                           </option>
                         ))}

@@ -20,6 +20,16 @@ export const ExperienceIcon: React.FC<ExperienceIconProps> = ({
   // Resolve icon type based on iconId or aliases
   let resolvedType: ExperienceIconType = 'frame';
   if (
+    cleanId.includes('grand-stereoscope') ||
+    cleanId.includes('stereoscope') ||
+    cleanId.includes('گراندسیور') ||
+    cleanId.includes('استریوسکوپ') ||
+    cleanId === 'experience4' ||
+    cleanId === 'exp4' ||
+    cleanId === '4'
+  ) {
+    resolvedType = 'grand-stereoscope';
+  } else if (
     cleanId.includes('reversed-camera') ||
     cleanId.includes('opposite-camera') ||
     cleanId.includes('reversed') ||
@@ -55,6 +65,153 @@ export const ExperienceIcon: React.FC<ExperienceIconProps> = ({
   const strokeColor = '#1e1b18';
 
   switch (resolvedType) {
+    case 'grand-stereoscope':
+      // Gallery 03: Grand Stereoscope (گراندسیور) viewing device based on user reference image
+      return (
+        <svg
+          viewBox="0 0 32 32"
+          className={`${className} overflow-visible`}
+          style={style}
+        >
+          {/* Subtle warm offset graphic shadow layer behind housing and pillar (matching reference illustration style) */}
+          <rect
+            x="11"
+            y="2"
+            width="11"
+            height="11"
+            rx="3"
+            fill="#f59e0b"
+            opacity="0.85"
+          />
+          <rect
+            x="24"
+            y="7"
+            width="3"
+            height="19.5"
+            rx="0.5"
+            fill="#f59e0b"
+            opacity="0.85"
+          />
+
+          {/* Vertical upright pillar on right side */}
+          <rect
+            x="22.5"
+            y="7"
+            width="3"
+            height="19.5"
+            rx="0.5"
+            fill={isSelected ? '#fca5a5' : '#e5ad58'}
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinejoin="round"
+          />
+
+          {/* Top main viewer housing (rounded chamber) */}
+          <rect
+            x="9.5"
+            y="2"
+            width="11"
+            height="11"
+            rx="3"
+            fill={isSelected ? '#ef4444' : '#e5ad58'}
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinejoin="round"
+            className="transition-colors"
+          />
+
+          {/* Two horizontal ventilation/viewing slot lines on front of viewer */}
+          <line
+            x1="14.2"
+            y1="4.5"
+            x2="19.2"
+            y2="4.5"
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          />
+          <line
+            x1="14.2"
+            y1="7"
+            x2="19.2"
+            y2="7"
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          />
+
+          {/* Horizontal crossbar carriage */}
+          <rect
+            x="6.5"
+            y="12.5"
+            width="16.5"
+            height="3.2"
+            rx="0.6"
+            fill={isSelected ? '#ef4444' : '#64748b'}
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinejoin="round"
+            className="transition-colors"
+          />
+
+          {/* Slide collar / bracket on vertical column */}
+          <path
+            d="M 21.5 8.5 H 25.5 V 20 H 22 V 15.5 H 21.5 Z"
+            fill={isSelected ? '#ef4444' : '#64748b'}
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinejoin="round"
+            className="transition-colors"
+          />
+
+          {/* Inverted trapezoid optical funnel / snout */}
+          <polygon
+            points="10.5,15.7 18.5,15.7 17.2,21.5 11.8,21.5"
+            fill={isSelected ? '#ef4444' : '#64748b'}
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinejoin="round"
+            className="transition-colors"
+          />
+
+          {/* Lower bracket vertical drop rod */}
+          <line
+            x1="19"
+            y1="15.7"
+            x2="19"
+            y2="25.5"
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          />
+
+          {/* Lower horizontal stage bar */}
+          <line
+            x1="11.5"
+            y1="23.2"
+            x2="19"
+            y2="23.2"
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          />
+
+          {/* Base plate horizontal bar with rounded ends */}
+          <rect
+            x="2.5"
+            y="26.5"
+            width="27"
+            height="3.2"
+            rx="1.6"
+            fill={isSelected ? '#ef4444' : '#64748b'}
+            stroke={strokeColor}
+            strokeWidth="1.1"
+            strokeLinejoin="round"
+            className="transition-colors"
+          />
+        </svg>
+      );
+
     case 'reversed-camera':
       // 0. Gallery 02: reversed / opposite-facing front camera matching reference image
       return (

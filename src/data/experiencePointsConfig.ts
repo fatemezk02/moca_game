@@ -14,6 +14,39 @@ export interface ExperienceMapPointDef {
   title?: string;
 }
 
+export const GALLERY_03_EXPERIENCE_DEFS: ExperienceMapPointDef[] = [
+  {
+    id: 'exp-g03-frame',
+    experienceId: 'experience_2',
+    galleryId: 'gallery_03',
+    iconId: 'frame',
+    x: 124,
+    y: 275,
+    labelFa: 'هم‌قاب با چهره‌های مشهور',
+    title: 'هم‌قاب با چهره‌های مشهور',
+  },
+  {
+    id: 'exp-g03-shadow',
+    experienceId: 'experience_3',
+    galleryId: 'gallery_03',
+    iconId: 'shadow-silhouette',
+    x: 241,
+    y: 80,
+    labelFa: 'پرتره تور و سایه',
+    title: 'پرتره تور و سایه',
+  },
+  {
+    id: 'exp-g03-stereoscope',
+    experienceId: 'experience_4',
+    galleryId: 'gallery_03',
+    iconId: 'grand-stereoscope',
+    x: 240,
+    y: 406,
+    labelFa: 'حالا نوبت توست که وارد قاب شوی',
+    title: 'یک پرتره، از زاویه‌ای دیگر',
+  },
+];
+
 /**
  * Authoritative SVG-relative default coordinates for Experience Points per gallery.
  * Carefully positioned on open floor plan space without overlapping Star or Puzzle points.
@@ -31,40 +64,8 @@ export const CANONICAL_EXPERIENCE_POINTS: Record<string, ExperienceMapPointDef[]
       title: 'q',
     },
   ],
-  gallery_03: [
-    {
-      id: 'exp-g02-reversed-camera',
-      experienceId: 'experience_1',
-      galleryId: 'gallery_02',
-      iconId: 'reversed-camera',
-      x: 243,
-      y: 117,
-      labelFa: 'q',
-      title: 'q',
-    },
-  ],
-  gallery_04: [
-    {
-      id: 'exp-g03-frame',
-      experienceId: 'experience_2',
-      galleryId: 'gallery_04',
-      iconId: 'frame',
-      x: 244,
-      y: 149,
-      labelFa: 'قرن ۱۹ عکاسخانه',
-      title: 'قرن ۱۹ عکاسخانه',
-    },
-    {
-      id: 'exp-g03-shadow',
-      experienceId: 'experience_3',
-      galleryId: 'gallery_04',
-      iconId: 'shadow-silhouette',
-      x: 241,
-      y: 80,
-      labelFa: 'پرتره تور و سایه',
-      title: 'پرتره تور و سایه',
-    },
-  ],
+  gallery_03: GALLERY_03_EXPERIENCE_DEFS,
+  gallery_04: GALLERY_03_EXPERIENCE_DEFS,
   gallery_05: [
     {
       id: 'exp-g05-vintage-camera',
@@ -113,28 +114,39 @@ function getSavedExperiencePoints(): Record<string, { x: number; y: number }> {
   }
   try {
     const raw = localStorage.getItem(STORAGE_EXP_POINTS_KEY);
-    if (raw) return JSON.parse(raw);
+    const parsed: Record<string, { x: number; y: number }> = raw ? JSON.parse(raw) : {};
 
     // Migration from v1 with shifted IDs
-    const oldRaw = localStorage.getItem(OLD_EXP_POINTS_KEY);
-    if (oldRaw) {
-      const oldCoords = JSON.parse(oldRaw);
-      const migrated: Record<string, { x: number; y: number }> = {};
-      const shiftMap: Record<string, string> = {
-        experience_1: 'experience_2',
-        experience_2: 'experience_3',
-        experience_3: 'experience_4',
-        experience_4: 'experience_5',
-        experience_5: 'experience_6',
-        experience_6: 'experience_7',
-      };
-      for (const [key, val] of Object.entries(oldCoords)) {
-        const newKey = shiftMap[key] || key;
-        migrated[newKey] = val as { x: number; y: number };
+    if (!raw) {
+      const oldRaw = localStorage.getItem(OLD_EXP_POINTS_KEY);
+      if (oldRaw) {
+        const oldCoords = JSON.parse(oldRaw);
+        const shiftMap: Record<string, string> = {
+          experience_1: 'experience_2',
+          experience_2: 'experience_3',
+          experience_3: 'experience_4',
+          experience_4: 'experience_5',
+          experience_5: 'experience_6',
+          experience_6: 'experience_7',
+        };
+        for (const [key, val] of Object.entries(oldCoords)) {
+          const newKey = shiftMap[key] || key;
+          parsed[newKey] = val as { x: number; y: number };
+        }
       }
-      return migrated;
     }
-    return {};
+
+    // Clean up stale previous coordinates for Gallery 03 experiences if present
+    if (parsed['exp-g03-frame'] && (parsed['exp-g03-frame'].x !== 124 || parsed['exp-g03-frame'].y !== 275)) {
+      parsed['exp-g03-frame'] = { x: 124, y: 275 };
+      parsed['experience_2'] = { x: 124, y: 275 };
+    }
+    if (parsed['exp-g03-stereoscope'] && (parsed['exp-g03-stereoscope'].x !== 240 || parsed['exp-g03-stereoscope'].y !== 406)) {
+      parsed['exp-g03-stereoscope'] = { x: 240, y: 406 };
+      parsed['experience_4'] = { x: 240, y: 406 };
+    }
+
+    return parsed;
   } catch {
     return {};
   }
@@ -149,25 +161,36 @@ export function getExperiencePointsForGallery(galleryId: string): ExperienceMapP
   const canonId = normalizeGalleryId(galleryId);
   const baseDefs =
     CANONICAL_EXPERIENCE_POINTS[canonId] ||
-    (canonId === 'gallery_03' ? CANONICAL_EXPERIENCE_POINTS.gallery_02 : []) ||
-    (canonId === 'gallery_02' ? CANONICAL_EXPERIENCE_POINTS.gallery_03 : []) ||
+    (canonId === 'gallery_03' ? GALLERY_03_EXPERIENCE_DEFS : []) ||
     [];
 
   if (!baseDefs || baseDefs.length === 0) {
     return [];
   }
 
+  // Guarantee strict uniqueness of definitions by id and experienceId
+  const seenIds = new Set<string>();
+  const uniqueDefs = baseDefs.filter((def) => {
+    if (!def?.id || !def?.experienceId) return false;
+    const key = `${def.id}_${def.experienceId}`;
+    if (seenIds.has(def.id) || seenIds.has(key)) return false;
+    seenIds.add(def.id);
+    seenIds.add(key);
+    return true;
+  });
+
   const savedCoords = getSavedExperiencePoints();
   const allExperiences = contentService.getExperiences();
 
-  return baseDefs.map((def) => {
+  return uniqueDefs.map((def) => {
     // Check if ContentService has live data from Google Sheets for this experience
-    const liveExp = allExperiences.find(
-      (e) =>
-        e.experienceId.toLowerCase() === def.experienceId.toLowerCase() ||
-        e.id.toLowerCase() === def.experienceId.toLowerCase() ||
-        (def.iconId && e.iconId === def.iconId)
-    );
+    const liveExp =
+      contentService.getExperienceById(def.experienceId) ||
+      allExperiences.find(
+        (e) =>
+          e.experienceId.toLowerCase() === def.experienceId.toLowerCase() ||
+          e.id.toLowerCase() === def.experienceId.toLowerCase()
+      );
 
     // Apply any saved coordinates override from localStorage
     const saved = savedCoords[def.id] || savedCoords[def.experienceId];
@@ -175,7 +198,9 @@ export function getExperiencePointsForGallery(galleryId: string): ExperienceMapP
     const y = saved ? saved.y : def.y;
 
     const effectiveIcon =
-      def.id === 'exp-g02-reversed-camera' || def.iconId === 'reversed-camera'
+      def.id === 'exp-g03-stereoscope' || def.iconId === 'grand-stereoscope' || liveExp?.iconId === 'grand-stereoscope'
+        ? 'grand-stereoscope'
+        : def.id === 'exp-g02-reversed-camera' || def.iconId === 'reversed-camera'
         ? 'reversed-camera'
         : def.id === 'exp-g05-vintage-camera'
         ? 'vintage-camera'

@@ -145,10 +145,9 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
   const g03ColPoints = g03Points.filter((p) => p.type === 'collection') as AdminCollectionPoint[];
   const g03IconPoints = g03Points.filter((p) => p.type === 'icon') as AdminIconPoint[];
   const g03PuzzlePoints = g03Points.filter((p) => p.type === 'puzzle') as AdminPuzzlePoint[];
-  const g03ExpPoints = [
-    ...getExperiencePointsForGallery('gallery-03'),
-    ...getExperiencePointsForGallery('gallery-04'),
-  ];
+  const g03ExpPoints = getExperiencePointsForGallery('gallery-03').filter(
+    (exp, idx, arr) => arr.findIndex((e) => e.id === exp.id) === idx
+  );
 
   const areLocationPinsVisible = getLocationPinsVisible();
 
@@ -412,7 +411,7 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
                 {/* G02 Experience Points */}
                 {g02ExpPoints.map((exp) => (
                   <ExperiencePoint
-                    key={exp.id}
+                    key={`cam-g02-exp-${exp.id}`}
                     id={exp.id}
                     experienceId={exp.experienceId}
                     galleryId={exp.galleryId || 'gallery_02'}
@@ -554,7 +553,7 @@ export const Gallery02To03CameraTransition: React.FC<Gallery02To03CameraTransiti
                 {/* G03 Experience Points */}
                 {g03ExpPoints.map((exp) => (
                   <ExperiencePoint
-                    key={exp.id}
+                    key={`cam-g03-exp-${exp.id}`}
                     id={exp.id}
                     experienceId={exp.experienceId}
                     galleryId={exp.galleryId || 'gallery_04'}
