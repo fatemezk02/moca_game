@@ -106,7 +106,7 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
                 <span>درباره این بخش</span>
                 <span className="text-[11px] font-mono text-[#64748b]">{collection.accessionRange}</span>
               </h3>
-              <p className="text-[13px] leading-relaxed text-[#334155] font-medium">
+              <p className="text-[13px] leading-relaxed text-[#334155] font-medium whitespace-pre-line break-words">
                 {collection.curatorNote}
               </p>
             </div>
@@ -137,7 +137,7 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
                     <p className="text-[10px] text-[#94a3b8] italic">
                       {art.medium} ({art.dimensions})
                     </p>
-                    <p className="text-[12px] text-[#475569] pt-1.5 border-t border-[#f1f5f9] leading-relaxed font-medium">
+                    <p className="text-[12px] text-[#475569] pt-1.5 border-t border-[#f1f5f9] leading-relaxed font-medium whitespace-pre-line break-words">
                       {art.description}
                     </p>
                   </div>

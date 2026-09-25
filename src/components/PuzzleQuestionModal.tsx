@@ -440,11 +440,11 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
 
                       {/* Question Text */}
                       <div className="space-y-1 text-right">
-                        <h3 className="font-sans-custom text-[14px] sm:text-[15px] font-black text-[#1e1b18] leading-snug">
+                        <h3 className="font-sans-custom text-[14px] sm:text-[15px] font-black text-[#1e1b18] leading-snug whitespace-pre-line break-words">
                           {questionData.questionFa || questionData.question}
                         </h3>
                         {questionData.questionEn && questionData.questionEn !== (questionData.questionFa || questionData.question) && (
-                          <p className="text-[12px] font-medium text-[#64748b] leading-relaxed font-mono-custom" dir="ltr">
+                          <p className="text-[12px] font-medium text-[#64748b] leading-relaxed font-mono-custom whitespace-pre-line break-words" dir="ltr">
                             {questionData.questionEn}
                           </p>
                         )}

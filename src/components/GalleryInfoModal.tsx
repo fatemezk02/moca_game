@@ -218,7 +218,7 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
                     )}
                     <p
                       id="gallery-info-description-text"
-                      className="font-sans-custom text-[14px] sm:text-[15.5px] text-[#292524] leading-[1.85] sm:leading-[1.95] font-medium text-center"
+                      className="font-sans-custom text-[14px] sm:text-[15.5px] text-[#292524] leading-[1.85] sm:leading-[1.95] font-medium text-center whitespace-pre-line break-words"
                     >
                       {gallery.descriptionFa}
                     </p>

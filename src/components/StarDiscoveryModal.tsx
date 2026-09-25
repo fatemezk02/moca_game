@@ -427,7 +427,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                     {discoveryData.titleFa}
                   </h3>
                   {discoveryData.introFa && (
-                    <p className="text-[12px] sm:text-[13px] font-medium text-[#475569] leading-relaxed px-2 break-words">
+                    <p className="text-[12px] sm:text-[13px] font-medium text-[#475569] leading-relaxed px-2 break-words whitespace-pre-line">
                       {discoveryData.introFa}
                     </p>
                   )}
@@ -570,7 +570,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 </div>
 
                 {/* Question Text */}
-                <h3 className="font-sans-custom text-[14px] sm:text-[15px] font-black text-[#1e1b18] leading-snug">
+                <h3 className="font-sans-custom text-[14px] sm:text-[15px] font-black text-[#1e1b18] leading-snug whitespace-pre-line break-words">
                   {discoveryData.question.question}
                 </h3>
 
@@ -789,11 +789,11 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                     <Info className="w-3.5 h-3.5 text-[#d97706]" />
                     <span>{discoveryData.titleFa}</span>
                   </div>
-                  <p className="text-[12px] sm:text-[13px] leading-relaxed text-[#334155] font-medium text-justify">
+                  <p className="text-[12px] sm:text-[13px] leading-relaxed text-[#334155] font-medium text-justify whitespace-pre-line break-words">
                     {discoveryData.information.textFa}
                   </p>
                   {discoveryData.information.textEn && (
-                    <p className="text-[11px] sm:text-[12px] leading-relaxed text-[#64748b] font-mono-custom dir-ltr text-left pt-2 border-t border-[#e2e8f0]">
+                    <p className="text-[11px] sm:text-[12px] leading-relaxed text-[#64748b] font-mono-custom dir-ltr text-left pt-2 border-t border-[#e2e8f0] whitespace-pre-line break-words">
                       {discoveryData.information.textEn}
                     </p>
                   )}
