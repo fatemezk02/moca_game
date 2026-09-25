@@ -11,9 +11,22 @@ import {
   GalleryContent,
   GameContentData,
   LocationContent,
+  PopupContent,
   QuestionContent,
   StarContent,
 } from './types';
+
+export const DEFAULT_POPUPS: PopupContent[] = [
+  {
+    id: 'POpup_1',
+    popupId: 'POpup_1',
+    galleryId: 'gallery_04',
+    infoTxt:
+      'خسته نباشی\nاگر دوست داری استراحت کنی می تونی به کافه ی موزه سر بزنی و آیتم های جذابش رو امتحان کنی.',
+    picture: 'https://www.olo.pics/images/2026/09/25/cafe.webp',
+    active: true,
+  },
+];
 
 export const DEFAULT_LOCATIONS: LocationContent[] = [
   {
@@ -498,6 +511,7 @@ export function buildDefaultSeedContent(): GameContentData {
     galleries: DEFAULT_GALLERIES,
     experiences: DEFAULT_EXPERIENCES,
     locations: DEFAULT_LOCATIONS,
+    popups: DEFAULT_POPUPS,
     metadata: {
       loadedAt: Date.now(),
       source: 'seed-fallback',

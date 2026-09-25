@@ -148,6 +148,22 @@ export interface LocationContent {
 }
 
 /**
+ * Strongly typed representation of a Popup entity
+ * Loaded from Google Sheets 'pop' / 'Pop' tab:
+ * Popup_id, gallery_id, info_txt, picture, active
+ */
+export interface PopupContent {
+  id: string;
+  popupId: string;
+  galleryId: string;
+  infoTxt: string;
+  picture?: string;
+  active: boolean;
+  title?: string;
+  rawFields?: Record<string, string>;
+}
+
+/**
  * Full bundled content payload stored in cache and memory
  */
 export interface GameContentData {
@@ -157,6 +173,7 @@ export interface GameContentData {
   galleries: GalleryContent[];
   experiences?: ExperienceContent[];
   locations?: LocationContent[];
+  popups?: PopupContent[];
   metadata: {
     loadedAt: number;
     source: ContentSourceType;
@@ -181,6 +198,7 @@ export interface ContentServiceStatus {
     galleries: number;
     experiences?: number;
     locations?: number;
+    popups?: number;
   };
 }
 
@@ -198,6 +216,7 @@ export interface GameContentSummary {
     galleries: number;
     experiences?: number;
     locations?: number;
+    popups?: number;
   };
   hasLocalCache: boolean;
 }
@@ -216,6 +235,10 @@ export interface GameContentDebug {
   getExperienceById: (id: string) => ExperienceContent | null;
   getLocations: () => LocationContent[];
   getLocationById: (locationId: string) => LocationContent | null;
+  getPopups: () => PopupContent[];
+  getPopupsForGallery: (galleryId: string) => PopupContent[];
+  getActivePopupsForGallery: (galleryId: string) => PopupContent[];
+  getPopupById: (popupId: string) => PopupContent | null;
   getGalleryById: (id: string) => GalleryContent | null;
   getArtworkById: (id: string) => ArtworkContent | null;
   getGalleryPuzzleArtwork: (galleryId: string) => ArtworkContent | null;

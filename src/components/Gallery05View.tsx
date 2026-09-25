@@ -255,13 +255,13 @@ export const Gallery05View: React.FC<Gallery05ViewProps> = ({
 
   return (
     <SharedGalleryPageLayout
-      galleryId="gallery-05"
+      galleryId="gallery-04"
       galleryNumberPersian={galleryNumFa}
       galleryNamePersian={galleryNameFa}
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
-      onOpenGuide={() => setActiveGalleryInfoId('gallery-05')}
+      onOpenGuide={() => setActiveGalleryInfoId('gallery-04')}
       onTriggerNextPuzzle={triggerNextPuzzleBlink}
       mapWidth={GALLERY_05_MAP_WIDTH}
       mapHeight={GALLERY_05_MAP_HEIGHT}

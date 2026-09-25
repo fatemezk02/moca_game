@@ -14,6 +14,7 @@ import {
   GameContentDebug,
   GameContentSummary,
   LocationContent,
+  PopupContent,
   QuestionContent,
   StarContent,
 } from './types';
@@ -93,6 +94,7 @@ class ContentService {
       galleries: 0,
       experiences: 0,
       locations: 0,
+      popups: 0,
     },
   };
 
@@ -116,6 +118,7 @@ class ContentService {
             galleries: (cached.galleries || []).length,
             experiences: (cached.experiences || []).length,
             locations: (cached.locations || []).length,
+            popups: (cached.popups || []).length,
           },
         };
       }
@@ -187,6 +190,7 @@ class ContentService {
             galleries: (data.galleries || []).length,
             experiences: (data.experiences || []).length,
             locations: (data.locations || []).length,
+            popups: (data.popups || []).length,
           },
         };
         registerContentDebugAPI(this);
@@ -216,6 +220,7 @@ class ContentService {
             galleries: (fallback.galleries || []).length,
             experiences: (fallback.experiences || []).length,
             locations: (fallback.locations || []).length,
+            popups: (fallback.popups || []).length,
           },
         };
         registerContentDebugAPI(this);
@@ -240,7 +245,7 @@ class ContentService {
     if (isOnline && isConfigured) {
       try {
         console.info(`[ContentService] Fetching latest content via ${this.provider.name}...`);
-        const { questions, stars, artworks, galleries, experiences, locations } = await this.provider.fetchAll();
+        const { questions, stars, artworks, galleries, experiences, locations, popups } = await this.provider.fetchAll();
 
         const networkData: GameContentData = {
           questions,
@@ -249,6 +254,7 @@ class ContentService {
           galleries,
           experiences: experiences || [],
           locations: locations || [],
+          popups: popups || [],
           metadata: {
             loadedAt: Date.now(),
             source: 'network',
@@ -1220,6 +1226,84 @@ class ContentService {
   }
 
   /**
+   * Helper to normalize gallery identifiers for comparison across all formats (e.g. 'gallery-04', 'gallery_04', 'gallery-05', '04', '4')
+   */
+  private matchGalleryIds(targetGalleryId: string, queryGalleryId: string): boolean {
+    if (!targetGalleryId || !queryGalleryId) return false;
+    const normTarget = normalizeGalleryId(targetGalleryId);
+    const normQuery = normalizeGalleryId(queryGalleryId);
+    if (normTarget && normQuery && normTarget === normQuery) return true;
+
+    // Direct case-insensitive trimmed equality
+    const cleanTarget = targetGalleryId.trim().toLowerCase().replace(/[-_]/g, '');
+    const cleanQuery = queryGalleryId.trim().toLowerCase().replace(/[-_]/g, '');
+    if (cleanTarget === cleanQuery) return true;
+
+    // Numerical digit match
+    const targetDigits = targetGalleryId.replace(/[^0-9]/g, '');
+    const queryDigits = queryGalleryId.replace(/[^0-9]/g, '');
+    if (targetDigits && queryDigits && parseInt(targetDigits, 10) === parseInt(queryDigits, 10)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Get all Popups loaded from the 'pop' sheet
+   */
+  getPopups(): PopupContent[] {
+    const data = this.ensureDataLoaded();
+    return data.popups || [];
+  }
+
+  /**
+   * Get all Popups configured for a specific gallery ID
+   */
+  getPopupsForGallery(galleryId: string): PopupContent[] {
+    if (!galleryId) return [];
+    const allPopups = this.getPopups();
+    const canonTarget = normalizeGalleryId(galleryId);
+    const targetRecord = this.getGalleryById(galleryId);
+    const canonRecordId = targetRecord ? normalizeGalleryId(targetRecord.galleryId || targetRecord.id) : '';
+
+    return allPopups.filter((pop) => {
+      if (!pop.galleryId) return false;
+      const popCanon = normalizeGalleryId(pop.galleryId);
+      if (popCanon && (popCanon === canonTarget || (canonRecordId && popCanon === canonRecordId))) {
+        return true;
+      }
+      if (this.matchGalleryIds(pop.galleryId, galleryId)) return true;
+      if (targetRecord?.galleryNumber && this.matchGalleryIds(pop.galleryId, targetRecord.galleryNumber)) return true;
+      if (targetRecord?.galleryId && this.matchGalleryIds(pop.galleryId, targetRecord.galleryId)) return true;
+      return false;
+    });
+  }
+
+  /**
+   * Get only ACTIVE Popups for a specific gallery ID
+   */
+  getActivePopupsForGallery(galleryId: string): PopupContent[] {
+    return this.getPopupsForGallery(galleryId).filter((pop) => pop.active !== false);
+  }
+
+  /**
+   * Get a specific Popup by its Popup_id / id
+   */
+  getPopupById(popupId: string): PopupContent | null {
+    if (!popupId) return null;
+    const cleanId = popupId.trim().toLowerCase();
+    const popups = this.getPopups();
+    return (
+      popups.find(
+        (p) =>
+          p.id?.toLowerCase().trim() === cleanId ||
+          p.popupId?.toLowerCase().trim() === cleanId
+      ) || null
+    );
+  }
+
+  /**
    * Alias for backward compatibility
    */
   getDebugSummary(): GameContentSummary {
@@ -1255,6 +1339,10 @@ export function registerContentDebugAPI(service: ContentService = contentService
     getExperienceById: (id: string) => service.getExperienceById(id),
     getLocations: () => service.getLocations(),
     getLocationById: (locationId: string) => service.getLocationById(locationId),
+    getPopups: () => service.getPopups(),
+    getPopupsForGallery: (galleryId: string) => service.getPopupsForGallery(galleryId),
+    getActivePopupsForGallery: (galleryId: string) => service.getActivePopupsForGallery(galleryId),
+    getPopupById: (popupId: string) => service.getPopupById(popupId),
     getGalleryById: (id: string) => service.getGalleryById(id),
     getArtworkById: (id: string) => service.getArtworkById(id),
     getGalleryPuzzleArtwork: (galleryId: string) => service.getGalleryPuzzleArtwork(galleryId),

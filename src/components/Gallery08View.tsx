@@ -334,14 +334,14 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
 
   return (
     <SharedGalleryPageLayout
-      galleryId="gallery-08"
+      galleryId="gallery-07"
       galleryNumberPersian={galleryNumFa}
       galleryNamePersian={galleryNameFa}
       additionalHeaderTitles={['گذر از برون به درون']}
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
-      onOpenGuide={() => setActiveGalleryInfoId('gallery-08')}
+      onOpenGuide={() => setActiveGalleryInfoId('gallery-07')}
       onTriggerNextPuzzle={triggerNextPuzzleBlink}
       mapWidth={GALLERY_08_MAP_WIDTH}
       mapHeight={GALLERY_08_MAP_HEIGHT}

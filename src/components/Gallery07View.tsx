@@ -301,7 +301,7 @@ export const Gallery07View: React.FC<Gallery07ViewProps> = ({
 
   return (
     <SharedGalleryPageLayout
-      galleryId="gallery-07"
+      galleryId="gallery-06"
       galleryNumberPersian={galleryNumFa}
       galleryNamePersian={galleryNameFa}
       onNavigateBack={onNavigateBack}

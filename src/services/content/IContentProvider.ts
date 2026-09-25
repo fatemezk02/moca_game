@@ -5,6 +5,7 @@ import {
   StarContent,
   ExperienceContent,
   LocationContent,
+  PopupContent,
 } from './types';
 
 /**
@@ -35,6 +36,9 @@ export interface IContentProvider {
   /** Fetch Locations dataset */
   fetchLocations(): Promise<LocationContent[]>;
 
+  /** Fetch Popups dataset */
+  fetchPopups(): Promise<PopupContent[]>;
+
   /** Fetch all datasets in parallel */
   fetchAll(): Promise<{
     questions: QuestionContent[];
@@ -43,5 +47,6 @@ export interface IContentProvider {
     galleries: GalleryContent[];
     experiences: ExperienceContent[];
     locations: LocationContent[];
+    popups: PopupContent[];
   }>;
 }

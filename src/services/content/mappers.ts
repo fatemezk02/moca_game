@@ -12,6 +12,7 @@ import {
   ExperienceContent,
   ExperienceIconType,
   LocationContent,
+  PopupContent,
 } from './types';
 
 /**
@@ -120,47 +121,26 @@ function extractOptions(
  */
 export function normalizeGalleryId(raw: string): string {
   if (!raw) return '';
-  const clean = raw.toLowerCase().trim().replace(/[\s_\-–—:\/\\()\[\]]/g, '');
+  // Convert Persian digits to English digits first
+  const englishDigits = String(raw).replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+  let clean = englishDigits.toLowerCase().trim().replace(/[\s_\-–—:\/\\()\[\]]/g, '');
   if (!clean) return '';
-  if (clean === '1' || clean === '01' || clean === 'g1' || clean === 'g01' || clean === 'gallery1' || clean === 'gallery01') {
-    return 'gallery_01';
-  }
-  if (clean === '2' || clean === '02' || clean === 'g2' || clean === 'g02' || clean === 'gallery2' || clean === 'gallery02') {
-    return 'gallery_02';
-  }
-  if (clean === '3' || clean === '03' || clean === 'g3' || clean === 'g03' || clean === 'gallery3' || clean === 'gallery03') {
-    return 'gallery_03';
-  }
-  if (clean === '4' || clean === '04' || clean === 'g4' || clean === 'g04' || clean === 'gallery4' || clean === 'gallery04') {
-    return 'gallery_04';
-  }
-  if (clean === '5' || clean === '05' || clean === 'g5' || clean === 'g05' || clean === 'gallery5' || clean === 'gallery05') {
-    return 'gallery_05';
-  }
-  if (clean === '6' || clean === '06' || clean === 'g6' || clean === 'g06' || clean === 'gallery6' || clean === 'gallery06') {
-    return 'gallery_06';
-  }
-  if (clean === '7' || clean === '07' || clean === 'g7' || clean === 'g07' || clean === 'gallery7' || clean === 'gallery07') {
-    return 'gallery_07';
-  }
-  if (clean === '8' || clean === '08' || clean === 'g8' || clean === 'g08' || clean === 'gallery8' || clean === 'gallery08') {
-    return 'gallery_08';
-  }
-  if (clean === '9' || clean === '09' || clean === 'g9' || clean === 'g09' || clean === 'gallery9' || clean === 'gallery09') {
-    return 'gallery_09';
-  }
-  if (clean === '0' || clean === '00' || clean === 'g0' || clean === 'g00' || clean === 'gallery0' || clean === 'gallery00') {
-    return 'gallery_00';
-  }
-  if (clean.startsWith('gallery')) {
-    const num = clean.replace('gallery', '');
-    if (num.length === 1) return `gallery_0${num}`;
-    return `gallery_${num}`;
-  }
+  clean = clean.replace(/^(?:گالری|gallery)/i, '');
   if (/^\d+$/.test(clean)) {
     const n = parseInt(clean, 10);
     return n < 10 ? `gallery_0${n}` : `gallery_${n}`;
   }
+  if (clean === '1' || clean === '01' || clean === 'g1' || clean === 'g01') return 'gallery_01';
+  if (clean === '2' || clean === '02' || clean === 'g2' || clean === 'g02') return 'gallery_02';
+  if (clean === '3' || clean === '03' || clean === 'g3' || clean === 'g03') return 'gallery_03';
+  if (clean === '4' || clean === '04' || clean === 'g4' || clean === 'g04') return 'gallery_04';
+  if (clean === '5' || clean === '05' || clean === 'g5' || clean === 'g05') return 'gallery_05';
+  if (clean === '6' || clean === '06' || clean === 'g6' || clean === 'g06') return 'gallery_06';
+  if (clean === '7' || clean === '07' || clean === 'g7' || clean === 'g07') return 'gallery_07';
+  if (clean === '8' || clean === '08' || clean === 'g8' || clean === 'g08') return 'gallery_08';
+  if (clean === '9' || clean === '09' || clean === 'g9' || clean === 'g09') return 'gallery_09';
+  if (clean === '0' || clean === '00' || clean === 'g0' || clean === 'g00') return 'gallery_00';
+
   return (raw || '').replace(/-/g, '_');
 }
 
@@ -1246,6 +1226,106 @@ export function mapRowToLocation(row: Record<string, string>, index: number): Lo
     title: title.trim() || undefined,
     description: description.trim(),
     active,
+    rawFields: row,
+  };
+}
+
+/**
+ * Maps a raw row from the 'pop' / 'Pop' sheet to a strongly typed PopupContent entity
+ * Columns: Popup_id, gallery_id, info_txt, picture, active
+ */
+export function mapRowToPopup(row: Record<string, string>, index: number): PopupContent {
+  const popupId =
+    getValueByAliases(row, [
+      'popup_id',
+      'popupid',
+      'id',
+      'ID',
+      'شناسه پاپ آپ',
+      'شناسه پاپ‌آپ',
+      'شناسه',
+      'کد',
+    ]) || `Popup_${index + 1}`;
+
+  const rawGalleryId = getValueByAliases(row, [
+    'gallery_id',
+    'galleryid',
+    'gallery',
+    'گالری',
+    'شناسه گالری',
+  ]);
+  const galleryId = normalizeGalleryId(rawGalleryId);
+
+  const infoTxt = getValueByAliases(row, [
+    'info_txt',
+    'infotxt',
+    'info_text',
+    'infotext',
+    'info',
+    'text',
+    'متن',
+    'متن پاپ آپ',
+    'متن پاپ‌آپ',
+    'متن پیام',
+    'توضیحات',
+    'شرح',
+  ]);
+
+  const picture = getValueByAliases(row, [
+    'picture',
+    'picture_url',
+    'image',
+    'image_url',
+    'photo',
+    'عکس',
+    'تصویر',
+    'لینک عکس',
+    'لینک تصویر',
+  ]);
+
+  const title = getValueByAliases(row, [
+    'title',
+    'title_fa',
+    'عنوان',
+    'تیتر',
+    'نام',
+  ]);
+
+  const activeRaw = (
+    getValueByAliases(row, ['active', 'فعال', 'is_active', 'isactive', 'status', 'وضعیت']) || ''
+  ).trim();
+
+  let active = true;
+  const lowerActive = activeRaw.toLowerCase();
+  if (
+    lowerActive === 'false' ||
+    lowerActive === '0' ||
+    lowerActive === 'no' ||
+    activeRaw === 'غیرفعال' ||
+    activeRaw === 'خیر'
+  ) {
+    active = false;
+  } else if (
+    lowerActive === 'true' ||
+    lowerActive === '1' ||
+    lowerActive === 'yes' ||
+    activeRaw === 'فعال' ||
+    activeRaw === 'بله'
+  ) {
+    active = true;
+  } else if (activeRaw === '') {
+    // Default active to true if it has actual content
+    active = Boolean(infoTxt || picture);
+  }
+
+  return {
+    id: popupId,
+    popupId,
+    galleryId,
+    infoTxt,
+    picture: picture ? picture.trim() : undefined,
+    active,
+    title: title ? title.trim() : undefined,
     rawFields: row,
   };
 }

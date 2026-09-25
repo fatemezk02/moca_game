@@ -6,6 +6,7 @@ import {
   mapRowToExperience,
   mapRowToGallery,
   mapRowToLocation,
+  mapRowToPopup,
   mapRowToQuestion,
   mapRowToStar,
 } from './mappers';
@@ -14,6 +15,7 @@ import {
   ExperienceContent,
   GalleryContent,
   LocationContent,
+  PopupContent,
   QuestionContent,
   StarContent,
 } from './types';
@@ -29,7 +31,9 @@ export class GoogleSheetsContentProvider implements IContentProvider {
   /**
    * Resolves the fetch URL for a specific tab
    */
-  private getTabUrl(tabKey: 'questions' | 'stars' | 'artworks' | 'galleries' | 'experiences' | 'locations'): string {
+  private getTabUrl(
+    tabKey: 'questions' | 'stars' | 'artworks' | 'galleries' | 'experiences' | 'locations' | 'pop'
+  ): string {
     const directUrl = CONTENT_SOURCE_CONFIG.sheetUrls[tabKey]?.trim();
     if (directUrl) return directUrl;
 
@@ -47,7 +51,9 @@ export class GoogleSheetsContentProvider implements IContentProvider {
           ? 'Galleries'
           : tabKey === 'experiences'
           ? 'Experiences'
-          : 'Location');
+          : tabKey === 'locations'
+          ? 'Location'
+          : 'Pop');
       return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(
         tabName
       )}`;
@@ -180,6 +186,25 @@ export class GoogleSheetsContentProvider implements IContentProvider {
   }
 
   /**
+   * Fetch and parse Popups from 'pop' / 'Pop' tab
+   */
+  async fetchPopups(): Promise<PopupContent[]> {
+    const url = this.getTabUrl('pop');
+    if (!url) return [];
+
+    try {
+      const text = await this.fetchText(url, 'Pop');
+      const rawRows = parseSheetResponse(text);
+      return rawRows
+        .map((row, idx) => mapRowToPopup(row, idx))
+        .filter((pop) => Boolean(pop.popupId && (pop.infoTxt || pop.picture)));
+    } catch (err: any) {
+      console.warn('[GoogleSheetsContentProvider] Failed to load Pop tab:', err?.message || err);
+      return [];
+    }
+  }
+
+  /**
    * Fetch all datasets in parallel
    */
   async fetchAll(): Promise<{
@@ -189,16 +214,25 @@ export class GoogleSheetsContentProvider implements IContentProvider {
     galleries: GalleryContent[];
     experiences: ExperienceContent[];
     locations: LocationContent[];
+    popups: PopupContent[];
   }> {
-    const [questionsResult, starsResult, artworksResult, galleriesResult, experiencesResult, locationsResult] =
-      await Promise.allSettled([
-        this.fetchQuestions(),
-        this.fetchStars(),
-        this.fetchArtworks(),
-        this.fetchGalleries(),
-        this.fetchExperiences(),
-        this.fetchLocations(),
-      ]);
+    const [
+      questionsResult,
+      starsResult,
+      artworksResult,
+      galleriesResult,
+      experiencesResult,
+      locationsResult,
+      popupsResult,
+    ] = await Promise.allSettled([
+      this.fetchQuestions(),
+      this.fetchStars(),
+      this.fetchArtworks(),
+      this.fetchGalleries(),
+      this.fetchExperiences(),
+      this.fetchLocations(),
+      this.fetchPopups(),
+    ]);
 
     const errors: string[] = [];
     const questions = questionsResult.status === 'fulfilled' ? questionsResult.value : [];
@@ -239,6 +273,15 @@ export class GoogleSheetsContentProvider implements IContentProvider {
       );
     }
 
+    const popups = popupsResult.status === 'fulfilled' ? popupsResult.value : [];
+    if (popupsResult.status === 'rejected') {
+      console.warn(
+        `[GoogleSheetsContentProvider] Pop tab fetch error: ${
+          popupsResult.reason?.message || popupsResult.reason
+        }`
+      );
+    }
+
     // If all core sources failed, throw combined error
     if (
       errors.length === 4 &&
@@ -250,7 +293,7 @@ export class GoogleSheetsContentProvider implements IContentProvider {
       throw new Error(`Failed to fetch all Google Sheets tabs:\n${errors.join('\n')}`);
     }
 
-    return { questions, stars, artworks, galleries, experiences, locations };
+    return { questions, stars, artworks, galleries, experiences, locations, popups };
   }
 
   /**
@@ -264,6 +307,7 @@ export class GoogleSheetsContentProvider implements IContentProvider {
       CONTENT_SOURCE_CONFIG.sheetUrls.galleries?.trim() ||
       CONTENT_SOURCE_CONFIG.sheetUrls.experiences?.trim() ||
       CONTENT_SOURCE_CONFIG.sheetUrls.locations?.trim() ||
+      CONTENT_SOURCE_CONFIG.sheetUrls.pop?.trim() ||
       CONTENT_SOURCE_CONFIG.spreadsheetId?.trim()
     );
   }

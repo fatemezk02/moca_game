@@ -41,6 +41,8 @@ export interface GoogleSheetsSourceConfig {
     experiences: string;
     /** Published CSV link for the 'Location' / 'Locations' tab */
     locations?: string;
+    /** Published CSV link for the 'Pop' / 'pop' tab */
+    pop?: string;
   };
 
   /**
@@ -51,7 +53,7 @@ export interface GoogleSheetsSourceConfig {
   spreadsheetId?: string;
 
   /**
-   * Tab names in your Google Spreadsheet (default: Questions, Stars, Artworks, Galleries, Experiences, Location)
+   * Tab names in your Google Spreadsheet (default: Questions, Stars, Artworks, Galleries, Experiences, Location, Pop)
    */
   tabNames?: {
     questions: string;
@@ -60,6 +62,7 @@ export interface GoogleSheetsSourceConfig {
     galleries: string;
     experiences: string;
     locations?: string;
+    pop?: string;
   };
 
   /**
@@ -79,6 +82,7 @@ export const CONTENT_SOURCE_CONFIG: GoogleSheetsSourceConfig = {
     galleries: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=1983886582&single=true&output=csv', // Published CSV link for the 'Galleries' tab
     experiences: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=145470513&single=true&output=csv', // Published CSV link for the 'Experiences' tab
     locations: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=2007606590&single=true&output=csv', // Published CSV link for the 'Location' tab
+    pop: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjQyAXLl2KypSC936NBgVOJB5CV_7gUKnP_2hhJu4kQSF3Bu_zOP1uJ18VIHTIlniD5G6bzWd8BxDo/pub?gid=614676365&single=true&output=csv', // Published CSV link for the 'Pop' tab
   },
 
   // Optional: If you want to use the Spreadsheet ID directly, paste it here:
@@ -91,6 +95,7 @@ export const CONTENT_SOURCE_CONFIG: GoogleSheetsSourceConfig = {
     galleries: 'Galleries',
     experiences: 'Experiences',
     locations: 'Location',
+    pop: 'Pop',
   },
 
   fetchTimeoutMs: 10000,

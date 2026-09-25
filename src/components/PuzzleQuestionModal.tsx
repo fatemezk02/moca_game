@@ -145,6 +145,10 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
   // Gallery name strictly from Galleries.name_fa
   const galleryNameFa = galleryRecord?.nameFa?.trim() || 'گالری';
 
+  // Piece title text: قطعه شماره [شماره قطعه] — [نام گالری]
+  const pieceOrderNum = currentPieceConfig?.order ?? pointOrder ?? puzzleNumber ?? 1;
+  const pieceTitleFa = `قطعه شماره ${toPersianDigits(pieceOrderNum)} — ${galleryNameFa}`;
+
   // Modal header title: پازل [شماره پازل] ـ گالری [شماره گالری]
   const modalHeaderTitle = `پازل ${puzzleNumberFa} ـ گالری ${galleryNumberFa}`;
 
@@ -572,7 +576,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                       </span>
                     </div>
                     <span className="font-sans-custom text-[13px] font-black text-[#1e1b18]">
-                      {currentPieceConfig.titleFa}
+                      {pieceTitleFa}
                     </span>
                   </div>
 
@@ -649,7 +653,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                       </span>
                     </div>
                     <span className="font-sans-custom text-[13px] font-black text-[#1e1b18]">
-                      {currentPieceConfig.titleFa}
+                      {pieceTitleFa}
                     </span>
                   </div>
 

@@ -5,9 +5,11 @@ import { BottomNavBar } from './BottomNavBar';
 import { PlayerStatusBar } from './PlayerStatusBar';
 import { GalleryFloatingActions } from './GalleryFloatingActions';
 import { GalleryInfoModal } from './GalleryInfoModal';
+import { GalleryPopupModal } from './GalleryPopupModal';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFitMapDimensions } from '../hooks/useFitMapDimensions';
 import { contentService } from '../services/content/contentService';
+import { PopupContent } from '../services/content/types';
 import { formatTwoDigitPersian, normalizeGalleryId } from '../services/content/mappers';
 import {
   getLocationPinsVisible,
@@ -163,6 +165,31 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
     window.addEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
     return () => window.removeEventListener('museum_location_pins_visibility_changed', handleVisUpdate);
   }, []);
+
+  // Story / Context Discovery Popups loaded dynamically from the 'pop' sheet
+  const [activePopups, setActivePopups] = useState<PopupContent[]>(() =>
+    contentService.getActivePopupsForGallery(galleryId)
+  );
+  const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
+  const hasAutoShownPopupRef = React.useRef<boolean>(false);
+
+  useEffect(() => {
+    const updatePopups = () => {
+      const popList = contentService.getActivePopupsForGallery(galleryId);
+      setActivePopups(popList);
+      if (popList.length > 0 && !hasAutoShownPopupRef.current) {
+        hasAutoShownPopupRef.current = true;
+        const timer = setTimeout(() => {
+          setIsPopupOpen(true);
+        }, 350);
+        return () => clearTimeout(timer);
+      }
+    };
+
+    updatePopups();
+    window.addEventListener('museum_content_synced', updatePopups);
+    return () => window.removeEventListener('museum_content_synced', updatePopups);
+  }, [galleryId]);
 
   const isGallery01 =
     galleryId === 'gallery-01' ||
@@ -324,6 +351,17 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
 
       {/* Modals & Popups */}
       {modals}
+
+      {/* Dynamic Story / Context Discovery Popup from 'pop' sheet */}
+      {activePopups.length > 0 && (
+        <GalleryPopupModal
+          popups={activePopups}
+          isOpen={isPopupOpen}
+          onClose={() => setIsPopupOpen(false)}
+          galleryNameFa={nameFa}
+          galleryNumberFa={numFa}
+        />
+      )}
 
       {/* Fallback Gallery Info Modal if not handled in parent view */}
       {isInternalGuideOpen && (
