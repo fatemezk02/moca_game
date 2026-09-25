@@ -250,7 +250,7 @@ export const Gallery04To05CameraTransition: React.FC<Gallery04To05CameraTransiti
   useEffect(() => {
     let animationFrameId: number;
     let startTime: number | null = null;
-    const DURATION = 850; // 0.85 seconds transition
+    const DURATION = 960; // 0.96 seconds transition (subtle ~13% smoother pacing)
 
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;

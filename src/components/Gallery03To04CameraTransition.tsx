@@ -319,7 +319,7 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
           initial={{ x: initialStageX, y: initialStageY, scale: initialStageScale }}
           animate={{ x: targetStageX, y: targetStageY, scale: targetStageScale }}
           transition={{
-            duration: 0.85,
+            duration: 0.96,
             ease: [0.16, 1, 0.3, 1],
           }}
           onAnimationComplete={onComplete}
@@ -344,8 +344,8 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
             animate={isReverse ? { opacity: 1 } : { opacity: [1, 1, 0] }}
             transition={
               isReverse
-                ? { duration: 0.85 }
-                : { duration: 0.85, times: [0, 0.72, 1], ease: 'easeOut' }
+                ? { duration: 0.96 }
+                : { duration: 0.96, times: [0, 0.72, 1], ease: 'easeOut' }
             }
             style={{
               position: 'absolute',
@@ -485,8 +485,8 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
             animate={isReverse ? { opacity: [1, 1, 0] } : { opacity: 1 }}
             transition={
               isReverse
-                ? { duration: 0.85, times: [0, 0.72, 1], ease: 'easeOut' }
-                : { duration: 0.85 }
+                ? { duration: 0.96, times: [0, 0.72, 1], ease: 'easeOut' }
+                : { duration: 0.96 }
             }
             style={{
               position: 'absolute',
