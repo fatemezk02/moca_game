@@ -12,6 +12,7 @@ import { CustomIconRender } from './CustomIconRender';
 import { NavigationArrowRender } from './NavigationArrowRender';
 import { PlayerStatusBar } from './PlayerStatusBar';
 import { BottomNavBar } from './BottomNavBar';
+import { GalleryFloatingActions } from './GalleryFloatingActions';
 import { ProfileAvatar } from './ProfileAvatar';
 import { getUserProfile, UserProfile } from '../data/userProfileStore';
 import { usePlayerStats } from '../hooks/usePlayerStats';
@@ -576,12 +577,23 @@ export const Gallery01To02CameraTransition: React.FC<Gallery01To02CameraTransiti
         </motion.div>
       </main>
 
-      {/* Bottom Floating Controls */}
-      <div className="absolute bottom-20 right-4 sm:right-6 z-30 flex items-center justify-center pointer-events-auto">
+      {/* Bottom Left Floating Action Button (Gallery 02 through Gallery 09 / transition) */}
+      <div className="pointer-events-auto">
+        <GalleryFloatingActions galleryId={isReverse ? 'gallery-01' : 'gallery-02'} />
+      </div>
+
+      {/* Bottom Right Floating Controls */}
+      <div
+        id="transition-floating-controls"
+        className="absolute bottom-20 right-4 sm:right-6 z-30 flex items-center justify-center select-none pointer-events-auto"
+      >
+        {/* Gallery Toggle Button to return to Gallery 00 */}
         <button
+          id="btn-transition-toggle-map"
           onClick={onNavigateBack}
-          aria-label="بازگشت به نقشه اصلی"
-          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center cursor-pointer"
+          aria-label="بازگشت به نقشه اصلی (گالری ۰۰)"
+          title="بازگشت به نقشه اصلی (گالری ۰۰)"
+          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] hover:bg-[#d97706] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none"
         >
           <Map className="w-6 h-6 stroke-[2.5]" />
         </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Map } from 'lucide-react';
 import { getGalleryPoints, getGalleryArrows } from '../data/mapConfig';
 import {
   AdminCollectionPoint,
@@ -13,8 +13,10 @@ import { ExperiencePoint } from './ExperiencePoint';
 import { PuzzlePoint } from './PuzzlePoint';
 import { NavigationArrowRender } from './NavigationArrowRender';
 import { CustomIconRender } from './CustomIconRender';
+import { ProfileAvatar } from './ProfileAvatar';
 import { PlayerStatusBar } from './PlayerStatusBar';
 import { BottomNavBar } from './BottomNavBar';
+import { GalleryFloatingActions } from './GalleryFloatingActions';
 import { getUserProfile, UserProfile } from '../data/userProfileStore';
 import { isArrowVisibleToPlayer } from '../data/arrowConditionsStore';
 import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
@@ -97,7 +99,7 @@ export const Gallery07To08CameraTransition: React.FC<Gallery07To08CameraTransiti
 }) => {
   const isReverse = direction === 'reverse';
   const containerRef = useRef<HTMLElement>(null);
-  const [, setProfile] = useState<UserProfile | null>(() => getUserProfile());
+  const [profile, setProfile] = useState<UserProfile | null>(() => getUserProfile());
   const playerStats = usePlayerStats();
 
   const [g07Dim, setG07Dim] = useState<MapDimensions | null>(() =>
@@ -308,7 +310,8 @@ export const Gallery07To08CameraTransition: React.FC<Gallery07To08CameraTransiti
           <button
             onClick={onNavigateBack}
             aria-label="بازگشت به نقشه اصلی"
-            className="w-10 h-10 rounded-xl border-[1.5px] border-[#1e1b18] bg-[#fbf9f9] text-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] flex items-center justify-center cursor-pointer active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-150 hover:bg-[#f3ede8]"
+            title="بازگشت به نقشه اصلی"
+            className="border-2 border-[#1e1b18] rounded-xl bg-[#fef3c7] hover:bg-[#fde047] text-[#1e1b18] p-2 shadow-[1.5px_1.5px_0px_#1e1b18] hover:shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none inline-flex items-center justify-center cursor-pointer transition-all duration-150"
           >
             <ArrowLeft className="w-5 h-5 text-[#1e1b18]" />
           </button>
@@ -323,7 +326,14 @@ export const Gallery07To08CameraTransition: React.FC<Gallery07To08CameraTransiti
             </span>
           </div>
 
-          <div className="w-10" />
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('museum_open_profile'))}
+            aria-label="پروفایل کاربری"
+            title="پروفایل کاربری"
+            className="active:scale-95 transition-all duration-150 rounded-full cursor-pointer inline-flex items-center justify-center shrink-0"
+          >
+            <ProfileAvatar avatarId={profile?.avatarId} size="md" className="scale-[1.04]" />
+          </button>
         </div>
       </header>
 
@@ -590,14 +600,25 @@ export const Gallery07To08CameraTransition: React.FC<Gallery07To08CameraTransiti
         </div>
       </main>
 
-      {/* Floating Circular Map Toggle Button */}
-      <div className="fixed bottom-20 right-4 sm:right-6 z-30 pointer-events-auto">
+      {/* Bottom Left Floating Action Button (Gallery 02 through Gallery 09 / transition) */}
+      <div className="pointer-events-auto">
+        <GalleryFloatingActions galleryId={isReverse ? 'gallery-07' : 'gallery-08'} />
+      </div>
+
+      {/* Bottom Right Floating Controls */}
+      <div
+        id="transition-floating-controls"
+        className="absolute bottom-20 right-4 sm:right-6 z-30 flex items-center justify-center select-none pointer-events-auto"
+      >
+        {/* Gallery Toggle Button to return to Gallery 00 */}
         <button
+          id="btn-transition-toggle-map"
           onClick={onNavigateBack}
-          aria-label="بازگشت به نقشه اصلی"
-          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center cursor-pointer active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-150 hover:bg-[#d97706]"
+          aria-label="بازگشت به نقشه اصلی (گالری ۰۰)"
+          title="بازگشت به نقشه اصلی (گالری ۰۰)"
+          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] hover:bg-[#d97706] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none"
         >
-          <span className="text-sm font-bold">نقشه</span>
+          <Map className="w-6 h-6 stroke-[2.5]" />
         </button>
       </div>
 

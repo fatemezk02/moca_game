@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Map } from 'lucide-react';
 import { getGalleryPoints, getGalleryArrows } from '../data/mapConfig';
 import {
   AdminCollectionPoint,
@@ -17,6 +17,7 @@ import { CustomIconRender } from './CustomIconRender';
 import { ProfileAvatar } from './ProfileAvatar';
 import { PlayerStatusBar } from './PlayerStatusBar';
 import { BottomNavBar } from './BottomNavBar';
+import { GalleryFloatingActions } from './GalleryFloatingActions';
 import { getUserProfile, UserProfile } from '../data/userProfileStore';
 import { isArrowVisibleToPlayer } from '../data/arrowConditionsStore';
 import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
@@ -255,10 +256,14 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
 
   return (
     <div className="user-facing-app h-screen h-[100dvh] max-h-[100dvh] w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom">
-      {/* Top Header - Pixel-perfect match with SharedGalleryPageLayout */}
-      <header className="user-header shrink-0 z-30 px-3 py-2 bg-[#fbf9f9] border-b-2 border-[#1e1b18] shadow-[0_2px_0_rgba(0,0,0,0.06)]">
-        <div className="max-w-md mx-auto flex items-center justify-between h-11">
-          {/* Back Button */}
+      {/* Top App Bar Header */}
+      <header
+        id="transition-top-bar"
+        dir="ltr"
+        className="bg-[#ffffff] border-b-[1.25px] border-[#1e1b18] shadow-[0px_2px_0px_#1e1b18] flex flex-col w-full z-40 relative select-none pt-safe shrink-0 pointer-events-auto"
+      >
+        <div className="h-[5px] w-full bg-[#f59e0b] border-b border-[#1e1b18]" />
+        <div className="flex justify-between items-center px-3.5 sm:px-6 h-[56px] sm:h-[60px]">
           <button
             onClick={onNavigateBack}
             aria-label="بازگشت به نقشه اصلی"
@@ -268,7 +273,6 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
             <ArrowLeft className="w-5 h-5 text-[#1e1b18]" />
           </button>
 
-          {/* Center Title */}
           <div className="flex items-center justify-center h-full relative px-2 overflow-hidden">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -286,7 +290,6 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
             </AnimatePresence>
           </div>
 
-          {/* Right Profile Avatar */}
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('museum_open_profile'))}
             aria-label="پروفایل کاربری"
@@ -615,14 +618,25 @@ export const Gallery03To04CameraTransition: React.FC<Gallery03To04CameraTransiti
         </motion.div>
       </main>
 
-      {/* Floating Circular Map View Button */}
-      <div className="fixed bottom-20 right-4 sm:right-6 z-30 pointer-events-auto">
+      {/* Bottom Left Floating Action Button (Gallery 02 through Gallery 09 / transition) */}
+      <div className="pointer-events-auto">
+        <GalleryFloatingActions galleryId={isReverse ? 'gallery-03' : 'gallery-04'} />
+      </div>
+
+      {/* Bottom Right Floating Controls */}
+      <div
+        id="transition-floating-controls"
+        className="absolute bottom-20 right-4 sm:right-6 z-30 flex items-center justify-center select-none pointer-events-auto"
+      >
+        {/* Gallery Toggle Button to return to Gallery 00 */}
         <button
+          id="btn-transition-toggle-map"
           onClick={onNavigateBack}
-          aria-label="بازگشت به نقشه اصلی"
-          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] flex items-center justify-center cursor-pointer active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-150 hover:bg-[#d97706]"
+          aria-label="بازگشت به نقشه اصلی (گالری ۰۰)"
+          title="بازگشت به نقشه اصلی (گالری ۰۰)"
+          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] hover:bg-[#d97706] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none"
         >
-          <span className="text-sm font-bold">نقشه</span>
+          <Map className="w-6 h-6 stroke-[2.5]" />
         </button>
       </div>
 
