@@ -615,6 +615,139 @@ export default function App() {
       );
     }
 
+    // If active tab is Collection (Treasure), Tasks, or Curator, render the tab view directly
+    // while preserving current gallery location for when user returns to map tab!
+    if (activeTab === 'collection' || activeTab === 'tasks' || activeTab === 'curator') {
+      return (
+        <div className="user-facing-app h-screen h-[100dvh] max-h-[100dvh] w-full flex flex-col overflow-hidden bg-[#fbf9f9] text-[#0e0f0f] relative font-sans-custom">
+          {/* Top App Bar Header */}
+          <TopAppBar
+            onOpenInfo={() => setIsInfoModalOpen(true)}
+            onOpenProfile={() => setIsProfileModalOpen(true)}
+            activeFilter={activeFilter}
+            onFilterChange={(f) => {
+              setActiveFilter(f);
+              setSelectedCollection(null);
+            }}
+          />
+
+          {/* Compact Player Status Bar */}
+          <PlayerStatusBar puzzles={playerStats.completedPuzzles} stars={playerStats.stars} coins={playerStats.coins} />
+
+          {/* Main Canvas Area */}
+          <main className="flex-1 min-h-0 relative overflow-hidden bg-[#fbf9f9] flex items-center justify-center mb-[calc(64px+env(safe-area-inset-bottom,0px))] sm:mb-[calc(68px+env(safe-area-inset-bottom,0px))]">
+            {/* Collection Tab Index */}
+            {activeTab === 'collection' && (
+              <CollectionListView
+                collections={MUSEUM_COLLECTIONS}
+                onSelectCollectionOnMap={(col) => {
+                  setSelectedCollection(col);
+                  setActiveTab('map');
+                }}
+                onOpenDetailModal={(col) => setDetailModalCollection(col)}
+              />
+            )}
+
+            {/* Tasks or Curator Tab */}
+            {(activeTab === 'tasks' || activeTab === 'curator') && (
+              <TasksCuratorView
+                type={activeTab}
+                onNavigateToMap={() => setActiveTab('map')}
+                onSelectGallery={(galleryId) => {
+                  setActiveTab('map');
+                  navigateToGalleryWithTrack(galleryId);
+                }}
+              />
+            )}
+
+            {/* Floating Audio Guide Mini-Player Bar when listening */}
+            {playingAudioCollection && (
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 bg-[#0e0f0f] text-[#fbf9f9] border border-[#c5a059] px-3.5 py-2 shadow-xl flex items-center gap-3 font-mono-custom text-[11px] max-w-[92vw] sm:max-w-md">
+                <button
+                  onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                  aria-label={isPlayingAudio ? 'Pause audio' : 'Play audio'}
+                  className="p-1 bg-[#c5a059] text-[#0e0f0f] font-bold cursor-pointer"
+                >
+                  {isPlayingAudio ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                </button>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between text-[10px] text-[#c5a059]">
+                    <span className="truncate uppercase font-bold">
+                      راهنمای صوتی: {playingAudioCollection.roomCode}
+                    </span>
+                    <span>{playingAudioCollection.audioGuideDuration}</span>
+                  </div>
+                  <div className="w-full bg-[#242424] h-1 mt-1 overflow-hidden">
+                    <div
+                      className="bg-[#c5a059] h-full transition-all duration-300"
+                      style={{ width: `${audioProgress}%` }}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsPlayingAudio(false);
+                    setPlayingAudioCollection(null);
+                  }}
+                  aria-label="Close audio guide"
+                  className="text-[#747878] hover:text-[#fbf9f9] p-1 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </main>
+
+          {/* Detail Modal for Full Collection Breakdown */}
+          <CollectionDetailModal
+            collection={detailModalCollection}
+            onClose={() => setDetailModalCollection(null)}
+            onAudioPlay={handleToggleAudio}
+            isAudioPlaying={
+              isPlayingAudio && playingAudioCollection?.id === detailModalCollection?.id
+            }
+          />
+
+          {/* Museum Guide & Legend Modal */}
+          <MuseumInfoModal
+            isOpen={isInfoModalOpen}
+            onClose={() => setIsInfoModalOpen(false)}
+            onOpenAdmin={() => {
+              setIsInfoModalOpen(false);
+              setIsAdminOpen(true);
+            }}
+            onNavigateToGallery={(galleryId) => {
+              setCurrentGallery(galleryId);
+            }}
+          />
+
+          {/* Bottom Navigation Bar */}
+          <BottomNavBar
+            activeTab={activeTab}
+            onTabChange={(tab) => {
+              setActiveTab(tab);
+              setSelectedCollection(null);
+              if (tab === 'collection') {
+                markCollectionsAsViewed();
+              }
+            }}
+          />
+
+          {/* Star Point Discovery Modal for Gallery 00 Star Points */}
+          {activeStarDiscoveryId && (
+            <StarDiscoveryModal
+              starPointId={activeStarDiscoveryId}
+              galleryId="gallery-00"
+              isOpen={!!activeStarDiscoveryId}
+              onClose={() => setActiveStarDiscoveryId(null)}
+            />
+          )}
+        </div>
+      );
+    }
+
     // If camera transition from Gallery 01 -> Gallery 02 is running (Forward)
     if (isTransitioningG01ToG02) {
       return (
@@ -634,7 +767,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG01ToG02(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -659,7 +791,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG02ToG01(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -684,7 +815,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG02ToG03(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -709,7 +839,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG03ToG02(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -734,7 +863,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG03ToG04(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -759,7 +887,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG04ToG03(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -784,7 +911,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG04ToG05(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -809,7 +935,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG05ToG04(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -834,7 +959,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG05ToG06(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -859,7 +983,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG06ToG05(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -884,7 +1007,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG06ToG07(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -909,7 +1031,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG07ToG06(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -934,7 +1055,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG07ToG08(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -959,7 +1079,6 @@ export default function App() {
           onSelectTab={(tab) => {
             setIsTransitioningG08ToG07(false);
             setActiveTab(tab);
-            navigateToGalleryWithTrack('gallery-00');
           }}
         />
       );
@@ -972,7 +1091,6 @@ export default function App() {
         onNavigateBack={() => navigateToGalleryWithTrack('gallery-03')}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -988,7 +1106,6 @@ export default function App() {
         }}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -1004,7 +1121,6 @@ export default function App() {
         }}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -1020,7 +1136,6 @@ export default function App() {
         }}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -1036,7 +1151,6 @@ export default function App() {
         }}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -1052,7 +1166,6 @@ export default function App() {
         }}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -1068,7 +1181,6 @@ export default function App() {
         }}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -1083,7 +1195,6 @@ export default function App() {
         onNavigateToGallery={(galleryId) => navigateToGalleryWithTrack(galleryId)}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -1096,7 +1207,6 @@ export default function App() {
         onNavigateBack={() => navigateToGalleryWithTrack('gallery-01')}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -1111,7 +1221,6 @@ export default function App() {
         onNavigateToGallery={(galleryId) => navigateToGalleryWithTrack(galleryId)}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          navigateToGalleryWithTrack('gallery-00');
         }}
       />
     );
@@ -1173,6 +1282,7 @@ export default function App() {
                 setActiveStarDiscoveryId(starId);
                 setSelectedCollection(null);
               }}
+              isMapVisible={Boolean(userProfile) && activeTab === 'map' && !isAdminOpen}
             />
 
             {/* Floating Circular Gallery Toggle & Gallery Status Controls */}

@@ -350,7 +350,6 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
               markCollectionsAsViewed();
             }
             onSelectTab?.(tab);
-            onNavigateBack();
           }
         }}
       />

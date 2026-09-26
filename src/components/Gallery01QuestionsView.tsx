@@ -359,7 +359,6 @@ export const Gallery01QuestionsView: React.FC<Gallery01QuestionsViewProps> = ({
               markCollectionsAsViewed();
             }
             onSelectTab?.(tab);
-            onNavigateBack();
           }
         }}
       />

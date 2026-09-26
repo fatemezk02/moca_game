@@ -11,7 +11,15 @@ import { StarPoint, StarLabel } from './StarPoint';
 import { isArrowVisibleToPlayer, markArrowUsed, isArrowUsed } from '../data/arrowConditionsStore';
 import { getCurrentGalleryId, setCurrentGalleryId } from '../data/playerLocationStore';
 import { getLocationPinsVisible } from '../data/locationPinsVisibilityStore';
-import { getLampPositionForGallery, getAllGalleryLamps, getAllGalleryLocks, getLockPositionForGallery, DEFAULT_GALLERY_LOCKS } from '../data/galleryAreasStore';
+import {
+  getLampPositionForGallery,
+  getAllGalleryLamps,
+  getAllGalleryLocks,
+  getLockPositionForGallery,
+  DEFAULT_GALLERY_LOCKS,
+  hasLocksIntroPlayed,
+  markLocksIntroPlayed,
+} from '../data/galleryAreasStore';
 import { isGalleryReached, markGalleryReached, isGalleryManuallyUnlocked } from '../data/reachedGalleriesStore';
 import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
 import { GalleryLockIndicator } from './GalleryLockIndicator';
@@ -37,6 +45,7 @@ interface MuseumFloorPlanProps {
   onSelectTab?: (tab: 'map' | 'collection' | 'tasks' | 'curator') => void;
   mapMode?: MapDisplayMode;
   onOpenStarDiscovery?: (starPointId: string) => void;
+  isMapVisible?: boolean;
 }
 
 export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
@@ -52,6 +61,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   onSelectTab,
   mapMode = 'normal',
   onOpenStarDiscovery,
+  isMapVisible = true,
 }) => {
   const { containerRef, dimensions } = useFitMapDimensions(604.8, 844.86);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -69,6 +79,24 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   const [galleryAreasVer, setGalleryAreasVer] = useState(0);
   const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
   const [locationAnimKey, setLocationAnimKey] = useState(0);
+  const [shouldAnimateLocks, setShouldAnimateLocks] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Only trigger locks entrance animation when the Master Map is actually visible to the user
+    if (isMapVisible && !hasLocksIntroPlayed() && !shouldAnimateLocks) {
+      setShouldAnimateLocks(true);
+    }
+  }, [isMapVisible, shouldAnimateLocks]);
+
+  useEffect(() => {
+    if (shouldAnimateLocks) {
+      const timer = setTimeout(() => {
+        markLocksIntroPlayed();
+        setShouldAnimateLocks(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldAnimateLocks]);
 
   const isMasterMapG01Arrow = (arrow: AdminArrowPoint): boolean =>
     arrow.id === 'arrow-g00-to-g01' ||
@@ -169,6 +197,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
       setIsG01ArrowDismissed(false);
       setIsG01ArrowFadingOut(false);
       setAdminArrows(getGalleryArrows('gallery-00'));
+      setShouldAnimateLocks(false);
     };
     window.addEventListener('museum_arrows_updated', handleArrowsUpdate);
     window.addEventListener('museum_used_arrows_updated', handleArrowsUpdate);
@@ -659,27 +688,12 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           // 1. Determine Current Player Gallery (map player location to canonical gallery_01 .. gallery_08)
           const rawCurrent = playerGalleryId || getCurrentGalleryId();
           const normCurrent = normalizeGalleryId(rawCurrent);
-
-          let canonPlayerId = 'gallery_01';
-          if (rawCurrent === 'gallery-00' || normCurrent === 'gallery_00') {
-            canonPlayerId = 'gallery_00';
-          } else if (rawCurrent === 'gallery-01' || rawCurrent === 'gallery_01' || normCurrent === 'gallery_01') {
-            canonPlayerId = 'gallery_01';
-          } else if (rawCurrent === 'gallery-03' || rawCurrent === 'gallery-02' || rawCurrent === 'gallery_02' || normCurrent === 'gallery_02') {
-            canonPlayerId = 'gallery_02';
-          } else if (rawCurrent === 'gallery-04' || rawCurrent === 'gallery_03' || normCurrent === 'gallery_03') {
-            canonPlayerId = 'gallery_03';
-          } else if (rawCurrent === 'gallery-05' || rawCurrent === 'gallery_04' || normCurrent === 'gallery_04') {
-            canonPlayerId = 'gallery_04';
-          } else if (rawCurrent === 'gallery-06' || rawCurrent === 'gallery_05' || normCurrent === 'gallery_05') {
-            canonPlayerId = 'gallery_05';
-          } else if (rawCurrent === 'gallery-07' || rawCurrent === 'gallery_06' || normCurrent === 'gallery_06') {
-            canonPlayerId = 'gallery_06';
-          } else if (rawCurrent === 'gallery-08' || rawCurrent === 'gallery_07' || normCurrent === 'gallery_07') {
-            canonPlayerId = 'gallery_07';
-          } else if (rawCurrent === 'gallery-09' || rawCurrent === 'gallery_08' || normCurrent === 'gallery_08' || normCurrent === 'gallery_09') {
-            canonPlayerId = 'gallery_08';
-          }
+          const canonPlayerId =
+            normCurrent && normCurrent !== 'gallery_00'
+              ? normCurrent
+              : rawCurrent === 'gallery-00' || normCurrent === 'gallery_00'
+              ? 'gallery_00'
+              : 'gallery_01';
 
           const isCompleted = (gid: string) => {
             const canon = normalizeGalleryId(gid);
@@ -691,28 +705,16 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           };
 
           const isReached = (gid: string) => {
-            if (gid === 'gallery_01') return true;
-            if (gid === 'gallery_02') {
-              return isCompleted('gallery_01') || isGalleryManuallyUnlocked('gallery_02') || isGalleryManuallyUnlocked('gallery-02') || isGalleryManuallyUnlocked('gallery-01');
-            }
-            if (gid === 'gallery_03') {
-              return isCompleted('gallery_02') || isGalleryManuallyUnlocked('gallery_03') || isGalleryManuallyUnlocked('gallery-03');
-            }
-            if (gid === 'gallery_04') {
-              return isCompleted('gallery_03') || isGalleryManuallyUnlocked('gallery_04') || isGalleryManuallyUnlocked('gallery-04');
-            }
-            if (gid === 'gallery_05') {
-              return isCompleted('gallery_04') || isGalleryManuallyUnlocked('gallery_05') || isGalleryManuallyUnlocked('gallery-05');
-            }
-            if (gid === 'gallery_06') {
-              return isCompleted('gallery_05') || isGalleryManuallyUnlocked('gallery_06') || isGalleryManuallyUnlocked('gallery-06');
-            }
-            if (gid === 'gallery_07') {
-              return isCompleted('gallery_06') || isGalleryManuallyUnlocked('gallery_07') || isGalleryManuallyUnlocked('gallery-07');
-            }
-            if (gid === 'gallery_08') {
-              return isCompleted('gallery_07') || isGalleryManuallyUnlocked('gallery_08') || isGalleryManuallyUnlocked('gallery-08');
-            }
+            const canon = normalizeGalleryId(gid);
+            if (canon === 'gallery_01') return true;
+            if (isGalleryManuallyUnlocked(gid) || isGalleryManuallyUnlocked(canon)) return true;
+            if (canon === 'gallery_02') return isCompleted('gallery_01');
+            if (canon === 'gallery_03') return isCompleted('gallery_02');
+            if (canon === 'gallery_04') return isCompleted('gallery_03');
+            if (canon === 'gallery_05') return isCompleted('gallery_04');
+            if (canon === 'gallery_06') return isCompleted('gallery_05');
+            if (canon === 'gallery_07') return isCompleted('gallery_06');
+            if (canon === 'gallery_08') return isCompleted('gallery_07');
             return false;
           };
 
@@ -737,6 +739,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                       destinationName={gid}
                       isLocationIndicator={true}
                       isUnlocked={false}
+                      animateEntrance={shouldAnimateLocks}
+                      animationDelay={0.05}
                       onNavigate={() => handleLampClick(gid)}
                     />
                   );
@@ -757,6 +761,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                       destinationName={gid}
                       isLocationIndicator={false}
                       isUnlocked={true}
+                      animateEntrance={shouldAnimateLocks}
+                      animationDelay={0.05}
                       onNavigate={() => handleLampClick(gid)}
                     />
                   );
@@ -768,8 +774,22 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                 const lockMapX = (lockPos.x / 604.8) * 100;
                 const lockMapY = (lockPos.y / 844.86) * 100;
                 const open = isReached(gid);
-                const lockDef = DEFAULT_GALLERY_LOCKS.find((l) => l.galleryId === gid);
+                const lockDef = DEFAULT_GALLERY_LOCKS.find((l) => normalizeGalleryId(l.galleryId) === gid || l.galleryId === gid);
                 const title = lockDef?.title || `قفل ${gid}`;
+
+                const LOCK_SEQUENCE_ORDER: Record<string, number> = {
+                  gallery_02: 0,
+                  gallery_03: 1,
+                  gallery_04: 2,
+                  gallery_05: 3,
+                  gallery_06: 4,
+                  gallery_07: 5,
+                  gallery_08: 6,
+                };
+                const canonId = normalizeGalleryId(gid);
+                const seqIndex = LOCK_SEQUENCE_ORDER[canonId] ?? -1;
+                // Lamps animate first at 0.05s (duration ~0.32s), followed by a short natural pause, then locks begin at 0.50s
+                const animDelay = seqIndex >= 0 ? 0.50 + seqIndex * 0.16 : 0;
 
                 return (
                   <GalleryLockIndicator
@@ -779,6 +799,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                     galleryId={gid}
                     title={title}
                     isOpen={open}
+                    animateEntrance={shouldAnimateLocks && seqIndex >= 0}
+                    animationDelay={animDelay}
                     onClick={() => {
                       if (open) {
                         handleLampClick(gid);

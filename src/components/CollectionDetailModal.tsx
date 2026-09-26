@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MuseumCollection, ArtworkPlaceholder } from '../types';
 import { PlaceholderArtworkGraphic } from './PlaceholderArtworkGraphic';
@@ -17,7 +17,7 @@ export const CollectionDetailModal: React.FC<CollectionDetailModalProps> = ({
   onAudioPlay,
   isAudioPlaying = false,
 }) => {
-  const [bookmarked, setBookmarked] = React.useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
 
   if (!collection) return null;
 
