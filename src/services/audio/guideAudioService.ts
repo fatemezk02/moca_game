@@ -2,16 +2,18 @@ import { useEffect, useState, useCallback } from 'react';
 import { getLogicalGalleryNumber, normalizeGalleryId } from '../content/mappers';
 
 /**
- * Dedicated versioned cache for TMOCA guide audio files.
- * Bumped to v2 to purge any previous synthetic/test-tone audio responses.
+ * Dedicated versioned caches for TMOCA assets.
+ * Bumped to v3 / v2 to purge any previous cached audio/static assets and stale logos.
  */
-export const GUIDE_AUDIO_CACHE_NAME = 'tmoca-guide-audio-v2';
+export const GUIDE_AUDIO_CACHE_NAME = 'tmoca-guide-audio-v3';
+export const STATIC_CACHE_NAME = 'tmoca-static-v2';
+export const ACTIVE_CACHE_NAMES = [GUIDE_AUDIO_CACHE_NAME, STATIC_CACHE_NAME];
 
-// Immediately purge any legacy audio caches on script evaluation in browser
+// Immediately purge any legacy audio/static caches on script evaluation in browser
 if (typeof window !== 'undefined' && 'caches' in window) {
   caches.keys().then((keys) => {
     keys.forEach((key) => {
-      if (key.startsWith('tmoca-guide-audio-') && key !== GUIDE_AUDIO_CACHE_NAME) {
+      if (!ACTIVE_CACHE_NAMES.includes(key)) {
         console.log('[GuideAudio] Purged legacy cache:', key);
         caches.delete(key);
       }
@@ -119,7 +121,7 @@ export function initGuideAudioBackgroundPrefetch(): void {
   if ('caches' in window) {
     caches.keys().then((keys) => {
       keys.forEach((key) => {
-        if (key.startsWith('tmoca-guide-audio-') && key !== GUIDE_AUDIO_CACHE_NAME) {
+        if (!ACTIVE_CACHE_NAMES.includes(key)) {
           caches.delete(key);
         }
       });
