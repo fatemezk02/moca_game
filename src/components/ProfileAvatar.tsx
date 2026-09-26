@@ -33,15 +33,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       style={{ border: '2.5px solid #1e1b18' }}
       title={`${avatar.nameFa} - ${avatar.titleFa}`}
     >
-      {avatar.imageSrc ? (
-        <img
-          src={avatar.imageSrc}
-          alt={avatar.nameFa}
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <CharacterAvatarSVG id={avatar.id} className="w-full h-full" />
-      )}
+      <CharacterAvatarSVG id={avatar.id} className="w-full h-full" />
     </div>
   );
 };
