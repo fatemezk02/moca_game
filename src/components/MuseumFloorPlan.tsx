@@ -294,7 +294,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
       return 'درب ورودی';
     }
     if (iconType === 'preset-location-cinema' || id.includes('cinema') || title.includes('سینما')) {
-      return 'سینماتک';
+      return 'سینماتک موزه';
     }
     if (iconType.startsWith('preset-location-gallery-')) {
       const num = parseInt(iconType.replace('preset-location-gallery-', ''), 10);

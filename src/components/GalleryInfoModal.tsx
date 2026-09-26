@@ -207,7 +207,7 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
                 >
                   <div
                     id="gallery-info-description-container"
-                    className="w-full text-center mx-auto select-text"
+                    className="w-full text-right select-text"
                   >
                     {/* Gallery Name as heading above description */}
                     {gallery.nameFa && (
@@ -220,7 +220,7 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
                     )}
                     <p
                       id="gallery-info-description-text"
-                      className="font-sans-custom text-[14px] sm:text-[15.5px] text-[#292524] leading-[1.85] sm:leading-[1.95] font-medium text-center whitespace-pre-line break-words"
+                      className="font-sans-custom text-[14px] sm:text-[15.5px] text-[#292524] leading-[1.85] sm:leading-[1.95] font-medium text-right whitespace-pre-line break-words"
                     >
                       {gallery.descriptionFa}
                     </p>

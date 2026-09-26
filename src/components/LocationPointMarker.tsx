@@ -96,12 +96,12 @@ export const LocationPointMarker: React.FC<LocationPointMarkerProps> = ({
              C 9.9 2.5 5 7.4 5 13.5
              C 5 19.6 11.7 25.4 14.3 28.5
              Z"
-          fill={isSelected ? '#ef4444' : iconType === 'gallery' ? '#f59e0b' : '#fbbf24'}
+          fill={isSelected ? '#ef4444' : iconType === 'gallery' ? '#84e89f' : '#fbbf24'}
           stroke="#1e1b18"
           strokeWidth="1.6"
           strokeLinejoin="round"
           strokeLinecap="round"
-          className={`transition-colors ${iconType === 'gallery' ? 'group-hover:fill-[#d97706]' : 'group-hover:fill-[#f59e0b]'}`}
+          className={`transition-colors ${iconType === 'gallery' ? 'group-hover:fill-[#6ee7a0]' : 'group-hover:fill-[#f59e0b]'}`}
         />
 
         {/* Specular Highlight Arc on Pin Head */}

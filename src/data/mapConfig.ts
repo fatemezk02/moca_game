@@ -237,10 +237,10 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         id: 'icon-g00-library',
         type: 'icon',
         galleryId: 'gallery-00',
-        title: 'کتابخانه تخصصی (Library)',
+        title: 'کتابخانه تخصصی',
         locationId: 'Location_11',
-        x: 441,
-        y: 591,
+        x: 288,
+        y: 734,
         iconType: 'preset-location-library',
         width: 32,
         height: 32,
@@ -250,28 +250,14 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         id: 'icon-g00-cinema',
         type: 'icon',
         galleryId: 'gallery-00',
-        title: 'سینماتک موزه (Cinema)',
+        title: 'سینماتک موزه',
         locationId: 'Location_12',
-        x: 230,
-        y: 663,
+        x: 257,
+        y: 520,
         iconType: 'preset-location-cinema',
         width: 32,
         height: 32,
         destination: 'gallery-00',
-      },
-      {
-        id: 'icon-g00-gallery-1',
-        type: 'icon',
-        galleryId: 'gallery-00',
-        title: 'گالری ۰۱',
-        locationId: 'Location_1',
-        x: 309,
-        y: 734,
-        iconType: 'preset-location-gallery-1',
-        galleryNumber: 1,
-        width: 32,
-        height: 32,
-        destination: 'gallery-01',
       },
       {
         id: 'icon-g00-gallery-2',
@@ -281,7 +267,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         locationId: 'Location_2',
         x: 165,
         y: 480,
-        iconType: 'preset-location-gallery-2',
+        iconType: 'preset-location-gallery-1',
         galleryNumber: 1,
         width: 32,
         height: 32,
@@ -295,7 +281,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         locationId: 'Location_3',
         x: 162,
         y: 326,
-        iconType: 'preset-location-gallery-3',
+        iconType: 'preset-location-gallery-2',
         galleryNumber: 2,
         width: 32,
         height: 32,
@@ -309,7 +295,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         locationId: 'Location_4',
         x: 162,
         y: 172,
-        iconType: 'preset-location-gallery-4',
+        iconType: 'preset-location-gallery-3',
         galleryNumber: 3,
         width: 32,
         height: 32,
@@ -323,7 +309,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         locationId: 'Location_5',
         x: 313,
         y: 124,
-        iconType: 'preset-location-gallery-5',
+        iconType: 'preset-location-gallery-4',
         galleryNumber: 4,
         width: 32,
         height: 32,
@@ -337,7 +323,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         locationId: 'Location_6',
         x: 466,
         y: 254,
-        iconType: 'preset-location-gallery-6',
+        iconType: 'preset-location-gallery-5',
         galleryNumber: 5,
         width: 32,
         height: 32,
@@ -351,7 +337,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         locationId: 'Location_7',
         x: 418,
         y: 283,
-        iconType: 'preset-location-gallery-7',
+        iconType: 'preset-location-gallery-6',
         galleryNumber: 6,
         width: 26,
         height: 26,
@@ -365,7 +351,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         locationId: 'Location_8',
         x: 427,
         y: 382,
-        iconType: 'preset-location-gallery-8',
+        iconType: 'preset-location-gallery-7',
         galleryNumber: 7,
         width: 32,
         height: 32,
@@ -379,7 +365,7 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         locationId: 'Location_9',
         x: 463,
         y: 481,
-        iconType: 'preset-location-gallery-9',
+        iconType: 'preset-location-gallery-8',
         galleryNumber: 8,
         width: 32,
         height: 32,
@@ -1434,7 +1420,7 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
           for (const key of Object.keys(DEFAULT_MAP_DATABASE)) {
             if (parsed[key]) {
               const defaultIcons = DEFAULT_MAP_DATABASE[key]?.iconPoints || [];
-              const savedIcons = (parsed[key].iconPoints || []).filter((i: any) => i.id !== 'icon-3527' && i.id !== 'icon-g00-entrance-to-g01');
+              const savedIcons = (parsed[key].iconPoints || []).filter((i: any) => i.id !== 'icon-3527' && i.id !== 'icon-g00-entrance-to-g01' && i.id !== 'icon-g00-gallery-1');
               const combinedIcons = [...savedIcons];
               for (const defIcon of defaultIcons) {
                 if (defIcon.id !== 'icon-3527') {
@@ -1449,6 +1435,10 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                       galleryNumber: defIcon.galleryNumber,
                       title: combinedIcons[existingIdx].title || defIcon.title,
                     };
+                    if (defIcon.id === 'icon-g00-library' || defIcon.id === 'icon-g00-cinema') {
+                      combinedIcons[existingIdx].x = defIcon.x;
+                      combinedIcons[existingIdx].y = defIcon.y;
+                    }
                   }
                 }
               }
@@ -1600,7 +1590,7 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
         })),
       iconPoints: (safeGalleryId === 'gallery-00' || canonId === 'gallery-00')
         ? (() => {
-            const rawList = rawConfig.iconPoints || [];
+            const rawList = (rawConfig.iconPoints || []).filter((ip) => ip.id !== 'icon-g00-gallery-1');
             const cafePt = rawList.find((ip) => ip.id === 'icon-g00-cafe');
             const targetWidth = cafePt?.width || 32;
             const targetHeight = cafePt?.height || 32;
@@ -1615,6 +1605,11 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
               if (existingIdx === -1) {
                 list.push({ ...defIcon, width: iconW, height: iconH });
               } else {
+                if (defIcon.id === 'icon-g00-library' || defIcon.id === 'icon-g00-cinema') {
+                  list[existingIdx].x = defIcon.x;
+                  list[existingIdx].y = defIcon.y;
+                  list[existingIdx].title = defIcon.title;
+                }
                 if (defIcon.iconType?.startsWith('preset-location-') || defIcon.locationId) {
                   list[existingIdx] = {
                     ...list[existingIdx],
