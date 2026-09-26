@@ -918,6 +918,30 @@ export function mapRowToGallery(row: Record<string, string>, index: number): Gal
     'اثر',
   ]);
 
+  const audioUrl = getValueByAliases(row, [
+    'audio_url',
+    'audiourl',
+    'audio',
+    'sound_url',
+    'soundurl',
+    'sound',
+    'voice_url',
+    'voiceurl',
+    'voice',
+    'guide_audio',
+    'guide_audio_url',
+    'audio_guide',
+    'audioguide',
+    'صدا',
+    'صوت',
+    'لینک صوتی',
+    'فایل صوتی',
+    'راهنمای صوتی',
+    'لینک صدا',
+    'آدرس صدا',
+    'آدرس صوت',
+  ]);
+
   const activeRaw = getValueByAliases(row, ['active', 'فعال', 'is_active', 'status']);
   const active =
     activeRaw === ''
@@ -938,6 +962,7 @@ export function mapRowToGallery(row: Record<string, string>, index: number): Gal
     curator: curator ? curator.trim() : undefined,
     curatorUrl: curatorUrl ? curatorUrl.trim() : undefined,
     puzzleArtworkId: puzzleArtworkId ? puzzleArtworkId.trim() : undefined,
+    audioUrl: audioUrl ? audioUrl.trim() : undefined,
     active,
     rawFields: row,
   };

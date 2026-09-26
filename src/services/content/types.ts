@@ -130,6 +130,7 @@ export interface GalleryContent {
   curator?: string;
   curatorUrl?: string;
   puzzleArtworkId?: string;
+  audioUrl?: string;
   active: boolean;
   rawFields?: Record<string, string>;
 }

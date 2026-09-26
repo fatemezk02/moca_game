@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Sparkles, RotateCw, Compass, Eye, Puzzle, Star } from 'lucide-react';
 import { contentService, formatTwoDigitPersian } from '../services/content';
+import { GuideAudioControl } from './GuideAudioControl';
+import { guideAudioManager } from '../services/audio/guideAudioService';
 
 export interface GalleryInfoModalProps {
   galleryId: string | null;
@@ -225,6 +227,9 @@ export const GalleryInfoModal: React.FC<GalleryInfoModalProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* AUDIO GUIDE CONTROL (Only for galleries with local audio; Gallery 06 renders nothing) */}
+              <GuideAudioControl galleryId={gallery.galleryId || gallery.id || galleryId || ''} />
 
               {/* DEDICATED GUIDE / CURATOR SECTION (Strictly BELOW the complete description in document flow) */}
               {(hasCuratorImage || hasCuratorName) && (

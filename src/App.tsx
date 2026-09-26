@@ -56,6 +56,8 @@ import { getUserProfile, UserProfile } from './data/userProfileStore';
 import { markCollectionsAsViewed } from './data/collectionNotificationStore';
 import { markArrowUsed } from './data/arrowConditionsStore';
 import { motion, AnimatePresence } from 'motion/react';
+import { initGuideAudioBackgroundPrefetch, guideAudioManager } from './services/audio/guideAudioService';
+import { GlobalGuideAudioPlayer } from './components/GlobalGuideAudioPlayer';
 
 export default function App() {
   const playerStats = usePlayerStats();
@@ -78,6 +80,7 @@ export default function App() {
   const [isTransitioningG08ToG07, setIsTransitioningG08ToG07] = useState(false);
 
   useEffect(() => {
+    initGuideAudioBackgroundPrefetch();
     const handleOpenCertificate = () => setIsFinalCertificateOpen(true);
     const handleCloseCertificate = () => setIsFinalCertificateOpen(false);
     const handleOpenProfile = () => setIsProfileModalOpen(true);
