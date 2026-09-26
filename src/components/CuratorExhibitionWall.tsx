@@ -85,7 +85,7 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
         num: 1,
         nameFa: 'گالری ۰۱ — کیمیای نور',
         nameEn: 'Alchemy of Light',
-        puzzleArtworkId: '26',
+        puzzleArtworkId: '60',
       },
       {
         id: 'gallery_02',
@@ -146,11 +146,22 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
     ];
 
     const list: ExhibitionArtwork[] = CANONICAL_EXHIBITION_GALLERIES.map((g, idx) => {
-      // Direct canonical lookup for puzzle artwork
+      const sheetGallery =
+        contentService.getGalleryById(g.id) ||
+        contentService.getGalleryById(g.routeId);
+
+      // Stable artwork ID lookup from Sheet (Galleries.artwork_id / puzzleArtworkId):
+      const targetArtworkId =
+        sheetGallery?.puzzleArtworkId?.trim() ||
+        g.puzzleArtworkId;
+
+      // Direct lookup for puzzle artwork using the stable artwork ID from the Sheet
       const puzzleArtwork =
+        (targetArtworkId ? contentService.getArtworkById(targetArtworkId) : null) ||
         contentService.getGalleryPuzzleArtwork(g.id) ||
         contentService.getGalleryPuzzleArtwork(g.routeId) ||
-        contentService.getArtworkById(g.puzzleArtworkId);
+        (g.puzzleArtworkId ? contentService.getArtworkById(g.puzzleArtworkId) : null) ||
+        (g.id === 'gallery_01' ? contentService.getArtworkById('60') || contentService.getArtworkById('26') : null);
 
       const dynamicSrc =
         contentService.getGalleryPuzzleArtworkSrc(g.id) ||
@@ -173,15 +184,19 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
         isGalleryPuzzleCompleted(g.routeId) ||
         (collectedPieces.length >= totalPieces && collectedPieces.length > 0);
 
-      const sheetGallery =
-        contentService.getGalleryById(g.id) ||
-        contentService.getGalleryById(g.routeId);
-
       const galleryNameFa = sheetGallery?.nameFa
         ? `گالری ${g.num < 10 ? '۰' + g.num : g.num} — ${sheetGallery.nameFa}`
         : g.nameFa;
       const galleryName = sheetGallery?.nameEn || g.nameEn;
-      const title = puzzleArtwork?.title || galleryNameFa;
+
+      // Read artwork title dynamically from Sheet data
+      // If artwork name is missing in the Sheet, keep existing fallback behavior
+      const rawTitle =
+        puzzleArtwork?.title?.trim() ||
+        puzzleArtwork?.rawFields?.['title_fa']?.trim() ||
+        puzzleArtwork?.rawFields?.['title']?.trim();
+
+      const title = rawTitle || galleryNameFa;
       const imageUrl = dynamicSrc || puzzleArtwork?.imageUrl || '';
 
       // Preload image dimensions in background for empty & completed frames

@@ -744,12 +744,24 @@ export function mapRowToArtwork(row: Record<string, string>, index: number): Art
   const artworkId = id;
 
   const galleryId =
-    getValueByAliases(row, ['galleryid', 'gallery', 'گالری', 'شناسه گالری']) ||
+    getValueByAliases(row, ['gallery_id', 'galleryid', 'gallery', 'گالری', 'شناسه گالری']) ||
     'gallery-01';
 
   const title =
-    getValueByAliases(row, ['title', 'عنوان', 'نام اثر', 'نام']) ||
-    `اثر هنری ${index + 1}`;
+    getValueByAliases(row, [
+      'title_fa',
+      'titlefa',
+      'title',
+      'title_en',
+      'titleen',
+      'name_fa',
+      'namefa',
+      'name',
+      'عنوان',
+      'نام اثر',
+      'نام_اثر',
+      'نام',
+    ]) || `اثر هنری ${index + 1}`;
 
   const roomSection = getValueByAliases(row, ['roomsection', 'section', 'بخش', 'تالار', 'مکان']);
 

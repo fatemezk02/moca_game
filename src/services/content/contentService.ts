@@ -710,7 +710,7 @@ class ContentService {
     if (!puzzleArtId) {
       const canonId = normalizeGalleryId(galleryId);
       const defaultMappings: Record<string, string> = {
-        'gallery_01': '26',
+        'gallery_01': '60',
         'gallery_02': '27',
         'gallery_03': '28',
         'gallery_04': '29',
@@ -718,7 +718,7 @@ class ContentService {
         'gallery_06': '31',
         'gallery_07': '32',
         'gallery_08': '33',
-        'gallery-01': '26',
+        'gallery-01': '60',
         'gallery-02': '27',
         'gallery-03': '28',
         'gallery-04': '29',
@@ -735,7 +735,12 @@ class ContentService {
     }
 
     if (puzzleArtId) {
-      const art = this.getArtworkById(puzzleArtId);
+      let art = this.getArtworkById(puzzleArtId);
+      if (!art && puzzleArtId === '60') {
+        art = this.getArtworkById('26');
+      } else if (!art && puzzleArtId === '26') {
+        art = this.getArtworkById('60');
+      }
       if (art) return art;
       console.warn(
         `[ContentService] Gallery "${galleryId}" references puzzle_artwork_id "${puzzleArtId}" which does not exist in Artworks.`

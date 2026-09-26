@@ -1,6 +1,6 @@
 import { GameContentData } from './types';
 
-const CACHE_STORAGE_KEY = 'museum_game_content_cache_v5';
+const CACHE_STORAGE_KEY = 'museum_game_content_cache_v6';
 
 /**
  * Manages local persistence for loaded game content.
