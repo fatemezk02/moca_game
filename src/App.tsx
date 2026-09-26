@@ -1282,7 +1282,6 @@ export default function App() {
                 setActiveStarDiscoveryId(starId);
                 setSelectedCollection(null);
               }}
-              isMapVisible={Boolean(userProfile) && activeTab === 'map' && !isAdminOpen}
             />
 
             {/* Floating Circular Gallery Toggle & Gallery Status Controls */}

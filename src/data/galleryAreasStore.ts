@@ -382,31 +382,6 @@ export function createNewGalleryArea(galleryId: string, title?: string): Gallery
   };
 }
 
-const LOCKS_INTRO_PLAYED_KEY = 'museum_locks_intro_played_v1';
-
-export function hasLocksIntroPlayed(): boolean {
-  if (typeof window === 'undefined' || !window.localStorage) return true;
-  try {
-    return localStorage.getItem(LOCKS_INTRO_PLAYED_KEY) === 'true';
-  } catch {
-    return true;
-  }
-}
-
-export function markLocksIntroPlayed(): void {
-  if (typeof window === 'undefined' || !window.localStorage) return;
-  try {
-    localStorage.setItem(LOCKS_INTRO_PLAYED_KEY, 'true');
-  } catch {}
-}
-
-export function resetLocksIntroPlayed(): void {
-  if (typeof window === 'undefined' || !window.localStorage) return;
-  try {
-    localStorage.removeItem(LOCKS_INTRO_PLAYED_KEY);
-  } catch {}
-}
-
 /**
  * Standard known museum gallery locks on the Master Map SVG (0 0 604.8 844.86)
  * Strict 1-to-1 mapping for Galleries 01 through 08.
@@ -483,27 +458,16 @@ export function saveGalleryLockPosition(rawGalleryId: string, x: number, y: numb
  * 3. Fallback to this gallery's lamp position
  */
 export function getLockPositionForGallery(galleryId: string): { x: number; y: number } {
-  if (!galleryId) return { x: 0, y: 0 };
-  const canonId = normalizeGalleryId(galleryId) || galleryId;
-  const hyphenId = canonId.replace('_', '-');
-  const rawHyphen = galleryId.replace('_', '-');
-  const rawUnderscore = galleryId.replace('-', '_');
+  const canonId = normalizeGalleryId(galleryId);
   const saved = getSavedGalleryLocks();
 
-  // 1. Saved lock positions (check all key variants)
+  // 1. Saved lock positions
   if (saved[galleryId]) return saved[galleryId];
   if (saved[canonId]) return saved[canonId];
-  if (saved[hyphenId]) return saved[hyphenId];
-  if (saved[rawHyphen]) return saved[rawHyphen];
-  if (saved[rawUnderscore]) return saved[rawUnderscore];
 
   // 2. Default lock positions
   const def = DEFAULT_GALLERY_LOCKS.find(
-    (l) =>
-      normalizeGalleryId(l.galleryId) === canonId ||
-      l.galleryId === galleryId ||
-      l.galleryId === hyphenId ||
-      l.galleryId === rawUnderscore
+    (l) => normalizeGalleryId(l.galleryId) === canonId || l.galleryId === galleryId
   );
   if (def) {
     return { x: def.defaultX, y: def.defaultY };
@@ -521,10 +485,10 @@ export function getAllGalleryLocks(): GalleryLockItem[] {
   const locks: GalleryLockItem[] = [];
   const seenGalleries = new Set<string>();
 
-  // 1. Process known standard museum galleries (Galleries 01 to 08)
+  // 1. Process known standard museum galleries
   for (const def of DEFAULT_GALLERY_LOCKS) {
     const canonId = normalizeGalleryId(def.galleryId);
-    if (!canonId || canonId === 'gallery_00' || canonId === 'gallery_09' || seenGalleries.has(canonId)) continue;
+    if (seenGalleries.has(canonId)) continue;
     seenGalleries.add(canonId);
 
     const pos = getLockPositionForGallery(def.galleryId);
@@ -542,7 +506,7 @@ export function getAllGalleryLocks(): GalleryLockItem[] {
   const areas = getGalleryAreas();
   for (const area of areas) {
     const canonId = normalizeGalleryId(area.galleryId);
-    if (!canonId || canonId === 'gallery_00' || canonId === 'gallery_09') continue;
+    if (canonId === 'gallery_00') continue;
     if (!seenGalleries.has(canonId)) {
       seenGalleries.add(canonId);
       const pos = getLockPositionForGallery(area.galleryId);

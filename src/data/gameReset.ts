@@ -9,7 +9,6 @@ import { resetFinalCompletionState } from './finalCompletionStore';
 import { resetCollectionNotificationStore } from './collectionNotificationStore';
 import { clearUserProfile } from './userProfileStore';
 import { resetLuckMachineState } from './luckMachineStore';
-import { resetLocksIntroPlayed } from './galleryAreasStore';
 
 /**
  * Full, authoritative game reset.
@@ -50,9 +49,6 @@ export function resetEntireGame(): void {
 
     // 8.1 Reset luck machine attempt state
     resetLuckMachineState();
-
-    // 8.2 Reset locks intro entrance animation state for new game
-    resetLocksIntroPlayed();
 
     // 7. Reset active gallery navigation storage
     if (typeof window !== 'undefined' && window.localStorage) {
