@@ -393,30 +393,79 @@ export function evaluateArrowConditions(
 }
 
 /**
- * Checks if the destination / next gallery of an arrow has been manually unlocked with coins
+ * Resolves the canonical ID of the DIRECT NEXT gallery (Gallery N+1)
+ * for a next-gallery navigation arrow.
+ * Current canonical numbering: 01, 02, 03, 04, 05, 06, 07, 08.
+ * There is NO Gallery 09.
+ */
+export function getDirectNextCanonicalGallery(arrow: AdminArrowPoint | string): string | null {
+  if (!arrow) return null;
+  const arrowId = typeof arrow === 'string' ? arrow : arrow.id;
+  const arrowObj = typeof arrow === 'string' ? null : arrow;
+
+  // 1. Direct next gallery by canonical arrow ID (unambiguous ground truth)
+  if (arrowId === 'arrow-g00-to-g01') return 'gallery_01';
+  if (arrowId === 'arrow-g01-to-g03') return 'gallery_02'; // Arrow on Gallery 01 -> Gallery 02
+  if (arrowId === 'arrow-g02-to-g03') return 'gallery_02';
+  if (arrowId === 'arrow-g03-to-g04') return 'gallery_03'; // Arrow on Gallery 02 -> Gallery 03
+  if (arrowId === 'arrow-g04-to-g05') return 'gallery_04'; // Arrow on Gallery 03 -> Gallery 04
+  if (arrowId === 'arrow-g05-to-g06') return 'gallery_05'; // Arrow on Gallery 04 -> Gallery 05
+  if (arrowId === 'arrow-g06-to-g07') return 'gallery_06'; // Arrow on Gallery 05 -> Gallery 06
+  if (arrowId === 'arrow-g07-to-g08') return 'gallery_07'; // Arrow on Gallery 06 -> Gallery 07
+  if (arrowId === 'arrow-g08-to-g09') return 'gallery_08'; // Arrow on Gallery 07 -> Gallery 08
+
+  // 2. By destination string mapped to canonical gallery
+  if (arrowObj?.destination && arrowObj.destination !== 'none') {
+    const canon = mapDestinationToCanonicalGallery(arrowObj.destination);
+    if (canon && canon.startsWith('gallery_')) {
+      return canon;
+    }
+  }
+
+  // 3. By progression rule target gallery mapped to canonical gallery
+  const progressionRule = getProgressionRuleForArrow(arrowId);
+  if (progressionRule?.targetGalleryId) {
+    const canon = mapDestinationToCanonicalGallery(progressionRule.targetGalleryId);
+    if (canon && canon.startsWith('gallery_')) {
+      return canon;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Checks if the DIRECT NEXT gallery (Gallery N+1) of an arrow has been manually unlocked with coins.
+ * Current canonical numbering: 01, 02, 03, 04, 05, 06, 07, 08.
+ *
+ * REQUIRED RULE:
+ * For the arrow from current Gallery N to Gallery N+1:
+ * `directNextGalleryIsManuallyUnlocked` must refer ONLY to Gallery N+1.
+ * It must NOT check:
+ * - any later gallery;
+ * - any unlocked gallery with a higher number;
+ * - highest unlocked gallery;
+ * - last visited gallery;
+ * - any global "some future gallery is unlocked" condition.
  */
 export function isDestinationGalleryManuallyUnlocked(arrow: AdminArrowPoint): boolean {
   if (!arrow) return false;
 
-  const destCandidates: string[] = [];
-  if (arrow.destination && arrow.destination !== 'none') {
-    destCandidates.push(arrow.destination);
-    const destCanon = mapDestinationToCanonicalGallery(arrow.destination);
-    if (destCanon) destCandidates.push(destCanon);
-    const norm = normalizeGalleryId(arrow.destination);
-    if (norm) destCandidates.push(norm);
+  // Backwards/previous arrows are never treated as next-gallery manual unlocks
+  if (isPreviousGalleryArrow(arrow)) {
+    return false;
   }
 
-  const progressionRule = getProgressionRuleForArrow(arrow.id);
-  if (progressionRule?.targetGalleryId) {
-    destCandidates.push(progressionRule.targetGalleryId);
-    const destCanon = mapDestinationToCanonicalGallery(progressionRule.targetGalleryId);
-    if (destCanon) destCandidates.push(destCanon);
-    const norm = normalizeGalleryId(progressionRule.targetGalleryId);
-    if (norm) destCandidates.push(norm);
+  const directNextCanon = getDirectNextCanonicalGallery(arrow);
+  if (!directNextCanon) {
+    return false;
   }
 
-  return destCandidates.some((dest) => isGalleryManuallyUnlocked(dest));
+  // Must ONLY check if the direct destination Gallery N+1 has been manually unlocked
+  return (
+    isGalleryManuallyUnlocked(directNextCanon) ||
+    isGalleryManuallyUnlocked(directNextCanon.replace('_', '-'))
+  );
 }
 
 /**

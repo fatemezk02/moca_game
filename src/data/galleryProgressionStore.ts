@@ -198,10 +198,28 @@ export function isProgressionArrowVisible(arrowId?: string): boolean {
     return true;
   }
 
-  // If destination / next gallery has already been manually unlocked with coins
+  // Canonical mapping for direct destination gallery
+  const directTarget =
+    arrowId === 'arrow-g01-to-g03'
+      ? 'gallery_02'
+      : arrowId === 'arrow-g03-to-g04'
+      ? 'gallery_03'
+      : arrowId === 'arrow-g04-to-g05'
+      ? 'gallery_04'
+      : arrowId === 'arrow-g05-to-g06'
+      ? 'gallery_05'
+      : arrowId === 'arrow-g06-to-g07'
+      ? 'gallery_06'
+      : arrowId === 'arrow-g07-to-g08'
+      ? 'gallery_07'
+      : arrowId === 'arrow-g08-to-g09'
+      ? 'gallery_08'
+      : rule.targetGalleryId;
+
+  // If direct next destination gallery has already been manually unlocked with coins
   if (
-    isGalleryManuallyUnlocked(rule.targetGalleryId) ||
-    isGalleryManuallyUnlocked(normalizeGalleryId(rule.targetGalleryId))
+    isGalleryManuallyUnlocked(directTarget) ||
+    isGalleryManuallyUnlocked(normalizeGalleryId(directTarget))
   ) {
     return true;
   }
