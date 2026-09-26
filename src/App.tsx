@@ -48,7 +48,7 @@ import { normalizeGalleryId } from './services/content/mappers';
 import { getCurrentGalleryId, setCurrentGalleryId } from './data/playerLocationStore';
 import { contentService, registerContentDebugAPI } from './services/content';
 import { Volume2, Pause, Play, X, Compass, Sparkles } from 'lucide-react';
-import { DevMapPositioningTool, IS_DEV_POSITIONING_ENABLED } from './components/DevMapPositioningTool';
+import { DevMapPositioningTool, IS_DEV_POSITIONING_ENABLED, POSITIONING_TOOLS_ENABLED } from './components/DevMapPositioningTool';
 import { ProfileCreationPage } from './components/ProfileCreationPage';
 import { ProfileModal } from './components/ProfileModal';
 import { FinalCertificateModal } from './components/FinalCertificateModal';
@@ -1310,7 +1310,7 @@ export default function App() {
       )}
       {userProfile && (
         <>
-          {IS_DEV_POSITIONING_ENABLED && !isAdminOpen && !currentGallery.includes('questions') && (
+          {POSITIONING_TOOLS_ENABLED && IS_DEV_POSITIONING_ENABLED && !isAdminOpen && !currentGallery.includes('questions') && (
             <DevMapPositioningTool currentGalleryId={currentGallery} activeTab={activeTab} />
           )}
           <ProfileModal

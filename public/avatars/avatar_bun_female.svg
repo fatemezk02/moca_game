@@ -34,11 +34,11 @@
   <path d="M 144,92 Q 152,110 150,126" fill="none" stroke="#1e1b18" stroke-width="3.5" stroke-linecap="round"/>
 
   <!-- Face Contour -->
-  <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90 C 142,45 126,45 100,45 C 74,45 58,45 58,90 Z" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
 
   <!-- Updo Hair & Bangs -->
   <path d="M 52,90 C 48,52 64,44 100,44 C 136,44 152,52 148,90 C 146,82 140,75 132,74 C 122,72 116,80 102,78 C 94,76 86,72 74,74 C 64,75 58,82 52,90 Z" fill="#1e1b18" stroke="#1e1b18" stroke-width="2"/>
-  <path d="M 88,52 C 94,65 98,75 92,84" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 80,56 C 92,50 108,50 120,56" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
 
   <!-- Eyebrows -->
   <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" stroke-width="3.5" stroke-linecap="round"/>

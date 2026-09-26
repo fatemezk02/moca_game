@@ -25,7 +25,7 @@
   <path d="M 148,98 C 150,102 146,106 144,104" fill="none" stroke="#1e1b18" stroke-width="3" stroke-linecap="round"/>
 
   <!-- Face Contour -->
-  <path d="M 56,85 C 56,128 72,143 100,143 C 128,143 144,128 144,85" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M 56,85 C 56,128 72,143 100,143 C 128,143 144,128 144,85 C 144,45 128,45 100,45 C 72,45 56,45 56,85 Z" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
 
   <!-- Hair under Cap -->
   <path d="M 54,78 C 54,92 56,102 65,98 C 65,88 67,82 72,82 C 78,82 79,88 88,85 C 93,83 98,86 104,85 C 112,85 118,82 128,82 C 133,82 135,88 135,98 C 144,102 146,92 146,78 Z" fill="#1e1b18" stroke="#1e1b18" stroke-width="2"/>

@@ -251,7 +251,23 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   };
 
   // Helper to resolve standard Location Pin labels
-  const getLocationPinLabel = (point: { id?: string; iconType?: string; title?: string }): string => {
+  const getLocationPinLabel = (point: { id?: string; iconType?: string; title?: string; galleryNumber?: number | string }): string => {
+    const iconType = point.iconType || '';
+    const id = (point.id || '').toLowerCase();
+    const title = (point.title || '').toLowerCase();
+
+    // Prioritize numbered gallery location pins (Decremented by 1: 1 through 8)
+    if (iconType.startsWith('preset-location-gallery-')) {
+      const num = parseInt(iconType.replace('preset-location-gallery-', ''), 10);
+      return !isNaN(num) ? `گالری ${formatTwoDigitPersian(num)}` : 'گالری';
+    }
+    if (point.galleryNumber !== undefined && point.galleryNumber !== null) {
+      const num = typeof point.galleryNumber === 'number' ? point.galleryNumber : parseInt(String(point.galleryNumber), 10);
+      if (!isNaN(num)) {
+        return `گالری ${formatTwoDigitPersian(num)}`;
+      }
+    }
+
     // Check if dynamic content from Location table exists
     const locData =
       (point.id ? contentService.getLocationById(point.id) : null) ||
@@ -259,10 +275,6 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     if (locData?.name?.trim()) {
       return locData.name.trim();
     }
-
-    const iconType = point.iconType || '';
-    const id = (point.id || '').toLowerCase();
-    const title = (point.title || '').toLowerCase();
 
     // Location labels:
     // - Cafe → "کافه"

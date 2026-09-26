@@ -42,7 +42,7 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
           <path d="M 52,98 C 50,102 54,106 56,104" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
           <path d="M 144,88 C 156,88 156,115 144,115" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
           <path d="M 148,98 C 150,102 146,106 144,104" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
-          <path d="M 56,85 C 56,128 72,143 100,143 C 128,143 144,128 144,85" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 56,85 C 56,128 72,143 100,143 C 128,143 144,128 144,85 C 144,45 128,45 100,45 C 72,45 56,45 56,85 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 54,78 C 54,92 56,102 65,98 C 65,88 67,82 72,82 C 78,82 79,88 88,85 C 93,83 98,86 104,85 C 112,85 118,82 128,82 C 133,82 135,88 135,98 C 144,102 146,92 146,78 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
           <path d="M 54,76 C 52,25 148,25 146,76 C 146,78 54,78 54,76 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 82,64 C 82,46 118,46 118,64 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="4" />
@@ -81,10 +81,10 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
           <circle cx="58" cy="113" r="3.5" fill="#ffffff" stroke="#1e1b18" strokeWidth="2.5" />
           <path d="M 142,92 C 152,92 152,114 142,114" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
           <circle cx="142" cy="113" r="3.5" fill="#ffffff" stroke="#1e1b18" strokeWidth="2.5" />
-          <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90 C 142,45 126,45 100,45 C 74,45 58,45 58,90 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 46,90 C 44,52 60,30 100,30 C 140,30 156,52 154,90 C 154,102 148,114 144,118 C 144,95 138,82 130,80 C 118,78 114,84 102,80 C 92,76 88,84 76,82 C 68,80 62,94 56,118 C 52,114 46,102 46,90 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
-          <path d="M 94,48 C 104,65 116,84 106,85" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M 86,45 C 92,60 98,75 92,78" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 82,46 C 94,40 106,42 118,50" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.9" />
+          <path d="M 88,56 C 96,52 104,54 112,60" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" opacity="0.9" />
           <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
           <path d="M 112,88 Q 120,84 130,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
           <ellipse cx="79" cy="98" rx="5" ry="6" fill="#1e1b18" />
@@ -119,9 +119,9 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
           <path d="M 146,100 C 148,103 145,106 142,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
           <path d="M 56,92 Q 48,110 50,126" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
           <path d="M 144,92 Q 152,110 150,126" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
-          <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90 C 142,45 126,45 100,45 C 74,45 58,45 58,90 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 52,90 C 48,52 64,44 100,44 C 136,44 152,52 148,90 C 146,82 140,75 132,74 C 122,72 116,80 102,78 C 94,76 86,72 74,74 C 64,75 58,82 52,90 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
-          <path d="M 88,52 C 94,65 98,75 92,84" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 80,56 C 92,50 108,50 120,56" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.9" />
           <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
           <path d="M 112,88 Q 120,84 130,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
           <ellipse cx="79" cy="98" rx="5" ry="6" fill="#1e1b18" />
@@ -153,9 +153,10 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
           <path d="M 54,98 C 52,102 55,106 58,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
           <path d="M 142,90 C 154,90 154,115 142,115" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
           <path d="M 146,98 C 148,102 145,106 142,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
-          <path d="M 58,88 C 58,130 74,144 100,144 C 126,144 142,130 142,88" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 58,88 C 58,130 74,144 100,144 C 126,144 142,130 142,88 C 142,45 126,45 100,45 C 74,45 58,45 58,88 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 54,88 C 48,46 64,30 100,30 C 136,30 152,46 146,88 C 144,78 136,68 126,66 C 114,64 108,72 96,70 C 86,68 76,64 64,68 C 58,70 55,78 54,88 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
-          <path d="M 94,40 C 98,52 102,62 96,70" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 74,44 C 84,38 95,38 102,44" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.9" />
+          <path d="M 112,42 C 122,38 132,42 138,48" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.9" />
           <path d="M 68,78 Q 80,74 90,78" fill="none" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
           <path d="M 110,78 Q 120,74 132,78" fill="none" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
           <rect x="65" y="86" width="28" height="24" rx="9" fill="#ffffff" stroke="#1e1b18" strokeWidth="4" />
@@ -186,11 +187,11 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
           <path d="M 54,98 C 52,102 55,106 58,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
           <path d="M 142,90 C 154,90 154,115 142,115" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
           <path d="M 146,98 C 148,102 145,106 142,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
-          <path d="M 58,88 C 58,130 74,144 100,144 C 126,144 142,130 142,88" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 58,88 C 58,130 74,144 100,144 C 126,144 142,130 142,88 C 142,45 126,45 100,45 C 74,45 58,45 58,88 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 52,88 C 42,70 44,45 62,32 C 78,20 122,20 138,32 C 156,45 158,70 148,88 C 146,78 138,68 126,64 C 114,60 108,68 96,65 C 84,62 76,60 64,65 C 58,68 55,76 52,88 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
-          <path d="M 72,42 C 82,34 94,36 98,46" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M 108,36 C 118,34 130,42 128,52" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M 88,54 C 95,62 102,68 96,74" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 74,42 C 84,35 94,37 98,46" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.9" />
+          <path d="M 108,38 C 118,35 128,40 130,48" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.9" />
+          <path d="M 86,58 C 96,52 106,54 114,60" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" opacity="0.9" />
           <path d="M 68,85 Q 80,82 89,86" fill="none" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
           <path d="M 111,86 Q 120,82 132,85" fill="none" stroke="#1e1b18" strokeWidth="4" strokeLinecap="round" />
           <ellipse cx="79" cy="97" rx="5" ry="6" fill="#1e1b18" />
@@ -218,11 +219,12 @@ export const CharacterAvatarSVG: React.FC<CharacterAvatarProps> = ({
           <path d="M 54,100 C 52,103 55,106 58,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
           <path d="M 142,92 C 152,92 152,114 142,114" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinecap="round" />
           <path d="M 146,100 C 148,103 145,106 142,105" fill="none" stroke="#1e1b18" strokeWidth="3" strokeLinecap="round" />
-          <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
+          <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90 C 142,45 126,45 100,45 C 74,45 58,45 58,90 Z" fill="#ffffff" stroke="#1e1b18" strokeWidth="4.5" strokeLinejoin="round" />
           <path d="M 44,92 C 40,54 58,30 100,30 C 142,30 160,54 156,92 C 154,115 142,140 146,165 C 148,175 144,182 136,180 C 132,160 136,130 134,105 C 134,88 126,80 116,78 C 106,76 102,84 94,80 C 86,76 80,78 72,82 C 64,88 64,105 66,130 C 64,160 68,160 64,180 C 56,182 52,175 54,165 C 58,140 46,115 44,92 Z" fill="#1e1b18" stroke="#1e1b18" strokeWidth="2" />
-          <path d="M 94,42 C 104,58 116,72 108,82" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M 48,110 C 44,130 52,150 48,170" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
-          <path d="M 152,110 C 156,130 148,150 152,170" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 82,42 C 94,36 108,36 118,42" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.9" />
+          <path d="M 88,52 C 98,46 106,48 112,54" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" opacity="0.9" />
+          <path d="M 52,115 C 46,135 50,155 48,172" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.85" />
+          <path d="M 148,115 C 154,135 150,155 152,172" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.85" />
           <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
           <path d="M 112,88 Q 120,84 130,88" fill="none" stroke="#1e1b18" strokeWidth="3.5" strokeLinecap="round" />
           <ellipse cx="79" cy="98" rx="5" ry="6" fill="#1e1b18" />

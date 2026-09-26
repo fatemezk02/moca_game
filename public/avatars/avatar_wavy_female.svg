@@ -21,15 +21,16 @@
   <path d="M 146,100 C 148,103 145,106 142,105" fill="none" stroke="#1e1b18" stroke-width="3" stroke-linecap="round"/>
 
   <!-- Face Contour -->
-  <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90 C 142,45 126,45 100,45 C 74,45 58,45 58,90 Z" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
 
   <!-- Front Voluminous Parted Hair & Side Waves -->
   <path d="M 44,92 C 40,54 58,30 100,30 C 142,30 160,54 156,92 C 154,115 142,140 146,165 C 148,175 144,182 136,180 C 132,160 136,130 134,105 C 134,88 126,80 116,78 C 106,76 102,84 94,80 C 86,76 80,78 72,82 C 64,88 64,105 66,130 C 64,160 68,160 64,180 C 56,182 52,175 54,165 C 58,140 46,115 44,92 Z" fill="#1e1b18" stroke="#1e1b18" stroke-width="2"/>
 
   <!-- Wavy hair highlights / inner lines -->
-  <path d="M 94,42 C 104,58 116,72 108,82" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M 48,110 C 44,130 52,150 48,170" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-  <path d="M 152,110 C 156,130 148,150 152,170" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 82,42 C 94,36 108,36 118,42" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 88,52 C 98,46 106,48 112,54" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 52,115 C 46,135 50,155 48,172" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+  <path d="M 148,115 C 154,135 150,155 152,172" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
 
   <!-- Eyebrows -->
   <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" stroke-width="3.5" stroke-linecap="round"/>

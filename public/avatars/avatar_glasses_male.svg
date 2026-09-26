@@ -25,11 +25,12 @@
   <path d="M 146,98 C 148,102 145,106 142,105" fill="none" stroke="#1e1b18" stroke-width="3" stroke-linecap="round"/>
 
   <!-- Face Contour -->
-  <path d="M 58,88 C 58,130 74,144 100,144 C 126,144 142,130 142,88" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M 58,88 C 58,130 74,144 100,144 C 126,144 142,130 142,88 C 142,45 126,45 100,45 C 74,45 58,45 58,88 Z" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
 
   <!-- Neat Parted Hair -->
   <path d="M 54,88 C 48,46 64,30 100,30 C 136,30 152,46 146,88 C 144,78 136,68 126,66 C 114,64 108,72 96,70 C 86,68 76,64 64,68 C 58,70 55,78 54,88 Z" fill="#1e1b18" stroke="#1e1b18" stroke-width="2"/>
-  <path d="M 94,40 C 98,52 102,62 96,70" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 74,44 C 84,38 95,38 102,44" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 112,42 C 122,38 132,42 138,48" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
 
   <!-- Eyebrows (above glasses) -->
   <path d="M 68,78 Q 80,74 90,78" fill="none" stroke="#1e1b18" stroke-width="4.5" stroke-linecap="round"/>

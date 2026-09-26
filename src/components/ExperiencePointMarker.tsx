@@ -7,6 +7,7 @@ interface ExperiencePointMarkerProps {
   isSelected?: boolean;
   className?: string;
   title?: string;
+  isUnlocked?: boolean;
 }
 
 export const ExperiencePointMarker: React.FC<ExperiencePointMarkerProps> = ({
@@ -14,6 +15,7 @@ export const ExperiencePointMarker: React.FC<ExperiencePointMarkerProps> = ({
   isSelected = false,
   className = '',
   title,
+  isUnlocked = true,
 }) => {
   return (
     <div
@@ -22,13 +24,15 @@ export const ExperiencePointMarker: React.FC<ExperiencePointMarkerProps> = ({
         isSelected ? 'scale-120' : 'hover:scale-115 active:scale-95'
       } ${className}`}
     >
-      {/* Standalone Experience Icon directly on the map (no circle, no badge, no frame container) */}
+      {/* Standalone Experience Icon directly on the map */}
       <div
         className="relative flex items-center justify-center transition-transform duration-200"
         style={{
           filter: isSelected
             ? 'drop-shadow(2px 2px 0px #1e1b18)'
-            : 'drop-shadow(1.5px 1.5px 0px #1e1b18)',
+            : isUnlocked
+            ? 'drop-shadow(1.5px 1.5px 0px #1e1b18)'
+            : 'drop-shadow(1px 1px 0px #1e1b18)',
         }}
       >
         <ExperienceIcon

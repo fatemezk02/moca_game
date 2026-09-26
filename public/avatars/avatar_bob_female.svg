@@ -24,14 +24,14 @@
   <circle cx="142" cy="113" r="3.5" fill="#ffffff" stroke="#1e1b18" stroke-width="2.5"/>
 
   <!-- Face Contour -->
-  <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M 58,90 C 58,130 74,144 100,144 C 126,144 142,130 142,90 C 142,45 126,45 100,45 C 74,45 58,45 58,90 Z" fill="#ffffff" stroke="#1e1b18" stroke-width="4.5" stroke-linejoin="round"/>
 
   <!-- Front Bob Bangs & Hair volume -->
   <path d="M 46,90 C 44,52 60,30 100,30 C 140,30 156,52 154,90 C 154,102 148,114 144,118 C 144,95 138,82 130,80 C 118,78 114,84 102,80 C 92,76 88,84 76,82 C 68,80 62,94 56,118 C 52,114 46,102 46,90 Z" fill="#1e1b18" stroke="#1e1b18" stroke-width="2"/>
 
   <!-- Bang strand details -->
-  <path d="M 94,48 C 104,65 116,84 106,85" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M 86,45 C 92,60 98,75 92,78" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 82,46 C 94,40 106,42 118,50" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 88,56 C 96,52 104,54 112,60" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>
 
   <!-- Eyebrows -->
   <path d="M 70,88 Q 80,84 88,88" fill="none" stroke="#1e1b18" stroke-width="3.5" stroke-linecap="round"/>

@@ -17,6 +17,7 @@ export function usePlayerStats(): PlayerStats {
     window.addEventListener('museum_player_stats_updated', handleUpdate);
     window.addEventListener('museum_puzzle_progress_updated', handleUpdate);
     window.addEventListener('museum_star_point_progress_updated', handleUpdate);
+    window.addEventListener('museum_experience_unlocked', handleUpdate);
     window.addEventListener('museum_game_fully_reset', handleUpdate);
     window.addEventListener('storage', handleUpdate);
 
@@ -25,6 +26,7 @@ export function usePlayerStats(): PlayerStats {
       window.removeEventListener('museum_player_stats_updated', handleUpdate);
       window.removeEventListener('museum_puzzle_progress_updated', handleUpdate);
       window.removeEventListener('museum_star_point_progress_updated', handleUpdate);
+      window.removeEventListener('museum_experience_unlocked', handleUpdate);
       window.removeEventListener('museum_game_fully_reset', handleUpdate);
       window.removeEventListener('storage', handleUpdate);
     };

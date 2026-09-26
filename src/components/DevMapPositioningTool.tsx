@@ -189,7 +189,13 @@ export function calculateSafePanelPosition({
  * simply change IS_DEV_POSITIONING_ENABLED to false or remove this component.
  * ============================================================================
  */
-export const IS_DEV_POSITIONING_ENABLED = true;
+/**
+ * Developer Flag: Enable or disable the map positioning tool ("تنظیم نقاط") in user-facing builds.
+ * Set POSITIONING_TOOLS_ENABLED = false to hide positioning tools.
+ * Set POSITIONING_TOOLS_ENABLED = true to restore positioning tools.
+ */
+export const POSITIONING_TOOLS_ENABLED = false;
+export const IS_DEV_POSITIONING_ENABLED = POSITIONING_TOOLS_ENABLED;
 
 export interface DevMapPositioningToolProps {
   currentGalleryId: string;
@@ -220,6 +226,10 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
   currentGalleryId,
   activeTab,
 }) => {
+  if (!POSITIONING_TOOLS_ENABLED || !IS_DEV_POSITIONING_ENABLED) {
+    return null;
+  }
+
   // Main toggle for positioning mode
   const [isActive, setIsActive] = useState<boolean>(false);
 

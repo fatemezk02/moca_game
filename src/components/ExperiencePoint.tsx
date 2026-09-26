@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Lock, Coins } from 'lucide-react';
 import { ExperiencePointMarker } from './ExperiencePointMarker';
 import { ExperienceContent, ExperienceIconType } from '../services/content/types';
 import { contentService } from '../services/content/contentService';
 import { DEFAULT_EXPERIENCES } from '../services/content/defaultSeedContent';
+import { isExperienceUnlocked } from '../data/experienceProgressStore';
 
 export interface ExperiencePointProps {
   id: string;
@@ -38,6 +40,8 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
 }) => {
   const [isLabelOpen, setIsLabelOpen] = useState<boolean>(false);
   const [, setContentVersion] = useState<number>(0);
+  const effectiveId = experienceId || id;
+  const [unlocked, setUnlocked] = useState<boolean>(() => isExperienceUnlocked(effectiveId));
 
   // Subscribe to ContentService updates (e.g. when Google Sheets load finishes)
   useEffect(() => {
@@ -45,6 +49,22 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
       setContentVersion((v) => v + 1);
     });
   }, []);
+
+  // Subscribe to experience unlock and reset events
+  useEffect(() => {
+    const handleUpdate = () => {
+      setUnlocked(isExperienceUnlocked(effectiveId));
+    };
+
+    window.addEventListener('museum_experience_unlocked', handleUpdate);
+    window.addEventListener('museum_experience_progress_updated', handleUpdate);
+    window.addEventListener('museum_game_fully_reset', handleUpdate);
+    return () => {
+      window.removeEventListener('museum_experience_unlocked', handleUpdate);
+      window.removeEventListener('museum_experience_progress_updated', handleUpdate);
+      window.removeEventListener('museum_game_fully_reset', handleUpdate);
+    };
+  }, [effectiveId]);
 
   // Sync external selection state
   useEffect(() => {
@@ -112,15 +132,8 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
 
   const handleMarkerClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isLabelOpen) {
-      // Second click: Open modal
-      setIsLabelOpen(false);
-      onOpenModal(resolvedExperience);
-    } else {
-      // First click: Reveal label
-      setIsLabelOpen(true);
-      onSelect?.();
-    }
+    setIsLabelOpen(false);
+    onOpenModal(resolvedExperience);
   };
 
   const handleLabelClick = (e: React.MouseEvent) => {
@@ -151,6 +164,7 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
         <ExperiencePointMarker
           iconId={effectiveIcon}
           isSelected={isSelected || isLabelOpen}
+          isUnlocked={unlocked}
           title={displayLabel}
         />
       </button>
@@ -186,6 +200,13 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
                   className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
                 >
                   <span className="break-words leading-snug">{displayLabel}</span>
+                  {!unlocked && (
+                    <span className="flex items-center gap-0.5 bg-[#fef3c7] border border-[#1e1b18] rounded-full px-1.5 py-0.2 text-[9px] font-black text-[#1e1b18] shrink-0">
+                      <Lock className="w-2.5 h-2.5 text-[#d97706] stroke-[2]" />
+                      <span>۷ سکه</span>
+                      <Coins className="w-2.5 h-2.5 text-[#ea580c] fill-[#fb923c]" />
+                    </span>
+                  )}
                 </div>
               </div>
             ) : (
@@ -202,6 +223,13 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
                   className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
                 >
                   <span className="break-words leading-snug">{displayLabel}</span>
+                  {!unlocked && (
+                    <span className="flex items-center gap-0.5 bg-[#fef3c7] border border-[#1e1b18] rounded-full px-1.5 py-0.2 text-[9px] font-black text-[#1e1b18] shrink-0">
+                      <Lock className="w-2.5 h-2.5 text-[#d97706] stroke-[2]" />
+                      <span>۷ سکه</span>
+                      <Coins className="w-2.5 h-2.5 text-[#ea580c] fill-[#fb923c]" />
+                    </span>
+                  )}
                 </div>
               </div>
             )}

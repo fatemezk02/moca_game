@@ -526,10 +526,13 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 </div>
 
                 {/* Error Notice if insufficient coins */}
-                {errorMessage && (
-                  <div className="bg-[#fee2e2] border border-[#ef4444] text-[#991b1b] rounded-lg p-2.5 text-[11px] font-bold flex items-center gap-2 text-right">
+                {(errorMessage || playerStats.coins < (discoveryData.informationCost || 30)) && (
+                  <div className="w-full bg-[#fee2e2] border border-[#ef4444] text-[#991b1b] rounded-xl p-3 text-[11px] font-bold flex items-center gap-2 text-right">
                     <AlertCircle className="w-4 h-4 text-[#ef4444] shrink-0" />
-                    <span>{errorMessage}</span>
+                    <span>
+                      {errorMessage ||
+                        `موجودی سکه شما کافی نیست (حداقل ${toPersianDigits(discoveryData.informationCost || 30)} سکه نیاز است).`}
+                    </span>
                   </div>
                 )}
 
@@ -539,7 +542,12 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                     id="star-pay-30-confirm-btn"
                     type="button"
                     onClick={handleConfirm30Payment}
-                    className="w-full py-3 px-4 bg-[#fbbf24] hover:bg-[#f59e0b] active:bg-[#d97706] text-[#1e1b18] font-black text-[14px] border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1.5px_1.5px_0px_#1e1b18]"
+                    disabled={playerStats.coins < (discoveryData.informationCost || 30)}
+                    className={`w-full py-3 px-4 font-black text-[14px] border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 transition-all ${
+                      playerStats.coins < (discoveryData.informationCost || 30)
+                        ? 'bg-[#e2e8f0] text-[#94a3b8] cursor-not-allowed shadow-[1px_1px_0px_#1e1b18]'
+                        : 'bg-[#fbbf24] hover:bg-[#f59e0b] active:bg-[#d97706] text-[#1e1b18] cursor-pointer active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1.5px_1.5px_0px_#1e1b18]'
+                    }`}
                   >
                     <span>پرداخت {toPersianDigits(discoveryData.informationCost || 30)} سکه و دیدن اطلاعات</span>
                   </button>
