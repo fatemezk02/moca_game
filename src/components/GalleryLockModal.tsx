@@ -2,9 +2,14 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, X, Coins, Compass } from 'lucide-react';
 import { getCurrentGalleryId } from '../data/playerLocationStore';
-import { markGalleryReached, markGalleryManuallyUnlocked } from '../data/reachedGalleriesStore';
+import {
+  markGalleryReached,
+  markGalleryManuallyUnlocked,
+  isGalleryManuallyUnlocked,
+} from '../data/reachedGalleriesStore';
+import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
 import { formatGalleryLabelFa } from './NavigationLight';
-import { normalizeGalleryId } from '../services/content/mappers';
+import { normalizeGalleryId, getLogicalGalleryNumber } from '../services/content/mappers';
 
 interface GalleryLockModalProps {
   lockGallery: { galleryId: string; title?: string } | null;
@@ -34,6 +39,69 @@ const GALLERY_DISPLAY_NAMES: Record<string, string> = {
   'gallery-08': 'تلاقی رسانه‌ها',
 };
 
+/**
+ * Checks whether a gallery's lock is open in the museum floor plan.
+ * A gallery's lock is open if:
+ * - It is Gallery 01 (always unlocked from start)
+ * - It was manually unlocked with coins (isGalleryManuallyUnlocked)
+ * - Its predecessor gallery's puzzle has been completed (isGalleryPuzzleCompleted)
+ * - Or this gallery's own puzzle has been completed (isGalleryPuzzleCompleted)
+ */
+function isGalleryLockOpen(galleryNum: number): boolean {
+  if (galleryNum <= 1) return true;
+  if (galleryNum > 8) return false;
+
+  const canonId = `gallery_0${galleryNum}`;
+  const routeId = `gallery-0${galleryNum}`;
+
+  // 1. Manually unlocked with coins
+  if (isGalleryManuallyUnlocked(canonId) || isGalleryManuallyUnlocked(routeId)) {
+    return true;
+  }
+
+  // 2. Predecessor gallery puzzle is completed
+  const prevCanonId = `gallery_0${galleryNum - 1}`;
+  const prevRouteId = `gallery-0${galleryNum - 1}`;
+  if (isGalleryPuzzleCompleted(prevCanonId) || isGalleryPuzzleCompleted(prevRouteId)) {
+    return true;
+  }
+
+  // 3. Own gallery puzzle is completed
+  if (isGalleryPuzzleCompleted(canonId) || isGalleryPuzzleCompleted(routeId)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Determines the continuation gallery ID for a locked destination gallery.
+ *
+ * Rules:
+ * 1. Find all canonical galleries (01 to 08) with a lower gallery number than the destination gallery.
+ * 2. From those galleries, find the gallery with the highest number whose lock is open.
+ * 3. If no lower-numbered unlocked gallery exists, falls back to the current gallery ID.
+ */
+function getContinuationGalleryId(targetGalleryId: string): string {
+  const fallbackGid = getCurrentGalleryId();
+  const destNum = getLogicalGalleryNumber(targetGalleryId);
+
+  // If destination gallery number is invalid or <= 1, fall back to current player gallery
+  if (destNum === null || destNum <= 1) {
+    return fallbackGid;
+  }
+
+  // Search in descending order from (destNum - 1) down to 1
+  // The first unlocked gallery encountered is the highest-numbered gallery whose lock is open before destination
+  for (let n = destNum - 1; n >= 1; n--) {
+    if (isGalleryLockOpen(n)) {
+      return `gallery_0${n}`;
+    }
+  }
+
+  return fallbackGid;
+}
+
 export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
   lockGallery,
   onClose,
@@ -42,9 +110,9 @@ export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
 }) => {
   if (!lockGallery) return null;
 
-  const currentGid = getCurrentGalleryId();
-  const currentGalleryLabel = formatGalleryLabelFa(currentGid);
-  const currentGalleryNumber = currentGalleryLabel.replace(/^گالری\s*/, '');
+  const continuationGid = getContinuationGalleryId(lockGallery.galleryId);
+  const continuationGalleryLabel = formatGalleryLabelFa(continuationGid);
+  const continuationGalleryNumber = continuationGalleryLabel.replace(/^گالری\s*/, '');
   const targetGalleryLabel = formatGalleryLabelFa(lockGallery.galleryId);
 
   const normId = normalizeGalleryId(lockGallery.galleryId);
@@ -92,7 +160,7 @@ export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
 
           <div className="p-5 sm:p-6 space-y-4">
             <p className="text-sm sm:text-base font-semibold text-[#1e1b18] leading-relaxed">
-              برای باز کردن گالری <span className="text-[#b45309] font-bold">{targetGalleryName}</span>، ۲۵ سکه بپردازید یا از گالری {currentGalleryNumber} ادامه دهید.
+              برای باز کردن گالری <span className="text-[#b45309] font-bold">{targetGalleryName}</span>، ۲۵ سکه بپردازید یا از گالری {continuationGalleryNumber} ادامه دهید.
             </p>
 
             <div className="flex flex-row gap-3 pt-2">
@@ -118,7 +186,7 @@ export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
               <button
                 onClick={() => {
                   onClose();
-                  onNavigateToCurrent(currentGid);
+                  onNavigateToCurrent(continuationGid);
                 }}
                 className="flex-1 py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#f0f9ff] text-[#1e1b18] font-black text-[13px] sm:text-[14px] rounded-xl border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] transition-all flex items-center justify-center gap-2 group cursor-pointer min-h-[48px] select-none"
               >
@@ -126,7 +194,7 @@ export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
                   <Compass className="w-4 h-4 text-[#1e1b18]" />
                 </div>
                 <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
-                  رفتن به {currentGalleryLabel}
+                  رفتن به {continuationGalleryLabel}
                 </span>
               </button>
             </div>
