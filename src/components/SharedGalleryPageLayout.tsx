@@ -137,11 +137,9 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
     const list = [nameFa, `گالری ${numFa}`];
     if (additionalHeaderTitles && additionalHeaderTitles.length > 0) {
       list.push(...additionalHeaderTitles);
-    } else if (galleryId === 'gallery-08' || galleryId === 'gallery_08') {
-      list.push('گذر از برون به درون');
     }
     return list;
-  }, [nameFa, numFa, additionalHeaderTitles, galleryId]);
+  }, [nameFa, numFa, additionalHeaderTitles]);
 
   // 5-second interval state for cycling through header titles
   const [titleIndex, setTitleIndex] = useState<number>(0);

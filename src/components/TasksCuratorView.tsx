@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { motion } from 'motion/react';
 import { Lock, Unlock, Star, CheckCircle2, ChevronLeft } from 'lucide-react';
 import { CuratorExhibitionWall } from './CuratorExhibitionWall';
 import { GalleryLockModal } from './GalleryLockModal';
@@ -52,6 +53,84 @@ function parseGalleryTitle(rawFa: string): string {
   }
   return title;
 }
+
+const AutoMarqueeGalleryTitle: React.FC<{ title: string; className?: string }> = ({
+  title,
+  className = '',
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [overflowDist, setOverflowDist] = useState<number>(0);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (containerRef.current && textRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const textWidth = textRef.current.scrollWidth;
+        const diff = textWidth - containerWidth;
+        if (diff > 2) {
+          setOverflowDist(diff);
+        } else {
+          setOverflowDist(0);
+        }
+      }
+    };
+
+    checkOverflow();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        checkOverflow();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
+    window.addEventListener('resize', checkOverflow);
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
+  }, [title]);
+
+  const isOverflowing = overflowDist > 0;
+
+  return (
+    <div
+      ref={containerRef}
+      dir="rtl"
+      className={`w-full overflow-hidden whitespace-nowrap relative ${className}`}
+    >
+      {isOverflowing ? (
+        <motion.span
+          ref={textRef}
+          key={`marquee-${title}-${overflowDist}`}
+          className="inline-block whitespace-nowrap will-change-transform"
+          initial={{ x: 0 }}
+          animate={{
+            x: [0, 0, overflowDist + 4, overflowDist + 4, 0],
+          }}
+          transition={{
+            duration: Math.max(4.5, (overflowDist + 4) / 18 + 2.5),
+            times: [0, 0.15, 0.65, 0.8, 1],
+            ease: 'easeInOut',
+            repeat: Infinity,
+            repeatDelay: 1.2,
+          }}
+        >
+          {title}
+        </motion.span>
+      ) : (
+        <span
+          ref={textRef}
+          className="block w-full text-right whitespace-nowrap truncate"
+        >
+          {title}
+        </span>
+      )}
+    </div>
+  );
+};
 
 export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
   type,
@@ -253,7 +332,7 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
               className="w-full rounded-2xl border-2 transition-all duration-150 flex items-center justify-between px-3.5 sm:px-4 py-3 gap-3 bg-[#ffffff] border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] hover:shadow-[4px_4px_0px_#1e1b18] hover:-translate-y-0.5 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] cursor-pointer"
             >
               {/* Right Side: Lock/Unlock Medallion + Vertical Divider + Title & Number */}
-              <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+              <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1 overflow-hidden">
                 {/* Status Icon */}
                 <div
                   className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 flex items-center justify-center shrink-0 ${
@@ -277,9 +356,16 @@ export const TasksCuratorView: React.FC<TasksCuratorViewProps> = ({
                 <div className="w-[1.5px] sm:w-[2px] h-8 sm:h-9 rounded-full shrink-0 bg-[#1e1b18]/20" />
 
                 {/* Left of Line: Gallery Name & Gallery Number */}
-                <div className="flex flex-col text-right justify-center min-w-0">
-                  <h3 className="font-sans-custom text-[14px] sm:text-[15.5px] font-black leading-snug truncate text-[#1e1b18]">
-                    {card.title}
+                <div className="flex flex-col text-right justify-center min-w-0 flex-1 overflow-hidden">
+                  <h3 className="font-sans-custom text-[14px] sm:text-[15.5px] font-black leading-snug text-[#1e1b18] overflow-hidden">
+                    <AutoMarqueeGalleryTitle
+                      title={
+                        card.id === 'gallery_07' || card.id === 'gallery-07'
+                          ? `${card.title}، گذر از برون به درون`
+                          : card.title
+                      }
+                      className="font-sans-custom text-[14px] sm:text-[15.5px] font-black leading-snug text-[#1e1b18]"
+                    />
                   </h3>
                   <span className="font-mono-custom text-[11px] sm:text-[12px] mt-0.5 font-bold truncate text-[#64748b]">
                     {card.subtitle}

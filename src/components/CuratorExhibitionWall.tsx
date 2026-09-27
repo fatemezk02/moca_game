@@ -504,21 +504,6 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
           'radial-gradient(ellipse at 50% 32%, #faf8f5 0%, #e5e2d8 100%)',
       }}
     >
-      {/* Final Certificate Floating Button when all 8 artworks are completed */}
-      {isAllExhibitionCompleted && (
-        <div className="absolute top-3 left-3 z-20">
-          <button
-            type="button"
-            id="curator-wall-certificate-badge-btn"
-            onClick={() => setShowCertificate(true)}
-            className="py-2 px-3 sm:px-4 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e1b18] font-sans-custom font-black text-[12px] sm:text-[13px] rounded-xl border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] flex items-center gap-1.5 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#1e1b18]" />
-            <span>گواهی‌نامه نهایی موزه 🏆</span>
-          </button>
-        </div>
-      )}
-
       {/* Main Responsive 2-Column Grid Area */}
       <div className="relative flex-1 w-full h-full overflow-y-auto px-3 sm:px-6 pt-4 pb-28">
         {/* Subtle Ambient Vignette */}
@@ -683,6 +668,21 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
               );
             })}
           </div>
+
+          {/* Final Certificate Button placed attached below all artwork cards */}
+          {isAllExhibitionCompleted && (
+            <div className="mt-6 w-full flex justify-center pb-2">
+              <button
+                type="button"
+                id="curator-wall-certificate-badge-btn"
+                onClick={() => setShowCertificate(true)}
+                className="py-2.5 px-4 sm:px-6 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e1b18] font-sans-custom font-black text-[12px] sm:text-[13px] rounded-xl border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
+              >
+                <Sparkles className="w-4 h-4 text-[#1e1b18]" />
+                <span>گواهی‌نامه نهایی موزه 🏆</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

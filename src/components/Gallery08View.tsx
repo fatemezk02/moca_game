@@ -337,7 +337,6 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
       galleryId="gallery-07"
       galleryNumberPersian={galleryNumFa}
       galleryNamePersian={galleryNameFa}
-      additionalHeaderTitles={['گذر از برون به درون']}
       onNavigateBack={onNavigateBack}
       onSelectTab={onSelectTab}
       onClickOutside={handleClosePopup}
