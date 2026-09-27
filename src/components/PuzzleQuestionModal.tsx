@@ -542,68 +542,201 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                       )}
 
                       {/* Options */}
-                      <div className="space-y-2.5">
-                        {questionData.options.map((optionText, idx) => {
-                          const isChosen = selectedOption === idx && wrongOptionIndex === null;
-                          const isWrong = wrongOptionIndex === idx;
-                          const optImageUrl = getOptionImageUrl(idx);
+                      {(() => {
+                        const optionImageUrls = questionData.options.map((_, i) => getOptionImageUrl(i));
+                        const imageOptionsCount = optionImageUrls.filter(Boolean).length;
+                        const hasAnyImageOptions = imageOptionsCount > 0;
 
+                        if (hasAnyImageOptions) {
                           return (
-                            <button
-                              key={idx}
-                              disabled={isAnswering}
-                              onClick={() => handleSelectOption(idx)}
-                              className={`w-full text-right p-2.5 sm:p-3 rounded-xl border-2 transition-all flex items-center justify-between gap-2.5 sm:gap-3 cursor-pointer group disabled:cursor-not-allowed ${
-                                isWrong
-                                  ? 'bg-[#fee2e2] text-[#dc2626] border-[#ef4444] shadow-[2px_2px_0px_#ef4444]'
-                                  : isChosen
-                                  ? 'bg-[#1e1b18] text-[#ffffff] border-[#1e1b18] shadow-[3px_3px_0px_#38bdf8]'
-                                  : 'bg-[#ffffff] text-[#1e1b18] border-[#1e1b18] hover:bg-[#f8fafc] shadow-[2px_2px_0px_#1e1b18]'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                                {optImageUrl && (
-                                  <div className="shrink-0 flex items-center justify-center rounded-lg border border-[#1e1b18]/20 bg-[#ffffff] p-1 shadow-xs max-w-[76px] sm:max-w-[92px] max-h-[60px] sm:max-h-[72px] overflow-hidden">
-                                    <img
-                                      src={optImageUrl}
-                                      alt={`تصویر گزینه ${idx + 1}`}
-                                      className="max-h-[52px] sm:max-h-[64px] max-w-full w-auto h-auto object-contain block rounded-xs select-none"
-                                      referrerPolicy="no-referrer"
-                                      onError={() => {
-                                        setOptionImgErrors((prev) => ({ ...prev, [idx]: true }));
-                                      }}
-                                    />
-                                  </div>
-                                )}
-                                <div className="flex flex-col min-w-0 pr-1">
-                                  <span className="text-[12px] sm:text-[13px] font-bold leading-relaxed break-words">
-                                    {optionText}
-                                  </span>
-                                  {questionData.optionsEn?.[idx] && (
-                                    <span
-                                      className={`text-[10px] font-medium ${isChosen ? 'text-[#94a3b8]' : 'text-[#64748b]'}`}
-                                      dir="ltr"
+                            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 [--grid-gap:0.625rem] sm:[--grid-gap:0.75rem]">
+                              {questionData.options.map((optionText, idx) => {
+                                const isChosen = selectedOption === idx && wrongOptionIndex === null;
+                                const isWrong = wrongOptionIndex === idx;
+                                const optImageUrl = optionImageUrls[idx];
+
+                                // Image-based option layout
+                                if (optImageUrl) {
+                                  const imgIndex = optionImageUrls.slice(0, idx).filter(Boolean).length;
+                                  const isCenteredRow =
+                                    (imageOptionsCount === 3 && imgIndex === 2) || imageOptionsCount === 1;
+
+                                  const imageCardButton = (
+                                    <button
+                                      key={idx}
+                                      disabled={isAnswering}
+                                      onClick={() => handleSelectOption(idx)}
+                                      style={
+                                        isCenteredRow
+                                          ? {
+                                              width: 'calc(50% - (var(--grid-gap, 0.75rem) / 2))',
+                                              maxWidth: 'calc(50% - (var(--grid-gap, 0.75rem) / 2))',
+                                            }
+                                          : undefined
+                                      }
+                                      className={`relative text-center p-2.5 sm:p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-between cursor-pointer group disabled:cursor-not-allowed ${
+                                        isCenteredRow
+                                          ? 'w-full'
+                                          : 'col-span-1 w-full'
+                                      } ${
+                                        isWrong
+                                          ? 'bg-[#fee2e2] text-[#dc2626] border-[#ef4444] shadow-[2px_2px_0px_#ef4444]'
+                                          : isChosen
+                                          ? 'bg-[#1e1b18] text-[#ffffff] border-[#1e1b18] shadow-[3px_3px_0px_#38bdf8]'
+                                          : 'bg-[#ffffff] text-[#1e1b18] border-[#1e1b18] hover:bg-[#f8fafc] shadow-[2px_2px_0px_#1e1b18]'
+                                      }`}
                                     >
-                                      {questionData.optionsEn[idx]}
+                                      {/* Option Number Badge */}
+                                      <span
+                                        className={`absolute top-2 left-2 z-10 font-mono-custom text-[10px] sm:text-[11px] font-black px-1.5 py-0.5 rounded border shadow-xs ${
+                                          isWrong
+                                            ? 'bg-[#ef4444] text-white border-[#b91c1c]'
+                                            : isChosen
+                                            ? 'bg-[#38bdf8] text-[#1e1b18] border-[#38bdf8]'
+                                            : 'bg-[#f1f5f9] text-[#64748b] border-[#cbd5e1] group-hover:border-[#1e1b18]'
+                                        }`}
+                                      >
+                                        {toPersianDigits(idx + 1)}
+                                      </span>
+
+                                      {/* [ IMAGE ] - Centered, larger size, aspect-ratio preserved */}
+                                      <div className="w-full flex items-center justify-center rounded-lg border border-[#1e1b18]/15 bg-[#ffffff] p-1.5 shadow-xs overflow-hidden h-[84px] sm:h-[98px]">
+                                        <img
+                                          src={optImageUrl}
+                                          alt={`تصویر گزینه ${idx + 1}`}
+                                          className="max-h-full max-w-full w-auto h-auto object-contain block rounded-xs select-none"
+                                          referrerPolicy="no-referrer"
+                                          onError={() => {
+                                            setOptionImgErrors((prev) => ({ ...prev, [idx]: true }));
+                                          }}
+                                        />
+                                      </div>
+
+                                      {/* [ OPTION TEXT ] - Below Image, Horizontally Centered */}
+                                      <div className="flex flex-col items-center justify-center text-center mt-2 w-full px-1 flex-1">
+                                        <span className="text-[12px] sm:text-[13px] font-bold leading-snug break-words text-center">
+                                          {optionText}
+                                        </span>
+                                        {questionData.optionsEn?.[idx] && (
+                                          <span
+                                            className={`text-[10px] font-medium mt-0.5 text-center ${
+                                              isChosen ? 'text-[#94a3b8]' : 'text-[#64748b]'
+                                            }`}
+                                            dir="ltr"
+                                          >
+                                            {questionData.optionsEn[idx]}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </button>
+                                  );
+
+                                  if (isCenteredRow) {
+                                    return (
+                                      <div key={idx} className="col-span-2 flex justify-center w-full">
+                                        {imageCardButton}
+                                      </div>
+                                    );
+                                  }
+
+                                  return imageCardButton;
+                                }
+
+                                // Text-only option layout (e.g. Option 4 or un-imaged options)
+                                return (
+                                  <button
+                                    key={idx}
+                                    disabled={isAnswering}
+                                    onClick={() => handleSelectOption(idx)}
+                                    className={`col-span-2 w-full text-right p-3 sm:p-3.5 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer group disabled:cursor-not-allowed ${
+                                      isWrong
+                                        ? 'bg-[#fee2e2] text-[#dc2626] border-[#ef4444] shadow-[2px_2px_0px_#ef4444]'
+                                        : isChosen
+                                        ? 'bg-[#1e1b18] text-[#ffffff] border-[#1e1b18] shadow-[3px_3px_0px_#38bdf8]'
+                                        : 'bg-[#ffffff] text-[#1e1b18] border-[#1e1b18] hover:bg-[#f8fafc] shadow-[2px_2px_0px_#1e1b18]'
+                                    }`}
+                                  >
+                                    <div className="flex flex-col pr-2">
+                                      <span className="text-[12px] sm:text-[13px] font-bold leading-relaxed">
+                                        {optionText}
+                                      </span>
+                                      {questionData.optionsEn?.[idx] && (
+                                        <span
+                                          className={`text-[10px] font-medium ${isChosen ? 'text-[#94a3b8]' : 'text-[#64748b]'}`}
+                                          dir="ltr"
+                                        >
+                                          {questionData.optionsEn[idx]}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span
+                                      className={`font-mono-custom text-[11px] font-black shrink-0 px-2 py-0.5 rounded border ${
+                                        isWrong
+                                          ? 'bg-[#ef4444] text-white border-[#b91c1c]'
+                                          : isChosen
+                                          ? 'bg-[#38bdf8] text-[#1e1b18] border-[#38bdf8]'
+                                          : 'bg-[#f1f5f9] text-[#64748b] border-[#cbd5e1] group-hover:border-[#1e1b18]'
+                                      }`}
+                                    >
+                                      {toPersianDigits(idx + 1)}
                                     </span>
-                                  )}
-                                </div>
-                              </div>
-                              <span
-                                className={`font-mono-custom text-[11px] font-black shrink-0 px-2 py-0.5 rounded border self-center ${
-                                  isWrong
-                                    ? 'bg-[#ef4444] text-white border-[#b91c1c]'
-                                    : isChosen
-                                    ? 'bg-[#38bdf8] text-[#1e1b18] border-[#38bdf8]'
-                                    : 'bg-[#f1f5f9] text-[#64748b] border-[#cbd5e1] group-hover:border-[#1e1b18]'
-                                }`}
-                              >
-                                {toPersianDigits(idx + 1)}
-                              </span>
-                            </button>
+                                  </button>
+                                );
+                              })}
+                            </div>
                           );
-                        })}
-                      </div>
+                        }
+
+                        // Pure text-only options: existing vertical stack
+                        return (
+                          <div className="space-y-2.5">
+                            {questionData.options.map((optionText, idx) => {
+                              const isChosen = selectedOption === idx && wrongOptionIndex === null;
+                              const isWrong = wrongOptionIndex === idx;
+
+                              return (
+                                <button
+                                  key={idx}
+                                  disabled={isAnswering}
+                                  onClick={() => handleSelectOption(idx)}
+                                  className={`w-full text-right p-3 sm:p-3.5 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer group disabled:cursor-not-allowed ${
+                                    isWrong
+                                      ? 'bg-[#fee2e2] text-[#dc2626] border-[#ef4444] shadow-[2px_2px_0px_#ef4444]'
+                                      : isChosen
+                                      ? 'bg-[#1e1b18] text-[#ffffff] border-[#1e1b18] shadow-[3px_3px_0px_#38bdf8]'
+                                      : 'bg-[#ffffff] text-[#1e1b18] border-[#1e1b18] hover:bg-[#f8fafc] shadow-[2px_2px_0px_#1e1b18]'
+                                  }`}
+                                >
+                                  <div className="flex flex-col pr-2">
+                                    <span className="text-[12px] sm:text-[13px] font-bold leading-relaxed">
+                                      {optionText}
+                                    </span>
+                                    {questionData.optionsEn?.[idx] && (
+                                      <span
+                                        className={`text-[10px] font-medium ${isChosen ? 'text-[#94a3b8]' : 'text-[#64748b]'}`}
+                                        dir="ltr"
+                                      >
+                                        {questionData.optionsEn[idx]}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span
+                                    className={`font-mono-custom text-[11px] font-black shrink-0 px-2 py-0.5 rounded border ${
+                                      isWrong
+                                        ? 'bg-[#ef4444] text-white border-[#b91c1c]'
+                                        : isChosen
+                                        ? 'bg-[#38bdf8] text-[#1e1b18] border-[#38bdf8]'
+                                        : 'bg-[#f1f5f9] text-[#64748b] border-[#cbd5e1] group-hover:border-[#1e1b18]'
+                                    }`}
+                                  >
+                                    {toPersianDigits(idx + 1)}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                     </>
                   )}
                 </motion.div>
