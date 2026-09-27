@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ZoomIn, Map, MapPin } from 'lucide-react';
+import { ZoomIn, Map, MapPin, Lightbulb } from 'lucide-react';
 import {
   getLocationPinsVisible,
   toggleLocationPinsVisible,
@@ -73,13 +73,19 @@ export const MapControls: React.FC<MapControlsProps> = ({
               : 'bg-[#ffffff] hover:bg-[#fef3c7]'
           } ${isPinAnimating ? 'scale-110' : ''}`}
         >
-          <MapPin
-            className={`w-6 h-6 stroke-[2.2] transition-transform ${
-              isPinsVisible
-                ? 'text-[#451a03] fill-[#ffffff]'
-                : 'text-[#b45309] fill-[#fbbf24]'
-            } ${isPinAnimating ? 'scale-125' : ''}`}
-          />
+          {isPinsVisible ? (
+            <Lightbulb
+              className={`w-6 h-6 stroke-[2.2] transition-transform text-[#1e1b18] fill-[#ffffff] ${
+                isPinAnimating ? 'scale-125' : ''
+              }`}
+            />
+          ) : (
+            <MapPin
+              className={`w-6 h-6 stroke-[2.2] transition-transform text-[#b45309] fill-[#fbbf24] ${
+                isPinAnimating ? 'scale-125' : ''
+              }`}
+            />
+          )}
         </button>
 
         {/* Gallery Toggle Button */}
