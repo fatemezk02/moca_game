@@ -127,6 +127,56 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
     }
   }, [questionData?.id, questionData?.artworkId, questionArtwork]);
 
+  // Option images loading and error states
+  const [optionImgErrors, setOptionImgErrors] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    setOptionImgErrors({});
+  }, [questionData?.id]);
+
+  // Resolves the image URL for an option at 0-based index:
+  // option_1 (index 0) -> option_1_image
+  // option_2 (index 1) -> option_2_image
+  // option_3 (index 2) -> option_3_image
+  // option_4 (index 3) -> strictly text-only
+  const getOptionImageUrl = (idx: number): string | undefined => {
+    if (idx < 0 || idx >= 3) return undefined;
+    if (optionImgErrors[idx]) return undefined;
+
+    let url: string | undefined = undefined;
+    if (idx === 0) {
+      url = questionData?.option_1_image || questionData?.optionImages?.[0];
+    } else if (idx === 1) {
+      url = questionData?.option_2_image || questionData?.optionImages?.[1];
+    } else if (idx === 2) {
+      url = questionData?.option_3_image || questionData?.optionImages?.[2];
+    }
+
+    if (!url && questionData?.rawFields) {
+      for (const [k, v] of Object.entries(questionData.rawFields)) {
+        const normKey = k.toLowerCase().replace(/[\s_\-]/g, '');
+        if (normKey === `option${idx + 1}image` || normKey === `opt${idx + 1}image`) {
+          url = v;
+          break;
+        }
+      }
+    }
+
+    if (typeof url === 'string') {
+      const trimmed = url.trim();
+      if (
+        trimmed &&
+        trimmed.toLowerCase() !== 'null' &&
+        trimmed.toLowerCase() !== 'undefined' &&
+        trimmed.toLowerCase() !== 'none'
+      ) {
+        return trimmed;
+      }
+    }
+
+    return undefined;
+  };
+
   // Resolve gallery record from Galleries dataset by canonicalGalleryId
   const galleryRecord = contentService.getGalleryById(canonicalGalleryId);
 
@@ -496,12 +546,14 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                         {questionData.options.map((optionText, idx) => {
                           const isChosen = selectedOption === idx && wrongOptionIndex === null;
                           const isWrong = wrongOptionIndex === idx;
+                          const optImageUrl = getOptionImageUrl(idx);
+
                           return (
                             <button
                               key={idx}
                               disabled={isAnswering}
                               onClick={() => handleSelectOption(idx)}
-                              className={`w-full text-right p-3 sm:p-3.5 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer group disabled:cursor-not-allowed ${
+                              className={`w-full text-right p-2.5 sm:p-3 rounded-xl border-2 transition-all flex items-center justify-between gap-2.5 sm:gap-3 cursor-pointer group disabled:cursor-not-allowed ${
                                 isWrong
                                   ? 'bg-[#fee2e2] text-[#dc2626] border-[#ef4444] shadow-[2px_2px_0px_#ef4444]'
                                   : isChosen
@@ -509,18 +561,36 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
                                   : 'bg-[#ffffff] text-[#1e1b18] border-[#1e1b18] hover:bg-[#f8fafc] shadow-[2px_2px_0px_#1e1b18]'
                               }`}
                             >
-                              <div className="flex flex-col pr-2">
-                                <span className="text-[12px] sm:text-[13px] font-bold leading-relaxed">
-                                  {optionText}
-                                </span>
-                                {questionData.optionsEn?.[idx] && (
-                                  <span className="text-[10px] text-[#64748b] font-medium" dir="ltr">
-                                    {questionData.optionsEn[idx]}
-                                  </span>
+                              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                                {optImageUrl && (
+                                  <div className="shrink-0 flex items-center justify-center rounded-lg border border-[#1e1b18]/20 bg-[#ffffff] p-1 shadow-xs max-w-[76px] sm:max-w-[92px] max-h-[60px] sm:max-h-[72px] overflow-hidden">
+                                    <img
+                                      src={optImageUrl}
+                                      alt={`تصویر گزینه ${idx + 1}`}
+                                      className="max-h-[52px] sm:max-h-[64px] max-w-full w-auto h-auto object-contain block rounded-xs select-none"
+                                      referrerPolicy="no-referrer"
+                                      onError={() => {
+                                        setOptionImgErrors((prev) => ({ ...prev, [idx]: true }));
+                                      }}
+                                    />
+                                  </div>
                                 )}
+                                <div className="flex flex-col min-w-0 pr-1">
+                                  <span className="text-[12px] sm:text-[13px] font-bold leading-relaxed break-words">
+                                    {optionText}
+                                  </span>
+                                  {questionData.optionsEn?.[idx] && (
+                                    <span
+                                      className={`text-[10px] font-medium ${isChosen ? 'text-[#94a3b8]' : 'text-[#64748b]'}`}
+                                      dir="ltr"
+                                    >
+                                      {questionData.optionsEn[idx]}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                               <span
-                                className={`font-mono-custom text-[11px] font-black shrink-0 px-2 py-0.5 rounded border ${
+                                className={`font-mono-custom text-[11px] font-black shrink-0 px-2 py-0.5 rounded border self-center ${
                                   isWrong
                                     ? 'bg-[#ef4444] text-white border-[#b91c1c]'
                                     : isChosen

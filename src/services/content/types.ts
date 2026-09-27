@@ -51,6 +51,10 @@ export interface QuestionContent {
   options: string[];
   optionsFa?: string[];
   optionsEn?: string[];
+  optionImages?: (string | undefined)[];
+  option_1_image?: string;
+  option_2_image?: string;
+  option_3_image?: string;
   correctOption?: string;
   correctAnswer: string;
   correctIndex: number;

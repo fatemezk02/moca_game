@@ -245,6 +245,85 @@ export function mapRowToQuestion(row: Record<string, string>, index: number): Qu
       ? generalOptions
       : [];
 
+  // Parse optional option images from spreadsheet columns (option_1_image, option_2_image, option_3_image)
+  // Note: There is NO option_4_image; option 4 must strictly remain text-only.
+  const cleanOptionImageUrl = (val?: string): string | undefined => {
+    if (!val || typeof val !== 'string') return undefined;
+    const trimmed = val.trim();
+    if (
+      !trimmed ||
+      trimmed.toLowerCase() === 'null' ||
+      trimmed.toLowerCase() === 'undefined' ||
+      trimmed.toLowerCase() === 'none'
+    ) {
+      return undefined;
+    }
+    return trimmed;
+  };
+
+  const rawOpt1Img = getValueByAliases(row, [
+    'option_1_image',
+    'option1image',
+    'option_1_img',
+    'option1img',
+    'opt_1_image',
+    'opt1image',
+    'option_a_image',
+    'optionaimage',
+    'opt_a_image',
+    'تصویر_گزینه_۱',
+    'عکس_گزینه_۱',
+    'تصویر_گزینه_1',
+    'عکس_گزینه_1',
+    'تصویر_گزینه_الف',
+    'عکس_گزینه_الف',
+  ]);
+  const rawOpt2Img = getValueByAliases(row, [
+    'option_2_image',
+    'option2image',
+    'option_2_img',
+    'option2img',
+    'opt_2_image',
+    'opt2image',
+    'option_b_image',
+    'optionbimage',
+    'opt_b_image',
+    'تصویر_گزینه_۲',
+    'عکس_گزینه_۲',
+    'تصویر_گزینه_2',
+    'عکس_گزینه_2',
+    'تصویر_گزینه_ب',
+    'عکس_گزینه_ب',
+  ]);
+  const rawOpt3Img = getValueByAliases(row, [
+    'option_3_image',
+    'option3image',
+    'option_3_img',
+    'option3img',
+    'opt_3_image',
+    'opt3image',
+    'option_c_image',
+    'optioncimage',
+    'opt_c_image',
+    'تصویر_گزینه_۳',
+    'عکس_گزینه_۳',
+    'تصویر_گزینه_3',
+    'عکس_گزینه_3',
+    'تصویر_گزینه_ج',
+    'عکس_گزینه_ج',
+  ]);
+
+  const option_1_image = cleanOptionImageUrl(rawOpt1Img);
+  const option_2_image = cleanOptionImageUrl(rawOpt2Img);
+  const option_3_image = cleanOptionImageUrl(rawOpt3Img);
+
+  const optionImages: (string | undefined)[] = [
+    option_1_image,
+    option_2_image,
+    option_3_image,
+    undefined, // Option 4 must strictly remain text-only!
+  ];
+
   const correctOption = getValueByAliases(row, [
     'correct_option',
     'correctoption',
@@ -376,6 +455,10 @@ export function mapRowToQuestion(row: Record<string, string>, index: number): Qu
     options,
     optionsFa: optionsFa.length > 0 ? optionsFa : undefined,
     optionsEn: optionsEn.length > 0 ? optionsEn : undefined,
+    optionImages,
+    option_1_image,
+    option_2_image,
+    option_3_image,
     correctOption: correctOption || undefined,
     correctAnswer,
     correctIndex,

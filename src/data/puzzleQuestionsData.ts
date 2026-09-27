@@ -9,6 +9,10 @@ export interface PuzzleQuestionItem {
   title: string;
   question: string;
   options: string[];
+  optionImages?: (string | undefined)[];
+  option_1_image?: string;
+  option_2_image?: string;
+  option_3_image?: string;
   correctIndex: number;
   explanation?: string;
   puzzlePieceId: string;
