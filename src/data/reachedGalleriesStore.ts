@@ -10,6 +10,7 @@
 import { normalizeGalleryId } from '../services/content/mappers';
 import { getCurrentGalleryId } from './playerLocationStore';
 import { isGalleryPuzzleCompleted } from './puzzleProgressStore';
+import { spendCoins, getPlayerStats } from './questionProgressStore';
 
 const STORAGE_REACHED_GALLERIES_KEY = 'museum_reached_galleries_v1';
 const STORAGE_MANUALLY_UNLOCKED_KEY = 'museum_manually_unlocked_galleries_v1';
@@ -116,6 +117,36 @@ export function isGalleryManuallyUnlocked(rawGalleryId: string): boolean {
   const canon = normalizeGalleryId(rawGalleryId);
   const unlocked = getManuallyUnlockedGalleries();
   return unlocked.has(rawGalleryId) || (!!canon && unlocked.has(canon));
+}
+
+/**
+ * Single source of truth for the manual Gallery Lock unlock cost (15 coins).
+ */
+export const GALLERY_UNLOCK_COST = 15;
+
+/**
+ * Attempts to manually unlock a gallery with coins.
+ * Validates that the player has at least GALLERY_UNLOCK_COST (15) coins,
+ * deducts exactly that amount via spendCoins, and marks the gallery as manually unlocked.
+ */
+export function unlockGalleryWithCoins(
+  rawGalleryId: string,
+  cost: number = GALLERY_UNLOCK_COST
+): { success: boolean; error?: 'insufficient_coins' } {
+  if (!rawGalleryId) return { success: false };
+  const currentStats = getPlayerStats();
+  if (currentStats.coins < cost) {
+    return { success: false, error: 'insufficient_coins' };
+  }
+
+  const spent = spendCoins(cost);
+  if (!spent) {
+    return { success: false, error: 'insufficient_coins' };
+  }
+
+  markGalleryManuallyUnlocked(rawGalleryId);
+  markGalleryReached(rawGalleryId);
+  return { success: true };
 }
 
 /**

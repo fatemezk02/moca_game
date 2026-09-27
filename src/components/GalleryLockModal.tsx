@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, X, Coins, Compass } from 'lucide-react';
 import { getCurrentGalleryId } from '../data/playerLocationStore';
@@ -6,10 +6,13 @@ import {
   markGalleryReached,
   markGalleryManuallyUnlocked,
   isGalleryManuallyUnlocked,
+  GALLERY_UNLOCK_COST,
+  unlockGalleryWithCoins,
 } from '../data/reachedGalleriesStore';
 import { isGalleryPuzzleCompleted } from '../data/puzzleProgressStore';
+import { getPlayerStats } from '../data/questionProgressStore';
 import { formatGalleryLabelFa } from './NavigationLight';
-import { normalizeGalleryId, getLogicalGalleryNumber } from '../services/content/mappers';
+import { normalizeGalleryId, getLogicalGalleryNumber, toPersianDigits } from '../services/content/mappers';
 
 interface GalleryLockModalProps {
   lockGallery: { galleryId: string; title?: string } | null;
@@ -108,99 +111,141 @@ export const GalleryLockModal: React.FC<GalleryLockModalProps> = ({
   onUnlockSuccess,
   onNavigateToCurrent,
 }) => {
-  if (!lockGallery) return null;
+  const [playerStats, setPlayerStats] = useState(() => getPlayerStats());
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const continuationGid = getContinuationGalleryId(lockGallery.galleryId);
-  const continuationGalleryLabel = formatGalleryLabelFa(continuationGid);
+  useEffect(() => {
+    setPlayerStats(getPlayerStats());
+    setErrorMessage(null);
+    const handleUpdate = () => {
+      setPlayerStats(getPlayerStats());
+    };
+    window.addEventListener('museum_player_stats_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('museum_player_stats_updated', handleUpdate);
+    };
+  }, [lockGallery?.galleryId]);
+
+  const continuationGid = lockGallery ? getContinuationGalleryId(lockGallery.galleryId) : '';
+  const continuationGalleryLabel = continuationGid ? formatGalleryLabelFa(continuationGid) : '';
   const continuationGalleryNumber = continuationGalleryLabel.replace(/^گالری\s*/, '');
-  const targetGalleryLabel = formatGalleryLabelFa(lockGallery.galleryId);
+  const targetGalleryLabel = lockGallery ? formatGalleryLabelFa(lockGallery.galleryId) : '';
 
-  const normId = normalizeGalleryId(lockGallery.galleryId);
-  let targetGalleryName = GALLERY_DISPLAY_NAMES[normId] || GALLERY_DISPLAY_NAMES[lockGallery.galleryId];
-  if (!targetGalleryName && lockGallery.title) {
+  const normId = lockGallery ? normalizeGalleryId(lockGallery.galleryId) : '';
+  let targetGalleryName = lockGallery
+    ? (GALLERY_DISPLAY_NAMES[normId] || GALLERY_DISPLAY_NAMES[lockGallery.galleryId])
+    : '';
+  if (!targetGalleryName && lockGallery?.title) {
     const match = lockGallery.title.match(/\(([^)]+)\)/);
     if (match && match[1]) {
       targetGalleryName = match[1].split('/')[0].trim();
     }
   }
-  if (!targetGalleryName) {
+  if (!targetGalleryName && lockGallery) {
     targetGalleryName = formatGalleryLabelFa(lockGallery.galleryId);
   }
 
+  const handleUnlock = () => {
+    if (!lockGallery) return;
+    setErrorMessage(null);
+    const currentCoins = getPlayerStats().coins;
+    if (currentCoins < GALLERY_UNLOCK_COST) {
+      setErrorMessage(
+        `موجودی سکه شما کافی نیست (حداقل ${toPersianDigits(GALLERY_UNLOCK_COST)} سکه نیاز است).`
+      );
+      return;
+    }
+
+    const result = unlockGalleryWithCoins(lockGallery.galleryId, GALLERY_UNLOCK_COST);
+    if (result.success) {
+      const targetId = lockGallery.galleryId;
+      onClose();
+      onUnlockSuccess(targetId);
+    } else {
+      setErrorMessage(
+        `موجودی سکه شما کافی نیست (حداقل ${toPersianDigits(GALLERY_UNLOCK_COST)} سکه نیاز است).`
+      );
+    }
+  };
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#1e1b18]/60 backdrop-blur-xs select-none">
-        <div className="absolute inset-0" onClick={onClose} />
+      {lockGallery && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#1e1b18]/60 backdrop-blur-xs select-none">
+          <div className="absolute inset-0" onClick={onClose} />
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.92, y: 15 }}
-          className="relative z-10 w-full max-w-md bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] text-right overflow-hidden flex flex-col"
-        >
-          {/* Top Header Bar */}
-          <div className="bg-[#fee2e2] border-b-2 border-[#1e1b18] px-4 py-2.5 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-[#ef4444] border-[1.5px] border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center text-[#1e1b18]">
-                <Lock className="w-3.5 h-3.5 text-[#1e1b18]" />
-              </div>
-              <div className="text-right">
-                <h2 className="font-sans-custom text-[14px] font-black text-[#1e1b18] tracking-tight">
-                  {targetGalleryLabel}
-                </h2>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="w-7 h-7 shrink-0 aspect-square rounded-full bg-[#ffffff] hover:bg-[#ef4444] hover:text-white transition-colors text-[#1e1b18] border border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5 stroke-[2.5]" />
-            </button>
-          </div>
-
-          <div className="p-5 sm:p-6 space-y-4">
-            <p className="text-sm sm:text-base font-semibold text-[#1e1b18] leading-relaxed">
-              برای باز کردن گالری <span className="text-[#b45309] font-bold">{targetGalleryName}</span>، ۲۵ سکه بپردازید یا از گالری {continuationGalleryNumber} ادامه دهید.
-            </p>
-
-            <div className="flex flex-row gap-3 pt-2">
-              <button
-                onClick={() => {
-                  markGalleryManuallyUnlocked(lockGallery.galleryId);
-                  markGalleryReached(lockGallery.galleryId);
-                  const targetId = lockGallery.galleryId;
-                  onClose();
-                  onUnlockSuccess(targetId);
-                }}
-                className="flex-1 py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#fef2f2] border-2 border-[#1e1b18] rounded-xl shadow-[2.5px_2.5px_0px_#1e1b18] text-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-2 group select-none min-h-[48px]"
-              >
-                <div className="w-7 h-7 rounded-lg bg-[#fee2e2] border border-[#1e1b18] flex items-center justify-center text-[#dc2626] shrink-0 group-hover:bg-[#fecaca] transition-colors">
-                  <Coins className="w-4 h-4 text-[#1e1b18]" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 15 }}
+            className="relative z-10 w-full max-w-md bg-[#ffffff] border-[2.5px] border-[#1e1b18] rounded-2xl shadow-[6px_6px_0px_#1e1b18] text-right overflow-hidden flex flex-col"
+          >
+            {/* Top Header Bar */}
+            <div className="bg-[#fee2e2] border-b-2 border-[#1e1b18] px-4 py-2.5 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-[#ef4444] border-[1.5px] border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center text-[#1e1b18]">
+                  <Lock className="w-3.5 h-3.5 text-[#1e1b18]" />
                 </div>
-                <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap flex items-center justify-center gap-1">
-                  <span dir="ltr">-۲۵</span>
-                  <span>سکه</span>
-                </span>
-              </button>
-
-              <button
-                onClick={() => {
-                  onClose();
-                  onNavigateToCurrent(continuationGid);
-                }}
-                className="flex-1 py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#f0f9ff] text-[#1e1b18] font-black text-[13px] sm:text-[14px] rounded-xl border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] transition-all flex items-center justify-center gap-2 group cursor-pointer min-h-[48px] select-none"
-              >
-                <div className="w-7 h-7 rounded-lg bg-[#e0f2fe] border border-[#1e1b18] flex items-center justify-center text-[#0284c7] shrink-0 group-hover:bg-[#bae6fd] transition-colors">
-                  <Compass className="w-4 h-4 text-[#1e1b18]" />
+                <div className="text-right">
+                  <h2 className="font-sans-custom text-[14px] font-black text-[#1e1b18] tracking-tight">
+                    {targetGalleryLabel}
+                  </h2>
                 </div>
-                <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
-                  رفتن به {continuationGalleryLabel}
-                </span>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-7 h-7 shrink-0 aspect-square rounded-full bg-[#ffffff] hover:bg-[#ef4444] hover:text-white transition-colors text-[#1e1b18] border border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5 stroke-[2.5]" />
               </button>
             </div>
-          </div>
-        </motion.div>
-      </div>
+
+            <div className="p-5 sm:p-6 space-y-4">
+              <p className="text-sm sm:text-base font-semibold text-[#1e1b18] leading-relaxed">
+                برای باز کردن گالری <span className="text-[#b45309] font-bold">{targetGalleryName}</span>، {toPersianDigits(GALLERY_UNLOCK_COST)} سکه بپردازید یا از گالری {continuationGalleryNumber} ادامه دهید.
+              </p>
+
+              {errorMessage && (
+                <div className="p-2.5 bg-[#fef2f2] border border-[#fecaca] rounded-xl text-center">
+                  <p className="text-xs font-bold text-[#dc2626]">
+                    {errorMessage}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex flex-row gap-3 pt-2">
+                <button
+                  onClick={handleUnlock}
+                  className="flex-1 py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#fef2f2] border-2 border-[#1e1b18] rounded-xl shadow-[2.5px_2.5px_0px_#1e1b18] text-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center gap-2 group select-none min-h-[48px]"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[#fee2e2] border border-[#1e1b18] flex items-center justify-center text-[#dc2626] shrink-0 group-hover:bg-[#fecaca] transition-colors">
+                    <Coins className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap flex items-center justify-center gap-1">
+                    <span dir="ltr">-{toPersianDigits(GALLERY_UNLOCK_COST)}</span>
+                    <span>سکه</span>
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    onClose();
+                    onNavigateToCurrent(continuationGid);
+                  }}
+                  className="flex-1 py-3.5 px-2 sm:px-3 bg-[#ffffff] hover:bg-[#f0f9ff] text-[#1e1b18] font-black text-[13px] sm:text-[14px] rounded-xl border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#1e1b18] transition-all flex items-center justify-center gap-2 group cursor-pointer min-h-[48px] select-none"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[#e0f2fe] border border-[#1e1b18] flex items-center justify-center text-[#0284c7] shrink-0 group-hover:bg-[#bae6fd] transition-colors">
+                    <Compass className="w-4 h-4 text-[#1e1b18]" />
+                  </div>
+                  <span className="font-sans-custom text-[13px] sm:text-[14px] font-black text-[#1e1b18] whitespace-nowrap">
+                    رفتن به {continuationGalleryLabel}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 };
