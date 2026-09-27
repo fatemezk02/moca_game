@@ -163,11 +163,11 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
                 aria-hidden={guideSlide !== 0}
               >
                 <div className="border-2 border-[#1e1b18] rounded-2xl p-4 bg-[#e0f2fe] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col items-start">
-                  <div className="flex items-center gap-2 font-black text-xs text-[#0369a1] mb-2">
-                    <Compass className="w-4 h-4 text-[#0284c7] shrink-0" />
+                  <div className="flex items-center gap-2 font-black text-[16.8px] text-[#0369a1] mb-2">
+                    <Compass className="w-4.5 h-4.5 text-[#0284c7] shrink-0" />
                     <span>داستان و هدف بازی</span>
                   </div>
-                  <p className="text-xs sm:text-[13px] text-[#1e293b] leading-relaxed font-medium text-right">
+                  <p className="text-[15.4px] sm:text-[16.8px] text-[#1e293b] leading-relaxed font-medium text-right">
                     در این بازی ۸ اثر مربوط به ۸ برهه مهم تاریخ عکاسی جهان را پیدا می‌کنی و از این طریق با ابعاد متفاوت عکاسی و مسیرش از فن به فرهنگ و هنر آشنا می‌شوی.
                   </p>
                 </div>
