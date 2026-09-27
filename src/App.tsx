@@ -1278,6 +1278,7 @@ export default function App() {
               onNavigateToGallery={(galleryId) => navigateToGalleryWithTrack(galleryId)}
               onSelectTab={(tab) => setActiveTab(tab)}
               mapMode={mapMode}
+              isMapVisible={!!userProfile && activeTab === 'map' && currentGallery === 'gallery-00' && !isAdminOpen}
               onOpenStarDiscovery={(starId) => {
                 setActiveStarDiscoveryId(starId);
                 setSelectedCollection(null);

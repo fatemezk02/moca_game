@@ -21,6 +21,10 @@ interface NavigationLightProps {
   isUnlocked?: boolean;
   /** Optional custom CSS classes */
   className?: string;
+  /** Optional visual entrance animation CSS class */
+  entranceAnimationClass?: string;
+  /** Optional visual entrance animation inline style (e.g. animationDelay) */
+  entranceStyle?: React.CSSProperties;
 }
 
 export function formatGalleryLabelFa(id?: string, customLabel?: string): string {
@@ -82,6 +86,8 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
   isLocationIndicator = true,
   isUnlocked,
   className = '',
+  entranceAnimationClass = '',
+  entranceStyle,
 }) => {
   const displayLabel = formatGalleryLabelFa(galleryId || destinationName, label);
   const unlocked = isUnlocked ?? (galleryId && galleryId !== 'gallery-00' && galleryId !== 'gallery_00' ? isGalleryPuzzleCompleted(galleryId) : false);
@@ -97,10 +103,17 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
       }}
       className={`absolute z-35 pointer-events-auto select-none ${className}`}
     >
-      {/* Touch Target Expander (Min 48x48px hit area) */}
-      <button
-        type="button"
-        id="player-location-lamp-container"
+      <div
+        className={entranceAnimationClass || undefined}
+        style={{
+          transformOrigin: 'center center',
+          ...entranceStyle,
+        }}
+      >
+        {/* Touch Target Expander (Min 48x48px hit area) */}
+        <button
+          type="button"
+          id="player-location-lamp-container"
         aria-label={onNavigate ? `رفتن به ${displayLabel}` : isLocationIndicator ? `موقعیت کنونی شما: ${displayLabel}` : `Enter ${destinationName}`}
         onClick={(e) => {
           e.stopPropagation();
@@ -220,6 +233,7 @@ export const NavigationLight: React.FC<NavigationLightProps> = ({
           )}
         </div>
       </button>
+      </div>
 
       {/* Embedded Keyframe Style for Lamp Glow Pulse */}
       <style>

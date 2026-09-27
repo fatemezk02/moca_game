@@ -149,6 +149,25 @@
   animation: neo-bounce 1.8s ease-in-out infinite;
 }
 
+/* Master Map visual entrance pop-in animation */
+@keyframes masterMapPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-master-map-pop-in {
+  animation-name: masterMapPopIn;
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  animation-fill-mode: both;
+}
+
 /* Navigation Arrow pointing animation - continuous rhythmic directional pulse */
 @keyframes arrow-pointing {
   0%, 100% {

@@ -37,7 +37,23 @@ interface MuseumFloorPlanProps {
   onSelectTab?: (tab: 'map' | 'collection' | 'tasks' | 'curator') => void;
   mapMode?: MapDisplayMode;
   onOpenStarDiscovery?: (starPointId: string) => void;
+  isMapVisible?: boolean;
 }
+
+// Module-level session flag so entrance animation runs once when a new game's map becomes visible
+let hasPlayedMasterMapEntranceInSession = false;
+
+// Canonical animation delays: Gallery 01 lamp first -> subtle pause -> locks 02 to 08 cascade
+const ENTRANCE_DELAYS: Record<string, number> = {
+  'gallery_01': 60,   // Gallery 01 current lamp (60ms -> 320ms)
+  'gallery_02': 440,  // Subtle pause of 120ms, then Gallery 02 lock (440ms -> 700ms)
+  'gallery_03': 520,  // Gallery 03 lock (520ms -> 780ms)
+  'gallery_04': 600,  // Gallery 04 lock (600ms -> 860ms)
+  'gallery_05': 680,  // Gallery 05 lock (680ms -> 940ms)
+  'gallery_06': 760,  // Gallery 06 lock (760ms -> 1020ms)
+  'gallery_07': 840,  // Gallery 07 lock (840ms -> 1100ms)
+  'gallery_08': 920,  // Gallery 08 lock (920ms -> 1180ms)
+};
 
 export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   collections,
@@ -52,6 +68,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   onSelectTab,
   mapMode = 'normal',
   onOpenStarDiscovery,
+  isMapVisible,
 }) => {
   const { containerRef, dimensions } = useFitMapDimensions(604.8, 844.86);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -69,6 +86,35 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   const [galleryAreasVer, setGalleryAreasVer] = useState(0);
   const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
   const [locationAnimKey, setLocationAnimKey] = useState(0);
+
+  // Observe profile existence (so animation does not start while intro/guide covers the map)
+  const [hasProfile, setHasProfile] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || !window.localStorage) return true;
+    try {
+      return !!localStorage.getItem('museum_user_profile');
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    const handleProfileUpdate = (e: any) => {
+      try {
+        setHasProfile(!!e?.detail || !!localStorage.getItem('museum_user_profile'));
+      } catch {
+        setHasProfile(true);
+      }
+    };
+    window.addEventListener('museum_user_profile_updated', handleProfileUpdate);
+    return () => window.removeEventListener('museum_user_profile_updated', handleProfileUpdate);
+  }, []);
+
+  const isActuallyVisible = isMapVisible !== undefined ? isMapVisible : hasProfile;
+
+  const [entranceAnimationTriggered, setEntranceAnimationTriggered] = useState<boolean>(false);
+  const [entranceAnimationDone, setEntranceAnimationDone] = useState<boolean>(
+    () => hasPlayedMasterMapEntranceInSession
+  );
 
   const isMasterMapG01Arrow = (arrow: AdminArrowPoint): boolean =>
     arrow.id === 'arrow-g00-to-g01' ||
@@ -187,6 +233,39 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
       window.removeEventListener('museum_gallery_manually_unlocked', handleArrowsUpdate);
       window.removeEventListener('museum_game_fully_reset', handleReset);
     };
+  }, []);
+
+  // Trigger Master Map visual entrance animation on new game start when map becomes visible
+  useEffect(() => {
+    const rawCurr = playerGalleryId || getCurrentGalleryId();
+    const isNew = (
+      !isGalleryPuzzleCompleted('gallery_01') &&
+      !isGalleryReached('gallery_02') &&
+      !isGalleryManuallyUnlocked('gallery_02') &&
+      (rawCurr === 'gallery-00' || rawCurr === 'gallery-01' || rawCurr === 'gallery_01')
+    );
+
+    if (isActuallyVisible && isNew && !hasPlayedMasterMapEntranceInSession) {
+      hasPlayedMasterMapEntranceInSession = true;
+      setEntranceAnimationTriggered(true);
+
+      const timer = setTimeout(() => {
+        setEntranceAnimationDone(true);
+      }, 1300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isActuallyVisible, playerGalleryId]);
+
+  // Reset entrance animation state when the game is fully reset
+  useEffect(() => {
+    const handleFullReset = () => {
+      hasPlayedMasterMapEntranceInSession = false;
+      setEntranceAnimationTriggered(false);
+      setEntranceAnimationDone(false);
+    };
+    window.addEventListener('museum_game_fully_reset', handleFullReset);
+    return () => window.removeEventListener('museum_game_fully_reset', handleFullReset);
   }, []);
 
   // Reset pan when scale resets
@@ -722,6 +801,27 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                 const isCurrent = gid === canonPlayerId;
                 const completed = isCompleted(gid);
 
+                const isNewGameSession = (
+                  !isGalleryPuzzleCompleted('gallery_01') &&
+                  !isGalleryReached('gallery_02') &&
+                  !isGalleryManuallyUnlocked('gallery_02') &&
+                  (canonPlayerId === 'gallery_01' || rawCurrent === 'gallery-00' || rawCurrent === 'gallery-01')
+                );
+
+                let entranceClass: string | undefined = undefined;
+                let entranceStyle: React.CSSProperties | undefined = undefined;
+
+                if (isNewGameSession && !entranceAnimationDone) {
+                  if (entranceAnimationTriggered) {
+                    const delay = ENTRANCE_DELAYS[gid] ?? 0;
+                    entranceClass = 'animate-master-map-pop-in';
+                    entranceStyle = { animationDelay: `${delay}ms` };
+                  } else {
+                    entranceClass = undefined;
+                    entranceStyle = { opacity: 0, transform: 'scale(0.75)' };
+                  }
+                }
+
                 // CASE 1 — CURRENT GALLERY:
                 // Regardless of complete or incomplete: show existing lit location indicator lamp (never green)
                 if (isCurrent) {
@@ -738,6 +838,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                       isLocationIndicator={true}
                       isUnlocked={false}
                       onNavigate={() => handleLampClick(gid)}
+                      entranceAnimationClass={entranceClass}
+                      entranceStyle={entranceStyle}
                     />
                   );
                 }
@@ -758,6 +860,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                       isLocationIndicator={false}
                       isUnlocked={true}
                       onNavigate={() => handleLampClick(gid)}
+                      entranceAnimationClass={entranceClass}
+                      entranceStyle={entranceStyle}
                     />
                   );
                 }
@@ -786,6 +890,8 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
                         handleLockClick(gid, title);
                       }
                     }}
+                    entranceAnimationClass={entranceClass}
+                    entranceStyle={entranceStyle}
                   />
                 );
               })}

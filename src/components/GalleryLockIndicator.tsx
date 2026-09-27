@@ -11,6 +11,8 @@ interface GalleryLockIndicatorProps {
   scale?: number;
   isOpen?: boolean;
   onClick?: () => void;
+  entranceAnimationClass?: string;
+  entranceStyle?: React.CSSProperties;
 }
 
 /**
@@ -29,6 +31,8 @@ export const GalleryLockIndicator: React.FC<GalleryLockIndicatorProps> = ({
   scale,
   isOpen = false,
   onClick,
+  entranceAnimationClass = '',
+  entranceStyle,
 }) => {
   const displayLabel = formatGalleryLabelFa(galleryId);
   const tooltipText = title || (isOpen ? `${displayLabel} — باز شده (برای ورود کلیک کنید)` : `${displayLabel} — هنوز باز نشده است`);
@@ -60,12 +64,19 @@ export const GalleryLockIndicator: React.FC<GalleryLockIndicatorProps> = ({
       title={tooltipText}
     >
       <div
-        id={`lock-medallion-${galleryId}`}
-        onClick={onClick}
-        className={`relative flex items-center justify-center transition-all duration-200 hover:scale-115 cursor-pointer ${
-          isOpen ? 'opacity-100 hover:opacity-100' : 'opacity-70 hover:opacity-95'
-        }`}
+        className={entranceAnimationClass || undefined}
+        style={{
+          transformOrigin: 'center center',
+          ...entranceStyle,
+        }}
       >
+        <div
+          id={`lock-medallion-${galleryId}`}
+          onClick={onClick}
+          className={`relative flex items-center justify-center transition-all duration-200 hover:scale-115 cursor-pointer ${
+            isOpen ? 'opacity-100 hover:opacity-100' : 'opacity-70 hover:opacity-95'
+          }`}
+        >
         {/* Pure Museum Vector Padlock (Closed or Open) */}
         <svg
           width={lockSize}
@@ -122,6 +133,7 @@ export const GalleryLockIndicator: React.FC<GalleryLockIndicatorProps> = ({
             strokeLinecap="round"
           />
         </svg>
+      </div>
       </div>
     </div>
   );
