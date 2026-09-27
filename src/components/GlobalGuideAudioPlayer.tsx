@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, X, Loader2 } from 'lucide-react';
 import { useGlobalGuideAudio } from '../services/audio/guideAudioService';
-import { getLogicalGalleryNumber, formatTwoDigitPersian } from '../services/content/mappers';
+import { getLogicalGalleryNumber, formatTwoDigitPersian, toPersianDigits } from '../services/content/mappers';
 
 export const GlobalGuideAudioPlayer: React.FC = () => {
   const {
@@ -29,6 +29,17 @@ export const GlobalGuideAudioPlayer: React.FC = () => {
     : 'راهنمای صوتی';
 
   const progressPercent = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
+
+  const remainingSeconds = Math.max(0, duration - currentTime);
+  const formatRemainingTime = (seconds: number): string => {
+    const safeSec = Math.max(0, Math.floor(seconds));
+    const mins = Math.floor(safeSec / 60);
+    const secs = safeSec % 60;
+    const mm = mins < 10 ? `0${mins}` : `${mins}`;
+    const ss = secs < 10 ? `0${secs}` : `${secs}`;
+    return toPersianDigits(`${mm}:${ss}`);
+  };
+  const formattedRemainingTime = duration > 0 ? formatRemainingTime(remainingSeconds) : toPersianDigits('00:00');
 
   const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (duration <= 0) return;
@@ -107,6 +118,15 @@ export const GlobalGuideAudioPlayer: React.FC = () => {
               style={{ left: `${progressPercent}%` }}
             />
           </div>
+
+          {/* Remaining Playback Time */}
+          <span
+            id="top-audio-remaining-time"
+            dir="ltr"
+            className="font-mono-custom text-[10px] sm:text-[11px] font-bold text-[#1e1b18] whitespace-nowrap shrink-0 tabular-nums select-text"
+          >
+            {formattedRemainingTime}
+          </span>
 
           {/* RIGHT: Small "×" Close / Stop Button */}
           <button
