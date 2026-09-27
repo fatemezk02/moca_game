@@ -173,22 +173,22 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
                 </div>
 
                 <div className="border-2 border-[#1e1b18] rounded-2xl p-3.5 bg-[#ffffff] shadow-[2.5px_2.5px_0px_#1e1b18] text-right flex flex-col items-start">
-                  <div className="flex items-center gap-2 font-black text-xs text-[#1e1b18] mb-1.5">
-                    <Sparkles className="w-4 h-4 text-[#f59e0b] shrink-0" />
+                  <div className="flex items-center gap-2 font-black text-[16.8px] text-[#1e1b18] mb-1.5">
+                    <Sparkles className="w-4.5 h-4.5 text-[#f59e0b] shrink-0" />
                     <span>چگونه بازی کنیم؟</span>
                   </div>
-                  <ul className="text-[11px] sm:text-xs text-[#475569] leading-relaxed font-medium text-right space-y-1 w-full list-none">
+                  <ul className="text-[15.4px] sm:text-[16.8px] text-[#475569] leading-relaxed font-medium text-right space-y-1.5 w-full list-none">
                     <li className="flex items-start gap-1.5">
                       <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                      <span>در هر گالری تکه‌های پازل رو جمع کن</span>
+                      <span>در هر گالری تکه‌های پازل رو جمع کن <span className="text-[#dc2626] font-bold">(اجباری)</span>.</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                      <span>اطلاعات جالب رو کشف کن یا با تجربه‌های تعاملی آشنا شو</span>
+                      <span>اطلاعات جالب رو کشف کن یا با تجربه‌های تعاملی آشنا شو.</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                      <span>و با استفاده از فلش‌های راهنما به گالری بعدی برو تا به زمان حال برسی</span>
+                      <span>و با استفاده از فلش‌های راهنما به گالری بعدی برو تا به زمان حال برسی.</span>
                     </li>
                   </ul>
                 </div>
