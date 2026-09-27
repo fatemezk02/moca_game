@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'motion/react';
 import { ArtworkFrame } from './ArtworkFrame';
 import { contentService } from '../services/content/contentService';
 import {
@@ -12,7 +13,7 @@ import {
 } from '../data/galleryPuzzleConfig';
 import { JigsawPieceGraphic } from './JigsawPieceGraphic';
 import { toPersianDigits } from '../services/content/mappers';
-import { MapPin, X, Eye, Lock, Sparkles, Award } from 'lucide-react';
+import { X, Eye, Lock, Sparkles, Award } from 'lucide-react';
 import {
   areAll8GalleryPuzzlesCompleted,
   isFinalCompletionAwarded,
@@ -51,6 +52,84 @@ interface CuratorExhibitionWallProps {
   onOpenDetailModal?: (item: any) => void;
 }
 
+const AutoMarqueeArtworkTitle: React.FC<{ title: string; className?: string }> = ({
+  title,
+  className = '',
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [overflowDist, setOverflowDist] = useState<number>(0);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (containerRef.current && textRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const textWidth = textRef.current.scrollWidth;
+        const diff = textWidth - containerWidth;
+        if (diff > 2) {
+          setOverflowDist(diff);
+        } else {
+          setOverflowDist(0);
+        }
+      }
+    };
+
+    checkOverflow();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        checkOverflow();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
+    window.addEventListener('resize', checkOverflow);
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
+  }, [title]);
+
+  const isOverflowing = overflowDist > 0;
+
+  return (
+    <div
+      ref={containerRef}
+      dir="rtl"
+      className={`w-full overflow-hidden whitespace-nowrap relative ${className}`}
+    >
+      {isOverflowing ? (
+        <motion.span
+          ref={textRef}
+          key={`marquee-${title}-${overflowDist}`}
+          className="inline-block whitespace-nowrap will-change-transform"
+          initial={{ x: 0 }}
+          animate={{
+            x: [0, 0, overflowDist + 4, overflowDist + 4, 0],
+          }}
+          transition={{
+            duration: Math.max(4.5, (overflowDist + 4) / 18 + 2.5),
+            times: [0, 0.15, 0.65, 0.8, 1],
+            ease: 'easeInOut',
+            repeat: Infinity,
+            repeatDelay: 1.2,
+          }}
+        >
+          {title}
+        </motion.span>
+      ) : (
+        <span
+          ref={textRef}
+          className="block w-full text-center whitespace-nowrap truncate"
+        >
+          {title}
+        </span>
+      )}
+    </div>
+  );
+};
+
 // Virtual salon wall coordinate space (720 x 580)
 // Derived with 1:1 fidelity from the user's reference diagram (image.png)
 const SALON_SLOTS: WallFramePosition[] = DEFAULT_SALON_SLOTS_LIST;
@@ -65,7 +144,6 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
   });
 
   const [selectedArtwork, setSelectedArtwork] = useState<ExhibitionArtwork | null>(null);
-  const [lockedHint, setLockedHint] = useState<string | null>(null);
   const [wallTheme, setWallTheme] = useState<'light' | 'dark'>('light');
   const [showCertificate, setShowCertificate] = useState<boolean>(false);
 
@@ -406,12 +484,6 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
 
     if (art.isCompleted || art.collectedPieces.length > 0) {
       setSelectedArtwork(art);
-      setLockedHint(null);
-    } else {
-      setLockedHint(`اثر مربوط به «${art.galleryNameFa}» هنوز کشف نشده است.`);
-      setTimeout(() => {
-        setLockedHint((prev) => (prev ? null : prev));
-      }, 3500);
     }
   };
 
@@ -592,17 +664,20 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
                   </div>
 
                   {/* Artwork & Gallery Label */}
-                  <div className="w-full mt-2 text-center flex flex-col items-center px-1">
-                    <span className="text-[10px] sm:text-[11px] font-sans-custom font-black text-[#ea580c] line-clamp-1">
+                  <div className="w-full mt-2 text-center flex flex-col items-center px-1 overflow-hidden">
+                    <span className="text-[10px] sm:text-[11px] font-sans-custom font-black text-[#ea580c] line-clamp-1 w-full text-center">
                       {art.galleryNameFa}
                     </span>
-                    <span className="text-[12px] sm:text-[13px] font-sans-custom font-bold text-[#1e1b18] mt-0.5 line-clamp-1">
-                      {art.isCompleted
-                        ? art.title
-                        : hasPartialPieces
-                        ? `${art.title} (${toPersianDigits(art.collectedPieces.length)} از ${toPersianDigits(art.totalPieces)} قطعه)`
-                        : 'هنوز کشف نشده'}
-                    </span>
+                    <AutoMarqueeArtworkTitle
+                      title={
+                        art.isCompleted
+                          ? art.title
+                          : hasPartialPieces
+                          ? `${art.title} (${toPersianDigits(art.collectedPieces.length)} از ${toPersianDigits(art.totalPieces)} قطعه)`
+                          : 'هنوز کشف نشده'
+                      }
+                      className="text-[12px] sm:text-[13px] font-sans-custom font-bold text-[#1e1b18] mt-0.5"
+                    />
                   </div>
                 </div>
               );
@@ -610,25 +685,6 @@ export const CuratorExhibitionWall: React.FC<CuratorExhibitionWallProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Floating Notification for Incomplete/Empty Frame click */}
-      {lockedHint && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 bg-[#ffffff] border-2 border-[#1e1b18] text-[#1e1b18] px-4 py-2.5 rounded-2xl shadow-[4px_4px_0px_#1e1b18] flex items-center gap-2.5 max-w-[90%] text-center animate-in fade-in slide-in-from-bottom-2">
-          <div className="w-6 h-6 rounded-full bg-[#fef3c7] border border-[#d97706] flex items-center justify-center shrink-0">
-            <Lock className="w-3.5 h-3.5 text-[#b45309]" />
-          </div>
-          <span className="font-sans-custom text-[12px] font-bold text-[#1e1b18]">{lockedHint}</span>
-          {onNavigateToMap && (
-            <button
-              onClick={onNavigateToMap}
-              className="neo-btn bg-[#fef3c7] hover:bg-[#fde047] text-[#1e1b18] px-3 py-1 rounded-xl text-[11px] font-black font-sans-custom mr-1 cursor-pointer flex-none flex items-center gap-1 border-2 border-[#1e1b18] shadow-[2px_2px_0px_#1e1b18]"
-            >
-              <MapPin className="w-3 h-3 text-[#b45309]" />
-              <span>نقشه</span>
-            </button>
-          )}
-        </div>
-      )}
 
       {/* Completed or Partially Assembled Artwork Preview Modal */}
       {selectedArtwork && (

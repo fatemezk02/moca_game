@@ -1255,7 +1255,7 @@ export default function App() {
             dir="rtl"
           >
             <span className="text-[11px] sm:text-xs font-bold text-[#635e59] tracking-tight">
-              به طرف فلش و به سمت نمایشگاه حرکت کن
+              به طرف فلش و به سمت نمایشگاه حرکت کن.
             </span>
           </motion.div>
         )}
