@@ -16,7 +16,6 @@ import { Gallery08MapSvg } from './Gallery08MapSvg';
 import { StarDiscoveryModal } from './StarDiscoveryModal';
 import { PuzzlePoint } from './PuzzlePoint';
 import { PuzzleQuestionModal } from './PuzzleQuestionModal';
-import { StarQuestionPopup } from './StarQuestionPopup';
 import { StarPoint } from './StarPoint';
 import { ExperiencePoint } from './ExperiencePoint';
 import { ExperienceModal } from './ExperienceModal';
@@ -268,11 +267,6 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
   // Filter arrows based on completion condition engine
   const visibleArrows = arrows.filter((arrow) => isArrowVisibleToPlayer(arrow));
 
-  // Determine active star question point
-  const selectedStarArtwork = selectedStarPointId
-    ? effectiveCollectionPoints.find((cp) => cp.id === selectedStarPointId)
-    : null;
-
   const modalsContent = (
     <>
       {/* Star Discovery Modal */}
@@ -284,21 +278,6 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
           isOpen={true}
           onClose={() => setActiveStarDiscoveryId(null)}
           onSelectTab={onSelectTab}
-        />
-      )}
-
-      {/* Star Question Popup */}
-      {selectedStarPointId && selectedStarArtwork && (
-        <StarQuestionPopup
-          starPointId={selectedStarPointId}
-          starId={selectedStarArtwork.starId || selectedStarPointId}
-          galleryId="gallery-08"
-          artworkTitle={selectedStarArtwork.title}
-          onClose={handleClosePopup}
-          onOpenDiscoveryModal={() => {
-            setActiveStarDiscoveryId(selectedStarPointId);
-            setSelectedStarPointId(null);
-          }}
         />
       )}
 

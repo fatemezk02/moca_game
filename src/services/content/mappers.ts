@@ -576,38 +576,110 @@ export function mapRowToStar(row: Record<string, string>, index: number): StarCo
     ]) || 'gallery-01';
   let galleryId = normalizeGalleryId(rawGalleryId);
 
+  const rawLabelTextFa = getValueByAliases(row, [
+    'label_fa',
+    'labelfa',
+    'label_text_fa',
+    'labeltextfa',
+    'label_text',
+    'labeltext',
+    'label',
+    'message',
+    'message_fa',
+    'messagefa',
+    'message_text',
+    'messagetext',
+    'message_text_fa',
+    'messagetextfa',
+    'first_tap_message',
+    'firsttapmessage',
+    'first_tap_message_fa',
+    'firsttapmessagefa',
+    'first_tap_label',
+    'firsttaplabel',
+    'first_tap_label_fa',
+    'firsttaplabelfa',
+    'star_message',
+    'starmessage',
+    'star_message_fa',
+    'starmessagefa',
+    'star_label',
+    'starlabel',
+    'star_label_fa',
+    'starlabelfa',
+    'tap_message',
+    'tapmessage',
+    'hint',
+    'hint_fa',
+    'hintfa',
+    'متن لیبل',
+    'متن_لیبل',
+    'لیبل',
+    'پیام',
+    'متن پیام',
+    'متن_پیام',
+    'پیام اول',
+    'پیام_اول',
+    'پیام ضربه اول',
+    'پیام_ضربه_اول',
+    'پیام ستاره',
+    'پیام_ستاره',
+    'متن ستاره',
+    'متن_ستاره',
+    'راهنما',
+    'متن راهنما',
+    'متن_راهنما',
+    'شرح اولیه',
+    'توضیح کوتاه',
+    'شرح',
+    'توضیح',
+    'description',
+    'description_fa',
+    'text_fa',
+    'textfa',
+    'متن',
+  ]);
+
+  const rawTitleFa = getValueByAliases(row, [
+    'title_fa',
+    'titlefa',
+    'title',
+    'عنوان',
+    'نام اثر',
+    'نام',
+    'نام ستاره',
+    'نام_ستاره',
+    'عنوان ستاره',
+    'عنوان_ستاره',
+  ]);
+
+  const rawIntroFa = getValueByAliases(row, [
+    'intro_fa',
+    'introfa',
+    'intro',
+    'مقدمه',
+    'توضیح کوتاه',
+    'شرح اولیه',
+  ]);
+
   const labelTextFa =
-    getValueByAliases(row, [
-      'label_fa',
-      'labelfa',
-      'label_text_fa',
-      'labeltextfa',
-      'labeltext',
-      'label',
-      'متن لیبل',
-      'لیبل',
-      'پیام',
-    ]) || 'ردپای عکاسی را در گذر زمان دنبال کن';
+    rawLabelTextFa && rawLabelTextFa !== 'q'
+      ? rawLabelTextFa
+      : rawIntroFa && rawIntroFa !== 'q'
+      ? rawIntroFa
+      : rawTitleFa && rawTitleFa !== 'q'
+      ? rawTitleFa
+      : 'ردپای عکاسی را در گذر زمان دنبال کن';
 
   const titleFa =
-    getValueByAliases(row, [
-      'title_fa',
-      'titlefa',
-      'title',
-      'عنوان',
-      'نام اثر',
-      'نام',
-    ]) || `نقطه کشف ستاره ${index + 1}`;
+    rawTitleFa && rawTitleFa !== 'q'
+      ? rawTitleFa
+      : `نقطه کشف ستاره ${index + 1}`;
 
   const introFa =
-    getValueByAliases(row, [
-      'intro_fa',
-      'introfa',
-      'intro',
-      'مقدمه',
-      'توضیح کوتاه',
-      'شرح اولیه',
-    ]) || labelTextFa;
+    rawIntroFa && rawIntroFa !== 'q'
+      ? rawIntroFa
+      : labelTextFa;
 
   const rawInfoCost = getValueByAliases(row, [
     'information_cost_coins',

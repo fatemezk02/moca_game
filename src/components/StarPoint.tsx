@@ -170,7 +170,11 @@ export const StarPoint: React.FC<StarPointProps> = ({
   }, []);
 
   const discoveryData = getStarDiscovery(effectiveStarId, galleryId, starId);
-  const labelText = discoveryData?.labelTextFa || '';
+  const labelText =
+    (discoveryData?.labelTextFa && discoveryData.labelTextFa !== 'q' ? discoveryData.labelTextFa : null) ||
+    (discoveryData?.titleFa && discoveryData.titleFa !== 'q' ? discoveryData.titleFa : null) ||
+    (title && title !== 'q' ? title : null) ||
+    'ستاره کشف';
 
   // Responsive map percentage coordinates
   const leftPercent = (x / mapWidth) * 100;
