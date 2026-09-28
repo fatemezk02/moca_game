@@ -742,6 +742,16 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
           let canonPlayerId = 'gallery_01';
           if (rawCurrent === 'gallery-00' || normCurrent === 'gallery_00') {
             canonPlayerId = 'gallery_00';
+          } else if (
+            rawCurrent === '08' ||
+            rawCurrent === '8' ||
+            rawCurrent === 'gallery_08' ||
+            rawCurrent === 'gallery-09' ||
+            rawCurrent === 'gallery_09' ||
+            normCurrent === 'gallery_09' ||
+            (rawCurrent !== 'gallery-08' && normCurrent === 'gallery_08')
+          ) {
+            canonPlayerId = 'gallery_08';
           } else if (rawCurrent === 'gallery-01' || rawCurrent === 'gallery_01' || normCurrent === 'gallery_01') {
             canonPlayerId = 'gallery_01';
           } else if (rawCurrent === 'gallery-03' || rawCurrent === 'gallery-02' || rawCurrent === 'gallery_02' || normCurrent === 'gallery_02') {
@@ -756,8 +766,6 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
             canonPlayerId = 'gallery_06';
           } else if (rawCurrent === 'gallery-08' || rawCurrent === 'gallery_07' || normCurrent === 'gallery_07') {
             canonPlayerId = 'gallery_07';
-          } else if (rawCurrent === 'gallery-09' || rawCurrent === 'gallery_08' || normCurrent === 'gallery_08' || normCurrent === 'gallery_09') {
-            canonPlayerId = 'gallery_08';
           }
 
           const isCompleted = (gid: string) => {

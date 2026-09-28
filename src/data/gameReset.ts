@@ -8,8 +8,9 @@ import { resetReachedGalleries } from './reachedGalleriesStore';
 import { resetFinalCompletionState } from './finalCompletionStore';
 import { resetCollectionNotificationStore } from './collectionNotificationStore';
 import { clearUserProfile } from './userProfileStore';
-import { resetLuckMachineState } from './luckMachineStore';
+import { resetLuckMachineState, getLuckMachineState } from './luckMachineStore';
 import { resetLocksIntroPlayed } from './galleryAreasStore';
+import { resetDarkroomRiddleState, getDarkroomRiddleState } from './darkroomRiddleStore';
 
 /**
  * Full, authoritative game reset.
@@ -48,10 +49,19 @@ export function resetEntireGame(): void {
     // 8. Reset collections unread notification store
     resetCollectionNotificationStore();
 
-    // 8.1 Reset luck machine attempt state
-    resetLuckMachineState();
+    // 8.1 Reset luck machine attempt state only if not already permanently completed
+    const currentLuckState = getLuckMachineState();
+    if (!currentLuckState.hasSpun) {
+      resetLuckMachineState();
+    }
 
-    // 8.2 Reset locks intro entrance animation state for new game
+    // 8.2 Reset darkroom riddle state only if not already permanently completed
+    const currentDarkroomState = getDarkroomRiddleState();
+    if (!currentDarkroomState.isSolved) {
+      resetDarkroomRiddleState();
+    }
+
+    // 8.3 Reset locks intro entrance animation state for new game
     resetLocksIntroPlayed();
 
     // 7. Reset active gallery navigation storage

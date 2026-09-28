@@ -13,6 +13,7 @@ import { resetEntireGame } from '../data/gameReset';
 import { FinalCompletionCardBack } from './FinalCompletionCardBack';
 import { toPersianDigits } from '../services/content/mappers';
 import { contentService } from '../services/content/contentService';
+import { PlayerGameRewardsBar } from './PlayerGameRewardsBar';
 import {
   isStarPointUnlocked,
   isStarPointInformationUnlocked,
@@ -239,7 +240,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 mt-2 bg-white p-4 rounded-2xl border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18]">
+          {/* Special Game Rewards & Coupons Row without container border, placed above progress bar */}
+          <div className="flex items-center justify-center my-2.5">
+            <PlayerGameRewardsBar size="lg" />
+          </div>
+
+          <div className="flex flex-col gap-3 mt-1 bg-white p-4 rounded-2xl border-2 border-[#1e1b18] shadow-[2.5px_2.5px_0px_#1e1b18]">
             <div className="flex justify-between items-end mb-1 px-1">
               <span className="font-bold text-sm text-[#4a443b]">پیشرفت</span>
               <span className="font-black text-[#f59e0b] text-xl leading-none">

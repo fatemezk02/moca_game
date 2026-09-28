@@ -39,11 +39,18 @@ export function getCurrentGalleryId(): string {
       localStorage.getItem(PLAYER_GALLERY_STORAGE_KEY) ||
       localStorage.getItem(ALTERNATIVE_STORAGE_KEY);
     if (saved && saved.trim() && saved.trim() !== 'gallery-00' && saved.trim() !== 'gallery_00') {
-      const canon = normalizeGalleryId(saved.trim());
+      const trimmed = saved.trim();
+      if (trimmed === '08' || trimmed === '8' || trimmed === 'gallery_08') {
+        return '08';
+      }
+      if (trimmed === 'gallery-09' || trimmed === 'gallery_09' || trimmed === '09' || trimmed === '9') {
+        return 'gallery-09';
+      }
+      const canon = normalizeGalleryId(trimmed);
       if (canon && canon !== 'gallery_00') {
         return canon.replace('_', '-');
       }
-      return saved.trim();
+      return trimmed;
     }
   } catch (err) {
     console.error('Failed to read player currentGalleryId:', err);
@@ -75,7 +82,12 @@ export function setCurrentGalleryId(galleryId: string): void {
     return;
   }
 
-  const normalizedTarget = canon === 'gallery_09' ? 'gallery-08' : canon.replace('_', '-');
+  let normalizedTarget = canon.replace('_', '-');
+  if (target === 'gallery-09' || canon === 'gallery_09') {
+    normalizedTarget = 'gallery-09';
+  } else if (galleryId === '08' || target === '08' || galleryId === 'gallery_08' || target === 'gallery_08') {
+    normalizedTarget = '08';
+  }
 
   // Update to the last gallery the user entered (from 01 to 08)
   try {

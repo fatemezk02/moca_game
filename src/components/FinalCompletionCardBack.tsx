@@ -87,19 +87,6 @@ export const FinalCompletionCardBack: React.FC<FinalCompletionCardBackProps> = (
           >
             <X className="w-4 h-4 stroke-[2.5]" />
           </button>
-
-          {onFlipBack && (
-            <button
-              id="final-card-flip-back-btn"
-              type="button"
-              onClick={onFlipBack}
-              title="مشاهده اطلاعات اثر"
-              aria-label="مشاهده اطلاعات اثر"
-              className="px-2.5 py-1 rounded-lg bg-white hover:bg-[#f3f4f6] text-[#64748b] hover:text-[#1e1b18] border border-[#1e1b18] text-[10px] sm:text-[11px] font-bold shadow-[1px_1px_0px_#1e1b18] cursor-pointer transition-all"
-            >
-              مشاهده اثر
-            </button>
-          )}
         </div>
 
         {/* Certificate Badge Ribbon */}

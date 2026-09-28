@@ -36,6 +36,10 @@ export interface SharedGalleryPageLayoutProps {
   onTriggerNextPuzzle?: () => void;
   onOpenLuckMachine?: () => void;
   isLuckMachineAvailable?: boolean;
+  isLuckMachineCompleted?: boolean;
+  onOpenSpecialPuzzle?: () => void;
+  isSpecialPuzzleAvailable?: boolean;
+  isSpecialPuzzleCompleted?: boolean;
 }
 
 const GALLERY_METADATA_MAP: Record<string, { num: string; name: string }> = {
@@ -86,6 +90,10 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
   onTriggerNextPuzzle,
   onOpenLuckMachine,
   isLuckMachineAvailable = false,
+  isLuckMachineCompleted = false,
+  onOpenSpecialPuzzle,
+  isSpecialPuzzleAvailable = false,
+  isSpecialPuzzleCompleted = false,
 }) => {
   const playerStats = usePlayerStats();
   const galleryRecord = contentService.getGalleryById(galleryId);
@@ -317,6 +325,10 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
           onTriggerNextPuzzle={handleTriggerNextPuzzle}
           onOpenLuckMachine={onOpenLuckMachine}
           isLuckMachineAvailable={isLuckMachineAvailable}
+          isLuckMachineCompleted={isLuckMachineCompleted}
+          onOpenSpecialPuzzle={onOpenSpecialPuzzle}
+          isSpecialPuzzleAvailable={isSpecialPuzzleAvailable}
+          isSpecialPuzzleCompleted={isSpecialPuzzleCompleted}
         />
       )}
 

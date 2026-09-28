@@ -271,6 +271,51 @@ export function markExperienceDiscovered(experienceId: string): void {
   }
 }
 
+/**
+ * Directly unlocks an Experience (for rewards like Luck Machine) without coin cost.
+ */
+export function markExperienceUnlockedDirectly(experienceId: string): boolean {
+  if (!experienceId || typeof window === 'undefined' || !window.localStorage) {
+    return false;
+  }
+
+  try {
+    const keys = getEquivalentExperienceKeys(experienceId);
+
+    // Save to STORAGE_UNLOCKED_KEY
+    const rawUnlocked = localStorage.getItem(STORAGE_UNLOCKED_KEY);
+    const unlockedList: string[] = rawUnlocked ? JSON.parse(rawUnlocked) : [];
+    for (const k of keys) {
+      if (!unlockedList.some((id) => id.toLowerCase() === k.toLowerCase())) {
+        unlockedList.push(k);
+      }
+    }
+    localStorage.setItem(STORAGE_UNLOCKED_KEY, JSON.stringify(unlockedList));
+
+    // Also mark in discovered list
+    for (const k of keys) {
+      markExperienceDiscovered(k);
+    }
+
+    // Broadcast unlock events for real-time reactive UI updates
+    window.dispatchEvent(
+      new CustomEvent('museum_experience_unlocked', {
+        detail: { experienceId, cost: 0, keys },
+      })
+    );
+    window.dispatchEvent(
+      new CustomEvent('museum_experience_progress_updated', {
+        detail: { experienceId, totalDiscovered: getDiscoveredExperiences().length },
+      })
+    );
+
+    return true;
+  } catch (err) {
+    console.error('Failed to directly unlock experience:', err);
+    return false;
+  }
+}
+
 export function getDiscoveredExperiencesCount(allActiveExperiences?: Array<{ id: string; experienceId?: string }>): number {
   const discovered = getDiscoveredExperiences();
   if (!allActiveExperiences || allActiveExperiences.length === 0) {

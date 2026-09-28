@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Compass, Eye, Sparkles } from 'lucide-react';
+import { Plus, Compass, Eye, Dices, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export interface GalleryFloatingActionsProps {
@@ -8,6 +8,10 @@ export interface GalleryFloatingActionsProps {
   onTriggerNextPuzzle?: () => void;
   onOpenLuckMachine?: () => void;
   isLuckMachineAvailable?: boolean;
+  isLuckMachineCompleted?: boolean;
+  onOpenSpecialPuzzle?: () => void;
+  isSpecialPuzzleAvailable?: boolean;
+  isSpecialPuzzleCompleted?: boolean;
 }
 
 /**
@@ -16,6 +20,8 @@ export interface GalleryFloatingActionsProps {
  * Expands upward to reveal:
  *  1. Gallery Guide (راهنمای گالری) - opens the existing Gallery Information / Curator modal
  *  2. Next Puzzle (پازل بعدی) - highlights the first incomplete puzzle in order with the existing 2-blink animation
+ *  3. Luck Machine (دستگاه شانس) - opens the existing Luck Machine modal in Gallery 02 when available
+ *  4. Special Puzzle (معما) - opens the existing Darkroom Riddle modal in Gallery 07 when available
  */
 export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
   galleryId,
@@ -23,9 +29,18 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
   onTriggerNextPuzzle,
   onOpenLuckMachine,
   isLuckMachineAvailable = false,
+  isLuckMachineCompleted = false,
+  onOpenSpecialPuzzle,
+  isSpecialPuzzleAvailable = false,
+  isSpecialPuzzleCompleted = false,
 }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Determine if there is an uncompleted available feature (subtle attention pulse)
+  const hasPendingAttention =
+    (isLuckMachineAvailable && !isLuckMachineCompleted) ||
+    (isSpecialPuzzleAvailable && !isSpecialPuzzleCompleted);
 
   // Close when clicking outside
   useEffect(() => {
@@ -72,6 +87,12 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
     onOpenLuckMachine?.();
   };
 
+  const handleSpecialPuzzleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsExpanded(false);
+    onOpenSpecialPuzzle?.();
+  };
+
   return (
     <div
       ref={containerRef}
@@ -86,13 +107,12 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
         aria-expanded={isExpanded}
         aria-label={isExpanded ? 'بستن منوی اقدامات' : 'منوی اقدامات گالری'}
         title={isExpanded ? 'بستن منو' : 'اقدامات گالری'}
-        className="relative w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#ffffff] hover:bg-[#f8fafc] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none"
+        className={`relative w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#ffffff] hover:bg-[#f8fafc] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none ${
+          hasPendingAttention
+            ? 'animate-pulse ring-2 ring-[#f59e0b] shadow-[0_0_12px_rgba(245,158,11,0.55)]'
+            : ''
+        }`}
       >
-        {isLuckMachineAvailable && (
-          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#f59e0b] rounded-full border border-[#1e1b18] shadow-[1px_1px_0px_#1e1b18] flex items-center justify-center text-[8px] animate-pulse">
-            ★
-          </span>
-        )}
         <motion.div
           animate={{ rotate: isExpanded ? 45 : 0 }}
           transition={{ duration: 0.2, ease: 'easeInOut' }}
@@ -109,14 +129,37 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
             id={`fab-${galleryId}-expanded-actions`}
             className="flex flex-col-reverse items-start gap-2.5"
           >
-            {/* Secondary Action: Luck Machine (if available) */}
+            {/* Secondary Action: Special Puzzle / معما (Gallery 07) */}
+            {isSpecialPuzzleAvailable && onOpenSpecialPuzzle && (
+              <motion.div
+                key="fab-special-puzzle-item"
+                initial={{ opacity: 0, y: 14, scale: 0.82 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.82 }}
+                transition={{ duration: 0.2, delay: 0.01, ease: 'easeOut' }}
+                className="flex items-center"
+              >
+                <button
+                  id={`btn-fab-${galleryId}-special-puzzle`}
+                  type="button"
+                  onClick={handleSpecialPuzzleClick}
+                  aria-label="معما"
+                  title="معما"
+                  className="w-11 h-11 rounded-xl border-[2px] border-[#1e1b18] bg-[#fce7f3] hover:bg-[#fbcfe8] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none"
+                >
+                  <HelpCircle className="w-5 h-5 stroke-[2.4] text-[#831843]" />
+                </button>
+              </motion.div>
+            )}
+
+            {/* Secondary Action: Luck Machine / دستگاه شانس (Gallery 02) */}
             {isLuckMachineAvailable && onOpenLuckMachine && (
               <motion.div
                 key="fab-luck-item"
                 initial={{ opacity: 0, y: 14, scale: 0.82 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.82 }}
-                transition={{ duration: 0.2, delay: 0.01, ease: 'easeOut' }}
+                transition={{ duration: 0.2, delay: 0.02, ease: 'easeOut' }}
                 className="flex items-center"
               >
                 <button
@@ -127,7 +170,7 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
                   title="دستگاه شانس"
                   className="w-11 h-11 rounded-xl border-[2px] border-[#1e1b18] bg-[#fef08a] hover:bg-[#fde047] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none"
                 >
-                  <Sparkles className="w-5 h-5 stroke-[2.4] text-[#b45309]" />
+                  <Dices className="w-5 h-5 stroke-[2.4] text-[#78350f]" />
                 </button>
               </motion.div>
             )}
