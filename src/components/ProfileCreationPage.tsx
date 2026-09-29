@@ -180,11 +180,11 @@ export const ProfileCreationPage: React.FC<ProfileCreationPageProps> = ({
                   <ul className="text-[15.4px] sm:text-[16.8px] text-[#475569] leading-relaxed font-medium text-right space-y-1.5 w-full list-none">
                     <li className="flex items-start gap-1.5">
                       <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                      <span>در هر گالری تکه‌های پازل رو جمع کن <span className="text-[#dc2626] font-bold">(اجباری)</span>.</span>
+                      <span>در هر گالری <span className="text-[#ef4444] font-bold">باید</span> تکه‌های پازل رو جمع کنی.</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                      <span>اطلاعات جالب رو کشف کن یا با تجربه‌های تعاملی آشنا شو.</span>
+                      <span>میتونی اطلاعات جالب رو کشف کنی یا با تجربه‌های تعاملی آشنا بشی.</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <span className="text-[#f59e0b] font-bold shrink-0">•</span>

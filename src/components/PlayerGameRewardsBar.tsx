@@ -176,6 +176,9 @@ export const PlayerGameRewardsBar: React.FC<PlayerGameRewardsBarProps> = ({
 
   // 2. Darkroom Riddle Circle computation
   const isDarkroomSolved = darkroomState.isSolved;
+  const isDarkroomExhausted = Boolean(
+    darkroomState.isExhausted || (!darkroomState.isSolved && (darkroomState.wrongAttempts || 0) >= 3)
+  );
 
   const renderDarkroomIcon = () => {
     if (!isDarkroomSolved) {
@@ -324,16 +327,18 @@ export const PlayerGameRewardsBar: React.FC<PlayerGameRewardsBarProps> = ({
           </button>
         )}
 
-        {/* 2. Darkroom Riddle Circle */}
-        <button
-          type="button"
-          onClick={handleDarkroomCircleClick}
-          title="معمای تاریکخانه"
-          aria-label="معمای تاریکخانه"
-          className={`${circleDimensions} rounded-full border-2 flex items-center justify-center transition-all cursor-pointer active:scale-95 ${getDarkroomBgClass()}`}
-        >
-          {renderDarkroomIcon()}
-        </button>
+        {/* 2. Darkroom Riddle Circle (hidden if exhausted) */}
+        {!isDarkroomExhausted && (
+          <button
+            type="button"
+            onClick={handleDarkroomCircleClick}
+            title="معمای تاریکخانه"
+            aria-label="معمای تاریکخانه"
+            className={`${circleDimensions} rounded-full border-2 flex items-center justify-center transition-all cursor-pointer active:scale-95 ${getDarkroomBgClass()}`}
+          >
+            {renderDarkroomIcon()}
+          </button>
+        )}
 
         {/* 3. Final Trophy / Ticket Circle */}
         <button

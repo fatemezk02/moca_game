@@ -55,9 +55,9 @@ export function resetEntireGame(): void {
       resetLuckMachineState();
     }
 
-    // 8.2 Reset darkroom riddle state only if not already permanently completed
+    // 8.2 Reset darkroom riddle state only if not already permanently completed or exhausted
     const currentDarkroomState = getDarkroomRiddleState();
-    if (!currentDarkroomState.isSolved) {
+    if (!currentDarkroomState.isSolved && !currentDarkroomState.isExhausted && (currentDarkroomState.wrongAttempts || 0) < 3) {
       resetDarkroomRiddleState();
     }
 

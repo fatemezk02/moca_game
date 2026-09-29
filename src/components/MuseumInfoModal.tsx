@@ -81,11 +81,11 @@ export const MuseumInfoModal: React.FC<MuseumInfoModalProps> = ({
                 <ul className="text-[11px] sm:text-xs text-[#475569] leading-relaxed font-medium text-right space-y-1 w-full list-none">
                   <li className="flex items-start gap-1.5">
                     <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                    <span>در هر گالری تکه‌های پازل رو جمع کن</span>
+                    <span>در هر گالری <span className="text-[#ef4444] font-bold">باید</span> تکه‌های پازل رو جمع کنی.</span>
                   </li>
                   <li className="flex items-start gap-1.5">
                     <span className="text-[#f59e0b] font-bold shrink-0">•</span>
-                    <span>اطلاعات جالب رو کشف کن یا با تجربه‌های تعاملی آشنا شو</span>
+                    <span>میتونی اطلاعات جالب رو کشف کنی یا با تجربه‌های تعاملی آشنا بشی.</span>
                   </li>
                   <li className="flex items-start gap-1.5">
                     <span className="text-[#f59e0b] font-bold shrink-0">•</span>

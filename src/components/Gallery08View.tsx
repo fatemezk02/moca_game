@@ -85,12 +85,19 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
   const [selectedExperiencePointId, setSelectedExperiencePointId] = useState<string | null>(null);
   const [activeExperience, setActiveExperience] = useState<ExperienceContent | null>(null);
   const [isDarkroomRiddleOpen, setIsDarkroomRiddleOpen] = useState<boolean>(false);
-  const [isDarkroomAvailable, setIsDarkroomAvailable] = useState<boolean>(() =>
-    hasDarkroomRiddleAutoOpened() ||
-    isExperienceUnlocked('exp-g08-darkroom') ||
-    isExperienceUnlocked('experience_7') ||
-    getDarkroomRiddleState().isSolved
-  );
+  const [isDarkroomAvailable, setIsDarkroomAvailable] = useState<boolean>(() => {
+    const darkState = getDarkroomRiddleState();
+    const isExhausted = Boolean(
+      darkState.isExhausted || (!darkState.isSolved && (darkState.wrongAttempts || 0) >= 3)
+    );
+    if (isExhausted) return false;
+    return (
+      hasDarkroomRiddleAutoOpened() ||
+      isExperienceUnlocked('exp-g08-darkroom') ||
+      isExperienceUnlocked('experience_7') ||
+      darkState.isSolved
+    );
+  });
   const [isDarkroomCompleted, setIsDarkroomCompleted] = useState<boolean>(() =>
     getDarkroomRiddleState().isSolved
   );
@@ -101,13 +108,23 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
   // Sync Darkroom Riddle availability and completion state
   useEffect(() => {
     const syncDarkroom = () => {
-      setIsDarkroomAvailable(
-        hasDarkroomRiddleAutoOpened() ||
-        isExperienceUnlocked('exp-g08-darkroom') ||
-        isExperienceUnlocked('experience_7') ||
-        getDarkroomRiddleState().isSolved
+      const darkState = getDarkroomRiddleState();
+      const isExhausted = Boolean(
+        darkState.isExhausted || (!darkState.isSolved && (darkState.wrongAttempts || 0) >= 3)
       );
-      setIsDarkroomCompleted(getDarkroomRiddleState().isSolved);
+
+      if (isExhausted) {
+        setIsDarkroomAvailable(false);
+        setIsDarkroomCompleted(false);
+      } else {
+        setIsDarkroomAvailable(
+          hasDarkroomRiddleAutoOpened() ||
+          isExperienceUnlocked('exp-g08-darkroom') ||
+          isExperienceUnlocked('experience_7') ||
+          darkState.isSolved
+        );
+        setIsDarkroomCompleted(darkState.isSolved);
+      }
     };
 
     syncDarkroom();
@@ -356,11 +373,15 @@ export const Gallery08View: React.FC<Gallery08ViewProps> = ({
               activeExperience.iconId === 'darkroom';
 
             const darkroomRecord = getDarkroomRiddleState();
+            const isExhausted = Boolean(
+              darkroomRecord.isExhausted || (!darkroomRecord.isSolved && (darkroomRecord.wrongAttempts || 0) >= 3)
+            );
             // Automatically open ONLY ONCE after the user first opens and closes the Darkroom Experience.
-            // Never auto-open if already solved/completed or already auto-opened.
+            // Never auto-open if already solved/completed, exhausted, or already auto-opened.
             const shouldAutoOpen =
               isDarkroom &&
               !darkroomRecord.isSolved &&
+              !isExhausted &&
               !hasDarkroomRiddleAutoOpened();
 
             setActiveExperience(null);

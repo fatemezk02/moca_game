@@ -6,6 +6,7 @@ import { toPersianDigits } from '../services/content/mappers';
 import {
   getDarkroomRiddleState,
   saveDarkroomRiddleSuccess,
+  recordDarkroomWrongAttempt,
   DarkroomDiscountRecord,
 } from '../data/darkroomRiddleStore';
 
@@ -33,13 +34,20 @@ export const DarkroomRiddleModal: React.FC<DarkroomRiddleModalProps> = ({
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  const isExhausted = Boolean(
+    darkroomState.isExhausted || (!darkroomState.isSolved && (darkroomState.wrongAttempts || 0) >= 3)
+  );
+
   // Focus the first empty digit box when modal opens
   useEffect(() => {
     if (isOpen) {
       const current = getDarkroomRiddleState();
       setDarkroomState(current);
       setIsSuccess(current.isSolved);
-      if (!current.isSolved) {
+      const currentlyExhausted = Boolean(
+        current.isExhausted || (!current.isSolved && (current.wrongAttempts || 0) >= 3)
+      );
+      if (!current.isSolved && !currentlyExhausted) {
         const firstEmpty = digits.findIndex((d) => d === '');
         const targetIndex = firstEmpty === -1 ? 0 : firstEmpty;
         setTimeout(() => {
@@ -163,6 +171,8 @@ export const DarkroomRiddleModal: React.FC<DarkroomRiddleModalProps> = ({
   };
 
   const handleSubmit = () => {
+    if (isExhausted) return;
+
     const entered = digits.join('');
     if (entered.length < 6 || digits.some((d) => d === '')) {
       setError('لطفاً همهٔ ۶ رقم را وارد کنید.');
@@ -184,9 +194,19 @@ export const DarkroomRiddleModal: React.FC<DarkroomRiddleModalProps> = ({
         // Safe confetti fallback
       }
     } else {
-      setError('عدد واردشده صحیح نیست! دوباره در تاریکخانه دقت کن.');
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      const updated = recordDarkroomWrongAttempt();
+      setDarkroomState(updated);
+      const isNowExhausted = Boolean(
+        updated.isExhausted || (!updated.isSolved && (updated.wrongAttempts || 0) >= 3)
+      );
+
+      if (isNowExhausted) {
+        setError(null);
+      } else {
+        setError('عدد واردشده صحیح نیست! دوباره در تاریکخانه دقت کن.');
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+      }
     }
   };
 
@@ -263,77 +283,7 @@ export const DarkroomRiddleModal: React.FC<DarkroomRiddleModalProps> = ({
 
           {/* Modal Body */}
           <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-right">
-            {!isSuccess ? (
-              <>
-                {/* Riddle Prompt Text */}
-                <div className="space-y-2">
-                  <p
-                    id="darkroom-riddle-text"
-                    className="font-sans-custom text-[14px] sm:text-[15px] font-black text-[#1e1b18] leading-relaxed"
-                  >
-                    یک عدد شش رقمی در این تاریکخانه مخفی شده؛ پیداش کن و هدیه رو دریافت کن.
-                  </p>
-                </div>
-
-                {/* Six-Digit Timer-Style Input Layout: [ 0 ][ 0 ] : [ 0 ][ 0 ] : [ 0 ][ 0 ] */}
-                <div className="py-2">
-                  <div
-                    dir="ltr"
-                    className={`flex items-center justify-center gap-1.5 sm:gap-2.5 transition-transform ${
-                      shake ? 'animate-bounce' : ''
-                    }`}
-                  >
-                    {/* Pair 1 */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 bg-[#f5f5f4] p-1.5 rounded-2xl border border-stone-300">
-                      {renderDigitBox(0)}
-                      {renderDigitBox(1)}
-                    </div>
-
-                    <span className="text-2xl sm:text-3xl font-black text-[#1e1b18] select-none font-mono pb-0.5">
-                      :
-                    </span>
-
-                    {/* Pair 2 */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 bg-[#f5f5f4] p-1.5 rounded-2xl border border-stone-300">
-                      {renderDigitBox(2)}
-                      {renderDigitBox(3)}
-                    </div>
-
-                    <span className="text-2xl sm:text-3xl font-black text-[#1e1b18] select-none font-mono pb-0.5">
-                      :
-                    </span>
-
-                    {/* Pair 3 */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 bg-[#f5f5f4] p-1.5 rounded-2xl border border-stone-300">
-                      {renderDigitBox(4)}
-                      {renderDigitBox(5)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Error Notice */}
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-2 p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-[12px] font-black font-sans-custom"
-                  >
-                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-                    <span>{error}</span>
-                  </motion.div>
-                )}
-
-                {/* Submit Action Button */}
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="w-full py-3 px-4 rounded-xl font-sans-custom text-[14px] font-black text-white bg-[#1e1b18] hover:bg-[#2d2926] active:translate-y-0.5 transition-all shadow-[3px_3px_0px_#b45309] flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Gift className="w-4 h-4 text-[#fde68a]" />
-                  <span>ثبت و دریافت هدیه</span>
-                </button>
-              </>
-            ) : (
+            {isSuccess ? (
               /* Success State */
               <div className="space-y-5 py-2">
                 <div className="flex flex-col items-center text-center space-y-3">
@@ -345,7 +295,7 @@ export const DarkroomRiddleModal: React.FC<DarkroomRiddleModalProps> = ({
                     id="darkroom-riddle-success-text"
                     className="font-sans-custom text-[15px] sm:text-[16px] font-black text-[#1e1b18] leading-relaxed"
                   >
-                    عالی بود! تو برندهی تخفیف ۵۰ درصدی کارت پستال از کتابفروشی موزه شدی
+                    عالی بود! تو برنده‌ی ۵۰ درصد تخفیف برای خرید کارت‌پستال از فروشگاه موزه شدی.
                   </h3>
                 </div>
 
@@ -384,6 +334,94 @@ export const DarkroomRiddleModal: React.FC<DarkroomRiddleModalProps> = ({
                   <span>متوجه شدم</span>
                 </button>
               </div>
+            ) : isExhausted ? (
+              /* Exhausted State (After 3 Wrong Attempts) */
+              <div className="space-y-5 py-2">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className="w-14 h-14 rounded-2xl bg-[#fee2e2] border-2 border-[#b91c1c] shadow-[3px_3px_0px_#b91c1c] flex items-center justify-center text-[#b91c1c]">
+                    <AlertCircle className="w-8 h-8" />
+                  </div>
+
+                  <h3
+                    id="darkroom-riddle-exhausted-text"
+                    className="font-sans-custom text-[15px] sm:text-[16px] font-black text-[#1e1b18] leading-relaxed"
+                  >
+                    متأسفانه فرصت امتحان کردن برای تو تموم شد
+                  </h3>
+                </div>
+
+                {/* Close Button */}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full py-3 px-4 rounded-xl font-sans-custom text-[14px] font-black text-[#1e1b18] bg-[#fef3c7] hover:bg-[#fde68a] border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>متوجه شدم</span>
+                </button>
+              </div>
+            ) : (
+              /* Active Input Form State */
+              <>
+                {/* Riddle Prompt Text */}
+                <div className="space-y-2">
+                  <p
+                    id="darkroom-riddle-text"
+                    className="font-sans-custom text-[14px] sm:text-[15px] font-black text-[#1e1b18] leading-relaxed"
+                  >
+                    یک عدد شش رقمی در این تاریکخانه مخفی شده؛ پیداش کن و هدیه رو دریافت کن.
+                  </p>
+                </div>
+
+                {/* Six-Digit Input Layout without colon separators: [ 0 ][ 0 ]  [ 0 ][ 0 ]  [ 0 ][ 0 ] */}
+                <div className="py-2">
+                  <div
+                    dir="ltr"
+                    className={`flex items-center justify-center gap-2 sm:gap-3 transition-transform ${
+                      shake ? 'animate-bounce' : ''
+                    }`}
+                  >
+                    {/* Pair 1 */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 bg-[#f5f5f4] p-1.5 rounded-2xl border border-stone-300">
+                      {renderDigitBox(0)}
+                      {renderDigitBox(1)}
+                    </div>
+
+                    {/* Pair 2 */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 bg-[#f5f5f4] p-1.5 rounded-2xl border border-stone-300">
+                      {renderDigitBox(2)}
+                      {renderDigitBox(3)}
+                    </div>
+
+                    {/* Pair 3 */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 bg-[#f5f5f4] p-1.5 rounded-2xl border border-stone-300">
+                      {renderDigitBox(4)}
+                      {renderDigitBox(5)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Error Notice */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-[12px] font-black font-sans-custom"
+                  >
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                    <span>{error}</span>
+                  </motion.div>
+                )}
+
+                {/* Submit Action Button */}
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="w-full py-3 px-4 rounded-xl font-sans-custom text-[14px] font-black text-white bg-[#1e1b18] hover:bg-[#2d2926] active:translate-y-0.5 transition-all shadow-[3px_3px_0px_#b45309] flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Gift className="w-4 h-4 text-[#fde68a]" />
+                  <span>ثبت و دریافت هدیه</span>
+                </button>
+              </>
             )}
           </div>
         </motion.div>

@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Compass, Eye, Dices, HelpCircle } from 'lucide-react';
+import { Plus, Compass, Eye, Dices, HelpCircle, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export interface GalleryFloatingActionsProps {
   galleryId: string;
+  onNavigateBack?: () => void;
   onOpenGuide?: () => void;
   onTriggerNextPuzzle?: () => void;
   onOpenLuckMachine?: () => void;
@@ -15,16 +16,18 @@ export interface GalleryFloatingActionsProps {
 }
 
 /**
- * Floating Action Button (FAB) for Individual Gallery Pages (Gallery 02 through Gallery 09).
- * Located at the bottom-left of the gallery screen, above the bottom navigation bar.
+ * Floating Action Button (FAB) for Individual Gallery Pages (Gallery 01 through Gallery 08/09).
+ * Located at the bottom-right of the gallery screen, above the bottom navigation bar.
  * Expands upward to reveal:
- *  1. Gallery Guide (راهنمای گالری) - opens the existing Gallery Information / Curator modal
- *  2. Next Puzzle (پازل بعدی) - highlights the first incomplete puzzle in order with the existing 2-blink animation
- *  3. Luck Machine (دستگاه شانس) - opens the existing Luck Machine modal in Gallery 02 when available
- *  4. Special Puzzle (معما) - opens the existing Darkroom Riddle modal in Gallery 07 when available
+ *  1. Back to Master Map (بازگشت به گالری نقشه اصلی) - returns to the main museum floor plan
+ *  2. Gallery Guide (راهنمای گالری) - opens the existing Gallery Information / Curator modal
+ *  3. Next Puzzle (پازل بعدی) - highlights the first incomplete puzzle in order with the existing 2-blink animation
+ *  4. Luck Machine (دستگاه شانس) - opens the existing Luck Machine modal in Gallery 02 when available
+ *  5. Special Puzzle (معما) - opens the existing Darkroom Riddle modal in Gallery 07 when available
  */
 export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
   galleryId,
+  onNavigateBack,
   onOpenGuide,
   onTriggerNextPuzzle,
   onOpenLuckMachine,
@@ -69,6 +72,12 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
     setIsExpanded((prev) => !prev);
   };
 
+  const handleNavigateBackClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsExpanded(false);
+    onNavigateBack?.();
+  };
+
   const handleGuideClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsExpanded(false);
@@ -97,9 +106,9 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
     <div
       ref={containerRef}
       id={`fab-${galleryId}-container`}
-      className="absolute bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] left-4 sm:left-6 z-30 flex flex-col-reverse items-center gap-2.5 select-none"
+      className="absolute bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] right-4 sm:right-6 z-30 flex flex-col-reverse items-center gap-2.5 select-none"
     >
-      {/* Primary Floating '+' Button */}
+      {/* Primary Floating '+' Button (اقدامات گالری) */}
       <button
         id={`btn-fab-${galleryId}-main`}
         type="button"
@@ -127,7 +136,7 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
         {isExpanded && (
           <div
             id={`fab-${galleryId}-expanded-actions`}
-            className="flex flex-col-reverse items-start gap-2.5"
+            className="flex flex-col-reverse items-center gap-2.5"
           >
             {/* Secondary Action: Special Puzzle / معما (Gallery 07) */}
             {isSpecialPuzzleAvailable && onOpenSpecialPuzzle && (
@@ -181,7 +190,7 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
               initial={{ opacity: 0, y: 14, scale: 0.82 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.82 }}
-              transition={{ duration: 0.2, delay: 0.05, ease: 'easeOut' }}
+              transition={{ duration: 0.2, delay: 0.04, ease: 'easeOut' }}
               className="flex items-center"
             >
               <button
@@ -202,7 +211,7 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
               initial={{ opacity: 0, y: 14, scale: 0.82 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.82 }}
-              transition={{ duration: 0.2, delay: 0.09, ease: 'easeOut' }}
+              transition={{ duration: 0.2, delay: 0.06, ease: 'easeOut' }}
               className="flex items-center"
             >
               <button
@@ -216,6 +225,29 @@ export const GalleryFloatingActions: React.FC<GalleryFloatingActionsProps> = ({
                 <Eye className="w-5 h-5 stroke-[2.4]" />
               </button>
             </motion.div>
+
+            {/* Secondary Action 3: Back to Master Map (بازگشت به گالری نقشه اصلی) */}
+            {onNavigateBack && (
+              <motion.div
+                key="fab-back-to-map-item"
+                initial={{ opacity: 0, y: 14, scale: 0.82 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.82 }}
+                transition={{ duration: 0.2, delay: 0.08, ease: 'easeOut' }}
+                className="flex items-center"
+              >
+                <button
+                  id={`btn-fab-${galleryId}-toggle-map`}
+                  type="button"
+                  onClick={handleNavigateBackClick}
+                  aria-label="بازگشت به گالری نقشه اصلی"
+                  title="بازگشت به گالری نقشه اصلی"
+                  className="w-11 h-11 rounded-xl border-[2px] border-[#1e1b18] bg-[#f59e0b] hover:bg-[#d97706] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none"
+                >
+                  <Map className="w-5 h-5 stroke-[2.4]" />
+                </button>
+              </motion.div>
+            )}
           </div>
         )}
       </AnimatePresence>

@@ -317,10 +317,11 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
         </div>
       </main>
 
-      {/* Bottom Left Floating Action Button (Gallery 02 through Gallery 09) */}
+      {/* Floating Action Button on the Right (Gallery 01 through Gallery 08/09) */}
       {!isMasterMap && (
         <GalleryFloatingActions
           galleryId={galleryId}
+          onNavigateBack={onNavigateBack}
           onOpenGuide={handleOpenGuide}
           onTriggerNextPuzzle={handleTriggerNextPuzzle}
           onOpenLuckMachine={onOpenLuckMachine}
@@ -331,23 +332,6 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
           isSpecialPuzzleCompleted={isSpecialPuzzleCompleted}
         />
       )}
-
-      {/* Bottom Right Floating Controls */}
-      <div
-        id={`${galleryId}-floating-controls`}
-        className="absolute bottom-20 right-4 sm:right-6 z-30 flex items-center justify-center select-none"
-      >
-        {/* Gallery Toggle Button to return to Gallery 00 */}
-        <button
-          id={`btn-${galleryId}-toggle-map`}
-          onClick={onNavigateBack}
-          aria-label="بازگشت به نقشه اصلی (گالری ۰۰)"
-          title="بازگشت به نقشه اصلی (گالری ۰۰)"
-          className="w-13 h-13 rounded-2xl border-[2.5px] border-[#1e1b18] bg-[#f59e0b] hover:bg-[#d97706] text-[#1e1b18] shadow-[2px_2px_0px_#1e1b18] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0px_#1e1b18] flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none"
-        >
-          <Map className="w-6 h-6 stroke-[2.5]" />
-        </button>
-      </div>
 
       {/* Bottom Navigation Bar */}
       <BottomNavBar
