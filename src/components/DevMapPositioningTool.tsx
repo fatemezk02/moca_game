@@ -2022,7 +2022,13 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                       </div>
                     ) : item.type === 'icon' ? (
                       <div className="relative flex items-center justify-center pointer-events-none">
-                        <span className="text-sm select-none leading-none">📍</span>
+                        {item.id === 'location-prayer' || item.subType === 'preset-location-prayer' ? (
+                          <span className="text-sm select-none leading-none">🤲</span>
+                        ) : item.id === 'location-water' || item.subType === 'preset-location-water' ? (
+                          <span className="text-sm select-none leading-none">💧</span>
+                        ) : (
+                          <span className="text-sm select-none leading-none">📍</span>
+                        )}
                       </div>
                     ) : item.type === 'arrow' ? (
                       <div
@@ -2222,7 +2228,7 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
                         .filter((e) => e.type === 'icon')
                         .map((e) => (
                           <option key={e.id} value={e.id}>
-                            {e.title} (X: {e.currentX}, Y: {e.currentY})
+                            [{e.id}] {e.title} (X: {e.currentX}, Y: {e.currentY})
                           </option>
                         ))}
                     </optgroup>
@@ -2249,6 +2255,16 @@ export const DevMapPositioningTool: React.FC<DevMapPositioningToolProps> = ({
               <span className="text-amber-300 font-medium">شناسه ستاره (star_id):</span>
               <span className="font-mono-custom font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/40">
                 {selectedElement.starId || selectedElement.id}
+              </span>
+            </div>
+          )}
+
+          {/* Location Pin ID Display Badge */}
+          {selectedElement.type === 'icon' && (
+            <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/30 rounded-lg px-2.5 py-1 text-xs">
+              <span className="text-amber-300 font-medium">شناسه نقطه لوکیشن (ID):</span>
+              <span className="font-mono-custom font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/40">
+                {selectedElement.id}
               </span>
             </div>
           )}

@@ -52,6 +52,8 @@ export interface AdminIconPoint {
     | 'preset-location-library'
     | 'preset-location-entrance'
     | 'preset-location-cinema'
+    | 'preset-location-prayer'
+    | 'preset-location-water'
     | 'preset-location-gallery'
     | 'preset-location-gallery-1'
     | 'preset-location-gallery-2'

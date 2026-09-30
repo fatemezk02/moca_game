@@ -138,6 +138,28 @@ export const CustomIconRender: React.FC<CustomIconRenderProps> = ({
         />
       );
 
+    case 'preset-location-prayer':
+      return (
+        <LocationPointMarker
+          iconType="prayer"
+          size={point.width || 32}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+
+    case 'preset-location-water':
+      return (
+        <LocationPointMarker
+          iconType="water"
+          size={point.width || 32}
+          isSelected={isSelected}
+          title={point.title}
+          className={className}
+        />
+      );
+
     case 'preset-location-gallery':
     case 'preset-location-gallery-1':
     case 'preset-location-gallery-2':

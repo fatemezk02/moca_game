@@ -149,6 +149,16 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     return () => window.removeEventListener('museum_points_updated', handleUpdate);
   }, []);
 
+  // Listen to external content updates (e.g. Google Sheets Location tab loaded)
+  useEffect(() => {
+    const unsubscribe = contentService.subscribe((status) => {
+      if (status.isLoaded) {
+        setGalleryAreasVer((v) => v + 1);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Listen to location pin visibility toggle event
   useEffect(() => {
     const handleVisUpdate = (e: any) => {
@@ -349,6 +359,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
 
     // Check if dynamic content from Location table exists
     const locData =
+      (point.locationId ? contentService.getLocationById(point.locationId) : null) ||
       (point.id ? contentService.getLocationById(point.id) : null) ||
       (point.iconType ? contentService.getLocationById(point.iconType) : null);
     if (locData?.name?.trim()) {
@@ -386,6 +397,12 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
     }
     if (iconType === 'preset-location-cinema' || id.includes('cinema') || title.includes('سینما')) {
       return 'سینماتک موزه';
+    }
+    if (id === 'location-prayer' || iconType === 'preset-location-prayer' || id.includes('prayer') || title.includes('نماز')) {
+      return 'نمازخانه';
+    }
+    if (id === 'location-water' || iconType === 'preset-location-water' || id.includes('water') || title.includes('آب')) {
+      return 'آب آشامیدنی';
     }
     if (iconType.startsWith('preset-location-gallery-')) {
       const num = parseInt(iconType.replace('preset-location-gallery-', ''), 10);

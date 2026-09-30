@@ -23,8 +23,8 @@ export const contentCache = {
         Array.isArray(parsed.stars) &&
         Array.isArray(parsed.artworks)
       ) {
-        // If cached locations is empty or missing, invalidate cache so fresh data is fetched
-        if (!Array.isArray(parsed.locations) || parsed.locations.length === 0) {
+        // If cached locations is empty or missing newly added locations, invalidate cache so fresh data is fetched
+        if (!Array.isArray(parsed.locations) || parsed.locations.length < 19) {
           return null;
         }
 

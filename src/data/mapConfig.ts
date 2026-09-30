@@ -260,6 +260,32 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         destination: 'gallery-00',
       },
       {
+        id: 'location-prayer',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'نمازخانه (Prayer Room)',
+        locationId: 'location-prayer',
+        x: 287,
+        y: 495,
+        iconType: 'preset-location-prayer',
+        width: 32,
+        height: 32,
+        destination: 'gallery-00',
+      },
+      {
+        id: 'location-water',
+        type: 'icon',
+        galleryId: 'gallery-00',
+        title: 'آب آشامیدنی (Drinking Water)',
+        locationId: 'location-water',
+        x: 306,
+        y: 526,
+        iconType: 'preset-location-water',
+        width: 32,
+        height: 32,
+        destination: 'gallery-00',
+      },
+      {
         id: 'icon-g00-gallery-2',
         type: 'icon',
         galleryId: 'gallery-00',
@@ -1605,7 +1631,12 @@ export function getGalleryMapConfig(galleryId: string): GalleryMapConfig {
               if (existingIdx === -1) {
                 list.push({ ...defIcon, width: iconW, height: iconH });
               } else {
-                if (defIcon.id === 'icon-g00-library' || defIcon.id === 'icon-g00-cinema') {
+                if (
+                  defIcon.id === 'icon-g00-library' ||
+                  defIcon.id === 'icon-g00-cinema' ||
+                  defIcon.id === 'location-prayer' ||
+                  defIcon.id === 'location-water'
+                ) {
                   list[existingIdx].x = defIcon.x;
                   list[existingIdx].y = defIcon.y;
                   list[existingIdx].title = defIcon.title;

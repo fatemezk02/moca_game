@@ -17,6 +17,8 @@ export type LocationMarkerIconType =
   | 'door'
   | 'cinema'
   | 'gallery'
+  | 'prayer'
+  | 'water'
   | 'general';
 
 export interface LocationPointMarkerProps {
@@ -421,6 +423,103 @@ export const LocationPointMarker: React.FC<LocationPointMarkerProps> = ({
           </g>
         )}
 
+        {/* Inner Glyph: Praying / Du'a Hands (Palms Up in Supplication - 🤲) */}
+        {iconType === 'prayer' && (
+          <g id="glyph-prayer" className="pointer-events-none">
+            <svg
+              x={9.6}
+              y={7.1}
+              width={12.8}
+              height={12.8}
+              viewBox="0 0 100 100"
+              fill="#1e1b18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Left Hand: Open Palm in Supplication (30% wider / chunkier) */}
+              <path
+                d="M 47 70
+                   C 45 83, 34 89, 24 89
+                   C 14 89, 8 81, 7 70
+                   C 6 62, 4.5 53, 2.5 46
+                   C 1 40.5, 5 36, 9.5 39
+                   C 13 41.5, 15.5 46.5, 17 53
+                   C 17.5 50, 18 36, 18 25
+                   C 18 19, 25 19, 25 25
+                   L 25 43
+                   C 25 45.5, 26.5 45.5, 26.5 43
+                   L 26.5 17
+                   C 26.5 11, 34.5 11, 34.5 17
+                   L 34.5 43
+                   C 34.5 45.5, 36 45.5, 36 43
+                   L 36 21
+                   C 36 15.5, 43 15.5, 43 21
+                   L 43 45
+                   C 43 47.5, 44.5 47.5, 44.5 45
+                   L 44.5 29
+                   C 44.5 24, 50.5 24, 50.5 29
+                   C 50.5 42, 49.5 57, 48.5 65
+                   C 48 68, 47.5 69.5, 47 70
+                   Z"
+              />
+              {/* Right Hand: Mirrored Symmetrically */}
+              <g transform="translate(100, 0) scale(-1, 1)">
+                <path
+                  d="M 47 70
+                     C 45 83, 34 89, 24 89
+                     C 14 89, 8 81, 7 70
+                     C 6 62, 4.5 53, 2.5 46
+                     C 1 40.5, 5 36, 9.5 39
+                     C 13 41.5, 15.5 46.5, 17 53
+                     C 17.5 50, 18 36, 18 25
+                     C 18 19, 25 19, 25 25
+                     L 25 43
+                     C 25 45.5, 26.5 45.5, 26.5 43
+                     L 26.5 17
+                     C 26.5 11, 34.5 11, 34.5 17
+                     L 34.5 43
+                     C 34.5 45.5, 36 45.5, 36 43
+                     L 36 21
+                     C 36 15.5, 43 15.5, 43 21
+                     L 43 45
+                     C 43 47.5, 44.5 47.5, 44.5 45
+                     L 44.5 29
+                     C 44.5 24, 50.5 24, 50.5 29
+                     C 50.5 42, 49.5 57, 48.5 65
+                     C 48 68, 47.5 69.5, 47 70
+                     Z"
+                />
+              </g>
+            </svg>
+          </g>
+        )}
+
+        {/* Inner Glyph: Drinking Water / Glass of Water */}
+        {iconType === 'water' && (
+          <g id="glyph-water" className="pointer-events-none">
+            <svg
+              x={10.8}
+              y={8.2}
+              width={10.4}
+              height={10.4}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#1e1b18"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {/* Glass tumbler body with gentle blue tint */}
+              <path
+                d="M5.116 4.104A1 1 0 0 1 6.11 3h11.78a1 1 0 0 1 .994 1.105L17.19 20.21A2 2 0 0 1 15.2 22H8.8a2 2 0 0 1-2-1.79z"
+                fill="#38bdf8"
+                fillOpacity="0.25"
+              />
+              {/* Water surface wave */}
+              <path d="M6 12a5 5 0 0 1 6 0 5 5 0 0 0 6 0" stroke="#0284c7" strokeWidth="2.2" />
+            </svg>
+          </g>
+        )}
+
         {/* Fallback general glyph */}
         {iconType !== 'coffee' &&
           iconType !== 'shop' &&
@@ -434,7 +533,9 @@ export const LocationPointMarker: React.FC<LocationPointMarkerProps> = ({
           iconType !== 'entrance' &&
           iconType !== 'door' &&
           iconType !== 'cinema' &&
-          iconType !== 'gallery' && (
+          iconType !== 'gallery' &&
+          iconType !== 'prayer' &&
+          iconType !== 'water' && (
             <circle
               cx="16"
               cy="13.5"

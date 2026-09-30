@@ -946,6 +946,9 @@ class ContentService {
     return (val || '')
       .toLowerCase()
       .replace(/[\s_\-–—:\/\\()\[\]]/g, '')
+      .replace(/[آأإ]/g, 'ا')
+      .replace(/ي/g, 'ی')
+      .replace(/ك/g, 'ک')
       .replace(/[۰-۹]/g, (d) => String(['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'].indexOf(d)));
   }
 
@@ -1142,6 +1145,70 @@ class ContentService {
         'دستشویی',
         'سرویسبهداشتی',
         'سرویس بهداشتی'
+      );
+    }
+
+    // Location_18: Prayer Room (location-prayer)
+    if (
+      clean === 'location18' ||
+      clean === 'location_18' ||
+      clean === 'locationprayer' ||
+      clean === 'location_prayer' ||
+      clean === 'prayer' ||
+      clean.includes('prayer') ||
+      clean.includes('نماز')
+    ) {
+      aliases.push(
+        'location_18',
+        'location18',
+        'Location_18',
+        'location-prayer',
+        'location_prayer',
+        'locationprayer',
+        'prayer',
+        'prayer-room',
+        'icon-g00-prayer',
+        'preset-location-prayer',
+        'نمازخانه',
+        'نماز خانه',
+        'نماز'
+      );
+    }
+
+    // Location_19: Drinking Water (location-water)
+    if (
+      clean === 'location19' ||
+      clean === 'location_19' ||
+      clean === 'locationwater' ||
+      clean === 'location_water' ||
+      clean === 'water' ||
+      clean.includes('water') ||
+      clean.includes('drinking') ||
+      clean.includes('آب') ||
+      clean.includes('اب') ||
+      clean.includes('سقا')
+    ) {
+      aliases.push(
+        'location_19',
+        'location19',
+        'Location_19',
+        'location-water',
+        'location_water',
+        'locationwater',
+        'water',
+        'drinking-water',
+        'icon-g00-water',
+        'preset-location-water',
+        'آب آشامیدنی',
+        'آبآشامیدنی',
+        'آب اشامیدنی',
+        'اب اشامیدنی',
+        'اباشامیدنی',
+        'اب آشامیدنی',
+        'سقاخانه',
+        'سقا خانه',
+        'آب',
+        'اب'
       );
     }
 
