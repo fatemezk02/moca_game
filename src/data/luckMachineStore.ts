@@ -105,7 +105,7 @@ export const LUCK_PRIZES: LuckPrize[] = [
   },
   {
     id: 'prize_gallery03_stars',
-    name: 'باز شدن ستارههای گالری بعدی (گالری 03)',
+    name: 'باز شدن ستاره‌های گالری بعدی (گالری 03)',
     type: 'gallery03_stars',
     icon: '⭐',
   },
