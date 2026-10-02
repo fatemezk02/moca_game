@@ -58,6 +58,7 @@ import { markArrowUsed } from './data/arrowConditionsStore';
 import { motion, AnimatePresence } from 'motion/react';
 import { initGuideAudioBackgroundPrefetch, guideAudioManager } from './services/audio/guideAudioService';
 import { GlobalGuideAudioPlayer } from './components/GlobalGuideAudioPlayer';
+import { sessionAnalyticsService } from './services/analytics';
 
 export default function App() {
   const playerStats = usePlayerStats();
@@ -539,6 +540,7 @@ export default function App() {
   // Listen for full game reset event
   useEffect(() => {
     const handleGameReset = () => {
+      sessionAnalyticsService.handleGameReset();
       setUserProfile(null);
       setHasEnteredGallery02(false);
       setIsProfileModalOpen(false);
@@ -576,6 +578,22 @@ export default function App() {
       markGalleryReached(currentGallery);
     }
   }, [currentGallery]);
+
+  // Anonymous Game-Session Analytics Lifecycle
+  // Only start tracking when player actually starts playing (userProfile is present)
+  // Do NOT start tracking simply because React mounted (userProfile is null on welcome/profile creation page)
+  useEffect(() => {
+    if (userProfile) {
+      sessionAnalyticsService.startSession(currentGallery);
+    }
+  }, [userProfile]);
+
+  // Keep analytics updated with current gallery location
+  useEffect(() => {
+    if (userProfile && currentGallery) {
+      sessionAnalyticsService.updateGallery(currentGallery);
+    }
+  }, [userProfile, currentGallery]);
 
 
   // Load external game content (Questions, Stars, Artworks) on application startup

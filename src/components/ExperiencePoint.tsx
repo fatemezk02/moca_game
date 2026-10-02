@@ -209,7 +209,13 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
           >
             {isRightSide ? (
               /* Label projecting to the LEFT */
-              <div className="flex flex-col items-end pr-1 select-none group">
+              <div
+                style={{
+                  transform: 'scale(var(--experience-label-scale, 1.16))',
+                  transformOrigin: 'right center',
+                }}
+                className="flex flex-col items-end pr-1 select-none group"
+              >
                 {/* Horizontal line in line with the marker */}
                 <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -mr-1" />
 
@@ -225,7 +231,13 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
               </div>
             ) : (
               /* Label projecting to the RIGHT */
-              <div className="flex flex-col items-start pl-1 select-none group">
+              <div
+                style={{
+                  transform: 'scale(var(--experience-label-scale, 1.16))',
+                  transformOrigin: 'left center',
+                }}
+                className="flex flex-col items-start pl-1 select-none group"
+              >
                 {/* Horizontal line in line with the marker */}
                 <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -ml-1" />
 

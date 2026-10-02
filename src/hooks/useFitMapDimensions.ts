@@ -4,6 +4,9 @@ export interface MapDimensions {
   width: number;
   height: number;
   scale: number;
+  g4MessageScale?: number;
+  targetMessageScale?: number;
+  messageScaleBase?: number;
 }
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -17,7 +20,16 @@ function getInitialEstimatedDimensions(mapWidth: number, mapHeight: number): Map
   const scale = Math.min(availWidth / mapWidth, availHeight / mapHeight);
   const fittedWidth = Math.floor(mapWidth * scale * 10) / 10;
   const fittedHeight = Math.floor(mapHeight * scale * 10) / 10;
-  return { width: fittedWidth, height: fittedHeight, scale };
+
+  // Gallery 04 (498.55 x 851.79) standard message scale reference on this device:
+  const g4Scale = Math.min(availWidth / 498.55, availHeight / 851.79);
+  const g4FittedWidth = Math.floor(498.55 * g4Scale * 10) / 10;
+  const g4MessageScale = Number(((g4FittedWidth / 360) * 1.12).toFixed(4));
+  const targetMessageScale = Number((g4MessageScale * g4MessageScale).toFixed(4));
+  const currentPointScale = fittedWidth > 0 ? fittedWidth / 360 : 1;
+  const messageScaleBase = Number((targetMessageScale / currentPointScale).toFixed(4));
+
+  return { width: fittedWidth, height: fittedHeight, scale, g4MessageScale, targetMessageScale, messageScaleBase };
 }
 
 /**
@@ -66,16 +78,27 @@ export function useFitMapDimensions(
     const fittedWidth = Math.floor(mapWidth * scale * 10) / 10;
     const fittedHeight = Math.floor(mapHeight * scale * 10) / 10;
 
+    // Gallery 04 (498.55 x 851.79) standard message scale reference on this device:
+    const g4Scale = Math.min(availWidth / 498.55, availHeight / 851.79);
+    const g4FittedWidth = Math.floor(498.55 * g4Scale * 10) / 10;
+    const g4MessageScale = Number(((g4FittedWidth / 360) * 1.12).toFixed(4));
+    const targetMessageScale = Number((g4MessageScale * g4MessageScale).toFixed(4));
+    const currentPointScale = fittedWidth > 0 ? fittedWidth / 360 : 1;
+    const messageScaleBase = Number((targetMessageScale / currentPointScale).toFixed(4));
+
     setDimensions((prev) => {
       if (
         prev &&
         Math.abs(prev.width - fittedWidth) < 0.5 &&
         Math.abs(prev.height - fittedHeight) < 0.5 &&
-        Math.abs(prev.scale - scale) < 0.001
+        Math.abs(prev.scale - scale) < 0.001 &&
+        Math.abs((prev.g4MessageScale || 0) - g4MessageScale) < 0.001 &&
+        Math.abs((prev.targetMessageScale || 0) - targetMessageScale) < 0.001 &&
+        Math.abs((prev.messageScaleBase || 0) - messageScaleBase) < 0.001
       ) {
         return prev;
       }
-      return { width: fittedWidth, height: fittedHeight, scale };
+      return { width: fittedWidth, height: fittedHeight, scale, g4MessageScale, targetMessageScale, messageScaleBase };
     });
   }, [mapWidth, mapHeight]);
 
