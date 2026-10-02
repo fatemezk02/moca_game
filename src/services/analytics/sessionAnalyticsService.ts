@@ -7,6 +7,9 @@
  * - Active play time tracked strictly when document.visibilityState === "visible".
  * - Heartbeat sent every 30 seconds of active visibility.
  * - Canonical gallery IDs (01 to 08).
+ * - Visited galleries list (canonical IDs in order of first entry, no duplicates).
+ * - Answered puzzles list (stable puzzle IDs, no duplicates).
+ * - Answered stars list (stable star IDs, no duplicates).
  * - Simple device category (mobile, tablet, desktop).
  * - Non-blocking asynchronous network requests with sendBeacon on session end.
  * - No personal data, quiz answers, or game secrets collected.
@@ -19,6 +22,9 @@ const APPS_SCRIPT_ENDPOINT =
 
 const PLAYER_ID_STORAGE_KEY = 'museum_analytics_player_id';
 const SESSION_ID_STORAGE_KEY = 'museum_analytics_session_id';
+const VISITED_GALLERIES_STORAGE_KEY = 'museum_analytics_visited_galleries';
+const ANSWERED_PUZZLES_STORAGE_KEY = 'museum_analytics_answered_puzzles';
+const ANSWERED_STARS_STORAGE_KEY = 'museum_analytics_answered_stars';
 
 export type DeviceCategory = 'mobile' | 'tablet' | 'desktop';
 export type CanonicalGalleryId = '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08';
@@ -32,6 +38,9 @@ export interface AnalyticsPayload {
   active_seconds: number;
   last_gallery: CanonicalGalleryId;
   device: DeviceCategory;
+  visited_galleries: CanonicalGalleryId[];
+  answered_puzzles: string[];
+  answered_stars: string[];
 }
 
 /**
@@ -216,6 +225,11 @@ class SessionAnalyticsService {
   private isSessionActive: boolean = false;
   private currentGallery: string = 'gallery-01';
 
+  // Visited galleries & answered questions state
+  private visitedGalleries: CanonicalGalleryId[] = [];
+  private answeredPuzzles: string[] = [];
+  private answeredStars: string[] = [];
+
   // Active time tracking
   private accumulatedActiveSeconds: number = 0;
   private visibleStartTime: number | null = null;
@@ -230,13 +244,14 @@ class SessionAnalyticsService {
   }
 
   /**
-   * Initialize window listeners and player ID
+   * Initialize window listeners, player ID, and restore session lists
    */
   public init(): void {
     if (this.isInitialized || typeof window === 'undefined') return;
     this.isInitialized = true;
 
     this.playerId = getOrCreatePlayerId();
+    this.loadPersistedSessionData();
 
     // Listen for Page Visibility API changes
     document.addEventListener('visibilitychange', () => {
@@ -264,6 +279,22 @@ class SessionAnalyticsService {
       }
     });
 
+    // Listen for puzzle answered events
+    window.addEventListener('museum_puzzle_answered', (e: any) => {
+      const pid = e?.detail?.puzzleId || e?.detail?.puzzlePointId;
+      if (pid) {
+        this.recordAnsweredPuzzle(pid);
+      }
+    });
+
+    // Listen for star answered events
+    window.addEventListener('museum_star_answered', (e: any) => {
+      const sid = e?.detail?.starId || e?.detail?.starPointId;
+      if (sid) {
+        this.recordAnsweredStar(sid);
+      }
+    });
+
     // Listen for full game reset
     window.addEventListener('museum_game_fully_reset', () => {
       this.handleGameReset();
@@ -271,11 +302,126 @@ class SessionAnalyticsService {
   }
 
   /**
+   * Loads persisted lists from sessionStorage so they survive refreshes and navigation
+   */
+  private loadPersistedSessionData(): void {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        const savedVisited = sessionStorage.getItem(VISITED_GALLERIES_STORAGE_KEY);
+        if (savedVisited) {
+          const parsed = JSON.parse(savedVisited);
+          if (Array.isArray(parsed)) {
+            this.visitedGalleries = parsed;
+          }
+        }
+
+        const savedPuzzles = sessionStorage.getItem(ANSWERED_PUZZLES_STORAGE_KEY);
+        if (savedPuzzles) {
+          const parsed = JSON.parse(savedPuzzles);
+          if (Array.isArray(parsed)) {
+            this.answeredPuzzles = parsed;
+          }
+        }
+
+        const savedStars = sessionStorage.getItem(ANSWERED_STARS_STORAGE_KEY);
+        if (savedStars) {
+          const parsed = JSON.parse(savedStars);
+          if (Array.isArray(parsed)) {
+            this.answeredStars = parsed;
+          }
+        }
+      }
+    } catch {
+      // Safe fallback
+    }
+  }
+
+  /**
+   * Persists session lists locally to survive rerenders, unmounts, and reloads
+   */
+  private persistSessionData(): void {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem(
+          VISITED_GALLERIES_STORAGE_KEY,
+          JSON.stringify(this.visitedGalleries)
+        );
+        sessionStorage.setItem(
+          ANSWERED_PUZZLES_STORAGE_KEY,
+          JSON.stringify(this.answeredPuzzles)
+        );
+        sessionStorage.setItem(
+          ANSWERED_STARS_STORAGE_KEY,
+          JSON.stringify(this.answeredStars)
+        );
+      }
+    } catch {
+      // Safe fallback
+    }
+  }
+
+  /**
+   * Records a gallery visit.
+   * Adds the current canonical gallery_id to visited_galleries without duplicates, preserving order.
+   * Valid canonical IDs: 01, 02, 03, 04, 05, 06, 07, 08.
+   */
+  public recordVisitedGallery(rawGalleryId?: string | null): void {
+    if (!rawGalleryId) return;
+    const target = rawGalleryId.trim().toLowerCase();
+
+    // Map/lobby is not one of the exhibition galleries (01-08)
+    if (target === 'gallery-00' || target === 'gallery_00' || target === 'main-map') {
+      return;
+    }
+
+    const canonicalId = getCanonicalGalleryId(rawGalleryId);
+    if (canonicalId && !this.visitedGalleries.includes(canonicalId)) {
+      this.visitedGalleries.push(canonicalId);
+      this.persistSessionData();
+    }
+  }
+
+  /**
+   * Records an answered puzzle question.
+   * Adds that Puzzle's stable ID to answered_puzzles without duplicates.
+   */
+  public recordAnsweredPuzzle(puzzleId?: string | null): void {
+    if (!puzzleId || typeof puzzleId !== 'string') return;
+    const cleanId = puzzleId.trim();
+    if (!cleanId) return;
+
+    if (!this.answeredPuzzles.includes(cleanId)) {
+      this.answeredPuzzles.push(cleanId);
+      this.persistSessionData();
+    }
+  }
+
+  /**
+   * Records an answered star question.
+   * Adds that Star's stable ID to answered_stars without duplicates.
+   */
+  public recordAnsweredStar(starId?: string | null): void {
+    if (!starId || typeof starId !== 'string') return;
+    const cleanId = starId.trim();
+    if (!cleanId) return;
+
+    if (!this.answeredStars.includes(cleanId)) {
+      this.answeredStars.push(cleanId);
+      this.persistSessionData();
+    }
+  }
+
+  /**
    * Starts a new game session.
    * Only called when the player is actually in the game (not on profile creation page).
    */
   public startSession(initialGallery?: string): void {
-    if (this.isSessionActive) return;
+    if (this.isSessionActive) {
+      if (initialGallery) {
+        this.updateGallery(initialGallery);
+      }
+      return;
+    }
 
     if (!this.playerId) {
       this.playerId = getOrCreatePlayerId();
@@ -288,6 +434,9 @@ class SessionAnalyticsService {
 
     if (initialGallery) {
       this.currentGallery = initialGallery;
+      this.recordVisitedGallery(initialGallery);
+    } else {
+      this.recordVisitedGallery(this.currentGallery);
     }
 
     if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
@@ -304,11 +453,12 @@ class SessionAnalyticsService {
   }
 
   /**
-   * Updates the tracked gallery whenever player moves
+   * Updates the tracked gallery whenever player moves between galleries
    */
   public updateGallery(galleryId: string): void {
     if (!galleryId) return;
     this.currentGallery = galleryId;
+    this.recordVisitedGallery(galleryId);
   }
 
   /**
@@ -317,7 +467,7 @@ class SessionAnalyticsService {
   public endSession(): void {
     if (!this.isSessionActive) return;
 
-    // Send end beacon
+    // Send end beacon with final metrics
     this.sendPayload('end', true);
 
     this.stopTicker();
@@ -330,14 +480,21 @@ class SessionAnalyticsService {
 
   /**
    * Handles game reset ("Reset Game / Start New Game")
-   * Ends previous session, clears session_id, preserves player_id.
+   * Ends previous session, clears session_id and session lists, preserves player_id.
    */
   public handleGameReset(): void {
     this.endSession();
-    // Prepare a new session ID for when the player starts playing again
+    this.visitedGalleries = [];
+    this.answeredPuzzles = [];
+    this.answeredStars = [];
+
+    // Clear session storage records for the fresh game
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         sessionStorage.removeItem(SESSION_ID_STORAGE_KEY);
+        sessionStorage.removeItem(VISITED_GALLERIES_STORAGE_KEY);
+        sessionStorage.removeItem(ANSWERED_PUZZLES_STORAGE_KEY);
+        sessionStorage.removeItem(ANSWERED_STARS_STORAGE_KEY);
       }
     } catch {}
   }
@@ -372,6 +529,27 @@ class SessionAnalyticsService {
       this.playerId = getOrCreatePlayerId();
     }
     return this.playerId;
+  }
+
+  /**
+   * Returns current visited galleries list (01 to 08)
+   */
+  public getVisitedGalleries(): CanonicalGalleryId[] {
+    return [...this.visitedGalleries];
+  }
+
+  /**
+   * Returns answered puzzles list
+   */
+  public getAnsweredPuzzles(): string[] {
+    return [...this.answeredPuzzles];
+  }
+
+  /**
+   * Returns answered stars list
+   */
+  public getAnsweredStars(): string[] {
+    return [...this.answeredStars];
   }
 
   /**
@@ -442,6 +620,9 @@ class SessionAnalyticsService {
       active_seconds: this.getActiveSeconds(),
       last_gallery: getCanonicalGalleryId(this.currentGallery),
       device: getDeviceCategory(),
+      visited_galleries: [...this.visitedGalleries],
+      answered_puzzles: [...this.answeredPuzzles],
+      answered_stars: [...this.answeredStars],
     };
 
     // Try sendBeacon first if requested (ideal for 'end' during visibility hidden / page unload)
@@ -481,3 +662,7 @@ class SessionAnalyticsService {
 }
 
 export const sessionAnalyticsService = new SessionAnalyticsService();
+
+if (typeof window !== 'undefined') {
+  (window as any).__SESSION_ANALYTICS__ = sessionAnalyticsService;
+}

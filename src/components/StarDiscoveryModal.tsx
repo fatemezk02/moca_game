@@ -28,6 +28,7 @@ import { contentService } from '../services/content/contentService';
 import { toPersianDigits, formatTwoDigitPersian } from '../services/content/mappers';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { deductCoins } from '../data/questionProgressStore';
+import { sessionAnalyticsService } from '../services/analytics';
 import { ArtworkFrame } from './ArtworkFrame';
 
 export interface StarDiscoveryModalProps {
@@ -236,6 +237,12 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
   // Handle user answering the question
   const handleSelectQuestionOption = (idx: number) => {
     if (isAnswering || phase !== 'question') return;
+
+    // Record the answered star ID anonymously for game analytics (correct or incorrect)
+    const resolvedStarId = discoveryData?.starId || discoveryData?.id || effectiveStarId || '';
+    if (resolvedStarId) {
+      sessionAnalyticsService.recordAnsweredStar(resolvedStarId);
+    }
 
     setSelectedOption(idx);
     const correctIdx = discoveryData.question.correctIndex;

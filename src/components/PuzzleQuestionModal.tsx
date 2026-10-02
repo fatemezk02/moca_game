@@ -27,6 +27,7 @@ import {
 } from '../data/puzzleProgressStore';
 import { deductCoins } from '../data/questionProgressStore';
 import { markQuestionAnswered } from '../data/arrowConditionsStore';
+import { sessionAnalyticsService } from '../services/analytics';
 import { contentService } from '../services/content/contentService';
 import { formatTwoDigitPersian, normalizeGalleryId, toPersianDigits } from '../services/content/mappers';
 import { usePlayerStats } from '../hooks/usePlayerStats';
@@ -262,6 +263,12 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
 
   const handleSelectOption = (index: number) => {
     if (isAnswering || viewMode !== 'question' || !questionData) return;
+
+    // Record the answered puzzle ID anonymously for game analytics (correct or incorrect)
+    const stablePuzzleId = puzzlePoint.id || puzzlePoint.questionId || puzzlePoint.puzzlePieceId || '';
+    if (stablePuzzleId) {
+      sessionAnalyticsService.recordAnsweredPuzzle(stablePuzzleId);
+    }
 
     setSelectedOption(index);
     const correctIdx = questionData.correctIndex;
