@@ -58,6 +58,7 @@ import { markArrowUsed } from './data/arrowConditionsStore';
 import { motion, AnimatePresence } from 'motion/react';
 import { initGuideAudioBackgroundPrefetch, guideAudioManager } from './services/audio/guideAudioService';
 import { GlobalGuideAudioPlayer } from './components/GlobalGuideAudioPlayer';
+import { sessionAnalytics } from './services/analytics/sessionAnalyticsService';
 
 export default function App() {
   const playerStats = usePlayerStats();
@@ -539,6 +540,7 @@ export default function App() {
   // Listen for full game reset event
   useEffect(() => {
     const handleGameReset = () => {
+      sessionAnalytics.endSessionAndReset();
       setUserProfile(null);
       setHasEnteredGallery02(false);
       setIsProfileModalOpen(false);
@@ -557,6 +559,18 @@ export default function App() {
     window.addEventListener('museum_game_fully_reset', handleGameReset);
     return () => window.removeEventListener('museum_game_fully_reset', handleGameReset);
   }, []);
+
+  // Anonymous game-session analytics: start session when the player actually starts playing
+  useEffect(() => {
+    if (userProfile) {
+      sessionAnalytics.startSession(currentGallery);
+    }
+  }, [userProfile]);
+
+  // Sync current gallery with session analytics
+  useEffect(() => {
+    sessionAnalytics.setCurrentGallery(currentGallery);
+  }, [currentGallery]);
 
   // One-time automatic reset triggered by user request
   useEffect(() => {

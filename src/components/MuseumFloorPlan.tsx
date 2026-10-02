@@ -340,7 +340,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
   };
 
   // Helper to resolve standard Location Pin labels
-  const getLocationPinLabel = (point: { id?: string; iconType?: string; title?: string; galleryNumber?: number | string }): string => {
+  const getLocationPinLabel = (point: { id?: string; iconType?: string; title?: string; galleryNumber?: number | string; locationId?: string }): string => {
     const iconType = point.iconType || '';
     const id = (point.id || '').toLowerCase();
     const title = (point.title || '').toLowerCase();

@@ -301,6 +301,18 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
             ['--map-point-scale' as any]: dimensions
               ? (dimensions.width / 360).toFixed(4)
               : '1',
+            ['--g4-message-scale' as any]: dimensions?.g4MessageScale
+              ? dimensions.g4MessageScale.toFixed(4)
+              : '1.16',
+            ['--target-message-scale' as any]: dimensions?.targetMessageScale
+              ? dimensions.targetMessageScale.toFixed(4)
+              : '1.3456',
+            ['--star-label-scale-base' as any]: dimensions?.messageScaleBase
+              ? dimensions.messageScaleBase.toFixed(4)
+              : '1.16',
+            ['--experience-label-scale' as any]: dimensions?.messageScaleBase
+              ? dimensions.messageScaleBase.toFixed(4)
+              : '1.16',
           }}
           className="relative mx-auto flex items-center justify-center shrink-0 select-none overflow-visible"
         >
