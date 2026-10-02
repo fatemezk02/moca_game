@@ -16,7 +16,6 @@ export interface StarLabelProps {
   isRightSide?: boolean;
   leftPercent?: number;
   onClick?: (e: React.MouseEvent) => void;
-  scaleFactor?: number;
 }
 
 export const StarLabel: React.FC<StarLabelProps> = ({
@@ -27,13 +26,7 @@ export const StarLabel: React.FC<StarLabelProps> = ({
   isRightSide = false,
   leftPercent = 50,
   onClick,
-  scaleFactor = 1,
 }) => {
-  const labelScale =
-    scaleFactor !== 1
-      ? `scale(calc(var(--star-label-scale-base, var(--experience-label-scale, 1.16)) / ${scaleFactor}))`
-      : 'scale(var(--star-label-scale-base, var(--experience-label-scale, 1.16)))';
-
   return (
     <AnimatePresence>
       {isOpen && !!labelText && (
@@ -51,13 +44,7 @@ export const StarLabel: React.FC<StarLabelProps> = ({
             onClick={onClick}
             className="absolute top-full left-1/2 -translate-x-1/2 z-[70] pointer-events-auto cursor-pointer"
           >
-            <div
-              style={{
-                transform: labelScale,
-                transformOrigin: 'top center',
-              }}
-              className="flex flex-col items-center select-none group"
-            >
+            <div className="flex flex-col items-center select-none group">
               {/* Collection/lamp-style badge container: identical style to star label directly below icon */}
               <div
                 style={{
@@ -87,13 +74,7 @@ export const StarLabel: React.FC<StarLabelProps> = ({
           >
             {isRightSide ? (
               /* Label projecting to the LEFT */
-              <div
-                style={{
-                  transform: labelScale,
-                  transformOrigin: 'right center',
-                }}
-                className="flex flex-col items-end pr-1 select-none group"
-              >
+              <div className="flex flex-col items-end pr-1 select-none group">
                 {/* Horizontal line in line with the star */}
                 <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -mr-1" />
 
@@ -109,13 +90,7 @@ export const StarLabel: React.FC<StarLabelProps> = ({
               </div>
             ) : (
               /* Label projecting to the RIGHT */
-              <div
-                style={{
-                  transform: labelScale,
-                  transformOrigin: 'left center',
-                }}
-                className="flex flex-col items-start pl-1 select-none group"
-              >
+              <div className="flex flex-col items-start pl-1 select-none group">
                 {/* Horizontal line in line with the star */}
                 <div className="h-[2px] bg-[#1e1b18] w-6 sm:w-8 -ml-1" />
 
@@ -284,7 +259,6 @@ export const StarPoint: React.FC<StarPointProps> = ({
         transform: transformStyle,
         transformOrigin: 'center center',
         zIndex: isLabelOpen || isSelected ? 60 : 30,
-        ['--current-parent-scale' as any]: effectiveScale,
       }}
       className={`absolute pointer-events-auto ${
         isLabelOpen || isSelected ? 'z-[60]' : 'z-30'
@@ -320,7 +294,6 @@ export const StarPoint: React.FC<StarPointProps> = ({
         isRightSide={isRightSide}
         leftPercent={leftPercent}
         onClick={handleLabelClick}
-        scaleFactor={effectiveScale}
       />
     </div>
   );
