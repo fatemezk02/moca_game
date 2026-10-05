@@ -134,6 +134,11 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
   const leftPercent = (x / mapWidth) * 100;
   const topPercent = (y / mapHeight) * 100;
   const isRightSide = x > mapWidth / 2;
+  const isGallery01 = galleryId === 'gallery-01' || galleryId === 'gallery_01';
+  const isGallery02 = galleryId === 'gallery-02' || galleryId === 'gallery_02';
+  const mapShift = isGallery01 ? 6 : (isGallery02 ? 2.2 : 0);
+  const effectiveLeft = Math.max(15, Math.min(85, leftPercent + mapShift));
+  const effectiveRight = Math.max(15, Math.min(85, 100 - effectiveLeft));
 
   const handleMarkerClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -222,7 +227,7 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
                 {/* Collection/lamp-style badge container: content-based width with dynamic boundary limit */}
                 <div
                   style={{
-                    maxWidth: `min(290px, calc(${Math.max(15, leftPercent - 2)}vw - 16px))`,
+                    maxWidth: `min(290px, max(90px, calc((${effectiveLeft}vw - 32px) / 1.16)))`,
                   }}
                   className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
                 >
@@ -244,7 +249,7 @@ export const ExperiencePoint: React.FC<ExperiencePointProps> = ({
                 {/* Collection/lamp-style badge container: content-based width with dynamic boundary limit */}
                 <div
                   style={{
-                    maxWidth: `min(290px, calc(${Math.max(15, 100 - leftPercent - 2)}vw - 16px))`,
+                    maxWidth: `min(290px, max(90px, calc((${effectiveRight}vw - 32px) / 1.16)))`,
                   }}
                   className="mt-1 bg-[#ffffff] text-[#1e1b18] group-hover:bg-[#fef3c7] border-1.5 border-[#1e1b18] shadow-[1.5px_1.5px_0px_#1e1b18] rounded-md px-2 py-0.5 font-sans-custom text-[11px] font-black tracking-tight transition-all duration-200 flex items-center gap-1.5 w-max text-right opacity-90 group-hover:opacity-100"
                 >

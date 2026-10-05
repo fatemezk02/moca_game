@@ -264,7 +264,7 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
   const handleSelectOption = (index: number) => {
     if (isAnswering || viewMode !== 'question' || !questionData) return;
 
-    // Record the answered puzzle ID anonymously for game analytics (correct or incorrect)
+    // Real stable Puzzle ID from the actual puzzle object
     const stablePuzzleId = puzzlePoint.id || puzzlePoint.questionId || puzzlePoint.puzzlePieceId || '';
     if (stablePuzzleId) {
       sessionAnalyticsService.recordAnsweredPuzzle(stablePuzzleId);

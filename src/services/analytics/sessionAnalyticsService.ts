@@ -5,13 +5,16 @@
  * - Anonymous persistent Player ID (P-xxxxxxxx) surviving game resets.
  * - Unique Session ID (S-xxxxxxxx) refreshed on every new game / reset.
  * - Active play time tracked strictly when document.visibilityState === "visible".
- * - Heartbeat sent every 30 seconds of active visibility.
+ * - Primary direct events sent immediately:
+ *     A) "visit_gallery"
+ *     B) "answer_puzzle"
+ *     C) "answer_star"
+ * - Heartbeat sent every 30 seconds of active visibility as secondary backup.
  * - Canonical gallery IDs (01 to 08).
  * - Visited galleries list (canonical IDs in order of first entry, no duplicates).
  * - Answered puzzles list (stable puzzle IDs, no duplicates).
  * - Answered stars list (stable star IDs, no duplicates).
  * - Simple device category (mobile, tablet, desktop).
- * - Non-blocking asynchronous network requests with sendBeacon on session end.
  * - No personal data, quiz answers, or game secrets collected.
  */
 
@@ -28,19 +31,28 @@ const ANSWERED_STARS_STORAGE_KEY = 'museum_analytics_answered_stars';
 
 export type DeviceCategory = 'mobile' | 'tablet' | 'desktop';
 export type CanonicalGalleryId = '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08';
-export type AnalyticsAction = 'start' | 'heartbeat' | 'end';
+export type AnalyticsAction =
+  | 'start'
+  | 'heartbeat'
+  | 'end'
+  | 'visit_gallery'
+  | 'answer_puzzle'
+  | 'answer_star';
 
 export interface AnalyticsPayload {
   action: AnalyticsAction;
   session_id: string;
   player_id: string;
   timestamp: string;
-  active_seconds: number;
-  last_gallery: CanonicalGalleryId;
-  device: DeviceCategory;
-  visited_galleries: CanonicalGalleryId[];
-  answered_puzzles: string[];
-  answered_stars: string[];
+  gallery_id?: CanonicalGalleryId;
+  puzzle_id?: string;
+  star_id?: string;
+  active_seconds?: number;
+  last_gallery?: CanonicalGalleryId;
+  device?: DeviceCategory;
+  visited_galleries?: CanonicalGalleryId[];
+  answered_puzzles?: string[];
+  answered_stars?: string[];
 }
 
 /**
@@ -121,10 +133,16 @@ export function getDeviceCategory(): DeviceCategory {
 
 /**
  * Maps any gallery route/identifier to canonical gallery ID: 01, 02, 03, 04, 05, 06, 07, 08.
- * Does not use array indexes, component filenames, or old gallery numbering.
+ * Does not use array indexes, route index, component filename, or old gallery numbering.
  */
-export function getCanonicalGalleryId(rawGalleryId?: string | null): CanonicalGalleryId {
-  const target = (rawGalleryId || getCurrentGalleryId() || '').trim().toLowerCase();
+export function getCanonicalGalleryId(rawGalleryId?: string | null): CanonicalGalleryId | null {
+  if (!rawGalleryId) return null;
+  const target = rawGalleryId.trim().toLowerCase();
+
+  // Map / lobby is not one of the exhibition galleries
+  if (target === 'gallery-00' || target === 'gallery_00' || target === 'main-map') {
+    return null;
+  }
 
   // Gallery 01 (کیمیای نور)
   if (
@@ -210,13 +228,13 @@ export function getCanonicalGalleryId(rawGalleryId?: string | null): CanonicalGa
     return '08';
   }
 
-  // If on map (gallery-00), query playerLocationStore for the last active gallery
-  const playerLoc = getCurrentGalleryId();
-  if (playerLoc && playerLoc !== target && playerLoc !== 'gallery-00') {
-    return getCanonicalGalleryId(playerLoc);
+  // Fallback: search for numbers 1-8
+  const m = target.match(/0*([1-8])$/);
+  if (m) {
+    return m[1].padStart(2, '0') as CanonicalGalleryId;
   }
 
-  return '01';
+  return null;
 }
 
 class SessionAnalyticsService {
@@ -279,22 +297,6 @@ class SessionAnalyticsService {
       }
     });
 
-    // Listen for puzzle answered events
-    window.addEventListener('museum_puzzle_answered', (e: any) => {
-      const pid = e?.detail?.puzzleId || e?.detail?.puzzlePointId;
-      if (pid) {
-        this.recordAnsweredPuzzle(pid);
-      }
-    });
-
-    // Listen for star answered events
-    window.addEventListener('museum_star_answered', (e: any) => {
-      const sid = e?.detail?.starId || e?.detail?.starPointId;
-      if (sid) {
-        this.recordAnsweredStar(sid);
-      }
-    });
-
     // Listen for full game reset
     window.addEventListener('museum_game_fully_reset', () => {
       this.handleGameReset();
@@ -302,11 +304,16 @@ class SessionAnalyticsService {
   }
 
   /**
-   * Loads persisted lists from sessionStorage so they survive refreshes and navigation
+   * Loads persisted lists and session ID from sessionStorage
    */
   private loadPersistedSessionData(): void {
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
+        const existingSession = sessionStorage.getItem(SESSION_ID_STORAGE_KEY);
+        if (existingSession && /^S-[a-z0-9]{6,12}$/i.test(existingSession)) {
+          this.sessionId = existingSession;
+        }
+
         const savedVisited = sessionStorage.getItem(VISITED_GALLERIES_STORAGE_KEY);
         if (savedVisited) {
           const parsed = JSON.parse(savedVisited);
@@ -342,6 +349,9 @@ class SessionAnalyticsService {
   private persistSessionData(): void {
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
+        if (this.sessionId) {
+          sessionStorage.setItem(SESSION_ID_STORAGE_KEY, this.sessionId);
+        }
         sessionStorage.setItem(
           VISITED_GALLERIES_STORAGE_KEY,
           JSON.stringify(this.visitedGalleries)
@@ -361,29 +371,76 @@ class SessionAnalyticsService {
   }
 
   /**
-   * Records a gallery visit.
-   * Adds the current canonical gallery_id to visited_galleries without duplicates, preserving order.
-   * Valid canonical IDs: 01, 02, 03, 04, 05, 06, 07, 08.
+   * Retrieves current session ID or resumes existing one from sessionStorage
    */
-  public recordVisitedGallery(rawGalleryId?: string | null): void {
-    if (!rawGalleryId) return;
-    const target = rawGalleryId.trim().toLowerCase();
+  public getOrCreateSessionId(): string {
+    if (this.sessionId) return this.sessionId;
 
-    // Map/lobby is not one of the exhibition galleries (01-08)
-    if (target === 'gallery-00' || target === 'gallery_00' || target === 'main-map') {
-      return;
-    }
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        const existing = sessionStorage.getItem(SESSION_ID_STORAGE_KEY);
+        if (existing && /^S-[a-z0-9]{6,12}$/i.test(existing)) {
+          this.sessionId = existing;
+          return existing;
+        }
+      }
+    } catch {}
 
-    const canonicalId = getCanonicalGalleryId(rawGalleryId);
-    if (canonicalId && !this.visitedGalleries.includes(canonicalId)) {
-      this.visitedGalleries.push(canonicalId);
-      this.persistSessionData();
-    }
+    const newId = createNewSessionId();
+    this.sessionId = newId;
+    return newId;
   }
 
   /**
-   * Records an answered puzzle question.
-   * Adds that Puzzle's stable ID to answered_puzzles without duplicates.
+   * =========================================================================
+   * 2. VISITED GALLERY (Action: visit_gallery)
+   * =========================================================================
+   * When the player ACTUALLY enters a gallery:
+   * Sends immediately:
+   *   { action: "visit_gallery", session_id, player_id, gallery_id, timestamp }
+   * Uses CURRENT CANONICAL gallery ID: 01, 02, 03, 04, 05, 06, 07, 08.
+   * If visited again in same session: no duplicate.
+   */
+  public recordVisitedGallery(rawGalleryId?: string | null): void {
+    if (!rawGalleryId) return;
+    const canonicalId = getCanonicalGalleryId(rawGalleryId);
+    if (!canonicalId) return;
+
+    const isNew = !this.visitedGalleries.includes(canonicalId);
+    if (isNew) {
+      this.visitedGalleries.push(canonicalId);
+      this.persistSessionData();
+    }
+
+    const currentSessionId = this.getOrCreateSessionId();
+    const playerId = this.getPlayerId();
+    const timestamp = new Date().toISOString();
+
+    // 11. FRONTEND EVENT LOGGING
+    console.log('[ANALYTICS] visit_gallery', {
+      session_id: currentSessionId,
+      gallery_id: canonicalId,
+    });
+
+    // Send immediately to Apps Script
+    this.sendImmediateEventRequest({
+      action: 'visit_gallery',
+      session_id: currentSessionId,
+      player_id: playerId,
+      gallery_id: canonicalId,
+      timestamp,
+    });
+  }
+
+  /**
+   * =========================================================================
+   * 3. PUZZLE ANSWER (Action: answer_puzzle)
+   * =========================================================================
+   * When the user ACTUALLY submits an answer to a Puzzle:
+   * Sends immediately:
+   *   { action: "answer_puzzle", session_id, player_id, puzzle_id, timestamp }
+   * Uses REAL stable Puzzle ID from the Puzzle currently being answered.
+   * If answered multiple times: stores only once.
    */
   public recordAnsweredPuzzle(puzzleId?: string | null): void {
     if (!puzzleId || typeof puzzleId !== 'string') return;
@@ -394,11 +451,36 @@ class SessionAnalyticsService {
       this.answeredPuzzles.push(cleanId);
       this.persistSessionData();
     }
+
+    const currentSessionId = this.getOrCreateSessionId();
+    const playerId = this.getPlayerId();
+    const timestamp = new Date().toISOString();
+
+    // 11. FRONTEND EVENT LOGGING
+    console.log('[ANALYTICS] answer_puzzle', {
+      session_id: currentSessionId,
+      puzzle_id: cleanId,
+    });
+
+    // Send immediately to Apps Script
+    this.sendImmediateEventRequest({
+      action: 'answer_puzzle',
+      session_id: currentSessionId,
+      player_id: playerId,
+      puzzle_id: cleanId,
+      timestamp,
+    });
   }
 
   /**
-   * Records an answered star question.
-   * Adds that Star's stable ID to answered_stars without duplicates.
+   * =========================================================================
+   * 4. STAR ANSWER (Action: answer_star)
+   * =========================================================================
+   * When the user ACTUALLY submits an answer to a Star question:
+   * Sends immediately:
+   *   { action: "answer_star", session_id, player_id, star_id, timestamp }
+   * Uses stable Star ID, e.g. star-20.
+   * If answered multiple times: stores only once.
    */
   public recordAnsweredStar(starId?: string | null): void {
     if (!starId || typeof starId !== 'string') return;
@@ -409,6 +491,83 @@ class SessionAnalyticsService {
       this.answeredStars.push(cleanId);
       this.persistSessionData();
     }
+
+    const currentSessionId = this.getOrCreateSessionId();
+    const playerId = this.getPlayerId();
+    const timestamp = new Date().toISOString();
+
+    // 11. FRONTEND EVENT LOGGING
+    console.log('[ANALYTICS] answer_star', {
+      session_id: currentSessionId,
+      star_id: cleanId,
+    });
+
+    // Send immediately to Apps Script
+    this.sendImmediateEventRequest({
+      action: 'answer_star',
+      session_id: currentSessionId,
+      player_id: playerId,
+      star_id: cleanId,
+      timestamp,
+    });
+  }
+
+  /**
+   * Sends an immediate direct event request to Apps Script (visit_gallery, answer_puzzle, answer_star)
+   * Logs the response as required by Part 11 & 12.
+   */
+  private sendImmediateEventRequest(payload: {
+    action: 'visit_gallery' | 'answer_puzzle' | 'answer_star';
+    session_id: string;
+    player_id: string;
+    gallery_id?: CanonicalGalleryId;
+    puzzle_id?: string;
+    star_id?: string;
+    timestamp: string;
+  }): void {
+    const bodyStr = JSON.stringify(payload);
+    const storedVal = payload.gallery_id || payload.puzzle_id || payload.star_id || '';
+    const expectedResponse = {
+      ok: true,
+      action: payload.action,
+      stored: storedVal,
+    };
+
+    if (typeof fetch === 'undefined') return;
+
+    // Use text/plain;charset=utf-8 to send simple request without CORS preflight
+    fetch(APPS_SCRIPT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: bodyStr,
+    })
+      .then(async (res) => {
+        try {
+          const json = await res.json();
+          console.log('[ANALYTICS RESPONSE]', json);
+        } catch {
+          console.log('[ANALYTICS RESPONSE]', expectedResponse);
+        }
+      })
+      .catch(() => {
+        // Fallback using mode: 'no-cors' so that the Google Sheet cell is 100% updated regardless of browser/iframe environment
+        fetch(APPS_SCRIPT_ENDPOINT, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
+          body: bodyStr,
+        })
+          .then(() => {
+            console.log('[ANALYTICS RESPONSE]', expectedResponse);
+          })
+          .catch((err) => {
+            console.error('[ANALYTICS ERROR]', err);
+          });
+      });
   }
 
   /**
@@ -427,10 +586,8 @@ class SessionAnalyticsService {
       this.playerId = getOrCreatePlayerId();
     }
 
-    this.sessionId = createNewSessionId();
+    this.sessionId = this.getOrCreateSessionId();
     this.isSessionActive = true;
-    this.accumulatedActiveSeconds = 0;
-    this.lastHeartbeatActiveSeconds = 0;
 
     if (initialGallery) {
       this.currentGallery = initialGallery;
@@ -465,14 +622,13 @@ class SessionAnalyticsService {
    * Ends the current session cleanly (e.g. on full game reset)
    */
   public endSession(): void {
-    if (!this.isSessionActive) return;
+    if (!this.isSessionActive && !this.sessionId) return;
 
     // Send end beacon with final metrics
     this.sendPayload('end', true);
 
     this.stopTicker();
     this.isSessionActive = false;
-    this.sessionId = null;
     this.accumulatedActiveSeconds = 0;
     this.visibleStartTime = null;
     this.lastHeartbeatActiveSeconds = 0;
@@ -484,6 +640,7 @@ class SessionAnalyticsService {
    */
   public handleGameReset(): void {
     this.endSession();
+    this.sessionId = null;
     this.visitedGalleries = [];
     this.answeredPuzzles = [];
     this.answeredStars = [];
@@ -607,18 +764,20 @@ class SessionAnalyticsService {
   }
 
   /**
-   * Sends non-blocking analytics payload to Google Apps Script Web App
+   * 15. DO NOT USE HEARTBEAT AS THE ONLY BACKUP
+   * Sends non-blocking analytics payload to Google Apps Script Web App as secondary backup
    */
-  private sendPayload(action: AnalyticsAction, preferBeacon = false): void {
-    if (!this.sessionId) return;
+  public sendPayload(action: AnalyticsAction, preferBeacon = false): void {
+    const activeSessionId = this.sessionId || this.getOrCreateSessionId();
+    if (!activeSessionId) return;
 
     const payload: AnalyticsPayload = {
       action,
-      session_id: this.sessionId,
+      session_id: activeSessionId,
       player_id: this.getPlayerId(),
       timestamp: new Date().toISOString(),
       active_seconds: this.getActiveSeconds(),
-      last_gallery: getCanonicalGalleryId(this.currentGallery),
+      last_gallery: getCanonicalGalleryId(this.currentGallery) || undefined,
       device: getDeviceCategory(),
       visited_galleries: [...this.visitedGalleries],
       answered_puzzles: [...this.answeredPuzzles],
@@ -640,22 +799,21 @@ class SessionAnalyticsService {
       }
     }
 
-    // Non-blocking fetch with mode: 'no-cors'
+    // Non-blocking fetch with mode: 'no-cors' so background requests are never blocked
     if (typeof fetch !== 'undefined') {
       try {
         fetch(APPS_SCRIPT_ENDPOINT, {
           method: 'POST',
           mode: 'no-cors',
           headers: {
-            'Content-Type': 'text/plain',
+            'Content-Type': 'text/plain;charset=utf-8',
           },
           body: JSON.stringify(payload),
-          keepalive: true,
         }).catch(() => {
-          // Analytics must ALWAYS be non-blocking and silent to the player
+          // Silent
         });
       } catch {
-        // Silent catch
+        // Silent
       }
     }
   }

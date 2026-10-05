@@ -238,8 +238,13 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
   const handleSelectQuestionOption = (idx: number) => {
     if (isAnswering || phase !== 'question') return;
 
-    // Record the answered star ID anonymously for game analytics (correct or incorrect)
-    const resolvedStarId = discoveryData?.starId || discoveryData?.id || effectiveStarId || '';
+    // Stable Star ID (e.g. star-20)
+    const resolvedStarId =
+      discoveryData?.starId ||
+      (effectiveStarId.startsWith('star-') && !effectiveStarId.includes('point')
+        ? effectiveStarId
+        : discoveryData?.id || effectiveStarId || '');
+
     if (resolvedStarId) {
       sessionAnalyticsService.recordAnsweredStar(resolvedStarId);
     }
