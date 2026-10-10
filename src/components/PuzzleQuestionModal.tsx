@@ -882,17 +882,6 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
 
                   {/* Actions */}
                   <div className="space-y-2 pt-1">
-                    {(areAll8GalleryPuzzlesCompleted() || isFinalCompletionAwarded()) && (
-                      <button
-                        type="button"
-                        id="already-collected-view-certificate-btn"
-                        onClick={() => setViewMode('final_certificate')}
-                        className="w-full py-3 px-4 bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e1b18] font-black text-[13px] border-2 border-[#1e1b18] rounded-xl shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center gap-2 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
-                      >
-                        <Sparkles className="w-4 h-4 text-[#1e1b18]" />
-                        <span>مشاهده کارت دستاورد نهایی (گواهی‌نامه) 🏆</span>
-                      </button>
-                    )}
 
                     {isComplete ? (
                       <button

@@ -115,7 +115,10 @@ export const FinalCompletionCardBack: React.FC<FinalCompletionCardBackProps> = (
 
         {/* Free return-visit ticket notice */}
         <p className="text-[12px] sm:text-[13px] font-medium text-[#b45309] bg-[#fef3c7]/60 border border-[#f59e0b]/40 rounded-xl px-3.5 py-2 leading-relaxed max-w-[340px]">
-          این کارت به منزلهٔ بلیت رایگان بازدید دوباره از موزه برای توست.
+          <span>این کارت به منزله بلیت رایگان موزه برای توست.</span>
+          <span className="block text-[11px] sm:text-[12px] font-semibold text-[#b45309] mt-0.5">
+            اعتبار به مدت یک سال
+          </span>
         </p>
       </div>
 

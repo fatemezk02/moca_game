@@ -403,7 +403,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
 
           {/* Star Artwork Image - Visible immediately upon modal opening and in all phases */}
           {discoveryData.information.image && !artworkImageError && (
-            <div className="w-full flex items-center justify-center overflow-hidden pt-3 px-4 sm:px-5 shrink-0">
+            <div className="w-full h-[24vh] sm:h-[27vh] flex items-center justify-center overflow-hidden pt-3 px-4 sm:px-5 shrink-0">
               <ArtworkFrame>
                 <img
                   src={discoveryData.information.image}
