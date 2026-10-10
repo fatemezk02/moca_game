@@ -63,6 +63,35 @@ const GALLERY_METADATA_MAP: Record<string, { num: string; name: string }> = {
   'gallery_09': { num: '۰۸', name: 'تلاقی رسانه‌ها' },
 };
 
+const STORAGE_SEEN_POPUPS_KEY = 'museum_seen_gallery_popups';
+
+const hasGalleryPopupBeenSeen = (galleryId: string): boolean => {
+  if (typeof window === 'undefined' || !window.localStorage) return false;
+  try {
+    const raw = localStorage.getItem(STORAGE_SEEN_POPUPS_KEY);
+    if (!raw) return false;
+    const list: string[] = JSON.parse(raw);
+    const canon = normalizeGalleryId(galleryId);
+    return list.includes(galleryId) || (Boolean(canon) && list.includes(canon));
+  } catch {
+    return false;
+  }
+};
+
+const markGalleryPopupAsSeen = (galleryId: string): void => {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    const raw = localStorage.getItem(STORAGE_SEEN_POPUPS_KEY);
+    const list: string[] = raw ? JSON.parse(raw) : [];
+    const canon = normalizeGalleryId(galleryId);
+    if (!list.includes(galleryId)) list.push(galleryId);
+    if (canon && !list.includes(canon)) list.push(canon);
+    localStorage.setItem(STORAGE_SEEN_POPUPS_KEY, JSON.stringify(list));
+  } catch {
+    // ignore
+  }
+};
+
 /**
  * Shared reusable visual layout shell for all individual museum gallery pages.
  * Enforces unified:
@@ -184,11 +213,26 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
   const hasAutoShownPopupRef = React.useRef<boolean>(false);
 
   useEffect(() => {
+    const handleGameReset = () => {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.removeItem(STORAGE_SEEN_POPUPS_KEY);
+      }
+    };
+    window.addEventListener('museum_game_fully_reset', handleGameReset);
+    return () => window.removeEventListener('museum_game_fully_reset', handleGameReset);
+  }, []);
+
+  useEffect(() => {
     const updatePopups = () => {
       const popList = contentService.getActivePopupsForGallery(galleryId);
       setActivePopups(popList);
-      if (popList.length > 0 && !hasAutoShownPopupRef.current) {
+      if (
+        popList.length > 0 &&
+        !hasAutoShownPopupRef.current &&
+        !hasGalleryPopupBeenSeen(galleryId)
+      ) {
         hasAutoShownPopupRef.current = true;
+        markGalleryPopupAsSeen(galleryId);
         const timer = setTimeout(() => {
           setIsPopupOpen(true);
         }, 350);
@@ -356,7 +400,10 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
         <GalleryPopupModal
           popups={activePopups}
           isOpen={isPopupOpen}
-          onClose={() => setIsPopupOpen(false)}
+          onClose={() => {
+            markGalleryPopupAsSeen(galleryId);
+            setIsPopupOpen(false);
+          }}
           galleryNameFa={nameFa}
           galleryNumberFa={numFa}
         />

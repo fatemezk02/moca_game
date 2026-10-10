@@ -73,6 +73,7 @@ export function resetEntireGame(): void {
       localStorage.removeItem('museum_has_entered_gallery_01');
       localStorage.removeItem('museum_has_entered_gallery_02');
       localStorage.removeItem('museum_has_entered_any_gallery');
+      localStorage.removeItem('museum_seen_gallery_popups');
     }
 
     // 7. Dispatch global reset notification event
