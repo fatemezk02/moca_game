@@ -401,28 +401,28 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
             </div>
           </div>
 
-          {/* Star Artwork Image - Visible immediately upon modal opening and in all phases */}
-          {discoveryData.information.image && !artworkImageError && (
-            <div className="w-full h-[24vh] sm:h-[27vh] flex items-center justify-center overflow-hidden pt-3 px-4 sm:px-5 shrink-0">
-              <ArtworkFrame>
-                <img
-                  src={discoveryData.information.image}
-                  alt={discoveryData.titleFa || 'تصویر ستاره اثر'}
-                  className="max-h-[22vh] sm:max-h-[25vh] max-w-full w-auto h-auto object-contain block rounded-xs select-none"
-                  referrerPolicy="no-referrer"
-                  onError={() => {
-                    console.warn(
-                      `[StarDiscoveryModal] Failed to load artwork image: ${discoveryData.information.image}`
-                    );
-                    setArtworkImageError(true);
-                  }}
-                />
-              </ArtworkFrame>
-            </div>
-          )}
-
           {/* Modal Body Container */}
-          <div className="p-4 sm:p-5 overflow-y-auto flex-1 flex flex-col justify-center">
+          <div className="p-4 sm:p-5 overflow-y-auto flex-1 flex flex-col space-y-4">
+            {/* Star Artwork Image - Visible immediately upon modal opening and in all phases */}
+            {discoveryData.information.image && !artworkImageError && (
+              <div className="w-full flex items-center justify-center shrink-0">
+                <ArtworkFrame>
+                  <img
+                    src={discoveryData.information.image}
+                    alt={discoveryData.titleFa || 'تصویر ستاره اثر'}
+                    className="max-h-[22vh] sm:max-h-[25vh] max-w-full w-auto h-auto object-contain block rounded-xs select-none"
+                    referrerPolicy="no-referrer"
+                    onError={() => {
+                      console.warn(
+                        `[StarDiscoveryModal] Failed to load artwork image: ${discoveryData.information.image}`
+                      );
+                      setArtworkImageError(true);
+                    }}
+                  />
+                </ArtworkFrame>
+              </div>
+            )}
+
             {/* ==========================================================
                 STAGE 1: TWO INITIAL CHOICES ([سؤال] | [۳۰ سکه])
                 ========================================================== */}
@@ -432,7 +432,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4 my-auto"
+                className="space-y-4"
               >
                 <div className="text-center space-y-1.5">
                   <h3 className="font-sans-custom text-[16px] sm:text-[17px] font-black text-[#1e1b18] break-words">
@@ -497,7 +497,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4 my-auto text-center"
+                className="space-y-4 text-center"
               >
                 <div className="flex items-center justify-end border-b border-[#e2e8f0] pb-2">
                   <button
@@ -656,7 +656,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
-                className="space-y-4 my-auto text-center relative py-2"
+                className="space-y-4 text-center relative py-2"
               >
                 <div className="w-14 h-14 mx-auto rounded-2xl bg-[#dcfce7] border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8 text-[#15803d]" />
@@ -745,7 +745,7 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4 my-auto text-center"
+                className="space-y-4 text-center"
               >
                 <div className="w-14 h-14 mx-auto rounded-2xl bg-[#fee2e2] border-2 border-[#1e1b18] shadow-[3px_3px_0px_#1e1b18] flex items-center justify-center">
                   <AlertCircle className="w-8 h-8 text-[#dc2626]" />
