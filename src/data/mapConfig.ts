@@ -226,8 +226,8 @@ export const DEFAULT_MAP_DATABASE: MuseumMapDatabase = {
         galleryId: 'gallery-00',
         title: 'سرویس بهداشتی (WC)',
         locationId: 'Location_17',
-        x: 314,
-        y: 496,
+        x: 327,
+        y: 494,
         iconType: 'preset-location-wc',
         width: 32,
         height: 32,
@@ -1461,7 +1461,7 @@ export function getAllGalleryMapConfigs(): MuseumMapDatabase {
                       galleryNumber: defIcon.galleryNumber,
                       title: combinedIcons[existingIdx].title || defIcon.title,
                     };
-                    if (defIcon.id === 'icon-g00-library' || defIcon.id === 'icon-g00-cinema') {
+                    if (defIcon.id === 'icon-g00-library' || defIcon.id === 'icon-g00-cinema' || defIcon.id === 'icon-g00-wc') {
                       combinedIcons[existingIdx].x = defIcon.x;
                       combinedIcons[existingIdx].y = defIcon.y;
                     }
