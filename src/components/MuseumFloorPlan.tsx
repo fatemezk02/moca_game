@@ -432,7 +432,7 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
       if (isG01ArrowDismissed || isG01ArrowFadingOut) {
         return;
       }
-      setIsG01ArrowFadingOut(true);
+      setIsG01ArrowDismissed(true);
       markArrowUsed(arrow.id);
       markArrowUsed('arrow-g00-to-g01');
       try {
@@ -441,15 +441,12 @@ export const MuseumFloorPlan: React.FC<MuseumFloorPlanProps> = ({
         localStorage.setItem('museum_has_entered_any_gallery', 'true');
       } catch {}
 
-      setTimeout(() => {
-        setIsG01ArrowDismissed(true);
-        setCurrentGalleryId('gallery-01');
-        if (onNavigateToGallery) {
-          onNavigateToGallery('gallery-01');
-        } else {
-          onNavigateToGallery01?.();
-        }
-      }, 500);
+      setCurrentGalleryId('gallery-01');
+      if (onNavigateToGallery) {
+        onNavigateToGallery('gallery-01');
+      } else {
+        onNavigateToGallery01?.();
+      }
       return;
     }
 
