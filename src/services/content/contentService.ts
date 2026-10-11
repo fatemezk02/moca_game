@@ -195,6 +195,13 @@ class ContentService {
         };
         registerContentDebugAPI(this);
         this.notify();
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('museum_content_synced', {
+              detail: { source: data.metadata.source, loadedAt: data.metadata.loadedAt },
+            })
+          );
+        }
         this.logSummary(data);
         return data;
       })

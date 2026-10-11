@@ -38,6 +38,7 @@ import {
   isFinalCompletionAwarded,
   openFinalCertificateModal,
 } from '../data/finalCompletionStore';
+import { imagePreloadService } from '../services/image/imagePreloadService';
 
 export interface PuzzleQuestionModalProps {
   galleryId: string;
@@ -177,6 +178,22 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
 
     return undefined;
   };
+
+  // Immediate priority background preloading for this actively opened puzzle point's images
+  useEffect(() => {
+    if (questionArtworkUrl) {
+      imagePreloadService.prioritize(questionArtworkUrl, canonicalGalleryId);
+    }
+    if (artworkSrc) {
+      imagePreloadService.prioritize(artworkSrc, canonicalGalleryId);
+    }
+    for (let i = 0; i < 3; i++) {
+      const optUrl = getOptionImageUrl(i);
+      if (optUrl) {
+        imagePreloadService.prioritize(optUrl, canonicalGalleryId);
+      }
+    }
+  }, [questionArtworkUrl, artworkSrc, questionData?.id, canonicalGalleryId]);
 
   // Resolve gallery record from Galleries dataset by canonicalGalleryId
   const galleryRecord = contentService.getGalleryById(canonicalGalleryId);

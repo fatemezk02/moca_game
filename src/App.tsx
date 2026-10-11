@@ -59,6 +59,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { initGuideAudioBackgroundPrefetch, guideAudioManager } from './services/audio/guideAudioService';
 import { GlobalGuideAudioPlayer } from './components/GlobalGuideAudioPlayer';
 import { sessionAnalyticsService } from './services/analytics';
+import { imagePreloadService } from './services/image/imagePreloadService';
 
 export default function App() {
   const playerStats = usePlayerStats();
@@ -588,26 +589,43 @@ export default function App() {
     }
   }, [userProfile]);
 
-  // Keep analytics updated with current gallery location
+  // Keep analytics and image preloading updated with current gallery location
   useEffect(() => {
-    if (userProfile && currentGallery) {
-      sessionAnalyticsService.updateGallery(currentGallery);
+    if (currentGallery) {
+      imagePreloadService.setCurrentGallery(currentGallery);
+      if (userProfile) {
+        sessionAnalyticsService.updateGallery(currentGallery);
+      }
     }
   }, [userProfile, currentGallery]);
 
-
-  // Load external game content (Questions, Stars, Artworks) on application startup
+  // Load external game content on application startup and initiate progressive image preloading
   useEffect(() => {
+    // 1. Immediately kick off progressive preloading from local cached/seed content
+    imagePreloadService.syncFromContent(currentGallery);
+
+    // 2. Reconcile queue whenever content updates / syncs
+    const handleContentSynced = () => {
+      imagePreloadService.syncFromContent(currentGallery);
+    };
+    window.addEventListener('museum_content_synced', handleContentSynced);
+
+    // 3. Network fetch initialization
     contentService
       .initializeContent()
       .then(() => {
-        // Requirement 5: Registration happens during application startup after ContentService has been initialized
         registerContentDebugAPI(contentService);
+        imagePreloadService.syncFromContent(currentGallery);
       })
       .catch((err) => {
         console.warn('[ContentService] Startup initialization notice:', err);
         registerContentDebugAPI(contentService);
+        imagePreloadService.syncFromContent(currentGallery);
       });
+
+    return () => {
+      window.removeEventListener('museum_content_synced', handleContentSynced);
+    };
   }, []);
 
   // Requirement 6: Ensure globals persist across React re-renders

@@ -30,6 +30,7 @@ import { usePlayerStats } from '../hooks/usePlayerStats';
 import { deductCoins } from '../data/questionProgressStore';
 import { sessionAnalyticsService } from '../services/analytics';
 import { ArtworkFrame } from './ArtworkFrame';
+import { imagePreloadService } from '../services/image/imagePreloadService';
 
 export interface StarDiscoveryModalProps {
   starPointId?: string;
@@ -101,7 +102,10 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
 
   useEffect(() => {
     setArtworkImageError(false);
-  }, [effectiveStarPointId, discoveryData?.information?.image]);
+    if (isOpen && discoveryData?.information?.image) {
+      imagePreloadService.prioritize(discoveryData.information.image, galleryId);
+    }
+  }, [effectiveStarPointId, discoveryData?.information?.image, isOpen, galleryId]);
 
   // Dynamic calculation of information unlock progress
   const [progressCount, setProgressCount] = useState<{ unlocked: number; total: number }>(() => {

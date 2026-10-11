@@ -18,6 +18,7 @@ import {
 import { markCollectionsAsViewed } from '../data/collectionNotificationStore';
 import { ProfileAvatar } from './ProfileAvatar';
 import { getUserProfile, UserProfile } from '../data/userProfileStore';
+import { imagePreloadService } from '../services/image/imagePreloadService';
 
 export interface SharedGalleryPageLayoutProps {
   galleryId: string;
@@ -128,6 +129,13 @@ export const SharedGalleryPageLayout: React.FC<SharedGalleryPageLayoutProps> = (
   const galleryRecord = contentService.getGalleryById(galleryId);
   const { containerRef, dimensions } = useFitMapDimensions(mapWidth, mapHeight);
   const [areLocationPinsVisible, setAreLocationPinsVisible] = useState<boolean>(() => getLocationPinsVisible());
+
+  // Prioritize images for this gallery when layout is entered
+  useEffect(() => {
+    if (galleryId) {
+      imagePreloadService.setCurrentGallery(galleryId);
+    }
+  }, [galleryId]);
 
   // Internal fallback state for Gallery Guide modal
   const [isInternalGuideOpen, setIsInternalGuideOpen] = useState<boolean>(false);
