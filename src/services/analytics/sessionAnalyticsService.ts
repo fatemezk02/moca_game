@@ -25,9 +25,12 @@ const APPS_SCRIPT_ENDPOINT =
 
 const PLAYER_ID_STORAGE_KEY = 'museum_analytics_player_id';
 const SESSION_ID_STORAGE_KEY = 'museum_analytics_session_id';
+const ACTIVE_SECONDS_STORAGE_KEY = 'museum_analytics_active_seconds';
 const VISITED_GALLERIES_STORAGE_KEY = 'museum_analytics_visited_galleries';
 const ANSWERED_PUZZLES_STORAGE_KEY = 'museum_analytics_answered_puzzles';
 const ANSWERED_STARS_STORAGE_KEY = 'museum_analytics_answered_stars';
+const OPENED_PUZZLES_STORAGE_KEY = 'museum_analytics_opened_puzzles';
+const OPENED_STARS_STORAGE_KEY = 'museum_analytics_opened_stars';
 
 export type DeviceCategory = 'mobile' | 'tablet' | 'desktop';
 export type CanonicalGalleryId = '01' | '02' | '03' | '04' | '05' | '06' | '07' | '08';
@@ -37,7 +40,9 @@ export type AnalyticsAction =
   | 'end'
   | 'visit_gallery'
   | 'answer_puzzle'
-  | 'answer_star';
+  | 'answer_star'
+  | 'open_puzzle'
+  | 'open_star';
 
 export interface AnalyticsPayload {
   action: AnalyticsAction;
@@ -53,6 +58,8 @@ export interface AnalyticsPayload {
   visited_galleries?: CanonicalGalleryId[];
   answered_puzzles?: string[];
   answered_stars?: string[];
+  opened_puzzles?: string[];
+  opened_stars?: string[];
 }
 
 /**
@@ -243,15 +250,18 @@ class SessionAnalyticsService {
   private isSessionActive: boolean = false;
   private currentGallery: string = 'gallery-01';
 
-  // Visited galleries & answered questions state
+  // Visited galleries, answered questions & opened points state
   private visitedGalleries: CanonicalGalleryId[] = [];
   private answeredPuzzles: string[] = [];
   private answeredStars: string[] = [];
+  private openedPuzzles: string[] = [];
+  private openedStars: string[] = [];
 
   // Active time tracking
   private accumulatedActiveSeconds: number = 0;
   private visibleStartTime: number | null = null;
   private lastHeartbeatActiveSeconds: number = 0;
+  private lastExitSentTime: number = 0;
 
   // Interval ticker
   private tickIntervalId: any = null;
@@ -276,18 +286,13 @@ class SessionAnalyticsService {
       this.handleVisibilityChange();
     });
 
-    // Send final beacon on page unload / hide
-    window.addEventListener('pagehide', () => {
-      if (this.isSessionActive) {
-        this.sendPayload('end', true);
-      }
-    });
+    const handleExit = () => {
+      this.handlePageExit();
+    };
 
-    window.addEventListener('beforeunload', () => {
-      if (this.isSessionActive) {
-        this.sendPayload('end', true);
-      }
-    });
+    // Send final payload on page exit without duplicating requests
+    window.addEventListener('pagehide', handleExit);
+    window.addEventListener('beforeunload', handleExit);
 
     // Listen for gallery location updates
     window.addEventListener('museum_player_location_updated', (e: any) => {
@@ -304,7 +309,7 @@ class SessionAnalyticsService {
   }
 
   /**
-   * Loads persisted lists and session ID from sessionStorage
+   * Loads persisted lists, active seconds, and session ID from sessionStorage
    */
   private loadPersistedSessionData(): void {
     try {
@@ -312,6 +317,15 @@ class SessionAnalyticsService {
         const existingSession = sessionStorage.getItem(SESSION_ID_STORAGE_KEY);
         if (existingSession && /^S-[a-z0-9]{6,12}$/i.test(existingSession)) {
           this.sessionId = existingSession;
+        }
+
+        const savedActiveSec = sessionStorage.getItem(ACTIVE_SECONDS_STORAGE_KEY);
+        if (savedActiveSec) {
+          const sec = parseInt(savedActiveSec, 10);
+          if (!isNaN(sec) && sec >= 0) {
+            this.accumulatedActiveSeconds = sec;
+            this.lastHeartbeatActiveSeconds = sec;
+          }
         }
 
         const savedVisited = sessionStorage.getItem(VISITED_GALLERIES_STORAGE_KEY);
@@ -337,6 +351,22 @@ class SessionAnalyticsService {
             this.answeredStars = parsed;
           }
         }
+
+        const savedOpenedPuzzles = sessionStorage.getItem(OPENED_PUZZLES_STORAGE_KEY);
+        if (savedOpenedPuzzles) {
+          const parsed = JSON.parse(savedOpenedPuzzles);
+          if (Array.isArray(parsed)) {
+            this.openedPuzzles = parsed;
+          }
+        }
+
+        const savedOpenedStars = sessionStorage.getItem(OPENED_STARS_STORAGE_KEY);
+        if (savedOpenedStars) {
+          const parsed = JSON.parse(savedOpenedStars);
+          if (Array.isArray(parsed)) {
+            this.openedStars = parsed;
+          }
+        }
       }
     } catch {
       // Safe fallback
@@ -344,7 +374,7 @@ class SessionAnalyticsService {
   }
 
   /**
-   * Persists session lists locally to survive rerenders, unmounts, and reloads
+   * Persists session lists and accumulated active seconds locally to survive rerenders, unmounts, and reloads
    */
   private persistSessionData(): void {
     try {
@@ -352,6 +382,10 @@ class SessionAnalyticsService {
         if (this.sessionId) {
           sessionStorage.setItem(SESSION_ID_STORAGE_KEY, this.sessionId);
         }
+        sessionStorage.setItem(
+          ACTIVE_SECONDS_STORAGE_KEY,
+          String(this.getActiveSeconds())
+        );
         sessionStorage.setItem(
           VISITED_GALLERIES_STORAGE_KEY,
           JSON.stringify(this.visitedGalleries)
@@ -363,6 +397,14 @@ class SessionAnalyticsService {
         sessionStorage.setItem(
           ANSWERED_STARS_STORAGE_KEY,
           JSON.stringify(this.answeredStars)
+        );
+        sessionStorage.setItem(
+          OPENED_PUZZLES_STORAGE_KEY,
+          JSON.stringify(this.openedPuzzles)
+        );
+        sessionStorage.setItem(
+          OPENED_STARS_STORAGE_KEY,
+          JSON.stringify(this.openedStars)
         );
       }
     } catch {
@@ -415,11 +457,13 @@ class SessionAnalyticsService {
     const currentSessionId = this.getOrCreateSessionId();
     const playerId = this.getPlayerId();
     const timestamp = new Date().toISOString();
+    const activeSeconds = this.getActiveSeconds();
 
     // 11. FRONTEND EVENT LOGGING
     console.log('[ANALYTICS] visit_gallery', {
       session_id: currentSessionId,
       gallery_id: canonicalId,
+      active_seconds: activeSeconds,
     });
 
     // Send immediately to Apps Script
@@ -428,6 +472,7 @@ class SessionAnalyticsService {
       session_id: currentSessionId,
       player_id: playerId,
       gallery_id: canonicalId,
+      active_seconds: activeSeconds,
       timestamp,
     });
   }
@@ -438,7 +483,7 @@ class SessionAnalyticsService {
    * =========================================================================
    * When the user ACTUALLY submits an answer to a Puzzle:
    * Sends immediately:
-   *   { action: "answer_puzzle", session_id, player_id, puzzle_id, timestamp }
+   *   { action: "answer_puzzle", session_id, player_id, puzzle_id, active_seconds, timestamp }
    * Uses REAL stable Puzzle ID from the Puzzle currently being answered.
    * If answered multiple times: stores only once.
    */
@@ -455,11 +500,13 @@ class SessionAnalyticsService {
     const currentSessionId = this.getOrCreateSessionId();
     const playerId = this.getPlayerId();
     const timestamp = new Date().toISOString();
+    const activeSeconds = this.getActiveSeconds();
 
     // 11. FRONTEND EVENT LOGGING
     console.log('[ANALYTICS] answer_puzzle', {
       session_id: currentSessionId,
       puzzle_id: cleanId,
+      active_seconds: activeSeconds,
     });
 
     // Send immediately to Apps Script
@@ -468,7 +515,9 @@ class SessionAnalyticsService {
       session_id: currentSessionId,
       player_id: playerId,
       puzzle_id: cleanId,
+      active_seconds: activeSeconds,
       timestamp,
+      answered_puzzles: [...this.answeredPuzzles],
     });
   }
 
@@ -478,7 +527,7 @@ class SessionAnalyticsService {
    * =========================================================================
    * When the user ACTUALLY submits an answer to a Star question:
    * Sends immediately:
-   *   { action: "answer_star", session_id, player_id, star_id, timestamp }
+   *   { action: "answer_star", session_id, player_id, star_id, active_seconds, timestamp }
    * Uses stable Star ID, e.g. star-20.
    * If answered multiple times: stores only once.
    */
@@ -495,11 +544,13 @@ class SessionAnalyticsService {
     const currentSessionId = this.getOrCreateSessionId();
     const playerId = this.getPlayerId();
     const timestamp = new Date().toISOString();
+    const activeSeconds = this.getActiveSeconds();
 
     // 11. FRONTEND EVENT LOGGING
     console.log('[ANALYTICS] answer_star', {
       session_id: currentSessionId,
       star_id: cleanId,
+      active_seconds: activeSeconds,
     });
 
     // Send immediately to Apps Script
@@ -508,65 +559,136 @@ class SessionAnalyticsService {
       session_id: currentSessionId,
       player_id: playerId,
       star_id: cleanId,
+      active_seconds: activeSeconds,
+      timestamp,
+      answered_stars: [...this.answeredStars],
+    });
+  }
+
+  /**
+   * =========================================================================
+   * 5. PUZZLE OPEN (Action: open_puzzle)
+   * =========================================================================
+   * When the user ACTUALLY opens a Puzzle point modal:
+   * Recorded into "opened_puzzles" distinct from "answered_puzzles".
+   */
+  public recordOpenedPuzzle(puzzleId?: string | null): void {
+    if (!puzzleId || typeof puzzleId !== 'string') return;
+    const cleanId = puzzleId.trim();
+    if (!cleanId) return;
+
+    if (!this.openedPuzzles.includes(cleanId)) {
+      this.openedPuzzles.push(cleanId);
+      this.persistSessionData();
+    }
+
+    const currentSessionId = this.getOrCreateSessionId();
+    const playerId = this.getPlayerId();
+    const timestamp = new Date().toISOString();
+    const activeSeconds = this.getActiveSeconds();
+
+    console.log('[ANALYTICS] open_puzzle', {
+      session_id: currentSessionId,
+      puzzle_id: cleanId,
+      active_seconds: activeSeconds,
+    });
+
+    this.sendImmediateEventRequest({
+      action: 'open_puzzle',
+      session_id: currentSessionId,
+      player_id: playerId,
+      puzzle_id: cleanId,
+      active_seconds: activeSeconds,
       timestamp,
     });
   }
 
   /**
-   * Sends an immediate direct event request to Apps Script (visit_gallery, answer_puzzle, answer_star)
+   * =========================================================================
+   * 6. STAR OPEN (Action: open_star)
+   * =========================================================================
+   * When the user ACTUALLY opens a Star point modal:
+   * Recorded into "opened_stars" distinct from "answered_stars".
+   */
+  public recordOpenedStar(starId?: string | null): void {
+    if (!starId || typeof starId !== 'string') return;
+    const cleanId = starId.trim();
+    if (!cleanId) return;
+
+    if (!this.openedStars.includes(cleanId)) {
+      this.openedStars.push(cleanId);
+      this.persistSessionData();
+    }
+
+    const currentSessionId = this.getOrCreateSessionId();
+    const playerId = this.getPlayerId();
+    const timestamp = new Date().toISOString();
+    const activeSeconds = this.getActiveSeconds();
+
+    console.log('[ANALYTICS] open_star', {
+      session_id: currentSessionId,
+      star_id: cleanId,
+      active_seconds: activeSeconds,
+    });
+
+    this.sendImmediateEventRequest({
+      action: 'open_star',
+      session_id: currentSessionId,
+      player_id: playerId,
+      star_id: cleanId,
+      active_seconds: activeSeconds,
+      timestamp,
+    });
+  }
+
+  /**
+   * Sends an immediate direct event request to Apps Script
    * Logs the response as required by Part 11 & 12.
    */
   private sendImmediateEventRequest(payload: {
-    action: 'visit_gallery' | 'answer_puzzle' | 'answer_star';
+    action: 'visit_gallery' | 'answer_puzzle' | 'answer_star' | 'open_puzzle' | 'open_star';
     session_id: string;
     player_id: string;
     gallery_id?: CanonicalGalleryId;
     puzzle_id?: string;
     star_id?: string;
+    active_seconds?: number;
     timestamp: string;
+    visited_galleries?: CanonicalGalleryId[];
+    answered_puzzles?: string[];
+    answered_stars?: string[];
+    opened_puzzles?: string[];
+    opened_stars?: string[];
   }): void {
-    const bodyStr = JSON.stringify(payload);
-    const storedVal = payload.gallery_id || payload.puzzle_id || payload.star_id || '';
-    const expectedResponse = {
-      ok: true,
-      action: payload.action,
-      stored: storedVal,
-    };
-
     if (typeof fetch === 'undefined') return;
 
-    // Use text/plain;charset=utf-8 to send simple request without CORS preflight
+    const bodyStr = JSON.stringify(payload);
+
+    // Google Apps Script redirects require mode: 'no-cors' for browser requests from cross-origin pages
     fetch(APPS_SCRIPT_ENDPOINT, {
       method: 'POST',
+      mode: 'no-cors',
       headers: {
         'Content-Type': 'text/plain;charset=utf-8',
       },
       body: bodyStr,
     })
-      .then(async (res) => {
-        try {
-          const json = await res.json();
-          console.log('[ANALYTICS RESPONSE]', json);
-        } catch {
-          console.log('[ANALYTICS RESPONSE]', expectedResponse);
+      .then((res) => {
+        // In no-cors mode, type is 'opaque' with status 0, indicating successful dispatch
+        if (res.type === 'opaque' || res.ok) {
+          // Dispatched successfully to Apps Script
+          return;
         }
+        res.json().then((json) => {
+          if (json && json.ok) {
+            console.log('[ANALYTICS RESPONSE SUCCESS]', json);
+          } else {
+            console.warn('[ANALYTICS RESPONSE WARNING]', json);
+          }
+        }).catch(() => {});
       })
-      .catch(() => {
-        // Fallback using mode: 'no-cors' so that the Google Sheet cell is 100% updated regardless of browser/iframe environment
-        fetch(APPS_SCRIPT_ENDPOINT, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          body: bodyStr,
-        })
-          .then(() => {
-            console.log('[ANALYTICS RESPONSE]', expectedResponse);
-          })
-          .catch((err) => {
-            console.error('[ANALYTICS ERROR]', err);
-          });
+      .catch((err) => {
+        console.warn('[ANALYTICS REQUEST WARNING]', err?.message || err);
       });
   }
 
@@ -644,14 +766,19 @@ class SessionAnalyticsService {
     this.visitedGalleries = [];
     this.answeredPuzzles = [];
     this.answeredStars = [];
+    this.openedPuzzles = [];
+    this.openedStars = [];
 
     // Clear session storage records for the fresh game
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         sessionStorage.removeItem(SESSION_ID_STORAGE_KEY);
+        sessionStorage.removeItem(ACTIVE_SECONDS_STORAGE_KEY);
         sessionStorage.removeItem(VISITED_GALLERIES_STORAGE_KEY);
         sessionStorage.removeItem(ANSWERED_PUZZLES_STORAGE_KEY);
         sessionStorage.removeItem(ANSWERED_STARS_STORAGE_KEY);
+        sessionStorage.removeItem(OPENED_PUZZLES_STORAGE_KEY);
+        sessionStorage.removeItem(OPENED_STARS_STORAGE_KEY);
       }
     } catch {}
   }
@@ -710,6 +837,20 @@ class SessionAnalyticsService {
   }
 
   /**
+   * Returns opened puzzles list
+   */
+  public getOpenedPuzzles(): string[] {
+    return [...this.openedPuzzles];
+  }
+
+  /**
+   * Returns opened stars list
+   */
+  public getOpenedStars(): string[] {
+    return [...this.openedStars];
+  }
+
+  /**
    * Page Visibility API handler
    */
   private handleVisibilityChange(): void {
@@ -721,14 +862,36 @@ class SessionAnalyticsService {
         this.accumulatedActiveSeconds += (Date.now() - this.visibleStartTime) / 1000;
         this.visibleStartTime = null;
       }
-      // Send end update reliably while document is being hidden
+      this.persistSessionData();
+      // Ensure the latest accumulated duration is sent and persisted when page becomes hidden
       if (this.isSessionActive) {
-        this.sendPayload('end', true);
+        this.sendPayload('heartbeat', true);
       }
     } else if (document.visibilityState === 'visible') {
       // Tab/App became visible: Resume accumulating active time
       this.visibleStartTime = Date.now();
     }
+  }
+
+  /**
+   * Handles page exit / unmount cleanly without duplicate requests
+   */
+  private handlePageExit(): void {
+    if (!this.isSessionActive) return;
+
+    const now = Date.now();
+    if (now - this.lastExitSentTime < 1500) {
+      return;
+    }
+    this.lastExitSentTime = now;
+
+    if (this.visibleStartTime !== null) {
+      this.accumulatedActiveSeconds += (Date.now() - this.visibleStartTime) / 1000;
+      this.visibleStartTime = null;
+    }
+    this.persistSessionData();
+
+    this.sendPayload('end', true);
   }
 
   /**
@@ -746,6 +909,8 @@ class SessionAnalyticsService {
         // Do not send heartbeat while hidden or inactive
         return;
       }
+
+      this.persistSessionData();
 
       const currentActive = this.getActiveSeconds();
       // Every 30 seconds of active visible play time: send heartbeat
@@ -765,11 +930,13 @@ class SessionAnalyticsService {
 
   /**
    * 15. DO NOT USE HEARTBEAT AS THE ONLY BACKUP
-   * Sends non-blocking analytics payload to Google Apps Script Web App as secondary backup
+   * Sends analytics payload to Google Apps Script Web App
    */
   public sendPayload(action: AnalyticsAction, preferBeacon = false): void {
     const activeSessionId = this.sessionId || this.getOrCreateSessionId();
     if (!activeSessionId) return;
+
+    this.persistSessionData();
 
     const payload: AnalyticsPayload = {
       action,
@@ -782,39 +949,73 @@ class SessionAnalyticsService {
       visited_galleries: [...this.visitedGalleries],
       answered_puzzles: [...this.answeredPuzzles],
       answered_stars: [...this.answeredStars],
+      opened_puzzles: [...this.openedPuzzles],
+      opened_stars: [...this.openedStars],
     };
 
-    // Try sendBeacon first if requested (ideal for 'end' during visibility hidden / page unload)
-    if (
-      preferBeacon &&
-      typeof navigator !== 'undefined' &&
-      typeof navigator.sendBeacon === 'function'
-    ) {
-      try {
-        const blob = new Blob([JSON.stringify(payload)], { type: 'text/plain;charset=UTF-8' });
-        const sent = navigator.sendBeacon(APPS_SCRIPT_ENDPOINT, blob);
-        if (sent) return;
-      } catch {
-        // Fallback to fetch
+    // PreferBeacon / isExit is used on unload/pagehide/visibility hidden:
+    // Deliver via sendBeacon when available (most reliable during unload), or fallback to keepalive fetch
+    if (preferBeacon) {
+      const payloadStr = JSON.stringify(payload);
+      let delivered = false;
+
+      if (
+        typeof navigator !== 'undefined' &&
+        typeof navigator.sendBeacon === 'function'
+      ) {
+        try {
+          const blob = new Blob([payloadStr], { type: 'text/plain;charset=UTF-8' });
+          delivered = navigator.sendBeacon(APPS_SCRIPT_ENDPOINT, blob);
+        } catch {
+          delivered = false;
+        }
       }
+
+      if (!delivered && typeof fetch !== 'undefined') {
+        try {
+          fetch(APPS_SCRIPT_ENDPOINT, {
+            method: 'POST',
+            mode: 'no-cors',
+            keepalive: true,
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: payloadStr,
+          }).catch((err) => {
+            console.warn('[ANALYTICS EXIT WARNING]', err?.message || err);
+          });
+        } catch (err: any) {
+          console.warn('[ANALYTICS EXIT ATTEMPT WARNING]', err?.message || err);
+        }
+      }
+      return;
     }
 
-    // Non-blocking fetch with mode: 'no-cors' so background requests are never blocked
+    // Standard non-blocking fetch
     if (typeof fetch !== 'undefined') {
-      try {
-        fetch(APPS_SCRIPT_ENDPOINT, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          body: JSON.stringify(payload),
-        }).catch(() => {
-          // Silent
+      fetch(APPS_SCRIPT_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((res) => {
+          if (res.type === 'opaque' || res.ok) {
+            return;
+          }
+          res.json().then((json) => {
+            if (json && json.ok) {
+              console.log('[ANALYTICS PAYLOAD SUCCESS]', json);
+            } else {
+              console.warn('[ANALYTICS PAYLOAD WARNING]', json);
+            }
+          }).catch(() => {});
+        })
+        .catch((err) => {
+          console.warn('[ANALYTICS PAYLOAD WARNING]', err?.message || err);
         });
-      } catch {
-        // Silent
-      }
     }
   }
 }

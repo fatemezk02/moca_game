@@ -107,6 +107,20 @@ export const StarDiscoveryModal: React.FC<StarDiscoveryModalProps> = ({
     }
   }, [effectiveStarPointId, discoveryData?.information?.image, isOpen, galleryId]);
 
+  // Analytics: Record star point open (distinct from answering)
+  useEffect(() => {
+    if (isOpen) {
+      const resolvedStarId =
+        discoveryData?.starId ||
+        (effectiveStarId.startsWith('star-') && !effectiveStarId.includes('point')
+          ? effectiveStarId
+          : discoveryData?.id || effectiveStarId || '');
+      if (resolvedStarId) {
+        sessionAnalyticsService.recordOpenedStar(resolvedStarId);
+      }
+    }
+  }, [isOpen, effectiveStarId, discoveryData?.starId, discoveryData?.id]);
+
   // Dynamic calculation of information unlock progress
   const [progressCount, setProgressCount] = useState<{ unlocked: number; total: number }>(() => {
     const activeStars = contentService.getStars().filter((s) => s.active !== false);

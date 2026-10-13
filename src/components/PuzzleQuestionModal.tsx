@@ -103,6 +103,14 @@ export const PuzzleQuestionModal: React.FC<PuzzleQuestionModalProps> = ({
     );
   }, [puzzlePoint.id, canonicalGalleryId, questionData?.id, questionData?.galleryId, questionData?.questionOrder]);
 
+  // Analytics: Record puzzle point open (distinct from answering)
+  useEffect(() => {
+    const stablePuzzleId = puzzlePoint.id || puzzlePoint.questionId || puzzlePoint.puzzlePieceId || '';
+    if (stablePuzzleId) {
+      sessionAnalyticsService.recordOpenedPuzzle(stablePuzzleId);
+    }
+  }, [puzzlePoint.id, puzzlePoint.questionId, puzzlePoint.puzzlePieceId]);
+
   // Question Image Resolution: Questions.artwork_id -> Artworks.artwork_id -> Artworks.image_url
   const questionArtwork = questionData?.artworkId
     ? contentService.getArtworkById(questionData.artworkId)
